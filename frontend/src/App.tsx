@@ -1,11 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout';
-import Dashboard from './pages/Dashboard';
-import Calendar from './pages/Calendar';
-import NoticeBoardPage from './pages/NoticeBoard';
-import VaultPage from './pages/Vault';
-import NotFoundPage from './pages/NotFound';
+import Home from './pages/Home';
 
 function App() {
   return (
@@ -13,11 +9,8 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/notice-board" element={<NoticeBoardPage />} />
-            <Route path="/vault" element={<VaultPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path="/" element={<Home />} />
+            <Route path="*" element={<Home />} />
           </Routes>
         </Layout>
       </BrowserRouter>
