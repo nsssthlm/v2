@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db import models
 from .models import User, Project, Task, RoleAccess, TimeReport
 from .serializers import (
     UserSerializer, UserCreateSerializer, ProjectSerializer,
@@ -104,3 +105,48 @@ class TimeReportViewSet(viewsets.ModelViewSet):
         return TimeReport.objects.filter(
             models.Q(user=user) | models.Q(task__project__in=leader_projects)
         )
+        
+class ProjectSampleViewSet(viewsets.ViewSet):
+    """
+    ViewSet for providing sample project data for testing and development.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def list(self, request):
+        """Return a sample list of projects"""
+        sample_data = [
+            {
+                "id": 1,
+                "name": "Office Building A",
+                "description": "10-story office building with underground parking",
+                "start_date": "2025-01-15",
+                "end_date": "2026-07-30",
+                "is_active": True,
+                "tasks_count": 24,
+                "files_count": 15,
+                "team_size": 8
+            },
+            {
+                "id": 2,
+                "name": "Residential Complex B",
+                "description": "Mixed-use residential development with retail spaces",
+                "start_date": "2025-03-10",
+                "end_date": "2027-02-28",
+                "is_active": True,
+                "tasks_count": 36,
+                "files_count": 22,
+                "team_size": 12
+            },
+            {
+                "id": 3,
+                "name": "Hospital Renovation C",
+                "description": "Modernization of existing hospital facilities",
+                "start_date": "2024-11-05",
+                "end_date": "2025-12-15",
+                "is_active": True,
+                "tasks_count": 18,
+                "files_count": 10,
+                "team_size": 6
+            }
+        ]
+        return Response(sample_data)
