@@ -1,17 +1,31 @@
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Layout from './components/layout/Layout';
+import Dashboard from './pages/Dashboard';
+import Calendar from './pages/Calendar';
+import NoticeBoardPage from './pages/NoticeBoard';
+import VaultPage from './pages/Vault';
+import NotFoundPage from './pages/NotFound';
+import { CssBaseline, CssVarsProvider } from '@mui/joy';
 
 function App() {
   return (
-    <BrowserRouter>
-      <div>
-        {/* 
-          This is a skeleton structure for the ValvX Projektplattform.
-          The actual components and routing will be implemented in future development.
-        */}
-        <h1>ValvX Projektplattform</h1>
-        <p>Framework initialized. Ready for development.</p>
-      </div>
-    </BrowserRouter>
+    <CssVarsProvider>
+      <CssBaseline />
+      <AuthProvider>
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/notice-board" element={<NoticeBoardPage />} />
+              <Route path="/vault" element={<VaultPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </AuthProvider>
+    </CssVarsProvider>
   );
 }
 
