@@ -23,8 +23,7 @@ import {
   FilterList as FilterListIcon,
   Notifications as NotificationsIcon,
   AccountCircle as UserIcon,
-  Building as BuildingIcon,
-  CalendarMonth as CalendarIcon,
+  Home as BuildingIcon,
   Announcement as AnnouncementIcon
 } from '@mui/icons-material';
 import { format } from 'date-fns';
