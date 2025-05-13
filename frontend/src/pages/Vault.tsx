@@ -382,7 +382,7 @@ const Vault: React.FC = () => {
                   <Divider sx={{ my: 2 }} />
                   
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    {getFileIcon(selectedFile.contentType)}
+                    <FileIcon />
                     <Box sx={{ ml: 2 }}>
                       <Typography level="body-sm" color="neutral">Typ</Typography>
                       <Typography level="body-md">

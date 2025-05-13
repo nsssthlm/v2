@@ -6,26 +6,22 @@ import Calendar from './pages/Calendar';
 import NoticeBoardPage from './pages/NoticeBoard';
 import VaultPage from './pages/Vault';
 import NotFoundPage from './pages/NotFound';
-import { CssBaseline, CssVarsProvider } from '@mui/joy';
 
 function App() {
   return (
-    <CssVarsProvider>
-      <CssBaseline />
-      <AuthProvider>
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/notice-board" element={<NoticeBoardPage />} />
-              <Route path="/vault" element={<VaultPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </AuthProvider>
-    </CssVarsProvider>
+    <AuthProvider>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/notice-board" element={<NoticeBoardPage />} />
+            <Route path="/vault" element={<VaultPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
