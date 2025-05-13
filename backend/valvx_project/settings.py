@@ -84,10 +84,10 @@ DATABASES = {
 if 'DATABASE_URL' in os.environ:
     # Parse DATABASE_URL environment variable
     import dj_database_url
-    DATABASES['default'] = dj_database_url.config(
+    DATABASES['default'] = dict(dj_database_url.config(
         conn_max_age=600,
         conn_health_checks=True,
-    )
+    ))
 
 
 # Password validation
