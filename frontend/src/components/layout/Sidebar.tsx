@@ -22,6 +22,7 @@ import {
 // Menu items for the sidebar
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+  { text: 'Anslagstavla', icon: <MessageIcon />, path: '/notice-board' },
   { text: 'Kalender', icon: <CalendarIcon />, path: '/calendar' },
   { text: 'Projektplanering', icon: <AssignmentIcon />, path: '/project-planning' },
   { text: 'Tidsrapportering', icon: <AssignmentIcon />, path: '/time-reporting' },
