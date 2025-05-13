@@ -43,3 +43,7 @@ run = ["sh", "-c", "cd frontend && npm install @mui/joy @emotion/react @emotion/
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
