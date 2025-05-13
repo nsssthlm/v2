@@ -1,0 +1,112 @@
+PROJEKTNAMN: ValvX Projektplattform
+
+Syftet är att bygga ett komplett fullstacksystem som Replit AI kan generera automatiskt. Systemet består av frontend, backend, databas, appar, utvecklingsmiljö och versionshantering. All kod ska struktureras enligt punktlistan nedan, inga instruktioner eller guider.
+
+STRUKTUR:
+- frontend/ (React med TypeScript och Vite)
+- backend/ (Django med Django REST Framework)
+- .env (miljövariabler)
+- docker-compose.yml (för PostgreSQL och produktion)
+- README.md
+
+FRONTEND:
+- React + Vite + TypeScript
+- UI-bibliotek: Joy UI Dashboard-template (https://mui.com/joy-ui/getting-started/templates/dashboard/)
+- Axios för API-anrop
+- Funktioner och vyer:
+  - Dashboard
+  - Project Leader Dashboard
+  - Tidsrapportering
+  - Projektplanering: Kanban, Gantt, Ekonomi & Tid
+  - Meddelanden
+  - 3D Viewer: 3D Översikt, Design, Byggarbetsplats
+  - Vault: Home, Comments, Review Package, Files (trädstruktur), Versionset, Meetings
+- Miljövariabel: VITE_API_URL
+
+BACKEND:
+- Django
+- Django REST Framework
+- App: core
+- Funktioner:
+  - Tokenbaserad autentisering (JWT)
+  - Tvåfaktorsautentisering
+  - Rollbaserad åtkomst (projectleader, medlem, gäst)
+  - API-prefix: /api/
+  - Hälsokontroll: /api/status/ → { "status": "ok" }
+  - CRUD-endpoints för: användare, projekt, uppgifter, filer, wiki, kommentarer, kalender, notifieringar, möten
+
+DATABAS:
+- SQLite för utveckling
+- PostgreSQL via Docker för produktion
+- Alla modeller ska fungera i båda
+- Datamodeller:
+  - User
+  - Project
+  - Task
+  - File (med trädstruktur och versionering)
+  - WikiArticle
+  - Comment
+  - RoleAccess
+  - TimeReport
+  - Notification
+  - Meeting
+
+APPAR:
+APP: files
+BESKRIVNING: hanterar uppladdning, struktur och nedladdning av filer med trädstruktur
+
+APP: wiki
+BESKRIVNING: tillåter användare att skapa och redigera wiki-artiklar kopplade till projekt
+
+APP: notifications
+BESKRIVNING: hanterar notifieringar och påminnelser för uppgifter och kommentarer
+
+UTVECKLINGSFLÖDE:
+- Git används för versionshantering
+- Branchstruktur enligt Git Flow:
+  - main
+  - develop
+  - feature/*
+  - bugfix/*
+  - release/*
+  - hotfix/*
+
+- Commit-taggar:
+  - #feat:
+  - #fix:
+  - #docs:
+  - #style:
+  - #refactor:
+  - #test:
+  - #chore:
+
+- Pull Requests:
+  - Från feature/ till develop
+  - Beskrivning krävs
+  - Minst 1 granskare
+
+KVALITET:
+- Kodstandard dokumenteras i CONTRIBUTING.md
+- Automatisk lintning och tester med GitHub Actions (valfritt)
+- Strukturen ska vara CI/CD-redo
+
+MÅL:
+- Replit AI ska kunna generera, strukturera och förstå hela projektet direkt
+- Ingen manuell vägledning krävs efter uppladdning
+
+TESTPLAN:
+- Syftet är att bekräfta att teamarbete fungerar korrekt för flera användare
+- Användare 1 och Användare 3 ska tilldelas olika grenar:
+  - Användare 1 arbetar i branch `feature/user-dashboard`
+  - Användare 3 arbetar i branch `feature/file-tree`
+- Båda användare ska skapa en enkel sida i frontend:
+  - Sida för Användare 1 visar endast texten "User 1"
+  - Sida för Användare 3 visar endast texten "User 3"
+- Båda:
+  - Skapar commit med tagg: `#feat: user page`
+  - Skickar pull request till `develop`
+  - PR ska godkännas och mergas utan konflikt
+- Syftet är att bekräfta:
+  - Branchlogik fungerar
+  - Grundläggande frontend-komponenter renderas
+  - Sammanfogning kan ske utan påverkan på andras kod
