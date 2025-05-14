@@ -137,9 +137,9 @@ export default function EmbeddedPDFViewer({ pdfUrl, title }: EmbeddedPDFViewerPr
           </Box>
           
           <Box sx={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
-            <iframe
+            <embed
               src={fullUrl}
-              title={title || "PDF Viewer"}
+              type="application/pdf"
               style={{
                 position: 'absolute',
                 top: 0,
@@ -149,8 +149,6 @@ export default function EmbeddedPDFViewer({ pdfUrl, title }: EmbeddedPDFViewerPr
                 border: 'none',
                 overflow: 'hidden'
               }}
-              allow="fullscreen"
-              sandbox="allow-same-origin allow-scripts allow-forms"
             />
           </Box>
         </>
