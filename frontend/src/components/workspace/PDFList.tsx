@@ -168,12 +168,25 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
     if (!confirm('Är du säker på att du vill ta bort detta dokument?')) return;
     
     try {
-      await axios.delete(`/api/workspace/pdfs/${id}/`);
-      // Remove the document from the list
+      console.log('Deleting PDF with ID:', id);
+      const token = localStorage.getItem('access_token');
+      await axios.delete(`/api/workspace/pdfs/${id}/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('PDF deleted successfully');
+      // Remove the document from both lists
       setDocuments(prev => prev.filter(doc => doc.id !== id));
-    } catch (err) {
+      setFilteredDocuments(prev => prev.filter(doc => doc.id !== id));
+      setError(null); // Clear any previous errors
+    } catch (err: any) {
       console.error('Error deleting PDF', err);
-      setError('Kunde inte ta bort dokumentet. Försök igen senare.');
+      const errorMessage = err.response?.data?.detail || 
+                          err.response?.data?.message ||
+                          'Kunde inte ta bort dokumentet. Försök igen senare.';
+      setError(errorMessage);
     }
   };
 

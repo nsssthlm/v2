@@ -22,6 +22,7 @@ import PDFList from '../components/workspace/PDFList';
 import PDFViewer from '../components/workspace/PDFViewer';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import api from '../services/api';
 
 interface Project {
   id: number;
@@ -69,19 +70,29 @@ const Workspace: React.FC = () => {
       
       setLoading(true);
       try {
-        const response = await axios.get(`/api/projects/${projectId}/`);
+        console.log('Fetching project data for ID:', projectId);
+        // Use our configured API client with auth headers
+        const response = await api.get(`/projects/${projectId}/`);
+        console.log('Project data:', response.data);
         setProject(response.data);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching project:", err);
-        setError("Failed to load project. Please try again later.");
+        const errorMessage = err.response?.data?.detail || 
+                          "Kunde inte ladda projekt. Vänligen försök igen senare.";
+        setError(errorMessage);
+        
+        // If unauthorized, redirect to login
+        if (err.response?.status === 401) {
+          navigate('/login');
+        }
       } finally {
         setLoading(false);
       }
     };
     
     fetchProject();
-  }, [projectId]);
+  }, [projectId, navigate]);
   
   // Tab change is handled inline with the onChange handler
   
