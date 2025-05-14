@@ -42,6 +42,7 @@ export default function FileBrowser({
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const [menuTargetId, setMenuTargetId] = useState<string | null>(null);
+  const [contextMenuIsFolder, setContextMenuIsFolder] = useState<boolean>(false);
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState<boolean>(false);
   const [newFolderName, setNewFolderName] = useState<string>('');
   const [currentParentId, setCurrentParentId] = useState<string | null>(null);
@@ -76,6 +77,8 @@ export default function FileBrowser({
     event.stopPropagation();
     setMenuPosition({ top: event.clientY, left: event.clientX });
     setMenuTargetId(nodeId);
+    // Spara även om det är en mapp eller fil för att kunna anpassa kontextmenyn
+    setContextMenuIsFolder(nodeIsFolder);
   };
 
   // Stäng kontextmenyn
