@@ -274,18 +274,20 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         Get PDF content with headers that exempt it from X-Frame-Options restrictions
         """
         pdf = self.get_object()
-        from django.http import HttpResponse
+        from django.http import HttpResponse, FileResponse
         import os
         
-        # Create response with the actual file content
-        with open(pdf.file.path, 'rb') as f:
-            file_content = f.read()
+        # Använd FileResponse istället för att läsa in hela filen i minnet
+        # Detta kan hantera större filer mer effektivt
+        response = FileResponse(open(pdf.file.path, 'rb'), content_type='application/pdf')
         
-        # Create response with the PDF content directly
-        response = HttpResponse(file_content)
-        response['Content-Type'] = 'application/pdf'
+        # Override default Django X-Frame-Options header för att tillåta embedding
         response['X-Frame-Options'] = 'ALLOWALL'
         response['Content-Security-Policy'] = 'frame-ancestors *'
         response['Access-Control-Allow-Origin'] = '*'
         response['Content-Disposition'] = f'inline; filename="{pdf.title}"'
+        
+        # Lägg till caching headers för bättre prestanda
+        response['Cache-Control'] = 'public, max-age=86400'
+        
         return response
