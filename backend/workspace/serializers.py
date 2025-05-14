@@ -74,11 +74,11 @@ class PDFDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PDFDocument
         fields = [
-            'id', 'title', 'description', 'file', 'file_url', 'content_type', 
+            'id', 'unique_id', 'title', 'description', 'file', 'file_url', 'content_type', 
             'size', 'version', 'project', 'uploaded_by', 'uploaded_by_details',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'file_url', 'uploaded_by', 'content_type', 'size', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'unique_id', 'file_url', 'uploaded_by', 'content_type', 'size', 'created_at', 'updated_at']
     
     def create(self, validated_data):
         validated_data['uploaded_by'] = self.context['request'].user
