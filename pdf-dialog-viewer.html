@@ -1622,6 +1622,12 @@
           if (uploadPanel) {
             uploadPanel.style.display = 'none';
           }
+          
+          // Ta bort overlay
+          const overlay = document.getElementById('upload-overlay');
+          if (overlay) {
+            overlay.remove();
+          }
         } else {
           alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
         }
