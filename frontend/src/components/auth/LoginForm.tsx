@@ -31,7 +31,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
 
     try {
       // Använd JWT token endpoint
-      const response = await axios.post('/api/token_obtain_pair/', {
+      const response = await axios.post('/api/token/', {
         username,
         password
       });
