@@ -52,7 +52,7 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1.5, // Indentera baserat på nivå
+          pl: Math.min(level * 1.5, 8), // Begränsa indenteringen för djupa nivåer
           pr: 0,
           position: 'relative',
           overflow: 'visible'
@@ -95,15 +95,22 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Filnamn/mappnamn */}
+          {/* Filnamn/mappnamn med förbättrad textomvandling vid många nivåer */}
           <ListItemContent sx={{ 
             minWidth: 0,  // Viktigt för att låta texten krympa
-            mr: 2,        // Marginal till höger för att ge plats åt plustecknet
+            mr: 3,        // Utökad marginal till höger för att ge mer plats åt plustecknet
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}>
-            <Typography level="body-xs" noWrap>
+            <Typography 
+              level="body-xs" 
+              noWrap 
+              sx={{ 
+                maxWidth: `calc(100% - ${Math.min(level, 5) * 12}px)`, // Anpassar maxbredd baserat på nivå
+                display: 'inline-block' 
+              }}
+            >
               {node.name}
             </Typography>
           </ListItemContent>
@@ -120,11 +127,17 @@ const FileSystemNode = ({
               }}
               sx={{ 
                 position: 'absolute',
-                right: 0,
+                right: 1,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                opacity: 0.6,
-                zIndex: 2
+                opacity: 0.7,
+                zIndex: 2,
+                minWidth: '18px',
+                height: '18px',
+                p: '2px',
+                '&:hover': {
+                  bgcolor: 'rgba(0, 0, 0, 0.04)'
+                }
               }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -355,15 +368,9 @@ const Sidebar = () => {
     setNewFolderDialogOpen(true);
   };
   
-  // Funktion för att rensa filsystemet 
-  const clearFilesystem = () => {
-    localStorage.removeItem('filesystemNodes');
-    setFilesystemNodes([]);
-  };
-
-  // Rensa direkt i den här versionen
+  // Rensa filsystemet vid första laddning
   useEffect(() => {
-    // Rensa allt filsystem relaterat till localStorage
+    // Rensa allt filsystem relaterat till localStorage för att börja med ett tomt system
     localStorage.removeItem('filesystemNodes');
     localStorage.removeItem('fileBrowserInitialized');
     setFilesystemNodes([]);
@@ -682,21 +689,46 @@ const Sidebar = () => {
                     </Typography>
                   </ListItemContent>
                   
-                  <IconButton 
-                    size="sm" 
-                    variant="plain" 
-                    color="neutral"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleAddNewFolder(null);
-                    }}
-                    sx={{ ml: 'auto', opacity: 0.8 }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                    </svg>
-                  </IconButton>
+                  <Box sx={{ display: 'flex', gap: 0.5, ml: 'auto' }}>
+                    {/* Återställ knapp */}
+                    <IconButton 
+                      size="sm" 
+                      variant="plain" 
+                      color="neutral"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Rensa filsystemet
+                        localStorage.removeItem('filesystemNodes');
+                        localStorage.removeItem('fileBrowserInitialized');
+                        setFilesystemNodes([]);
+                      }}
+                      sx={{ opacity: 0.8 }}
+                      title="Återställ filsystem"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                      </svg>
+                    </IconButton>
+
+                    {/* Lägg till knapp */}
+                    <IconButton 
+                      size="sm" 
+                      variant="plain" 
+                      color="neutral"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleAddNewFolder(null);
+                      }}
+                      sx={{ opacity: 0.8 }}
+                      title="Skapa ny mapp"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                      </svg>
+                    </IconButton>
+                  </Box>
                 </ListItemButton>
               </ListItem>
               
