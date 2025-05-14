@@ -4,15 +4,12 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import api from '../../services/api';
 
 // För PDF.js
-import * as pdfjsLib from 'pdfjs-dist';
-// Sätt upp arbetare för PDF.js lokalt
 import { pdfjs } from 'pdfjs-dist';
 
-// Ladda PDF.js arbetare från lokal build
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
+// Sätt upp arbetare för PDF.js lokalt
+// Detta sätter upp PDF.js arbetare på ett sätt som fungerar med Vite
+const pdfjsVersion = '4.0.379'; // Kontrollera att denna version stämmer med installerad version
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
 interface AdvancedPDFViewerProps {
   pdfUrl: string;
@@ -22,7 +19,7 @@ interface AdvancedPDFViewerProps {
 export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pdfDocument, setPdfDocument] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
+  const [pdfDocument, setPdfDocument] = useState<pdfjs.PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.5);
