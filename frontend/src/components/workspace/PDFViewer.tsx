@@ -33,9 +33,11 @@ import { sv } from 'date-fns/locale';
 // Import the PDF document type from PDFList
 interface PDFDocument {
   id: number;
+  unique_id: string;
   title: string;
   description: string;
   file_url: string;
+  content_type: string;
   version: number;
   size: number;
   uploaded_by_details: {
