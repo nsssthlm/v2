@@ -86,7 +86,14 @@ const mainMenuItems = [
         <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.42l.82-1zM5 19V8h14v11H5zm8-5.35V10.5h-2.5v3.15c-.66.25-1.15.97-1.15 1.85 0 1.1.9 2 2 2s2-.9 2-2c0-.88-.49-1.6-1.15-1.85z"/>
       </svg>
     ),
-    submenu: [],
+    submenu: [
+      { name: 'Home', path: '/vault/home' },
+      { name: 'Comments', path: '/vault/comments' },
+      { name: 'Review Package', path: '/vault/review' },
+      { name: 'Files', path: '/vault/files' },
+      { name: 'Versionsset', path: '/vault/versions' },
+      { name: 'Meetings', path: '/vault/meetings' }
+    ],
     collapsible: true
   }
 ];
@@ -107,7 +114,8 @@ const Sidebar = () => {
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
     '/planning': true,    // Öppna dessa undermenyer som standard
     '/communication': true,
-    '/3dviewer': true
+    '/3dviewer': true,
+    '/vault': true
   });
 
   // Toggle submenu
@@ -319,6 +327,12 @@ const Sidebar = () => {
                             {subitem.name.includes('Översikt') && <path d="M16 15h-2V5h2v10zm-8 0H6V5h2v10zm12-7h-2v4h2V8zM8 8H6v4h2V8z"/>}
                             {subitem.name.includes('Design') && <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"/>}
                             {subitem.name.includes('Byggarbetsplats') && <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>}
+                            {subitem.name.includes('Home') && <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>}
+                            {subitem.name.includes('Comments') && <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>}
+                            {subitem.name.includes('Review Package') && <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>}
+                            {subitem.name.includes('Files') && <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>}
+                            {subitem.name.includes('Versionsset') && <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>}
+                            {subitem.name.includes('Meetings') && <path d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 9h4V9h-4V6h-2v3H7v2h4v3h-4v2h4v3h2v-3h4v-2h-4v-3z"/>}
                           </svg>
                         </Box>
                         <ListItemContent>
