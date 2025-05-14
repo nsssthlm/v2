@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "VITE_HOST=fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww31xj0zy1.janeway.replit.dev vite --port 5000",
+    "dev": "vite --host --port 5000 --cors",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview --port 5000"
+    "preview": "vite preview --host --port 5000"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

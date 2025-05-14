@@ -1,11 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import replitCompat from "./vite-plugin-replit";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), replitCompat()],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -22,7 +21,9 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5000,
     strictPort: true,
-    cors: true,
+    cors: {
+      origin: "*",
+    },
     hmr: {
       clientPort: 443,
     },
