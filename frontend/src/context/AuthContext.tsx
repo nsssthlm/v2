@@ -127,6 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = localStorage.getItem('access_token');
         
         if (!token) {
+          console.log('No token found, user not logged in');
           setAuthState({
             ...initialState,
             loading: false,
@@ -134,9 +135,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
 
+        console.log('Token found, verifying...');
         // Token exists, attempt to validate by getting user info
-        const response = await api.get('/me/');
+        const response = await api.get('/user-me/');
         
+        console.log('User data received:', response.data);
         setAuthState({
           isAuthenticated: true,
           user: response.data as User,
@@ -168,22 +171,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null,
       }));
 
-      // Get token
-      const tokenResponse = await api.post('/token/', { username, password });
+      console.log('Attempting login with:', { username });
+      
+      // Get token - use the Django JWT endpoint
+      const tokenResponse = await api.post('/token-auth/', { username, password });
+      console.log('Token response received');
       
       // Extract tokens and data
-      const { access, refresh } = tokenResponse.data;
+      const { access, refresh, user } = tokenResponse.data;
+      
+      console.log('Login successful, storing tokens');
       
       // Store tokens
       localStorage.setItem('access_token', access);
       localStorage.setItem('refresh_token', refresh);
       
-      // Get user info with the token
-      const userResponse = await api.get('/me/');
-      
+      // Django response includes user data directly
       setAuthState({
         isAuthenticated: true,
-        user: userResponse.data as User,
+        user: user as User,
         token: access,
         loading: false,
         error: null,
@@ -196,7 +202,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user: null,
         token: null,
         loading: false,
-        error: error.response?.data?.detail || 'Invalid credentials or server error',
+        error: error.response?.data?.detail || 'Ogiltiga inloggningsuppgifter eller serverfel.',
       }));
     }
   };
@@ -204,10 +210,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Logout function
   const logout = async (): Promise<void> => {
     try {
+      console.log('Logout initiated');
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
         // Call backend logout endpoint to blacklist token
         await api.post('/logout/', { refresh: refreshToken });
+        console.log('Token blacklisted successfully');
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -215,6 +223,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Clear tokens and reset state regardless of API call success
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+      console.log('Tokens cleared from storage');
       
       setAuthState({
         isAuthenticated: false,
