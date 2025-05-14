@@ -27,6 +27,7 @@ urlpatterns = [
         path('files/', include('files.urls')),
         path('wiki/', include('wiki.urls')),
         path('notifications/', include('notifications.urls')),
+        path('workspace/', include('workspace.urls')),
     ])),
 ]
 
