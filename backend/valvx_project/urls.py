@@ -32,6 +32,9 @@ urlpatterns = [
     ])),
 ]
 
+# Registrera PDF API routes
+register_pdf_api_routes(urlpatterns)
+
 # Add static and media URLs in development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
