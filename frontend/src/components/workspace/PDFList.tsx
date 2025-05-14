@@ -88,6 +88,11 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
 
     if (projectId) {
       fetchDocuments();
+    } else {
+      // If no projectId is available, set empty state
+      setDocuments([]);
+      setFilteredDocuments([]);
+      setLoading(false);
     }
   }, [projectId]);
 

@@ -56,7 +56,15 @@ function App() {
             </ProtectedRoute>
           } />
           
-          <Route path="/workspace/*" element={
+          <Route path="/workspace" element={
+            <ProtectedRoute>
+              <Layout>
+                <Workspace />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/workspace/:projectId" element={
             <ProtectedRoute>
               <Layout>
                 <Workspace />
