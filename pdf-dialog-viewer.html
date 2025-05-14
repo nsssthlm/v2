@@ -751,13 +751,58 @@
       currentPdfId = pdfData.id;
       currentFolderId = pdfData.folderId;
       
+      console.log("Öppnar sparad PDF med ID:", currentPdfId, "URL:", pdfData.url);
+      
       // Om vi har en sparad URL
       if (pdfData.url) {
-        currentPdfUrl = pdfData.url;
-        filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
-        infoFilename.textContent = pdfData.filename || 'dokument.pdf';
-        pdfDialogOverlay.style.display = 'block';
-        loadPdf(pdfData.url);
+        // För externt URL, använd direkt
+        if (pdfData.url.startsWith('http')) {
+          currentPdfUrl = pdfData.url;
+          currentPdfFile = null; // Ingen lokal fil
+          
+          filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
+          infoFilename.textContent = pdfData.filename || 'dokument.pdf';
+          pdfDialogOverlay.style.display = 'block';
+          loadPdf(pdfData.url);
+        } 
+        // För blob URL, måste vi använda originalets URL igen eftersom blob URLs är temporära
+        else if (pdfData.url.startsWith('blob:')) {
+          // Försök att använda URL:en från input-fältet igen om möjligt
+          const inputUrl = pdfUrlInput.value.trim();
+          if (inputUrl && inputUrl.length > 0) {
+            currentPdfUrl = inputUrl;
+            filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
+            infoFilename.textContent = pdfData.filename || 'dokument.pdf';
+            pdfDialogOverlay.style.display = 'block';
+            loadPdf(inputUrl);
+          } else {
+            // Annars försök med originalets URL från databasen
+            console.log("Försöker öppna URL från databasen:", pdfData.url);
+            try {
+              currentPdfUrl = pdfData.url;
+              filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
+              infoFilename.textContent = pdfData.filename || 'dokument.pdf';
+              pdfDialogOverlay.style.display = 'block';
+              loadPdf(pdfData.url);
+            } catch (error) {
+              console.error("Kunde inte öppna blob URL:", error);
+              // Försök ladda från URL-fältet om det finns
+              if (pdfUrlInput.value) {
+                currentPdfUrl = pdfUrlInput.value;
+                loadPdf(pdfUrlInput.value);
+              } else {
+                alert("Kunde inte öppna PDF-filen. Ange URL:en igen eller ladda upp filen på nytt.");
+              }
+            }
+          }
+        } else {
+          // Vanlig sträng URL
+          currentPdfUrl = pdfData.url;
+          filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
+          infoFilename.textContent = pdfData.filename || 'dokument.pdf';
+          pdfDialogOverlay.style.display = 'block';
+          loadPdf(pdfData.url);
+        }
       }
       // Om vi har en sparad blob/fil
       else if (pdfData.blob) {
@@ -773,7 +818,16 @@
           alert('Kunde inte öppna den sparade PDF-filen');
         }
       } else {
-        alert('Kunde inte hitta PDF-innehållet');
+        // Försök använda URL från input-fältet
+        if (pdfUrlInput.value) {
+          currentPdfUrl = pdfUrlInput.value;
+          filenameDisplay.textContent = pdfData.title || 'PDF Dokument';
+          infoFilename.textContent = pdfData.filename || 'dokument.pdf';
+          pdfDialogOverlay.style.display = 'block';
+          loadPdf(pdfUrlInput.value);
+        } else {
+          alert('Kunde inte hitta PDF-innehållet. Vänligen ange URL:en eller ladda upp filen igen.');
+        }
       }
     }
     
@@ -813,13 +867,34 @@
           filename: currentPdfFile ? currentPdfFile.name : (filenameDisplay.textContent || 'dokument.pdf')
         };
         
-        // Spara URL eller blob data
-        if (currentPdfUrl) {
+        // Spara källan till PDF:en - prioritera alltid extern URL
+        if (pdfUrlInput.value && pdfUrlInput.value.trim() !== '') {
+          // Om vi har en inmatad URL, använd den som primär källa (garanterar att vi kan öppna den igen)
+          newPdf.url = pdfUrlInput.value.trim();
+          console.log("Sparar PDF med extern URL:", newPdf.url);
+        } 
+        else if (currentPdfUrl) {
+          // Annars använd den aktuella URL:en
           if (currentPdfUrl.startsWith('blob:')) {
-            // Eftersom vi inte kan spara blob-URLs direkt, spara URL:en för extern resurs
-            newPdf.url = pdfUrlInput.value || currentPdfUrl;
+            // För blob URLs, spara den ursprungliga källan om möjligt
+            if (pdfFileInput.files && pdfFileInput.files[0]) {
+              // För lokala filer, markera att vi har en fil
+              newPdf.fileAvailable = true;
+              newPdf.originalSource = 'file';
+              newPdf.url = currentPdfUrl; // Spara ändå URL:en, men märk den som tillfällig
+              console.log("Sparar PDF från lokal fil");
+            } else {
+              // Om det inte finns någon lokal fil men vi har en blob URL, det kan vara problematiskt
+              // eftersom blob URLs är tillfälliga
+              newPdf.url = currentPdfUrl;
+              newPdf.originalSource = 'blob';
+              console.log("Sparar PDF med blob URL (tillfällig), kan vara svårt att öppna igen");
+            }
           } else {
+            // För vanliga http URLs, spara direkt
             newPdf.url = currentPdfUrl;
+            newPdf.originalSource = 'url';
+            console.log("Sparar PDF med URL:", newPdf.url);
           }
         }
         
@@ -833,8 +908,14 @@
         // Kontrollera om denna PDF redan finns (baserat på ID)
         const existingIndex = savedPdfs.findIndex(pdf => pdf.id === newPdf.id);
         if (existingIndex >= 0) {
-          // Uppdatera existerande PDF
-          savedPdfs[existingIndex] = { ...savedPdfs[existingIndex], ...newPdf };
+          // Uppdatera existerande PDF men behåll vissa viktiga attribut
+          const existingPdf = savedPdfs[existingIndex];
+          savedPdfs[existingIndex] = { 
+            ...existingPdf, 
+            ...newPdf,
+            // Om vi inte har en ny URL, behåll den gamla
+            url: newPdf.url || existingPdf.url
+          };
         } else {
           // Lägg till ny PDF
           savedPdfs.push(newPdf);
