@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Dialog Viewer</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-light: #60a5fa;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f3f4f6;
+      --bg-tertiary: #e5e7eb;
+      --border: #d1d5db;
+      --radius: 0.375rem;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: var(--text-primary);
+      line-height: 1.5;
+      background-color: var(--bg-secondary);
+      overflow-x: hidden;
+    }
+
+    button {
+      cursor: pointer;
+      outline: none;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .primary-btn {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .primary-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .secondary-btn {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .secondary-btn:hover {
+      background-color: #d1d5db;
+    }
+
+    .icon-btn {
+      padding: 0.5rem;
+      background-color: transparent;
+      color: var(--text-primary);
+    }
+
+    .icon-btn:hover {
+      background-color: var(--bg-tertiary);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: var(--bg-primary);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .file-selection {
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.625rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    /* PDF Dialog Styles */
+    .pdf-dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.75);
+      display: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .pdf-dialog {
+      position: relative;
+      background-color: var(--bg-primary);
+      border-radius: var(--radius);
+      margin: 2rem auto;
+      width: 90%;
+      height: 90vh;
+      max-width: 1200px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .pdf-dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--bg-primary);
+    }
+
+    .pdf-dialog-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .pdf-dialog-close {
+      background: transparent;
+      padding: 0.25rem;
+      font-size: 1.5rem;
+      line-height: 0.75;
+    }
+
+    .pdf-dialog-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .pdf-viewer {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      background-color: var(--bg-secondary);
+      display: flex;
+      justify-content: center;
+    }
+
+    .pdf-sidebar {
+      width: 300px;
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdf-toolbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--bg-primary);
+      flex-wrap: wrap;
+    }
+
+    .pdf-canvas-container {
+      position: relative;
+      display: inline-block;
+      margin: 1rem;
+      box-shadow: var(--shadow);
+      background-color: white;
+    }
+
+    #pdf-canvas {
+      display: block;
+    }
+
+    .loading-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    .pdf-annotation-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .pdf-annotation {
+      position: absolute;
+      background-color: rgba(255, 255, 0, 0.3);
+      border: 2px solid rgba(255, 200, 0, 0.7);
+      cursor: pointer;
+      pointer-events: all;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .pdf-annotation:hover {
+      background-color: rgba(255, 255, 0, 0.5);
+    }
+
+    .pdf-annotation.active {
+      background-color: rgba(255, 165, 0, 0.5);
+      border: 2px solid orange;
+    }
+
+    .annotation-draw {
+      position: absolute;
+      background-color: rgba(255, 255, 0, 0.3);
+      border: 2px solid rgba(255, 200, 0, 0.7);
+      pointer-events: none;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .sidebar-tab.active {
+      border-bottom: 2px solid var(--primary);
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .sidebar-content {
+      padding: 1rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .annotation-details {
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+
+    .annotation-details h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .annotation-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .annotation-comment {
+      margin-top: 0.75rem;
+    }
+
+    .comment-form {
+      margin-top: 1rem;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      padding: 0.625rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.5rem;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .status-select {
+      margin-bottom: 0.5rem;
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: var(--bg-primary);
+    }
+
+    .version-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .version-item:hover {
+      background-color: var(--bg-secondary);
+    }
+
+    .version-item.active {
+      background-color: var(--bg-tertiary);
+    }
+
+    .version-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+    }
+
+    .version-meta {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    /* Icons (simplified for this example) */
+    .icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* Hide file input visually but keep it accessible */
+    .file-input {
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+    }
+
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      background-color: var(--primary);
+      color: white;
+      border-radius: var(--radius);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .file-input-label:hover {
+      background-color: var(--primary-dark);
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .pdf-dialog {
+        width: 95%;
+        margin: 1rem auto;
+        height: 95vh;
+      }
+
+      .pdf-dialog-content {
+        flex-direction: column;
+      }
+
+      .pdf-sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        max-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PDF Viewer Demo</h1>
+    <p>Klicka på knappen nedan för att ladda en PDF-fil och öppna den i en modal visare med stöd för anteckningar och versionshantering.</p>
+
+    <div class="file-selection">
+      <div class="form-group">
+        <label for="pdf-file">Välj PDF-fil</label>
+        <input type="file" id="pdf-file" accept=".pdf" />
+      </div>
+      <div class="form-group">
+        <label for="pdf-url">Eller ange URL till PDF</label>
+        <input type="text" id="pdf-url" placeholder="https://example.com/document.pdf" value="https://cdn.mozilla.net/pdfjs/tracemonkey.pdf" />
+      </div>
+      <button id="show-pdf-btn" class="primary-btn">Visa PDF</button>
+    </div>
+  </div>
+
+  <!-- PDF Dialog/Modal -->
+  <div id="pdf-dialog-overlay" class="pdf-dialog-overlay">
+    <div class="pdf-dialog">
+      <div class="pdf-dialog-header">
+        <div class="pdf-dialog-title" id="pdf-filename">PDF Dokument</div>
+        <button class="pdf-dialog-close" id="pdf-dialog-close">&times;</button>
+      </div>
+
+      <div class="pdf-toolbar">
+        <button id="prev-page" class="secondary-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+          </svg>
+          Föregående
+        </button>
+        <span id="page-info">Sida: 1 / 1</span>
+        <button id="next-page" class="secondary-btn">
+          Nästa
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+          </svg>
+        </button>
+        <button id="zoom-out" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5 1.5-1.5-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z"></path>
+          </svg>
+        </button>
+        <button id="zoom-in" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5 1.5-1.5-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-5H9v2H7v1h2v2h1v-2h2V9h-2z"></path>
+          </svg>
+        </button>
+        <button id="rotate-btn" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M18.5 12c0 .83-.67 1.5-1.5 1.5-1.75 0-3 1.57-3 3.5s1.25 3.5 3 3.5c2.76 0 5-2.24 5-5h2c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-1.93.78-3.68 2.05-4.95l1.41 1.41C13.12 12.89 12.5 14.37 12.5 16c0 1.93 1.57 3.5 3.5 3.5s3.5-1.57 3.5-3.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5H14c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.76-2.24 5-5 5-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5c.83 0 1.5-.67 1.5-1.5h-2z"></path>
+          </svg>
+        </button>
+        <button id="download-btn" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
+          </svg>
+        </button>
+        <button id="annotation-btn" class="secondary-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"></path>
+          </svg>
+          Markera/Kommentera
+        </button>
+      </div>
+
+      <div class="pdf-dialog-content">
+        <div id="pdf-viewer" class="pdf-viewer">
+          <div id="loading-spinner" class="loading-spinner"></div>
+          <div id="pdf-canvas-container" class="pdf-canvas-container" style="display: none;">
+            <canvas id="pdf-canvas"></canvas>
+            <div id="pdf-annotation-layer" class="pdf-annotation-layer"></div>
+            <div id="annotation-draw" class="annotation-draw" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div id="pdf-sidebar" class="pdf-sidebar">
+          <div class="sidebar-tabs">
+            <div id="annotations-tab" class="sidebar-tab active">Kommentarer</div>
+            <div id="versions-tab" class="sidebar-tab">Versioner</div>
+            <div id="details-tab" class="sidebar-tab">Detaljer</div>
+          </div>
+
+          <div id="annotations-content" class="sidebar-content">
+            <div id="no-annotation-selected" style="text-align: center; color: var(--text-secondary); padding: 2rem 0;">
+              <p>Markera en del av dokumentet för att lägga till en kommentar, eller klicka på en befintlig markering.</p>
+            </div>
+
+            <div id="annotation-details" style="display: none;">
+              <div class="annotation-details">
+                <h3>Kommentar</h3>
+                <div class="annotation-meta">
+                  <span id="annotation-author">Användare</span>
+                  <span id="annotation-date">2025-05-14</span>
+                </div>
+                <div id="annotation-status" style="font-weight: 500; margin-bottom: 0.5rem;">Status: Ny</div>
+                <div id="annotation-comment" class="annotation-comment">
+                  Kommentartext visas här.
+                </div>
+              </div>
+
+              <div class="comment-form">
+                <h3>Svara eller uppdatera</h3>
+                <textarea id="comment-input" placeholder="Skriv din kommentar här..."></textarea>
+                <select id="status-select" class="status-select">
+                  <option value="new_comment">Ny kommentar</option>
+                  <option value="action_required">Åtgärd krävs</option>
+                  <option value="rejected">Avvisad</option>
+                  <option value="new_review">Ny granskning</option>
+                  <option value="resolved">Löst</option>
+                </select>
+                <button id="save-comment-btn" class="primary-btn">Spara kommentar</button>
+                <button id="cancel-comment-btn" class="secondary-btn">Avbryt</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="versions-content" class="sidebar-content" style="display: none;">
+            <button id="upload-version-btn" class="primary-btn" style="width: 100%; margin-bottom: 1rem;">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"></path>
+              </svg>
+              Ladda upp ny version
+            </button>
+
+            <div id="version-list">
+              <!-- Version items will be added here dynamically -->
+              <div class="version-item active">
+                <div class="version-header">
+                  <span>Version 1.0</span>
+                  <span>14 maj 2025</span>
+                </div>
+                <div class="version-meta">
+                  <div>Uppladdad av: Användare</div>
+                  <div>Initial version</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="details-content" class="sidebar-content" style="display: none;">
+            <h3 style="margin-bottom: 1rem;">Dokumentinformation</h3>
+            <div id="pdf-info" style="margin-bottom: 1rem;">
+              <p><strong>Filnamn:</strong> <span id="info-filename">dokument.pdf</span></p>
+              <p><strong>Storlek:</strong> <span id="info-size">--</span></p>
+              <p><strong>Antal sidor:</strong> <span id="info-pages">--</span></p>
+              <p><strong>Skapad:</strong> <span id="info-created">--</span></p>
+              <p><strong>Senast ändrad:</strong> <span id="info-modified">--</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load PDF.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.min.js"></script>
+
+  <script>
+    // Set PDF.js worker path
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.worker.min.js';
+
+    // DOM Elements
+    const pdfFileInput = document.getElementById('pdf-file');
+    const pdfUrlInput = document.getElementById('pdf-url');
+    const showPdfBtn = document.getElementById('show-pdf-btn');
+    const pdfDialogOverlay = document.getElementById('pdf-dialog-overlay');
+    const pdfDialogClose = document.getElementById('pdf-dialog-close');
+    const pdfCanvas = document.getElementById('pdf-canvas');
+    const canvasContainer = document.getElementById('pdf-canvas-container');
+    const annotationLayer = document.getElementById('pdf-annotation-layer');
+    const annotationDraw = document.getElementById('annotation-draw');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const pageInfo = document.getElementById('page-info');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const zoomInBtn = document.getElementById('zoom-in');
+    const zoomOutBtn = document.getElementById('zoom-out');
+    const rotateBtn = document.getElementById('rotate-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const annotationBtn = document.getElementById('annotation-btn');
+    const filenameDisplay = document.getElementById('pdf-filename');
+    const infoFilename = document.getElementById('info-filename');
+    const infoSize = document.getElementById('info-size');
+    const infoPages = document.getElementById('info-pages');
+    const infoCreated = document.getElementById('info-created');
+    const infoModified = document.getElementById('info-modified');
+
+    // Sidebar tabs
+    const annotationsTab = document.getElementById('annotations-tab');
+    const versionsTab = document.getElementById('versions-tab');
+    const detailsTab = document.getElementById('details-tab');
+    const annotationsContent = document.getElementById('annotations-content');
+    const versionsContent = document.getElementById('versions-content');
+    const detailsContent = document.getElementById('details-content');
+
+    // Annotation related elements
+    const noAnnotationSelected = document.getElementById('no-annotation-selected');
+    const annotationDetails = document.getElementById('annotation-details');
+    const annotationAuthor = document.getElementById('annotation-author');
+    const annotationDate = document.getElementById('annotation-date');
+    const annotationStatus = document.getElementById('annotation-status');
+    const annotationComment = document.getElementById('annotation-comment');
+    const commentInput = document.getElementById('comment-input');
+    const statusSelect = document.getElementById('status-select');
+    const saveCommentBtn = document.getElementById('save-comment-btn');
+    const cancelCommentBtn = document.getElementById('cancel-comment-btn');
+
+    // Version related elements
+    const uploadVersionBtn = document.getElementById('upload-version-btn');
+    const versionList = document.getElementById('version-list');
+
+    // PDF.js variables
+    let pdfDoc = null;
+    let pageNum = 1;
+    let pageRendering = false;
+    let pageNumPending = null;
+    let scale = 1.0;
+    let rotation = 0;
+    let ctx = pdfCanvas.getContext('2d');
+    let currentPdfUrl = null;
+
+    // Status colors
+    const statusColors = {
+      new_comment: '#FF69B4',      // HotPink (Rosa)
+      action_required: '#FF0000',  // Röd
+      rejected: '#808080',         // Grå
+      new_review: '#FFA500',       // Orange
+      other_forum: '#4169E1',      // RoyalBlue (Blå)
+      resolved: '#ADFF2F',         // GreenYellow (Grön)
+    };
+
+    // Annotation variables
+    let annotations = [];
+    let isAnnotationMode = false;
+    let isMarking = false;
+    let markingStart = null;
+    let markingEnd = null;
+    let activeAnnotation = null;
+
+    // Format file size
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Format date
+    function formatDate(date) {
+      if (!date) return '--';
+      const d = new Date(date);
+      return d.toLocaleDateString('sv-SE', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Generate a unique ID
+    function generateId() {
+      return 'anno_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Show PDF dialog
+    showPdfBtn.addEventListener('click', function() {
+      const file = pdfFileInput.files[0];
+      const url = pdfUrlInput.value.trim();
+      
+      if (file) {
+        currentPdfUrl = URL.createObjectURL(file);
+        filenameDisplay.textContent = file.name;
+        infoFilename.textContent = file.name;
+        infoSize.textContent = formatFileSize(file.size);
+        infoCreated.textContent = formatDate(new Date());
+        infoModified.textContent = formatDate(new Date());
+      } else if (url) {
+        currentPdfUrl = url;
+        const urlParts = url.split('/');
+        const filename = urlParts[urlParts.length - 1] || 'dokument.pdf';
+        filenameDisplay.textContent = filename;
+        infoFilename.textContent = filename;
+      } else {
+        alert('Välj en fil eller ange en URL');
+        return;
+      }
+      
+      pdfDialogOverlay.style.display = 'block';
+      loadPdf(currentPdfUrl);
+    });
+
+    // Close dialog
+    pdfDialogClose.addEventListener('click', function() {
+      pdfDialogOverlay.style.display = 'none';
+    });
+
+    // Close dialog when clicking outside
+    pdfDialogOverlay.addEventListener('click', function(e) {
+      if (e.target === pdfDialogOverlay) {
+        pdfDialogOverlay.style.display = 'none';
+      }
+    });
+
+    // Tab switching
+    annotationsTab.addEventListener('click', function() {
+      annotationsTab.classList.add('active');
+      versionsTab.classList.remove('active');
+      detailsTab.classList.remove('active');
+      annotationsContent.style.display = 'block';
+      versionsContent.style.display = 'none';
+      detailsContent.style.display = 'none';
+    });
+
+    versionsTab.addEventListener('click', function() {
+      annotationsTab.classList.remove('active');
+      versionsTab.classList.add('active');
+      detailsTab.classList.remove('active');
+      annotationsContent.style.display = 'none';
+      versionsContent.style.display = 'block';
+      detailsContent.style.display = 'none';
+    });
+
+    detailsTab.addEventListener('click', function() {
+      annotationsTab.classList.remove('active');
+      versionsTab.classList.remove('active');
+      detailsTab.classList.add('active');
+      annotationsContent.style.display = 'none';
+      versionsContent.style.display = 'none';
+      detailsContent.style.display = 'block';
+    });
+
+    // Load PDF
+    function loadPdf(url) {
+      // Reset page number
+      pageNum = 1;
+      
+      // Show loading spinner
+      loadingSpinner.style.display = 'block';
+      canvasContainer.style.display = 'none';
+      
+      // Load PDF document
+      pdfjsLib.getDocument(url).promise.then(function(pdf) {
+        pdfDoc = pdf;
+        infoPages.textContent = pdf.numPages;
+        pageInfo.textContent = `Sida: ${pageNum} / ${pdf.numPages}`;
+        
+        // Render first page
+        renderPage(pageNum);
+        
+        // Enable/disable navigation buttons
+        updateUIState();
+      }).catch(function(error) {
+        console.error('Error loading PDF:', error);
+        loadingSpinner.style.display = 'none';
+        alert('Kunde inte ladda PDF: ' + error.message);
+      });
+    }
+
+    // Render PDF page
+    function renderPage(num) {
+      pageRendering = true;
+      
+      // Show loading spinner
+      loadingSpinner.style.display = 'block';
+      
+      // Get page
+      pdfDoc.getPage(num).then(function(page) {
+        // Get viewport
+        const viewport = page.getViewport({ scale: scale, rotation: rotation });
+        
+        // Set canvas dimensions
+        pdfCanvas.width = viewport.width;
+        pdfCanvas.height = viewport.height;
+        
+        // Render PDF page
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        
+        const renderTask = page.render(renderContext);
+        
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+          pageRendering = false;
+          loadingSpinner.style.display = 'none';
+          canvasContainer.style.display = 'block';
+          
+          // Render annotations
+          renderAnnotations();
+          
+          if (pageNumPending !== null) {
+            // New page rendering is pending
+            renderPage(pageNumPending);
+            pageNumPending = null;
+          }
+        });
+      });
+      
+      // Update page info
+      pageInfo.textContent = `Sida: ${num} / ${pdfDoc.numPages}`;
+      
+      // Enable/disable navigation buttons
+      updateUIState();
+    }
+
+    // Queue rendering of the page
+    function queueRenderPage(num) {
+      if (pageRendering) {
+        pageNumPending = num;
+      } else {
+        renderPage(num);
+      }
+    }
+
+    // Update UI state based on current settings
+    function updateUIState() {
+      prevPageBtn.disabled = pageNum <= 1;
+      nextPageBtn.disabled = pageNum >= pdfDoc.numPages;
+      
+      // Visual indication for disabled buttons
+      if (prevPageBtn.disabled) {
+        prevPageBtn.style.opacity = 0.5;
+      } else {
+        prevPageBtn.style.opacity = 1;
+      }
+      
+      if (nextPageBtn.disabled) {
+        nextPageBtn.style.opacity = 0.5;
+      } else {
+        nextPageBtn.style.opacity = 1;
+      }
+    }
+
+    // Previous page
+    prevPageBtn.addEventListener('click', function() {
+      if (pageNum <= 1) return;
+      pageNum--;
+      queueRenderPage(pageNum);
+    });
+
+    // Next page
+    nextPageBtn.addEventListener('click', function() {
+      if (pageNum >= pdfDoc.numPages) return;
+      pageNum++;
+      queueRenderPage(pageNum);
+    });
+
+    // Zoom in
+    zoomInBtn.addEventListener('click', function() {
+      scale += 0.25;
+      queueRenderPage(pageNum);
+    });
+
+    // Zoom out
+    zoomOutBtn.addEventListener('click', function() {
+      if (scale <= 0.25) return;
+      scale -= 0.25;
+      queueRenderPage(pageNum);
+    });
+
+    // Rotate
+    rotateBtn.addEventListener('click', function() {
+      rotation = (rotation + 90) % 360;
+      queueRenderPage(pageNum);
+    });
+
+    // Download
+    downloadBtn.addEventListener('click', function() {
+      if (currentPdfUrl) {
+        const link = document.createElement('a');
+        link.href = currentPdfUrl;
+        link.download = filenameDisplay.textContent || 'document.pdf';
+        link.click();
+      }
+    });
+
+    // Toggle annotation mode
+    annotationBtn.addEventListener('click', function() {
+      isAnnotationMode = !isAnnotationMode;
+      
+      if (isAnnotationMode) {
+        annotationBtn.style.backgroundColor = '#e5e7eb';
+        annotationBtn.textContent = 'Avsluta markering';
+        pdfCanvas.style.cursor = 'crosshair';
+      } else {
+        annotationBtn.style.backgroundColor = '';
+        annotationBtn.textContent = 'Markera/Kommentera';
+        pdfCanvas.style.cursor = 'default';
+        
+        // Cancel any ongoing marking
+        if (isMarking) {
+          isMarking = false;
+          annotationDraw.style.display = 'none';
+        }
+      }
+    });
+
+    // Handle keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (pdfDialogOverlay.style.display !== 'block') return;
+      
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        // Next page with right arrow or space
+        if (pageNum < pdfDoc.numPages) {
+          pageNum++;
+          queueRenderPage(pageNum);
+        }
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft') {
+        // Previous page with left arrow
+        if (pageNum > 1) {
+          pageNum--;
+          queueRenderPage(pageNum);
+        }
+        e.preventDefault();
+      } else if (e.key === 'Escape') {
+        // Close dialog with escape
+        pdfDialogOverlay.style.display = 'none';
+        e.preventDefault();
+      }
+    });
+
+    // --- Annotation functionality ---
+
+    // Start marking
+    canvasContainer.addEventListener('mousedown', function(e) {
+      if (!isAnnotationMode) return;
+      
+      const rect = canvasContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      isMarking = true;
+      markingStart = { x, y };
+      
+      // Show annotation drawing
+      annotationDraw.style.display = 'block';
+      annotationDraw.style.left = x + 'px';
+      annotationDraw.style.top = y + 'px';
+      annotationDraw.style.width = '0px';
+      annotationDraw.style.height = '0px';
+    });
+
+    // Update marking
+    canvasContainer.addEventListener('mousemove', function(e) {
+      if (!isMarking) return;
+      
+      const rect = canvasContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      markingEnd = { x, y };
+      
+      // Calculate position and dimensions
+      const left = Math.min(markingStart.x, markingEnd.x);
+      const top = Math.min(markingStart.y, markingEnd.y);
+      const width = Math.abs(markingEnd.x - markingStart.x);
+      const height = Math.abs(markingEnd.y - markingStart.y);
+      
+      // Update annotation drawing
+      annotationDraw.style.left = left + 'px';
+      annotationDraw.style.top = top + 'px';
+      annotationDraw.style.width = width + 'px';
+      annotationDraw.style.height = height + 'px';
+    });
+
+    // End marking
+    canvasContainer.addEventListener('mouseup', function(e) {
+      if (!isMarking) return;
+      
+      const rect = canvasContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      markingEnd = { x, y };
+      isMarking = false;
+      
+      // Hide annotation drawing
+      annotationDraw.style.display = 'none';
+      
+      // Calculate position and dimensions
+      const left = Math.min(markingStart.x, markingEnd.x);
+      const top = Math.min(markingStart.y, markingEnd.y);
+      const width = Math.abs(markingEnd.x - markingStart.x);
+      const height = Math.abs(markingEnd.y - markingStart.y);
+      
+      // Add new annotation if area is large enough
+      if (width > 10 && height > 10) {
+        const newAnnotation = {
+          id: generateId(),
+          rect: {
+            x: left,
+            y: top,
+            width: width,
+            height: height,
+            pageNumber: pageNum
+          },
+          color: statusColors.new_comment,
+          comment: '',
+          status: 'new_comment',
+          createdBy: 'Current User',
+          createdAt: new Date().toISOString()
+        };
+        
+        annotations.push(newAnnotation);
+        renderAnnotations();
+        
+        // Select the new annotation
+        setActiveAnnotation(newAnnotation);
+        
+        // Switch to annotations tab
+        annotationsTab.click();
+      }
+    });
+
+    // Render annotations
+    function renderAnnotations() {
+      // Clear annotation layer
+      annotationLayer.innerHTML = '';
+      
+      // Filter annotations for current page
+      const pageAnnotations = annotations.filter(anno => anno.rect.pageNumber === pageNum);
+      
+      // Create annotation elements
+      pageAnnotations.forEach(anno => {
+        const annoElement = document.createElement('div');
+        annoElement.className = 'pdf-annotation';
+        annoElement.dataset.id = anno.id;
+        
+        // Position and dimensions
+        annoElement.style.left = anno.rect.x + 'px';
+        annoElement.style.top = anno.rect.y + 'px';
+        annoElement.style.width = anno.rect.width + 'px';
+        annoElement.style.height = anno.rect.height + 'px';
+        
+        // Color based on status
+        annoElement.style.backgroundColor = getStatusColor(anno.status, 0.3);
+        annoElement.style.borderColor = getStatusColor(anno.status, 0.7);
+        
+        // Add active class if this is the active annotation
+        if (activeAnnotation && anno.id === activeAnnotation.id) {
+          annoElement.classList.add('active');
+        }
+        
+        // Click handler
+        annoElement.addEventListener('click', function() {
+          setActiveAnnotation(anno);
+        });
+        
+        annotationLayer.appendChild(annoElement);
+      });
+    }
+
+    // Get color for status
+    function getStatusColor(status, alpha = 1) {
+      const baseColor = statusColors[status] || '#727cf5';
+      
+      // For simple alpha, just return with rgba
+      if (alpha < 1) {
+        // Convert hex to rgb
+        const r = parseInt(baseColor.substring(1, 3), 16);
+        const g = parseInt(baseColor.substring(3, 5), 16);
+        const b = parseInt(baseColor.substring(5, 7), 16);
+        
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      
+      return baseColor;
+    }
+
+    // Set active annotation
+    function setActiveAnnotation(annotation) {
+      activeAnnotation = annotation;
+      
+      // Update UI
+      if (annotation) {
+        // Show annotation details
+        noAnnotationSelected.style.display = 'none';
+        annotationDetails.style.display = 'block';
+        
+        // Update details
+        annotationAuthor.textContent = annotation.createdBy;
+        annotationDate.textContent = formatDate(annotation.createdAt);
+        
+        // Map status to readable text
+        const statusText = {
+          new_comment: 'Ny kommentar',
+          action_required: 'Åtgärd krävs',
+          rejected: 'Avvisad',
+          new_review: 'Ny granskning',
+          other_forum: 'Diskuteras i annat forum',
+          resolved: 'Löst'
+        };
+        
+        annotationStatus.textContent = 'Status: ' + (statusText[annotation.status] || annotation.status);
+        annotationStatus.style.color = getStatusColor(annotation.status);
+        
+        // Update comment
+        annotationComment.textContent = annotation.comment || 'Ingen kommentar tillagd.';
+        
+        // Set form values
+        commentInput.value = annotation.comment || '';
+        statusSelect.value = annotation.status;
+      } else {
+        // Hide annotation details
+        noAnnotationSelected.style.display = 'block';
+        annotationDetails.style.display = 'none';
+      }
+      
+      // Update annotation highlighting
+      renderAnnotations();
+    }
+
+    // Save comment
+    saveCommentBtn.addEventListener('click', function() {
+      if (!activeAnnotation) return;
+      
+      // Update annotation
+      activeAnnotation.comment = commentInput.value;
+      activeAnnotation.status = statusSelect.value;
+      
+      // Update UI
+      setActiveAnnotation(activeAnnotation);
+      
+      // Save to localStorage for demo purposes
+      localStorage.setItem('pdfDialogAnnotations', JSON.stringify(annotations));
+    });
+
+    // Cancel comment
+    cancelCommentBtn.addEventListener('click', function() {
+      if (!activeAnnotation) return;
+      
+      // Reset form
+      commentInput.value = activeAnnotation.comment || '';
+      statusSelect.value = activeAnnotation.status;
+    });
+
+    // Load stored annotations (for demo)
+    try {
+      const storedAnnotations = localStorage.getItem('pdfDialogAnnotations');
+      if (storedAnnotations) {
+        annotations = JSON.parse(storedAnnotations);
+      }
+    } catch (e) {
+      console.error('Error loading stored annotations:', e);
+    }
+  </script>
+</body>
+</html>
