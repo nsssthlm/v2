@@ -2,6 +2,22 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// For Replit, we need to determine the backend URL dynamically
+const getBackendUrl = () => {
+  if (process.env.REPL_SLUG) {
+    // We're in Replit - use hostname-based detection
+    // Replace 00- with 01- to target the backend service in the same Replit 
+    return process.env.REPL_SLUG 
+      ? `https://${process.env.REPL_ID.replace('00-', '01-')}.${process.env.REPL_OWNER}.repl.co` 
+      : 'http://localhost:8001';
+  }
+  
+  // Local development
+  return 'http://localhost:8001';
+};
+
+const backendUrl = getBackendUrl();
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -27,12 +43,13 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:8001',
-        changeOrigin: true
+        target: backendUrl,
+        changeOrigin: true,
+        secure: false,
       }
     }
   },
   define: {
-    'process.env.VITE_API_URL': JSON.stringify('http://localhost:8001/api'),
+    'process.env.VITE_API_URL': JSON.stringify(`${backendUrl}/api`),
   }
 });
