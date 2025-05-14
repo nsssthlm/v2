@@ -1,18 +1,11 @@
-import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box, IconButton } from '@mui/joy';
+import { Box } from '@mui/joy';
 import Sidebar from './Sidebar';
 
 const Layout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar open={sidebarOpen} />
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+      <Sidebar />
       
       <Box
         component="main"
@@ -20,19 +13,9 @@ const Layout = () => {
           flexGrow: 1,
           p: 3,
           overflow: 'auto',
+          bgcolor: '#f9fafb', // Ljusgrå bakgrund som i bilden
         }}
       >
-        <Box sx={{ mb: 2 }}>
-          <IconButton 
-            onClick={toggleSidebar} 
-            sx={{ mb: 2 }}
-            variant="outlined"
-            color="neutral"
-          >
-            {sidebarOpen ? '◀' : '▶'}
-          </IconButton>
-        </Box>
-        
         <Outlet />
       </Box>
     </Box>
