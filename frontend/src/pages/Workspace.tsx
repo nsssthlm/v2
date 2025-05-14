@@ -66,16 +66,29 @@ const Workspace: React.FC = () => {
   
   useEffect(() => {
     const fetchProject = async () => {
-      if (!projectId) return;
-      
       setLoading(true);
       try {
-        console.log('Fetching project data for ID:', projectId);
-        // Use our configured API client with auth headers
-        const response = await api.get(`/projects/${projectId}/`);
-        console.log('Project data:', response.data);
-        setProject(response.data);
-        setError(null);
+        if (projectId) {
+          console.log('Fetching project data for ID:', projectId);
+          // Use our configured API client with auth headers
+          const response = await api.get(`/core/projects/${projectId}/`);
+          console.log('Project data:', response.data);
+          setProject(response.data);
+          setError(null);
+        } else {
+          // If no projectId, fetch all projects and use the first one
+          console.log('No project ID provided, fetching all projects');
+          const response = await api.get('/core/projects/');
+          if (response.data && response.data.length > 0) {
+            console.log('Found projects:', response.data);
+            const firstProject = response.data[0];
+            setProject(firstProject);
+            // Redirect to project-specific workspace
+            navigate(`/workspace/${firstProject.id}`);
+          } else {
+            setError('Inga projekt hittades');
+          }
+        }
       } catch (err: any) {
         console.error("Error fetching project:", err);
         const errorMessage = err.response?.data?.detail || 
