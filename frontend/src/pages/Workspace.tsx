@@ -203,8 +203,8 @@ const Workspace: React.FC = () => {
           onClose={handleClosePDF}
           sx={{ 
             display: 'flex', 
-            justifyContent: 'center', 
             alignItems: 'center',
+            justifyContent: 'center',
             zIndex: 1400
           }}
         >
@@ -216,8 +216,13 @@ const Workspace: React.FC = () => {
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              maxWidth: '90vw',
-              maxHeight: '90vh'
+              maxWidth: '80vw',
+              maxHeight: '85vh',
+              margin: 'auto',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)'
             }}
           >
             <ModalClose />
@@ -251,7 +256,7 @@ const Workspace: React.FC = () => {
               </Box>
               
               <iframe
-                src={`${selectedPDF.file}#toolbar=1&navpanes=1`}
+                src={`${selectedPDF.file_url}#toolbar=1&navpanes=1`}
                 title={selectedPDF.title}
                 width="100%"
                 height="100%"
