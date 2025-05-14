@@ -92,10 +92,12 @@ const Workspace: React.FC = () => {
   // Tab change is handled inline with the onChange handler
   
   const handleOpenPDF = (pdf: PDFDocument) => {
+    console.log('Opening PDF:', pdf);
     setSelectedPDF(pdf);
   };
   
   const handleClosePDF = () => {
+    console.log('Closing PDF viewer');
     setSelectedPDF(null);
   };
   
