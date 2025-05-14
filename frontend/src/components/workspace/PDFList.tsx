@@ -20,7 +20,8 @@ import {
   Visibility as ViewIcon,
   Delete as DeleteIcon,
   CloudUpload as UploadIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  OpenInNew as OpenInNewIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -273,6 +274,16 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
                         }}
                       >
                         <ViewIcon />
+                      </IconButton>
+                      <IconButton 
+                        size="sm" 
+                        variant="plain" 
+                        color="primary" 
+                        onClick={() => {
+                          window.open(`http://0.0.0.0:8001${doc.file_url}`, '_blank');
+                        }}
+                      >
+                        <OpenInNewIcon />
                       </IconButton>
                       <IconButton 
                         size="sm" 

@@ -292,7 +292,7 @@ const Workspace: React.FC = () => {
                   </IconButton>
                 </Box>
                 
-                {/* PDF-visare */}
+                {/* PDF-visare med direkt inbäddad iframe */}
                 <Box sx={{ 
                   flex: 1, 
                   overflow: 'auto',
@@ -301,7 +301,25 @@ const Workspace: React.FC = () => {
                   alignItems: 'center',
                   padding: 2
                 }}>
-                  <SimplePDFViewer url={`http://0.0.0.0:8001${selectedPDF.file_url}`} />
+                  <Box sx={{ 
+                    width: '100%', 
+                    height: '500px', 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                  }}>
+                    <Typography color="danger" sx={{ mb: 2, display: 'flex', justifyContent: 'center', width: '100%' }}>
+                      Kunde inte ladda PDF-filen. Försök öppna den i ett nytt fönster istället.
+                    </Typography>
+                    <Button 
+                      onClick={() => window.open(`http://0.0.0.0:8001${selectedPDF.file_url}`, '_blank')}
+                      variant="solid"
+                      color="primary"
+                      startDecorator={<OpenInNewIcon />}
+                    >
+                      Öppna i nytt fönster
+                    </Button>
+                  </Box>
                 </Box>
                 
                 {/* Pagination ingår nu i SimplePDFViewer */}
