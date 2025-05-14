@@ -1465,33 +1465,38 @@
     }
     
     // 2. Avbryt-knappen döljer uppladdningspanelen och återställer
-    cancelUploadBtn.addEventListener('click', function() {
-      uploadPanel.style.display = 'none';
-      // Återställ uppladdningsområdet
-      if (dropArea && dropArea.classList.contains('has-file')) {
-        dropArea.classList.remove('has-file');
-        dropArea.innerHTML = `
-          <img src="https://img.icons8.com/office/80/000000/pdf.png" alt="PDF Icon" class="pdf-icon">
-          <p>Dra och släpp PDF-filer här<br>eller</p>
-          <label for="pdf-file" class="file-label">Välj PDF-fil</label>
-          <input type="file" id="pdf-file" accept=".pdf" style="display: none;" />
-        `;
-        
-        // Återaktivera eventlisteners för nya input-elementet
-        const newPdfFileInput = document.getElementById('pdf-file');
-        if (newPdfFileInput) {
-          newPdfFileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-              handleFileSelection(this.files[0]);
-            }
-          });
+    if (cancelUploadBtn) {
+      cancelUploadBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Avbryt uppladdning klickad');
+        if (uploadPanel) {
+          uploadPanel.style.display = 'none';
         }
-      }
-      
-      // Återställ variabler
-      currentPdfFile = null;
-      currentPdfUrl = null;
-      currentPdfDataUrl = null;
+        // Återställ uppladdningsområdet
+        if (dropArea && dropArea.classList.contains('has-file')) {
+          dropArea.classList.remove('has-file');
+          dropArea.innerHTML = `
+            <img src="https://img.icons8.com/office/80/000000/pdf.png" alt="PDF Icon" class="pdf-icon">
+            <p>Dra och släpp PDF-filer här<br>eller</p>
+            <label for="pdf-file" class="file-label">Välj PDF-fil</label>
+            <input type="file" id="pdf-file" accept=".pdf" style="display: none;" />
+          `;
+        
+          // Återaktivera eventlisteners för nya input-elementet
+          const newPdfFileInput = document.getElementById('pdf-file');
+          if (newPdfFileInput) {
+            newPdfFileInput.addEventListener('change', function() {
+              if (this.files.length > 0) {
+                handleFileSelection(this.files[0]);
+              }
+            });
+          }
+        }
+        
+        // Återställ variabler
+        currentPdfFile = null;
+        currentPdfUrl = null;
+        currentPdfDataUrl = null;
       pdfTitleInput.value = '';
       pdfDescriptionInput.value = '';
     });
