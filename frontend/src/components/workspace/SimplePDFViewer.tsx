@@ -1,123 +1,128 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Box, CircularProgress, Typography, Button } from '@mui/joy';
-import * as pdfjsLib from 'pdfjs-dist';
-import { PDFDocumentProxy } from 'pdfjs-dist';
+import { useState, useEffect } from 'react';
+import { Box, CircularProgress, Typography } from '@mui/joy';
+import * as pdfjs from 'pdfjs-dist';
+import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
 
-// Set the worker path to allow PDF.js to function properly
-// Set to a fake worker for now since we have issues loading it
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+// Konfigurera arbetaren för PDF.js
+// PDF.js globala inställningar
+const DEFAULT_URL = 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf';
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface SimplePDFViewerProps {
-  url: string;
+  pdfUrl: string;
+  title?: string;
 }
 
-export const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({ url }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps) {
+  const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
+  const [page, setPage] = useState<PDFPageProxy | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [numPages, setNumPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [scale, setScale] = useState(1.0);
 
+  // Ladda PDF
   useEffect(() => {
     setLoading(true);
     setError(null);
-
-    const loadPDF = async () => {
+    
+    const loadPdf = async () => {
       try {
-        // Load document
-        const pdfDocument = await pdfjsLib.getDocument(url).promise;
-        setPdfDoc(pdfDocument);
-        setTotalPages(pdfDocument.numPages);
-        setCurrentPage(1);
+        // Vi måste använda den nya API-URLen som vi skapade för att kringgå X-Frame-Options
+        // Användning av HTTP istället för HTTPS kan orsaka problem med PDF.js
+        const loadingTask = pdfjs.getDocument(pdfUrl);
+        const pdf = await loadingTask.promise;
+        setPdf(pdf);
+        setNumPages(pdf.numPages);
+        
+        // Ladda första sidan
+        if (pdf) {
+          const page = await pdf.getPage(1);
+          setPage(page);
+        }
+        
         setLoading(false);
       } catch (err) {
-        console.error('Error loading PDF:', err);
-        setError('Kunde inte ladda PDF-filen. Försök öppna den i ett nytt fönster istället.');
+        console.error('Fel vid laddning av PDF:', err);
+        setError('Kunde inte ladda PDF-filen. Försök med att öppna den i ett nytt fönster istället.');
         setLoading(false);
       }
     };
-
-    loadPDF();
-
-    // Cleanup
+    
+    loadPdf();
+    
+    // Rensa vid unmount
     return () => {
-      if (pdfDoc) {
-        pdfDoc.destroy().catch(err => {
-          console.error('Error destroying PDF document:', err);
-        });
+      if (page) {
+        page.cleanup();
+      }
+      if (pdf) {
+        pdf.destroy();
       }
     };
-  }, [url]);
+  }, [pdfUrl]);
 
+  // Rendera sidan
   useEffect(() => {
-    if (!pdfDoc || !canvasRef.current) return;
-
-    const renderPage = async () => {
-      try {
-        // Get page
-        const page = await pdfDoc.getPage(currentPage);
-        
-        // Get viewport
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        
-        const viewport = page.getViewport({ scale: 1.0 });
-        
-        // Adjust canvas dimensions to match viewport
-        const scale = Math.min(
-          canvas.parentElement!.clientWidth / viewport.width,
-          600 / viewport.height
-        );
-        
-        const scaledViewport = page.getViewport({ scale });
-        
-        canvas.height = scaledViewport.height;
-        canvas.width = scaledViewport.width;
-        
-        // Render PDF page into canvas context
-        const context = canvas.getContext('2d');
-        if (!context) return;
-        
-        const renderContext = {
-          canvasContext: context,
-          viewport: scaledViewport,
-        };
-        
-        page.render(renderContext);
-      } catch (err) {
-        console.error('Error rendering PDF page:', err);
-        setError('Kunde inte visa sidan. Försök med en annan sida eller öppna filen i ett nytt fönster.');
-      }
+    if (!page) return;
+    
+    const canvas = document.getElementById('pdf-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    
+    const viewport = page.getViewport({ scale });
+    
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport
     };
+    
+    page.render(renderContext);
+  }, [page, scale]);
 
-    renderPage();
-  }, [pdfDoc, currentPage]);
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+  // Byt sida
+  const changePage = async (newPage: number) => {
+    if (!pdf) return;
+    if (newPage < 1 || newPage > numPages) return;
+    
+    try {
+      setLoading(true);
+      if (page) {
+        page.cleanup();
+      }
+      
+      const newPageObj = await pdf.getPage(newPage);
+      setPage(newPageObj);
+      setCurrentPage(newPage);
+      setLoading(false);
+    } catch (err) {
+      console.error('Fel vid byte av sida:', err);
+      setError('Kunde inte ladda sidan.');
+      setLoading(false);
     }
   };
 
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+  // Zooma
+  const zoom = (delta: number) => {
+    setScale(prev => Math.max(0.5, Math.min(3.0, prev + delta)));
   };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   if (error) {
     return (
-      <Box sx={{ textAlign: 'center', p: 4 }}>
-        <Typography color="danger" sx={{ mb: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        p: 2 
+      }}>
+        <Typography color="danger" level="body-lg">
           {error}
         </Typography>
       </Box>
@@ -125,23 +130,97 @@ export const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({ url }) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
-      <Box sx={{ maxWidth: '100%', overflow: 'auto', mb: 2 }}>
-        <canvas ref={canvasRef} />
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100%' 
+    }}>
+      {/* PDF viewer */}
+      <Box sx={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        overflow: 'auto',
+        p: 2 
+      }}>
+        {loading ? (
+          <CircularProgress size="lg" />
+        ) : (
+          <Box sx={{ 
+            boxShadow: 'md', 
+            borderRadius: 'md',
+            backgroundColor: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <canvas id="pdf-canvas" style={{ maxWidth: '100%' }} />
+          </Box>
+        )}
       </Box>
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <Button onClick={goToPrevPage} disabled={currentPage <= 1}>
-          Föregående
-        </Button>
-        <Typography>
-          Sida {currentPage} av {totalPages}
-        </Typography>
-        <Button onClick={goToNextPage} disabled={currentPage >= totalPages}>
-          Nästa
-        </Button>
+      
+      {/* Controls */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        gap: 2, 
+        p: 2,
+        borderTop: '1px solid',
+        borderColor: 'divider'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <button 
+            onClick={() => changePage(currentPage - 1)} 
+            disabled={currentPage <= 1 || loading}
+            style={{ 
+              padding: '8px 16px',
+              cursor: currentPage <= 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Föregående
+          </button>
+          
+          <Typography>
+            {currentPage} / {numPages}
+          </Typography>
+          
+          <button 
+            onClick={() => changePage(currentPage + 1)} 
+            disabled={currentPage >= numPages || loading}
+            style={{ 
+              padding: '8px 16px',
+              cursor: currentPage >= numPages ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Nästa
+          </button>
+        </Box>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <button 
+            onClick={() => zoom(-0.1)} 
+            disabled={scale <= 0.5 || loading}
+            style={{ 
+              padding: '8px 16px',
+              cursor: scale <= 0.5 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Zooma ut
+          </button>
+          
+          <button 
+            onClick={() => zoom(0.1)} 
+            disabled={scale >= 3.0 || loading}
+            style={{ 
+              padding: '8px 16px',
+              cursor: scale >= 3.0 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Zooma in
+          </button>
+        </Box>
       </Box>
     </Box>
   );
-};
-
-export default SimplePDFViewer;
+}
