@@ -28,21 +28,32 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
     // Använd axios för att hämta PDF-filen med autentisering
     const fetchPdf = async () => {
       try {
-        // Skapa korrekt URL för backend-begäran
+        // Förbered URL för API-anrop
         let apiUrl = pdfUrl;
         
-        // Om URL:en inte börjar med /api/, lägg till det
-        if (!pdfUrl.startsWith('/api/')) {
+        // Kontrollera och rensa URL:en för att undvika dubbla /api/ prefix
+        if (apiUrl.startsWith('/api/')) {
+          // URL:en har redan /api/ prefix - använd den direkt
+          // Ingen åtgärd behövs
+        } else if (apiUrl.startsWith('workspace/')) {
+          // Om URL:en börjar med workspace/ (utan slash), lägg till /api/
+          apiUrl = `/api/${apiUrl}`;
+        } else if (apiUrl.startsWith('/workspace/')) {
           // Om URL:en börjar med /workspace/, lägg till /api före
-          if (pdfUrl.startsWith('/workspace/')) {
-            apiUrl = `/api${pdfUrl}`;
-          }
+          apiUrl = `/api${apiUrl}`;
         }
         
         // Ta bort eventuella http://0.0.0.0:8001/api prefix 
         apiUrl = apiUrl.replace(/^http:\/\/0\.0\.0\.0:8001\/api/, '/api');
             
         console.log('Fetching PDF from URL:', apiUrl);
+        
+        // Fixa fel i URL före API-anrop
+        // Om URL:en har dubbla api-prefix, åtgärda det
+        if (apiUrl.includes('/api/api/')) {
+          apiUrl = apiUrl.replace('/api/api/', '/api/');
+          console.log('Fixed double /api/ prefix, new URL:', apiUrl);
+        }
         
         // Ladda ner PDF som blob med autentiserade begäran
         const response = await api.get(apiUrl, {
