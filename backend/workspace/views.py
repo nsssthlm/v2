@@ -275,15 +275,17 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         """
         pdf = self.get_object()
         from django.http import HttpResponse
+        import os
         
-        # Create response that allows the PDF to be embedded in an iframe
-        response = HttpResponse()
+        # Create response with the actual file content
+        with open(pdf.file.path, 'rb') as f:
+            file_content = f.read()
+        
+        # Create response with the PDF content directly
+        response = HttpResponse(file_content)
         response['Content-Type'] = 'application/pdf'
         response['X-Frame-Options'] = 'ALLOWALL'
         response['Content-Security-Policy'] = 'frame-ancestors *'
+        response['Access-Control-Allow-Origin'] = '*'
         response['Content-Disposition'] = f'inline; filename="{pdf.title}"'
-        
-        # Redirect to the actual file URL
-        response['Location'] = pdf.file.url
-        response.status_code = 302
         return response

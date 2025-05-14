@@ -217,7 +217,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 maxWidth: '100%'
               }}>
                 <iframe 
-                  src={`${pdf.file_url}#toolbar=0&navpanes=0`} 
+                  src={`http://0.0.0.0:8001/api/workspace/pdfs/${pdf.id}/content/`}
                   style={{ 
                     width: '100%', 
                     height: '100%', 
