@@ -58,19 +58,20 @@ const FileSystemNode = ({
         <ListItemButton
           onClick={() => isFolder && toggleFolder(node.id)}
           sx={{ 
-            py: 0.5,
-            pl: 1,
-            borderRadius: '6px',
-            color: 'neutral.600'
+            py: 0.3,
+            pl: 0.5,
+            borderRadius: '4px',
+            color: 'neutral.700',
+            fontSize: '0.875rem'
           }}
         >
           {/* Ikon för fil/mapp */}
           <Box
             sx={{
-              width: 18,
-              height: 18,
-              mr: 1,
-              color: isFolder ? 'warning.500' : 'info.500',
+              width: 16,
+              height: 16,
+              mr: 1.5,
+              color: isFolder ? '#e3a008' : '#3182ce',  // Mer exakta färger för mapparna/filerna
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -80,7 +81,7 @@ const FileSystemNode = ({
               {isFolder ? (
                 <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
               ) : (
-                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
               )}
             </svg>
           </Box>
@@ -226,16 +227,16 @@ const mainMenuItems = [
       </svg>
     ),
     submenu: [
-      { name: 'Home', path: '/vault/home' },
-      { name: 'Comments', path: '/vault/comments' },
+      { name: 'Hem', path: '/vault/home' },
+      { name: 'Kommentarer', path: '/vault/comments' },
       { name: 'Review Package', path: '/vault/review' },
       { 
-        name: 'Files', 
+        name: 'Filer', 
         path: '/vault/files',
         hasAddButton: true  // Lägg till denna flagga
       },
       { name: 'Versionsset', path: '/vault/versions' },
-      { name: 'Meetings', path: '/vault/meetings' }
+      { name: 'Möten', path: '/vault/meetings' }
     ],
     collapsible: true
   }
@@ -619,15 +620,15 @@ const Sidebar = () => {
                         )}
                       </ListItemButton>
                       
-                      {/* Rendera filsystemet under "Files" */}
-                      {subitem.name === 'Files' && (
+                      {/* Rendera filsystemet under "Filer" */}
+                      {subitem.name === 'Filer' && (
                         <List 
                           size="sm" 
                           sx={{ 
-                            '--ListItem-radius': '6px',
-                            pl: 3,
-                            pt: 1,
-                            mb: 0.5
+                            '--ListItem-radius': '4px',
+                            pl: 2.5,
+                            pt: 0.5,
+                            pb: 0.5
                           }}
                         >
                           {/* Visa mappar på rotnivå */}
