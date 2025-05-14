@@ -93,7 +93,11 @@ const Workspace: React.FC = () => {
   
   const handleOpenPDF = (pdf: PDFDocument) => {
     console.log('Opening PDF:', pdf);
-    setSelectedPDF(pdf);
+    // Force update with setTimeout to ensure state update is processed
+    setTimeout(() => {
+      setSelectedPDF(pdf);
+      console.log('selectedPDF has been set to:', pdf.title);
+    }, 0);
   };
   
   const handleClosePDF = () => {
@@ -188,11 +192,13 @@ const Workspace: React.FC = () => {
         </Tabs>
       </Card>
       
-      {/* PDF Viewer Modal */}
-      <PDFViewer 
-        pdf={selectedPDF} 
-        onClose={handleClosePDF} 
-      />
+      {/* PDF Viewer Modal - explicit modal rendering control */}
+      {selectedPDF && (
+        <PDFViewer 
+          pdf={selectedPDF} 
+          onClose={handleClosePDF} 
+        />
+      )}
     </Container>
   );
 };
