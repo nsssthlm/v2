@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  List, 
-  ListItem, 
-  ListItemButton, 
-  ListItemIcon, 
+import {
+  List,
+  ListItem,
+  ListItemButton,
   ListItemContent,
+  ListItemDecorator,
   Typography,
+  CircularProgress,
+  Box,
   IconButton,
   Menu,
   MenuItem,
-  Divider,
-  CircularProgress
+  Stack,
+  Button,
+  Modal,
+  ModalDialog,
+  ModalClose,
+  FormControl,
+  FormLabel,
+  Input,
+  Alert
 } from '@mui/joy';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
+import { format } from 'date-fns';
 
 interface FileNode {
   id: number;
@@ -31,6 +38,7 @@ interface FileNode {
   created_by: number;
   created_at: string;
   updated_at: string;
+  children?: FileNode[];
 }
 
 interface FileTreeProps {
@@ -42,288 +50,446 @@ const FileTree: React.FC<FileTreeProps> = ({ projectId, onNodeSelect }) => {
   const [nodes, setNodes] = useState<FileNode[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentFolder, setCurrentFolder] = useState<number | null>(null);
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [expandedFolders, setExpandedFolders] = useState<Set<number>>(new Set());
+  
+  // For context menu
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedNode, setSelectedNode] = useState<FileNode | null>(null);
-  const [path, setPath] = useState<{ id: number | null; name: string }[]>([{ id: null, name: 'Root' }]);
-
-  // Load files and folders for current directory
+  
+  // For modal dialogs
+  const [newFolderModal, setNewFolderModal] = useState<boolean>(false);
+  const [uploadFileModal, setUploadFileModal] = useState<boolean>(false);
+  const [newFolderName, setNewFolderName] = useState<string>('');
+  const [uploadParentId, setUploadParentId] = useState<number | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  // Fetch files structure for the project
   useEffect(() => {
-    const fetchNodes = async () => {
+    if (!projectId) return;
+    
+    const fetchFiles = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`/api/workspace/files/`, {
-          params: {
-            project: projectId,
-            parent: currentFolder,
-          },
+        const response = await axios.get('/api/workspace/files/', {
+          params: { project: projectId }
         });
-        setNodes(response.data);
+        
+        // Convert flat list to tree structure
+        const tree = buildFileTree(response.data);
+        setNodes(tree);
         setError(null);
       } catch (err) {
-        console.error('Error fetching file nodes:', err);
-        setError('Failed to load files and folders');
+        console.error('Error fetching files:', err);
+        setError('Failed to load files');
       } finally {
         setLoading(false);
       }
     };
-
-    fetchNodes();
-  }, [projectId, currentFolder]);
-
+    
+    fetchFiles();
+  }, [projectId]);
+  
+  // Build tree structure from flat list of nodes
+  const buildFileTree = (flatNodes: FileNode[]): FileNode[] => {
+    const nodeMap = new Map<number, FileNode>();
+    const rootNodes: FileNode[] = [];
+    
+    // First pass: create map of all nodes
+    flatNodes.forEach(node => {
+      const nodeCopy = { ...node, children: [] };
+      nodeMap.set(node.id, nodeCopy);
+    });
+    
+    // Second pass: build parent-child relationships
+    flatNodes.forEach(node => {
+      if (node.parent === null) {
+        rootNodes.push(nodeMap.get(node.id)!);
+      } else {
+        const parent = nodeMap.get(node.parent);
+        if (parent) {
+          parent.children = parent.children || [];
+          parent.children.push(nodeMap.get(node.id)!);
+        }
+      }
+    });
+    
+    // Sort root nodes: folders first, then alphabetically
+    return sortNodes(rootNodes);
+  };
+  
+  // Sort nodes by type and name
+  const sortNodes = (nodes: FileNode[]): FileNode[] => {
+    return [...nodes].sort((a, b) => {
+      // Sort folders before files
+      if (a.type === 'folder' && b.type !== 'folder') return -1;
+      if (a.type !== 'folder' && b.type === 'folder') return 1;
+      
+      // Sort alphabetically by name
+      return a.name.localeCompare(b.name);
+    });
+  };
+  
   const handleNodeClick = (node: FileNode) => {
     if (node.type === 'folder') {
-      // Navigate into folder
-      setCurrentFolder(node.id);
-      setPath([...path, { id: node.id, name: node.name }]);
+      toggleFolder(node.id);
     } else {
-      // Select file
       onNodeSelect(node);
     }
   };
-
-  const handlePathClick = (pathItem: { id: number | null; name: string }, index: number) => {
-    // Navigate to a specific folder in the path
-    setCurrentFolder(pathItem.id);
-    setPath(path.slice(0, index + 1));
+  
+  const toggleFolder = (folderId: number) => {
+    setExpandedFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+      }
+      return newSet;
+    });
   };
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, node: FileNode) => {
-    event.stopPropagation();
-    setMenuAnchorEl(event.currentTarget);
+  
+  const handleContextMenu = (event: React.MouseEvent<HTMLElement>, node: FileNode) => {
+    event.preventDefault();
+    setAnchorEl(event.currentTarget);
     setSelectedNode(node);
   };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
+  
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
     setSelectedNode(null);
   };
-
-  const handleNewFolder = async () => {
-    // This would be replaced with a modal for name input
-    const folderName = prompt('Enter folder name:');
-    if (!folderName) return;
+  
+  const handleCreateFolder = (parentId: number | null = null) => {
+    handleCloseMenu();
+    setUploadParentId(parentId);
+    setNewFolderModal(true);
+  };
+  
+  const handleUploadFile = (parentId: number | null = null) => {
+    handleCloseMenu();
+    setUploadParentId(parentId);
+    setUploadFileModal(true);
+  };
+  
+  const submitNewFolder = async () => {
+    if (!newFolderName.trim()) {
+      setError('Folder name cannot be empty');
+      return;
+    }
     
     try {
-      await axios.post('/api/workspace/files/', {
-        name: folderName,
+      const response = await axios.post('/api/workspace/files/', {
+        name: newFolderName,
         type: 'folder',
         project: projectId,
-        parent: currentFolder,
+        parent: uploadParentId
       });
-      // Refresh the list
-      const response = await axios.get(`/api/workspace/files/`, {
-        params: {
-          project: projectId,
-          parent: currentFolder,
-        },
+      
+      // Add new folder to tree
+      const updatedResponse = await axios.get('/api/workspace/files/', {
+        params: { project: projectId }
       });
-      setNodes(response.data);
+      
+      const tree = buildFileTree(updatedResponse.data);
+      setNodes(tree);
+      
+      // Expand parent folder
+      if (uploadParentId) {
+        setExpandedFolders(prev => {
+          const newSet = new Set(prev);
+          newSet.add(uploadParentId);
+          return newSet;
+        });
+      }
+      
+      setNewFolderModal(false);
+      setNewFolderName('');
+      setError(null);
     } catch (err) {
       console.error('Error creating folder:', err);
       setError('Failed to create folder');
     }
-    
-    handleMenuClose();
   };
-
-  const handleUploadFile = () => {
-    // This would trigger a file input
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.onchange = async (e) => {
-      const target = e.target as HTMLInputElement;
-      if (!target.files || target.files.length === 0) return;
+  
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+  
+  const submitFileUpload = async () => {
+    if (!selectedFile) {
+      setError('No file selected');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('name', selectedFile.name);
+    formData.append('project', projectId.toString());
+    if (uploadParentId !== null) {
+      formData.append('parent', uploadParentId.toString());
+    }
+    
+    try {
+      await axios.post('/api/workspace/files/upload/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       
-      const file = target.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('name', file.name);
-      formData.append('type', 'file');
-      formData.append('project', projectId.toString());
-      if (currentFolder) {
-        formData.append('parent', currentFolder.toString());
-      }
+      // Refresh tree
+      const response = await axios.get('/api/workspace/files/', {
+        params: { project: projectId }
+      });
       
-      try {
-        // First create the file node
-        const nodeResponse = await axios.post('/api/workspace/files/', formData);
-        
-        // Then create the file version
-        const versionFormData = new FormData();
-        versionFormData.append('file', file);
-        versionFormData.append('file_node', nodeResponse.data.id);
-        
-        await axios.post('/api/workspace/versions/', versionFormData);
-        
-        // Refresh the list
-        const response = await axios.get(`/api/workspace/files/`, {
-          params: {
-            project: projectId,
-            parent: currentFolder,
-          },
+      const tree = buildFileTree(response.data);
+      setNodes(tree);
+      
+      // Expand parent folder
+      if (uploadParentId) {
+        setExpandedFolders(prev => {
+          const newSet = new Set(prev);
+          newSet.add(uploadParentId);
+          return newSet;
         });
-        setNodes(response.data);
-      } catch (err) {
-        console.error('Error uploading file:', err);
-        setError('Failed to upload file');
       }
-    };
-    fileInput.click();
-    
-    handleMenuClose();
+      
+      setUploadFileModal(false);
+      setSelectedFile(null);
+      setError(null);
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      setError('Failed to upload file');
+    }
   };
-
-  const handleDelete = async () => {
+  
+  const handleDeleteNode = async () => {
     if (!selectedNode) return;
     
     if (!confirm(`Are you sure you want to delete ${selectedNode.name}?`)) {
-      handleMenuClose();
+      handleCloseMenu();
       return;
     }
     
     try {
       await axios.delete(`/api/workspace/files/${selectedNode.id}/`);
       
-      // Refresh the list
-      const response = await axios.get(`/api/workspace/files/`, {
-        params: {
-          project: projectId,
-          parent: currentFolder,
-        },
+      // Refresh tree
+      const response = await axios.get('/api/workspace/files/', {
+        params: { project: projectId }
       });
-      setNodes(response.data);
+      
+      const tree = buildFileTree(response.data);
+      setNodes(tree);
+      
+      handleCloseMenu();
     } catch (err) {
       console.error('Error deleting node:', err);
-      setError('Failed to delete item');
+      setError('Failed to delete');
+      handleCloseMenu();
     }
-    
-    handleMenuClose();
   };
-
+  
+  // Recursive component to render file nodes
+  const renderNode = (node: FileNode, depth = 0) => {
+    const isExpanded = expandedFolders.has(node.id);
+    
+    return (
+      <React.Fragment key={node.id}>
+        <ListItem 
+          sx={{ 
+            pl: `${depth * 24 + 8}px`,
+            py: 0.5
+          }}
+        >
+          <ListItemButton
+            onClick={() => handleNodeClick(node)}
+            selected={false} // Replace with selection logic if needed
+            sx={{ borderRadius: 'sm' }}
+            onContextMenu={(e) => handleContextMenu(e, node)}
+          >
+            <ListItemDecorator>
+              {node.type === 'folder' ? (
+                <FolderIcon color="primary" />
+              ) : (
+                <InsertDriveFileIcon />
+              )}
+            </ListItemDecorator>
+            <ListItemContent>
+              <Typography level="body-sm">{node.name}</Typography>
+            </ListItemContent>
+            
+            <IconButton 
+              size="sm"
+              variant="plain"
+              color="neutral"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleContextMenu(e, node);
+              }}
+            >
+              <MoreVertIcon fontSize="small" />
+            </IconButton>
+          </ListItemButton>
+        </ListItem>
+        
+        {node.type === 'folder' && isExpanded && node.children && node.children.length > 0 && (
+          <List>
+            {sortNodes(node.children).map(childNode => renderNode(childNode, depth + 1))}
+          </List>
+        )}
+      </React.Fragment>
+    );
+  };
+  
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: 200 }}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+        <CircularProgress size="sm" />
       </Box>
     );
   }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 2, color: 'danger.500' }}>
-        <Typography level="body-sm">{error}</Typography>
-      </Box>
-    );
-  }
-
+  
   return (
-    <Box sx={{ width: '100%', bgcolor: 'background.surface' }}>
-      {/* Breadcrumb navigation */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-        {path.map((item, index) => (
-          <React.Fragment key={index}>
-            <Typography
-              component="span"
-              sx={{
-                cursor: 'pointer',
-                color: index === path.length - 1 ? 'primary.500' : 'text.secondary',
-                '&:hover': { textDecoration: 'underline' },
-                fontWeight: index === path.length - 1 ? 'bold' : 'normal',
-              }}
-              onClick={() => handlePathClick(item, index)}
-            >
-              {item.name}
-            </Typography>
-            {index < path.length - 1 && (
-              <Typography component="span" sx={{ mx: 0.5, color: 'text.tertiary' }}>
-                /
-              </Typography>
-            )}
-          </React.Fragment>
-        ))}
-      </Box>
-
+    <Box>
+      {error && (
+        <Alert color="danger" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      
       {/* Action buttons */}
-      <Box sx={{ display: 'flex', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <IconButton onClick={handleNewFolder} size="sm" variant="plain" color="neutral">
-          <CreateNewFolderIcon />
-        </IconButton>
-        <IconButton onClick={handleUploadFile} size="sm" variant="plain" color="neutral">
-          <UploadFileIcon />
-        </IconButton>
-      </Box>
-
-      {/* File/folder list */}
-      <List>
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        <Button 
+          size="sm" 
+          variant="outlined"
+          color="primary"
+          startDecorator={<CreateNewFolderIcon />}
+          onClick={() => handleCreateFolder(null)}
+        >
+          New Folder
+        </Button>
+        <Button 
+          size="sm" 
+          variant="outlined"
+          color="primary"
+          startDecorator={<UploadFileIcon />}
+          onClick={() => handleUploadFile(null)}
+        >
+          Upload
+        </Button>
+      </Stack>
+      
+      {/* File tree */}
+      <List size="sm">
         {nodes.length === 0 ? (
-          <ListItem>
-            <ListItemContent>
-              <Typography level="body-sm" sx={{ fontStyle: 'italic', color: 'text.tertiary' }}>
-                This folder is empty
-              </Typography>
-            </ListItemContent>
-          </ListItem>
+          <Typography level="body-sm" sx={{ color: 'text.secondary', py: 2, textAlign: 'center' }}>
+            No files or folders yet
+          </Typography>
         ) : (
-          nodes.map((node) => (
-            <ListItem
-              key={node.id}
-              endAction={
-                <IconButton size="sm" variant="plain" color="neutral" onClick={(e) => handleMenuOpen(e, node)}>
-                  <MoreVertIcon />
-                </IconButton>
-              }
-            >
-              <ListItemButton onClick={() => handleNodeClick(node)}>
-                <ListItemIcon>
-                  {node.type === 'folder' ? <FolderIcon color="primary" /> : <InsertDriveFileIcon />}
-                </ListItemIcon>
-                <ListItemContent>
-                  <Typography level="body-sm">{node.name}</Typography>
-                </ListItemContent>
-              </ListItemButton>
-            </ListItem>
-          ))
+          nodes.map(node => renderNode(node))
         )}
       </List>
-
+      
       {/* Context menu */}
       <Menu
-        anchorEl={menuAnchorEl}
-        open={Boolean(menuAnchorEl)}
-        onClose={handleMenuClose}
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
         placement="bottom-end"
       >
         {selectedNode?.type === 'folder' && (
-          <MenuItem onClick={handleNewFolder}>
-            <ListItemIcon>
-              <CreateNewFolderIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemContent>New Folder</ListItemContent>
-          </MenuItem>
+          <>
+            <MenuItem onClick={() => handleCreateFolder(selectedNode.id)}>
+              <ListItemDecorator>
+                <CreateNewFolderIcon fontSize="small" />
+              </ListItemDecorator>
+              New Folder
+            </MenuItem>
+            <MenuItem onClick={() => handleUploadFile(selectedNode.id)}>
+              <ListItemDecorator>
+                <UploadFileIcon fontSize="small" />
+              </ListItemDecorator>
+              Upload File
+            </MenuItem>
+          </>
         )}
-        {selectedNode?.type === 'folder' && (
-          <MenuItem onClick={handleUploadFile}>
-            <ListItemIcon>
-              <UploadFileIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemContent>Upload File</ListItemContent>
-          </MenuItem>
-        )}
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemContent>Rename</ListItemContent>
-        </MenuItem>
-        <Divider />
-        <MenuItem color="danger" onClick={handleDelete}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemContent>Delete</ListItemContent>
+        <MenuItem onClick={handleDeleteNode} color="danger">
+          <ListItemDecorator sx={{ color: 'danger.500' }}>
+            <InsertDriveFileIcon fontSize="small" />
+          </ListItemDecorator>
+          Delete
         </MenuItem>
       </Menu>
+      
+      {/* New folder modal */}
+      <Modal open={newFolderModal} onClose={() => setNewFolderModal(false)}>
+        <ModalDialog>
+          <ModalClose />
+          <Typography level="h4">Create New Folder</Typography>
+          <FormControl sx={{ mt: 2 }}>
+            <FormLabel>Folder Name</FormLabel>
+            <Input
+              autoFocus
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="Enter folder name..."
+            />
+          </FormControl>
+          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
+            <Button variant="plain" color="neutral" onClick={() => setNewFolderModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={submitNewFolder}>Create</Button>
+          </Stack>
+        </ModalDialog>
+      </Modal>
+      
+      {/* Upload file modal */}
+      <Modal open={uploadFileModal} onClose={() => setUploadFileModal(false)}>
+        <ModalDialog>
+          <ModalClose />
+          <Typography level="h4">Upload File</Typography>
+          <Box sx={{ mt: 2 }}>
+            <input
+              accept="*/*"
+              style={{ display: 'none' }}
+              id="file-upload-input"
+              type="file"
+              onChange={handleFileSelect}
+            />
+            <label htmlFor="file-upload-input">
+              <Button 
+                component="span"
+                variant="outlined"
+                color="neutral"
+                fullWidth
+                startDecorator={<UploadFileIcon />}
+              >
+                Select File
+              </Button>
+            </label>
+            {selectedFile && (
+              <Typography level="body-sm" sx={{ mt: 1 }}>
+                Selected: {selectedFile.name}
+              </Typography>
+            )}
+          </Box>
+          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
+            <Button variant="plain" color="neutral" onClick={() => setUploadFileModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={submitFileUpload}
+              disabled={!selectedFile}
+            >
+              Upload
+            </Button>
+          </Stack>
+        </ModalDialog>
+      </Modal>
     </Box>
   );
 };

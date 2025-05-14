@@ -5,22 +5,20 @@ import {
   CardContent,
   Typography,
   CircularProgress,
+  Stack,
+  Divider,
   Tabs,
   TabList,
   Tab,
   TabPanel,
-  List,
-  ListItem,
-  ListItemContent,
-  ListItemDecorator,
-  Chip,
+  Alert,
   Button,
   IconButton,
-  Stack,
-  Divider
+  Select,
+  Option
 } from '@mui/joy';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DownloadIcon from '@mui/icons-material/Download';
-import UploadIcon from '@mui/icons-material/Upload';
 import HistoryIcon from '@mui/icons-material/History';
 import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -35,21 +33,26 @@ interface FileNode {
   project: number;
   parent: number | null;
   created_by: number;
+  created_by_details: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+  };
+  created_at: string;
+  updated_at: string;
 }
 
 interface FileVersion {
   id: number;
   file_node: number;
-  file: string;
+  version: number;
   file_url: string;
-  version_number: number;
   content_type: string;
-  size: number;
   uploaded_by: number;
   uploaded_by_details: {
     id: number;
     username: string;
-    email: string;
     first_name: string;
     last_name: string;
   };
@@ -61,33 +64,42 @@ interface FileViewerProps {
 }
 
 const FileViewer: React.FC<FileViewerProps> = ({ fileNode }) => {
+  const [versions, setVersions] = useState<FileVersion[]>([]);
+  const [selectedVersion, setSelectedVersion] = useState<FileVersion | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [versions, setVersions] = useState<FileVersion[]>([]);
-  const [activeVersion, setActiveVersion] = useState<FileVersion | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
+  const [binaryFile, setBinaryFile] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<number>(0);
   
-  // Fetch file versions when file changes
+  // Fetch file versions when fileNode changes
   useEffect(() => {
     if (!fileNode || fileNode.type !== 'file') {
       setVersions([]);
-      setActiveVersion(null);
+      setSelectedVersion(null);
+      setFileContent(null);
       return;
     }
     
     const fetchVersions = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('/api/workspace/versions/', {
-          params: {
-            file_node: fileNode.id
-          }
+        const response = await axios.get('/api/workspace/file-versions/', {
+          params: { file_node: fileNode.id }
         });
-        setVersions(response.data);
-        if (response.data.length > 0) {
-          setActiveVersion(response.data[0]); // Latest version
-        } else {
-          setActiveVersion(null);
+        
+        // Sort by version (newest first)
+        const sortedVersions = response.data.sort((a: FileVersion, b: FileVersion) => 
+          b.version - a.version
+        );
+        
+        setVersions(sortedVersions);
+        
+        // Select the latest version by default
+        if (sortedVersions.length > 0) {
+          setSelectedVersion(sortedVersions[0]);
         }
+        
         setError(null);
       } catch (err) {
         console.error('Error fetching file versions:', err);
@@ -100,104 +112,182 @@ const FileViewer: React.FC<FileViewerProps> = ({ fileNode }) => {
     fetchVersions();
   }, [fileNode]);
   
-  const handleVersionSelect = (version: FileVersion) => {
-    setActiveVersion(version);
-  };
-  
-  const handleUploadNewVersion = () => {
-    if (!fileNode) return;
+  // Fetch file content when selectedVersion changes
+  useEffect(() => {
+    if (!selectedVersion) {
+      setFileContent(null);
+      setBinaryFile(false);
+      return;
+    }
     
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.onchange = async (e) => {
-      const target = e.target as HTMLInputElement;
-      if (!target.files || target.files.length === 0) return;
-      
-      const file = target.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('file_node', fileNode.id.toString());
-      
+    const fetchFileContent = async () => {
       setLoading(true);
       try {
-        const response = await axios.post('/api/workspace/versions/', formData);
+        // Check if this is a viewable text-based file based on content type
+        const isTextBased = selectedVersion.content_type.startsWith('text/') || 
+                          ['application/json', 'application/javascript', 'application/xml'].includes(selectedVersion.content_type);
         
-        // Refresh versions
-        const versionsResponse = await axios.get('/api/workspace/versions/', {
-          params: {
-            file_node: fileNode.id
-          }
-        });
-        setVersions(versionsResponse.data);
-        
-        // Set active version to the newly uploaded one
-        const newVersion = versionsResponse.data.find((v: FileVersion) => v.id === response.data.id);
-        if (newVersion) {
-          setActiveVersion(newVersion);
+        if (isTextBased) {
+          // Fetch as text
+          const response = await axios.get(selectedVersion.file_url);
+          setFileContent(response.data);
+          setBinaryFile(false);
+        } else {
+          // Mark as binary (will show preview or download link)
+          setFileContent(null);
+          setBinaryFile(true);
         }
         
         setError(null);
       } catch (err) {
-        console.error('Error uploading new version:', err);
-        setError('Failed to upload new version');
+        console.error('Error fetching file content:', err);
+        setError('Failed to load file content');
       } finally {
         setLoading(false);
       }
     };
-    fileInput.click();
+    
+    fetchFileContent();
+  }, [selectedVersion]);
+  
+  const handleVersionChange = (event: React.SyntheticEvent | null, value: string | null) => {
+    if (!value) return;
+    
+    const versionId = parseInt(value);
+    const version = versions.find(v => v.id === versionId);
+    if (version) {
+      setSelectedVersion(version);
+    }
   };
   
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-    return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+  const getInitials = (first: string, last: string) => {
+    return `${first[0]}${last[0]}`.toUpperCase();
   };
   
-  const getFileTypeIcon = (contentType: string): string => {
-    if (contentType.startsWith('image/')) return '🖼️';
-    if (contentType === 'application/pdf') return '📄';
-    if (contentType.includes('spreadsheet') || contentType.includes('excel')) return '📊';
-    if (contentType.includes('document') || contentType.includes('word')) return '📝';
-    if (contentType.includes('presentation') || contentType.includes('powerpoint')) return '📽️';
-    if (contentType.includes('text/')) return '📋';
-    return '📁';
+  // Determine content preview based on file type
+  const renderFilePreview = () => {
+    if (!selectedVersion) return null;
+    
+    // For images, show the image
+    if (selectedVersion.content_type.startsWith('image/')) {
+      return (
+        <Box sx={{ textAlign: 'center', p: 2 }}>
+          <img 
+            src={selectedVersion.file_url} 
+            alt={fileNode?.name} 
+            style={{ maxWidth: '100%', maxHeight: '500px' }} 
+          />
+        </Box>
+      );
+    }
+    
+    // For PDFs, show an iframe
+    if (selectedVersion.content_type === 'application/pdf') {
+      return (
+        <Box sx={{ height: '500px', width: '100%' }}>
+          <iframe 
+            src={`${selectedVersion.file_url}#view=FitH`}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            title={fileNode?.name}
+          />
+        </Box>
+      );
+    }
+    
+    // For text-based files, show the content
+    if (fileContent !== null) {
+      return (
+        <Box 
+          sx={{ 
+            p: 2, 
+            maxHeight: '500px', 
+            overflow: 'auto',
+            fontFamily: 'monospace',
+            whiteSpace: 'pre-wrap',
+            bgcolor: 'background.level1',
+            borderRadius: 'sm',
+            border: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          {fileContent}
+        </Box>
+      );
+    }
+    
+    // For other binary files, show download link
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        p: 4
+      }}>
+        <Typography level="body-lg" sx={{ color: 'text.tertiary', mb: 2 }}>
+          This file type cannot be previewed directly
+        </Typography>
+        <Button
+          startDecorator={<DownloadIcon />}
+          component="a"
+          href={selectedVersion.file_url}
+          download
+        >
+          Download File
+        </Button>
+      </Box>
+    );
   };
   
   if (!fileNode) {
     return (
-      <Card variant="outlined" sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Typography level="body-lg" sx={{ textAlign: 'center', color: 'text.tertiary' }}>
-          Select a file to view its contents
-        </Typography>
+      <Card variant="outlined" sx={{ height: '100%' }}>
+        <CardContent sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '100%',
+          p: 4
+        }}>
+          <InsertDriveFileIcon sx={{ fontSize: 60, color: 'text.tertiary', mb: 2 }} />
+          <Typography level="body-lg" sx={{ color: 'text.tertiary' }}>
+            Select a file to view
+          </Typography>
+        </CardContent>
       </Card>
     );
   }
   
   if (fileNode.type === 'folder') {
     return (
-      <Card variant="outlined" sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Typography level="body-lg" sx={{ textAlign: 'center', color: 'text.tertiary' }}>
-          This is a folder, not a file
-        </Typography>
+      <Card variant="outlined" sx={{ height: '100%' }}>
+        <CardContent sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '100%',
+          p: 4
+        }}>
+          <Typography level="body-lg" sx={{ color: 'text.tertiary' }}>
+            {fileNode.name} is a folder. Select a file to view its contents.
+          </Typography>
+        </CardContent>
       </Card>
     );
   }
   
-  if (loading) {
+  if (loading && !selectedVersion) {
     return (
-      <Card variant="outlined" sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Card>
-    );
-  }
-  
-  if (error) {
-    return (
-      <Card variant="outlined" sx={{ height: '100%', p: 2 }}>
-        <Typography level="body-lg" color="danger">
-          {error}
-        </Typography>
+      <Card variant="outlined" sx={{ height: '100%' }}>
+        <CardContent sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          p: 4
+        }}>
+          <CircularProgress />
+        </CardContent>
       </Card>
     );
   }
@@ -205,164 +295,92 @@ const FileViewer: React.FC<FileViewerProps> = ({ fileNode }) => {
   return (
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+        {error && (
+          <Alert color="danger" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        
+        {/* File header */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
           <Box>
-            <Typography level="h4">{fileNode.name}</Typography>
-            <Typography level="body-sm" color="text.tertiary">
-              {activeVersion && (
-                <>Version {activeVersion.version_number} • {formatFileSize(activeVersion.size)}</>
-              )}
+            <Typography level="h4">
+              <InsertDriveFileIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              {fileNode.name}
             </Typography>
+            
+            <Stack direction="row" spacing={2} sx={{ mt: 0.5 }}>
+              <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center' }}>
+                <PersonIcon fontSize="small" sx={{ mr: 0.5 }} />
+                {fileNode.created_by_details.first_name} {fileNode.created_by_details.last_name}
+              </Typography>
+              
+              <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center' }}>
+                <AccessTimeIcon fontSize="small" sx={{ mr: 0.5 }} />
+                {format(new Date(fileNode.updated_at), 'MMM d, yyyy h:mm a')}
+              </Typography>
+            </Stack>
           </Box>
-          <Stack direction="row" spacing={1}>
-            <Button 
-              variant="outlined" 
-              color="primary" 
-              startDecorator={<UploadIcon />}
-              onClick={handleUploadNewVersion}
-            >
-              Upload New Version
-            </Button>
-            {activeVersion && (
-              <IconButton 
-                variant="soft" 
+          
+          {/* Action buttons */}
+          {selectedVersion && (
+            <Box>
+              <IconButton
                 color="primary"
+                variant="outlined"
                 component="a"
-                href={activeVersion.file_url}
+                href={selectedVersion.file_url}
                 download
+                title="Download"
               >
                 <DownloadIcon />
               </IconButton>
-            )}
-          </Stack>
+            </Box>
+          )}
         </Stack>
+        
+        {/* Version selector */}
+        {versions.length > 0 && (
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+            <Typography level="body-sm">Version:</Typography>
+            <Select
+              value={selectedVersion?.id.toString() || ''}
+              onChange={handleVersionChange}
+              size="sm"
+              sx={{ minWidth: 150 }}
+              startDecorator={<HistoryIcon />}
+            >
+              {versions.map((version) => (
+                <Option key={version.id} value={version.id.toString()}>
+                  v{version.version} - {format(new Date(version.created_at), 'MMM d, yyyy')}
+                </Option>
+              ))}
+            </Select>
+          </Stack>
+        )}
         
         <Divider sx={{ my: 2 }} />
         
-        <Tabs defaultValue={0} sx={{ bgcolor: 'background.surface' }}>
-          <TabList>
-            <Tab>Preview</Tab>
-            <Tab startDecorator={<HistoryIcon />}>Version History</Tab>
+        {/* File content with tabs for content and comments */}
+        <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v as number)}>
+          <TabList sx={{ mb: 2 }}>
+            <Tab>Content</Tab>
             <Tab>Comments</Tab>
           </TabList>
           
           <TabPanel value={0}>
-            {activeVersion ? (
-              <Box sx={{ height: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'auto' }}>
-                {activeVersion.content_type.startsWith('image/') ? (
-                  <img 
-                    src={activeVersion.file_url} 
-                    alt={fileNode.name}
-                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                  />
-                ) : activeVersion.content_type === 'application/pdf' ? (
-                  <iframe
-                    src={`${activeVersion.file_url}#view=fitH`}
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                    title={fileNode.name}
-                  />
-                ) : (
-                  <Box sx={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    bgcolor: 'background.level1',
-                    borderRadius: 'sm',
-                    p: 4
-                  }}>
-                    <Typography fontSize="4rem" sx={{ mb: 2 }}>
-                      {getFileTypeIcon(activeVersion.content_type)}
-                    </Typography>
-                    <Typography level="body-lg">
-                      {fileNode.name}
-                    </Typography>
-                    <Typography level="body-sm" color="text.tertiary">
-                      This file type cannot be previewed
-                    </Typography>
-                    <Button 
-                      variant="soft" 
-                      color="primary" 
-                      sx={{ mt: 2 }}
-                      component="a"
-                      href={activeVersion.file_url}
-                      download
-                      startDecorator={<DownloadIcon />}
-                    >
-                      Download
-                    </Button>
-                  </Box>
-                )}
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                <CircularProgress />
               </Box>
             ) : (
-              <Typography level="body-lg" sx={{ textAlign: 'center', color: 'text.tertiary', p: 4 }}>
-                No file versions available
-              </Typography>
+              renderFilePreview()
             )}
           </TabPanel>
           
           <TabPanel value={1}>
-            <List>
-              {versions.length > 0 ? (
-                versions.map((version) => (
-                  <ListItem 
-                    key={version.id}
-                    variant={activeVersion?.id === version.id ? 'soft' : 'plain'}
-                    sx={{ 
-                      borderRadius: 'sm',
-                      cursor: 'pointer',
-                      '&:hover': { bgcolor: 'background.level1' }
-                    }}
-                    onClick={() => handleVersionSelect(version)}
-                  >
-                    <ListItemContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Box>
-                          <Typography level="title-sm">
-                            Version {version.version_number}
-                            {version === versions[0] && (
-                              <Chip size="sm" variant="soft" color="primary" sx={{ ml: 1 }}>
-                                Latest
-                              </Chip>
-                            )}
-                          </Typography>
-                          <Typography level="body-xs" startDecorator={<PersonIcon fontSize="small" />}>
-                            {version.uploaded_by_details.first_name} {version.uploaded_by_details.last_name}
-                          </Typography>
-                          <Typography level="body-xs" startDecorator={<AccessTimeIcon fontSize="small" />}>
-                            {format(new Date(version.created_at), 'MMM d, yyyy h:mm a')}
-                          </Typography>
-                        </Box>
-                        <IconButton 
-                          size="sm" 
-                          variant="outlined"
-                          component="a"
-                          href={version.file_url}
-                          download
-                        >
-                          <DownloadIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </ListItemContent>
-                  </ListItem>
-                ))
-              ) : (
-                <Typography level="body-lg" sx={{ textAlign: 'center', color: 'text.tertiary', p: 4 }}>
-                  No version history available
-                </Typography>
-              )}
-            </List>
-          </TabPanel>
-          
-          <TabPanel value={2}>
-            {activeVersion ? (
-              <CommentSection fileVersion={activeVersion} />
-            ) : (
-              <Typography level="body-lg" sx={{ textAlign: 'center', color: 'text.tertiary', p: 4 }}>
-                Select a file version to view comments
-              </Typography>
+            {selectedVersion && (
+              <CommentSection fileVersion={selectedVersion} />
             )}
           </TabPanel>
         </Tabs>
