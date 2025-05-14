@@ -38,9 +38,11 @@ interface Project {
 // Import the PDF document type
 interface PDFDocument {
   id: number;
+  unique_id: string;
   title: string;
   description: string;
   file_url: string;
+  content_type: string;
   version: number;
   size: number;
   uploaded_by_details: {
