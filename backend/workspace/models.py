@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
-from core.models import Project, User
+from core.models import Project
+import uuid
 
 class FileNode(models.Model):
     """
@@ -114,6 +115,7 @@ class PDFDocument(models.Model):
     """
     Represents a PDF document in the project
     """
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     file = models.FileField(upload_to='pdf_documents/%Y/%m/%d/')
