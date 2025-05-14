@@ -1,10 +1,34 @@
 import axios from 'axios';
 
-// Get the API_URL using a compatible approach
-// Use environment-based URL detection to support both local and Replit environments
-const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:8001/api' 
-  : `https://${window.location.hostname.replace('00-', '01-')}/api`;
+// Function to dynamically determine the API URL based on the current environment
+const getApiUrl = () => {
+  if (window.location.hostname === 'localhost') {
+    return 'http://localhost:8001/api';
+  }
+  
+  // For Replit - replace '00-' with '01-' in hostname to target backend
+  const hostname = window.location.hostname;
+  
+  // We're in the Replit web editor preview
+  if (hostname.includes('janeway.replit.dev')) {
+    const parts = hostname.split('-');
+    const replId = parts.slice(0, 3).join('-');
+    return `https://${replId.replace('00-', '01-')}.${parts.slice(3).join('-')}/api`;
+  }
+  
+  // We're deployed to replit.app domain
+  if (hostname.includes('replit.app')) {
+    return `https://${hostname.replace('00-', '01-')}/api`;
+  }
+  
+  // Default fallback for other environments
+  return '/api';
+};
+
+// Get the API_URL using our dynamic function
+const API_URL = getApiUrl();
+
+console.log('Using API URL:', API_URL);
 
 // Create an axios instance with defaults
 const api = axios.create({

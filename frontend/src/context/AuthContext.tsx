@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import axios from 'axios';
 import api from '../services/api';
 
 // Define types locally instead of importing from types
@@ -37,6 +38,66 @@ interface AuthContextProps {
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+// Set up axios interceptor for authentication headers and token refresh
+const setupAxiosInterceptors = () => {
+  // Add token to outgoing requests
+  api.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  // Handle token expiration and refresh
+  api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+      
+      // If error is unauthorized and we haven't tried to refresh yet
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        try {
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (!refreshToken) {
+            // No refresh token available, trigger logout
+            window.dispatchEvent(new Event('auth:logout'));
+            return Promise.reject(error);
+          }
+          
+          // Try to get a new access token
+          const response = await axios.post(`${api.defaults.baseURL}/token/refresh/`, {
+            refresh: refreshToken
+          });
+          
+          const { access } = response.data;
+          
+          // Update stored token
+          localStorage.setItem('access_token', access);
+          
+          // Update header and retry original request
+          originalRequest.headers['Authorization'] = `Bearer ${access}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          // Refresh failed, trigger logout
+          window.dispatchEvent(new Event('auth:logout'));
+          return Promise.reject(refreshError);
+        }
+      }
+      
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Setup interceptors right away
+setupAxiosInterceptors();
 
 // Provider component
 interface AuthProviderProps {
@@ -84,6 +145,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           error: null,
         });
       } catch (error) {
+        console.error('Failed to load user:', error);
         // Token invalid or other error
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
@@ -107,16 +169,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }));
 
       // Get token
-      const tokenResponse = await api.post('/login/', { username, password });
-      const { access, refresh, user } = tokenResponse.data;
+      const tokenResponse = await api.post('/token/', { username, password });
+      
+      // Extract tokens and data
+      const { access, refresh } = tokenResponse.data;
       
       // Store tokens
       localStorage.setItem('access_token', access);
       localStorage.setItem('refresh_token', refresh);
       
+      // Get user info with the token
+      const userResponse = await api.get('/me/');
+      
       setAuthState({
         isAuthenticated: true,
-        user: user as User,
+        user: userResponse.data as User,
         token: access,
         loading: false,
         error: null,
