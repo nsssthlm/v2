@@ -660,6 +660,65 @@
     const noPdfsMessage = document.getElementById('no-pdfs-message');
     const pdfDialogOverlay = document.getElementById('pdf-dialog-overlay');
     const pdfDialogClose = document.getElementById('pdf-dialog-close');
+    const dropArea = document.getElementById('drop-area');
+    
+    // Implementera drag and drop funktionalitet
+    if (dropArea) {
+      // Förhindra standardbeteendet för dessa händelser
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      // Lägg till/ta bort highlight klass
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      // Hantera släppta filer
+      dropArea.addEventListener('drop', handleDrop, false);
+      
+      // Klick på drop-area för att öppna filväljaren
+      dropArea.addEventListener('click', function(e) {
+        if (e.target !== pdfFileInput) {
+          pdfFileInput.click();
+        }
+      });
+    }
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    function highlight() {
+      dropArea.classList.add('highlight');
+    }
+    
+    function unhighlight() {
+      dropArea.classList.remove('highlight');
+    }
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length) {
+        pdfFileInput.files = files;
+        // Visa filnamnet som feedback
+        const file = files[0];
+        if (file.type === 'application/pdf') {
+          pdfTitleInput.value = file.name.replace('.pdf', '');
+          alert('PDF-fil uppladdad: ' + file.name);
+        } else {
+          alert('Endast PDF-filer är tillåtna.');
+        }
+      }
+    }
     const pdfCanvas = document.getElementById('pdf-canvas');
     const canvasContainer = document.getElementById('pdf-canvas-container');
     const annotationLayer = document.getElementById('pdf-annotation-layer');
