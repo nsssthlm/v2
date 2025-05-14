@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValvX Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2><span class="logo-icon">⚡</span> ValvX</h2>
+    </div>
+    
+    <a href="/" class="nav-item active">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="/calendar" class="nav-item">
+      <span class="icon">📅</span>
+      <span>Kalender</span>
+    </a>
+    <a href="/notice-board" class="nav-item">
+      <span class="icon">📌</span>
+      <span>Anslagstavla</span>
+    </a>
+    <a href="/vault" class="nav-item">
+      <span class="icon">📁</span>
+      <span>Vault</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">✏️</span>
+      <span>Tidsrapportering</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">📝</span>
+      <span>Wiki</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">👥</span>
+      <span>Team</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">⚙️</span>
+      <span>Inställningar</span>
+    </a>
+    
+    <div class="sidebar-footer">
+      &copy; 2025 ValvX Platform
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="header">
+      <h2>Dashboard</h2>
+      <div class="header-right">
+        <span class="material-symbols-outlined">notifications</span>
+        <div class="avatar">AK</div>
+      </div>
+    </header>
+    
+    <div class="page-content">
+      <div class="container">
+        <h1>Projektöversikt</h1>
+        <p>
+          Välkommen till ValvX Projektplattform. Här hittar du en överblick av dina aktiva projekt, 
+          kommande deadlines och pågående aktiviteter.
+        </p>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h4>Aktiva Projekt</h4>
+            <div class="value">12</div>
+          </div>
+          <div class="stat-card">
+            <h4>Öppna Uppgifter</h4>
+            <div class="value">48</div>
+          </div>
+          <div class="stat-card">
+            <h4>Teammedlemmar</h4>
+            <div class="value">32</div>
+          </div>
+          <div class="stat-card">
+            <h4>Kommande Deadlines</h4>
+            <div class="value">7</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="container">
+        <h3>Senaste Aktiviteter</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid #eee; text-align: left;">
+              <th style="padding: 12px 8px;">Projekt</th>
+              <th style="padding: 12px 8px;">Aktivitet</th>
+              <th style="padding: 12px 8px;">Användare</th>
+              <th style="padding: 12px 8px;">Datum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 12px 8px;">Bygge Norrtälje</td>
+              <td style="padding: 12px 8px;">Ny fil uppladdad: <strong>fasadritning-v2.pdf</strong></td>
+              <td style="padding: 12px 8px;">Erik Johansson</td>
+              <td style="padding: 12px 8px;">2025-05-14</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 12px 8px;">Renovering Kungsgatan</td>
+              <td style="padding: 12px 8px;">Uppgift slutförd: <strong>Elinstallation våning 2</strong></td>
+              <td style="padding: 12px 8px;">Anna Lindgren</td>
+              <td style="padding: 12px 8px;">2025-05-13</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 12px 8px;">Köpcentrum Malmö</td>
+              <td style="padding: 12px 8px;">Kommentar tillagd: <strong>"Möte med leverantörer inbokat..."</strong></td>
+              <td style="padding: 12px 8px;">Johan Karlsson</td>
+              <td style="padding: 12px 8px;">2025-05-13</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 12px 8px;">Renovering Kungsgatan</td>
+              <td style="padding: 12px 8px;">Ny uppgift skapad: <strong>Installation av ventilation</strong></td>
+              <td style="padding: 12px 8px;">Maria Nilsson</td>
+              <td style="padding: 12px 8px;">2025-05-12</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="container">
+        <h3>Kommande Deadlines</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid #eee; text-align: left;">
+              <th style="padding: 12px 8px;">Projekt</th>
+              <th style="padding: 12px 8px;">Uppgift</th>
+              <th style="padding: 12px 8px;">Ansvarig</th>
+              <th style="padding: 12px 8px;">Deadline</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 12px 8px;">Köpcentrum Malmö</td>
+              <td style="padding: 12px 8px;">Leverans av konstruktionsritningar</td>
+              <td style="padding: 12px 8px;">Lars Andersson</td>
+              <td style="padding: 12px 8px; color: #f44336;"><strong>2025-05-18</strong></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 12px 8px;">Bygge Norrtälje</td>
+              <td style="padding: 12px 8px;">Slutföra budgetförslag</td>
+              <td style="padding: 12px 8px;">Sofia Berg</td>
+              <td style="padding: 12px 8px;">2025-05-20</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+              <td style="padding: 12px 8px;">Renovering Kungsgatan</td>
+              <td style="padding: 12px 8px;">Slutinspektion av elarbeten</td>
+              <td style="padding: 12px 8px;">Erik Johansson</td>
+              <td style="padding: 12px 8px;">2025-05-22</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

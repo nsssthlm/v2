@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValvX Anslagstavla</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2><span class="logo-icon">⚡</span> ValvX</h2>
+    </div>
+    
+    <a href="/" class="nav-item">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="/calendar" class="nav-item">
+      <span class="icon">📅</span>
+      <span>Kalender</span>
+    </a>
+    <a href="/notice-board" class="nav-item active">
+      <span class="icon">📌</span>
+      <span>Anslagstavla</span>
+    </a>
+    <a href="/vault" class="nav-item">
+      <span class="icon">📁</span>
+      <span>Vault</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">✏️</span>
+      <span>Tidsrapportering</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">📝</span>
+      <span>Wiki</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">👥</span>
+      <span>Team</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">⚙️</span>
+      <span>Inställningar</span>
+    </a>
+    
+    <div class="sidebar-footer">
+      &copy; 2025 ValvX Platform
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="header">
+      <h2>Anslagstavla</h2>
+      <div class="header-right">
+        <span class="material-symbols-outlined">notifications</span>
+        <div class="avatar">AK</div>
+      </div>
+    </header>
+    
+    <div class="page-content">
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1>Anslagstavla</h1>
+          <p>
+            Här hittar du viktiga meddelanden och nyheter för alla dina projekt.
+          </p>
+        </div>
+        
+        <button style="padding: 8px 16px; background: #1a237e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px; margin-right: 4px;">add</span> 
+          Nytt inlägg
+        </button>
+      </div>
+      
+      <div style="display: flex; gap: 1rem; margin: 1rem 0;">
+        <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+          <button style="padding: 6px 12px; background: #e3f2fd; color: #1a237e; border: none; border-radius: 4px; cursor: pointer;">
+            Alla
+          </button>
+          <button style="padding: 6px 12px; background: white; border: 1px solid #e0e0e0; color: #424242; border-radius: 4px; cursor: pointer;">
+            Viktiga
+          </button>
+          <button style="padding: 6px 12px; background: white; border: 1px solid #e0e0e0; color: #424242; border-radius: 4px; cursor: pointer;">
+            Nyheter
+          </button>
+          <button style="padding: 6px 12px; background: white; border: 1px solid #e0e0e0; color: #424242; border-radius: 4px; cursor: pointer;">
+            Uppdateringar
+          </button>
+        </div>
+      </div>
+      
+      <div class="notices">
+        <div class="notice-card">
+          <div class="notice-header">
+            <div>
+              <div class="notice-title">Ny uppdatering av projektsystemet</div>
+              <div class="notice-date">2025-05-14</div>
+            </div>
+            <div class="notice-category">Viktigt</div>
+          </div>
+          <div class="notice-content">
+            <p>Vi har uppdaterat ValvX med nya funktioner och förbättringar:</p>
+            <ul style="padding-left: 20px; margin-bottom: 10px;">
+              <li>Förbättrad kalendervy med flera vyer (dag/vecka/månad)</li>
+              <li>Ny funktion för att exportera rapporter</li>
+              <li>Förbättrad prestanda för filhantering</li>
+            </ul>
+            <p>Uppdateringen installeras automatiskt nästa gång du loggar in.</p>
+          </div>
+          <div class="notice-footer">
+            <div>Av: SystemAdmin</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">thumb_up</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">comment</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="notice-card">
+          <div class="notice-header">
+            <div>
+              <div class="notice-title">Nytt projekt: Köpcentrum Malmö</div>
+              <div class="notice-date">2025-05-10</div>
+            </div>
+            <div class="notice-category">Nytt Projekt</div>
+          </div>
+          <div class="notice-content">
+            <p>Vi är glada att tillkännage att vi har tilldelats ett nytt projekt för renovering av köpcentrumet i Malmö.</p>
+            <p>Projektstart: 2025-05-05<br>
+               Projektledare: Maria Nilsson<br>
+               Budget: 12M SEK</p>
+            <p>Teammedlemmar kommer att tilldelas under nästa vecka. Mer information kommer.</p>
+          </div>
+          <div class="notice-footer">
+            <div>Av: Johan Karlsson</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">thumb_up</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">comment</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="notice-card">
+          <div class="notice-header">
+            <div>
+              <div class="notice-title">Teambuilding den 25:e maj</div>
+              <div class="notice-date">2025-05-08</div>
+            </div>
+            <div class="notice-category">Event</div>
+          </div>
+          <div class="notice-content">
+            <p>Vi inbjuder alla teammedlemmar till vårt årliga teambuildingsevent!</p>
+            <p>Datum: 25 maj 2025<br>
+               Plats: Stadsparken<br>
+               Tid: 14:00-18:00</p>
+            <p>Aktiviteter, mat och dryck kommer att tillhandahållas. Anmäl dig senast den 20:e maj via personalportalen.</p>
+          </div>
+          <div class="notice-footer">
+            <div>Av: Anna Lindgren</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">thumb_up</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">comment</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="notice-card">
+          <div class="notice-header">
+            <div>
+              <div class="notice-title">Påminnelse: Tidsrapportering</div>
+              <div class="notice-date">2025-05-02</div>
+            </div>
+            <div class="notice-category">Påminnelse</div>
+          </div>
+          <div class="notice-content">
+            <p>Detta är en påminnelse om att tidsrapportering för april månad ska vara inlämnad senast den 5:e maj.</p>
+            <p>Se till att alla dina projektaktiviteter är korrekt kategoriserade och att du har angett rätt antalet timmar.</p>
+          </div>
+          <div class="notice-footer">
+            <div>Av: Erik Johansson</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">thumb_up</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">comment</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
