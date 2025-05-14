@@ -5,6 +5,14 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
 import NotFoundPage from './pages/NotFoundPage';
 
+// Vault pages
+import HomePage from './pages/vault/home/HomePage';
+import CommentsPage from './pages/vault/comments/CommentsPage';
+import ReviewPage from './pages/vault/review/ReviewPage';
+import FilesPage from './pages/vault/files/FilesPage';
+import VersionsPage from './pages/vault/versions/VersionsPage';
+import MeetingsPage from './pages/vault/meetings/MeetingsPage';
+
 // Anpassa temat för att matcha bilden
 const theme = extendTheme({
   colorSchemes: {

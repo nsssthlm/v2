@@ -3,10 +3,7 @@ import {
   Box, 
   Sheet, 
   Typography, 
-  Divider, 
-  Chip, 
-  Button, 
-  IconButton,
+  Button,
   Grid,
   Card,
   AspectRatio,
@@ -132,7 +129,7 @@ export default function FileView({ selectedFile }: FileViewProps) {
           {getFileIcon()}
           <Box sx={{ ml: 2 }}>
             <Typography level="title-lg">{selectedFile.name}</Typography>
-            <Typography level="body-sm" color="neutral.600">
+            <Typography level="body-sm" sx={{ color: 'neutral.600' }}>
               {selectedFile.path}
             </Typography>
           </Box>
@@ -209,27 +206,27 @@ export default function FileView({ selectedFile }: FileViewProps) {
               <Card variant="outlined" sx={{ p: 2 }}>
                 <Grid container spacing={2}>
                   <Grid xs={12} sm={6}>
-                    <Typography level="body-xs" color="neutral.500">File Name</Typography>
+                    <Typography level="body-xs" color="neutral">File Name</Typography>
                     <Typography level="body-sm">{selectedFile.name}</Typography>
                   </Grid>
                   <Grid xs={12} sm={6}>
-                    <Typography level="body-xs" color="neutral.500">File Type</Typography>
+                    <Typography level="body-xs" color="neutral">File Type</Typography>
                     <Typography level="body-sm">{selectedFile.file_type || 'Unknown'}</Typography>
                   </Grid>
                   <Grid xs={12} sm={6}>
-                    <Typography level="body-xs" color="neutral.500">File Size</Typography>
+                    <Typography level="body-xs" color="neutral">File Size</Typography>
                     <Typography level="body-sm">{formatFileSize(selectedFile.size)}</Typography>
                   </Grid>
                   <Grid xs={12} sm={6}>
-                    <Typography level="body-xs" color="neutral.500">Created</Typography>
+                    <Typography level="body-xs" color="neutral">Created</Typography>
                     <Typography level="body-sm">{formatDate(selectedFile.created_at)}</Typography>
                   </Grid>
                   <Grid xs={12} sm={6}>
-                    <Typography level="body-xs" color="neutral.500">Last Modified</Typography>
+                    <Typography level="body-xs" color="neutral">Last Modified</Typography>
                     <Typography level="body-sm">{formatDate(selectedFile.updated_at)}</Typography>
                   </Grid>
                   <Grid xs={12} sm={6}>
-                    <Typography level="body-xs" color="neutral.500">Path</Typography>
+                    <Typography level="body-xs" color="neutral">Path</Typography>
                     <Typography level="body-sm">{selectedFile.path}</Typography>
                   </Grid>
                 </Grid>

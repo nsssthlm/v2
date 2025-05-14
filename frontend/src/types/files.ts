@@ -13,7 +13,7 @@ export interface FileNode {
 }
 
 // Filsystem som träd med barn (för hierarkisk visning)
-export interface FileTreeNode extends Omit<FileNode, 'parent_id'> {
+export interface FileTreeNode extends FileNode {
   children: FileTreeNode[];
   files: FileNode[];
   isExpanded?: boolean;

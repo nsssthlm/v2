@@ -24,8 +24,7 @@ import { FileNode, FileTreeNode } from '../../types/files';
 import { 
   buildFileTree, 
   createFolder, 
-  toggleFolderExpanded, 
-  findNodeById 
+  toggleFolderExpanded
 } from '../../utils/fileSystemUtils';
 
 interface FileBrowserProps {
