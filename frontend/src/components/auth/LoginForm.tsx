@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Button, 
@@ -23,7 +23,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { login, authState } = useAuth();
+
+  // Automatically redirect when user is authenticated
+  useEffect(() => {
+    if (authState.isAuthenticated && authState.user) {
+      onLoginSuccess();
+    }
+  }, [authState.isAuthenticated, authState.user, onLoginSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +40,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     try {
       // Use context login function
       await login(username, password);
-      
-      // If login succeeds, call the success handler
-      onLoginSuccess();
+      // OnLoginSuccess will be called by the effect above when authentication state changes
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.response?.data?.detail || 'Inloggning misslyckades. Kontrollera dina uppgifter.');
-    } finally {
       setLoading(false);
     }
   };
