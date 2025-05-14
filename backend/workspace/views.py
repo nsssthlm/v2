@@ -327,8 +327,8 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
             as_attachment=False
         )
         
-        # Säkerställ att X-Frame-Options inte sätts (tillåt embedding överallt)
-        response['X-Frame-Options'] = 'ALLOWALL'
+        # Radera X-Frame-Options header helt för att tillåta embedding
+        response.headers.pop('X-Frame-Options', None)
         
         # Lägg till Content-Disposition header för att säkerställa inline-visning
         response['Content-Disposition'] = f'inline; filename="{pdf.title}.pdf"'
