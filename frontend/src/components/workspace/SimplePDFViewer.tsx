@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/joy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import api from '../../services/api';
 
 interface SimplePDFViewerProps {
   pdfUrl: string;
@@ -10,18 +11,53 @@ interface SimplePDFViewerProps {
 export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Enkel timer för laddningsindikator
+  // Ladda PDF-innehållet med autentisering
   useEffect(() => {
     setLoading(true);
     setError(null);
     
-    const timer = setTimeout(() => {
+    if (!pdfUrl) {
+      setError('Ingen PDF-URL tillhandahållen');
       setLoading(false);
-    }, 1000);
+      return;
+    }
     
-    return () => clearTimeout(timer);
+    // Använd axios för att hämta PDF-filen med autentisering
+    const fetchPdf = async () => {
+      try {
+        // Skapa korrekt URL för backend-begäran
+        const apiUrl = pdfUrl.replace(/^http:\/\/0\.0\.0\.0:8001\/api/, '');
+        console.log('Fetching PDF from URL:', apiUrl);
+        
+        // Ladda ner PDF som blob med autentiserade begäran
+        const response = await api.get(apiUrl, {
+          responseType: 'blob'
+        });
+        
+        // Skapa en blob URL från responsen
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        
+        setObjectUrl(url);
+        setLoading(false);
+      } catch (err) {
+        console.error('Fel vid hämtning av PDF:', err);
+        setError('Kunde inte ladda PDF-dokumentet. Försök öppna i nytt fönster istället.');
+        setLoading(false);
+      }
+    };
+    
+    fetchPdf();
+    
+    // Rensa blob URL när komponenten avmonteras
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
   }, [pdfUrl]);
 
   // Hantera iframe fel
@@ -83,17 +119,23 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
             backgroundColor: 'white',
             overflow: 'hidden'
           }}>
-            <iframe
-              ref={iframeRef}
-              src={pdfUrl}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                border: 'none' 
-              }}
-              onError={handleIframeError}
-              title={title || "PDF Dokument"}
-            />
+            {objectUrl ? (
+              <iframe
+                ref={iframeRef}
+                src={objectUrl}
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  border: 'none' 
+                }}
+                onError={handleIframeError}
+                title={title || "PDF Dokument"}
+              />
+            ) : (
+              <Typography level="body-md">
+                Laddar PDF-innehåll...
+              </Typography>
+            )}
           </Box>
         )}
       </Box>
