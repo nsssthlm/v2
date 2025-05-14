@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.utils.decorators import method_decorator
 from core.models import Project, RoleAccess
 from .models import FileNode, FileVersion, FileComment, WikiArticle, ProjectDashboard, PDFDocument
 from .serializers import (
@@ -269,32 +271,36 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
         
     @action(detail=True, methods=['get'])
+    @method_decorator(xframe_options_exempt)
     def content(self, request, pk=None):
         """
         Get PDF content with headers that exempt it from X-Frame-Options restrictions
         """
         pdf = self.get_object()
-        from django.http import HttpResponse, FileResponse
+        from django.http import FileResponse
+        from django.views.decorators.clickjacking import xframe_options_exempt
+        from django.utils.decorators import method_decorator
         import os
         
         # Lägg till extra säkerhet på filhantering
         if not os.path.exists(pdf.file.path):
             return Response({"error": "File not found"}, status=404)
         
-        # Skapa ett binärt svar för att hantera alla typer av Accept-headers
-        with open(pdf.file.path, 'rb') as f:
-            file_content = f.read()
-        
-        response = HttpResponse(
-            file_content,
-            content_type='application/pdf'
+        # Använd FileResponse för att hantera filer effektivt
+        response = FileResponse(
+            open(pdf.file.path, 'rb'),
+            content_type='application/pdf',
+            as_attachment=False
         )
         
-        # Override default Django X-Frame-Options header för att tillåta embedding
-        response['X-Frame-Options'] = 'ALLOWALL'
+        # Explicit ta bort X-Frame-Options för att tillåta embedding i iframe
+        if 'X-Frame-Options' in response:
+            del response['X-Frame-Options']
+        
+        # Sätt Content-Disposition för att visa inline
+        response['Content-Disposition'] = f'inline; filename="{pdf.title}"'
         response['Content-Security-Policy'] = 'frame-ancestors *'
         response['Access-Control-Allow-Origin'] = '*'
-        response['Content-Disposition'] = f'inline; filename="{pdf.title}"'
         
         # Lägg till caching headers för bättre prestanda
         response['Cache-Control'] = 'public, max-age=86400'
