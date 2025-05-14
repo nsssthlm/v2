@@ -128,7 +128,7 @@ const FileSystemNode = ({
             </Typography>
           </ListItemContent>
           
-          {/* Fast positionerad plusknapp för mappar med samma avstånd för alla nivåer */}
+          {/* Dynamiskt positionerad plusknapp för diagonal linje */}
           {isFolder && (
             <IconButton 
               size="sm" 
@@ -140,7 +140,7 @@ const FileSystemNode = ({
               }}
               sx={{ 
                 position: 'absolute',
-                right: 5, // Fast avstånd från högerkanten
+                right: Math.max(5, 35 - level * 5), // Minskar avståndet progressivt med nivån för en diagonal effekt
                 opacity: 0.7,
                 minWidth: '18px',
                 height: '18px',
