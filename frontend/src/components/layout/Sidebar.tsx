@@ -623,20 +623,19 @@ const Sidebar = () => {
             </Box>
           ))}
           
-          {/* Visa filsystemet mellan menyrader */}
+          {/* Visa Filer-menyraden med dropdown-funktion */}
           {openSubmenus['/vault'] && (
             <Box sx={{ ml: 2, mt: 0.5, mb: 1 }}>
               <ListItem sx={{ mb: 0.5 }}>
                 <ListItemButton 
-                  component={Link}
-                  to="/vault/files"
+                  onClick={() => setOpenFolders(prev => ({...prev, 'files_root': !prev['files_root']}))}
                   sx={{ 
                     py: 0.75,
                     pl: 1.5,
-                    color: isActive('/vault/files') ? 'primary.600' : 'neutral.600',
-                    ...(isActive('/vault/files') && {
-                      bgcolor: 'primary.50',
-                    })
+                    bgcolor: 'rgba(240, 245, 250, 0.7)',
+                    color: 'neutral.700',
+                    border: '1px solid rgba(240, 245, 250, 0.9)',
+                    borderRadius: '6px'
                   }}
                 >
                   <Box
@@ -647,15 +646,16 @@ const Sidebar = () => {
                       fontSize: '0.8rem',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      color: '#64748b'
                     }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" opacity={0.5}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" opacity={0.7}>
                       <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
                     </svg>
                   </Box>
                   <ListItemContent>
-                    <Typography level="body-sm">
+                    <Typography level="body-sm" fontWeight={500}>
                       Filer
                     </Typography>
                   </ListItemContent>
@@ -669,7 +669,7 @@ const Sidebar = () => {
                       e.stopPropagation();
                       handleAddNewFolder(null);
                     }}
-                    sx={{ ml: 'auto', opacity: 0.6 }}
+                    sx={{ ml: 'auto', opacity: 0.8 }}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -678,46 +678,49 @@ const Sidebar = () => {
                 </ListItemButton>
               </ListItem>
               
-              {/* Visa filsystemet */}
-              <List 
-                size="sm" 
-                sx={{ 
-                  '--ListItem-radius': '4px',
-                  pl: 2.5,
-                  mt: 0
-                }}
-              >
-                {/* Visa mappar på rotnivå */}
-                {filesystemNodes
-                  .filter(node => node.parent_id === null)
-                  .map(node => (
-                    <FileSystemNode 
-                      key={node.id} 
-                      node={node} 
-                      level={0}
-                      filesystemNodes={filesystemNodes}
-                      openFolders={openFolders}
-                      toggleFolder={toggleFolder}
-                      handleAddNewFolder={handleAddNewFolder}
-                    />
-                  ))
-                }
-                
-                {/* Om inga filer/mappar finns, visa en text */}
-                {filesystemNodes.filter(node => node.parent_id === null).length === 0 && (
-                  <Typography 
-                    level="body-xs" 
-                    sx={{ 
-                      pl: 2, 
-                      py: 1, 
-                      color: 'neutral.500', 
-                      fontStyle: 'italic' 
-                    }}
-                  >
-                    Inga filer eller mappar
-                  </Typography>
-                )}
-              </List>
+              {/* Visa filsystemet om Filer är expanderad */}
+              {openFolders['files_root'] && (
+                <List 
+                  size="sm" 
+                  sx={{ 
+                    '--ListItem-radius': '4px',
+                    pl: 2.5,
+                    mt: 0.5,
+                    mb: 0.5
+                  }}
+                >
+                  {/* Visa mappar på rotnivå */}
+                  {filesystemNodes
+                    .filter(node => node.parent_id === null)
+                    .map(node => (
+                      <FileSystemNode 
+                        key={node.id} 
+                        node={node} 
+                        level={0}
+                        filesystemNodes={filesystemNodes}
+                        openFolders={openFolders}
+                        toggleFolder={toggleFolder}
+                        handleAddNewFolder={handleAddNewFolder}
+                      />
+                    ))
+                  }
+                  
+                  {/* Om inga filer/mappar finns, visa en text */}
+                  {filesystemNodes.filter(node => node.parent_id === null).length === 0 && (
+                    <Typography 
+                      level="body-xs" 
+                      sx={{ 
+                        pl: 2, 
+                        py: 1, 
+                        color: 'neutral.500', 
+                        fontStyle: 'italic' 
+                      }}
+                    >
+                      Inga filer eller mappar
+                    </Typography>
+                  )}
+                </List>
+              )}
             </Box>
           )}
         </List>
