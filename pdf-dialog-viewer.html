@@ -978,11 +978,33 @@
             lastModified: currentPdfFile.lastModified
           };
           
-          // För denna session, spara blob URL
-          newPdf.url = currentPdfUrl;
-          newPdf.originalSource = 'file';
-          console.log("1. Sparar PDF från lokal fil:", currentPdfFile.name);
-        } 
+          // Spara filen direkt i base64-format för att kunna återskapa den senare
+          if (currentPdfFile.size < 5*1024*1024) { // Begränsa till 5MB för lokallagring
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              // Spara base64-encoded data direkt
+              newPdf.fileData = e.target.result;
+              
+              // Slutför sparandet med korrekt data
+              finalizeSave(newPdf);
+            };
+            reader.readAsDataURL(currentPdfFile);
+            
+            // För denna session, spara blob URL
+            newPdf.url = currentPdfUrl;
+            newPdf.originalSource = 'file';
+            console.log("1. Sparar PDF från lokal fil (med fileData):", currentPdfFile.name);
+            
+            // Återvänd här så vi väntar på FileReader
+            return;
+          } else {
+            // För stora filer informera användaren
+            alert('Filen är större än 5MB och kan inte sparas i lokallagring. Metadata har sparats men filen måste laddas upp igen nästa gång.');
+            newPdf.url = currentPdfUrl;
+            newPdf.originalSource = 'file_too_large';
+            console.log("1b. Sparar metadata för stor fil:", currentPdfFile.name);
+          }
+        }
         // Fallback till URL om det finns
         else if (currentPdfUrl) {
           newPdf.url = currentPdfUrl;
@@ -1021,6 +1043,13 @@
           console.log("5. Sparar PDF med sista möjliga URL:", newPdf.url);
         }
         
+        // Skapa hjälpfunktion för att spara och använda finalizeSave
+        finalizeSave(newPdf);
+      }
+    }
+    
+    // Slutför sparandet av PDF
+    function finalizeSave(newPdf) {
         // Hämta nuvarande sparade PDF:er
         let savedPdfs = [];
         const existingSaved = localStorage.getItem('savedPdfs');
