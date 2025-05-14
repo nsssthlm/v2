@@ -471,7 +471,7 @@
         </div>
       </div>
       <!-- URL-fältet borttaget enligt instruktion -->
-      <input type="hidden" id="pdf-url" value="" />
+      <!-- URL-input borttagen - endast filuppladdning tillåts nu -->
       <div class="form-group">
         <label for="pdf-title">Titel (valfritt)</label>
         <input type="text" id="pdf-title" placeholder="Ange en titel för PDF-filen" />
@@ -651,7 +651,8 @@
 
     // DOM Elements
     const pdfFileInput = document.getElementById('pdf-file');
-    const pdfUrlInput = document.getElementById('pdf-url');
+    // URL-input är borttagen, så vi behöver inte denna variabel längre
+    // const pdfUrlInput = document.getElementById('pdf-url');
     const pdfTitleInput = document.getElementById('pdf-title');
     const pdfDescriptionInput = document.getElementById('pdf-description');
     const showPdfBtn = document.getElementById('show-pdf-btn');
@@ -935,8 +936,8 @@
     // Spara PDF till localStorage
     function savePdf() {
       // Kontrollera att vi har en PDF att spara
-      if (!currentPdfUrl && !pdfFileInput.files[0] && !pdfUrlInput.value) {
-        alert('Välj en PDF-fil eller ange en URL först');
+      if (!currentPdfUrl && !pdfFileInput.files[0]) {
+        alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
         return;
       }
       
@@ -954,21 +955,26 @@
         // Alltid spara originalkällan oavsett vad (för felsökning)
         newPdf.originalUrl = currentPdfUrl;
         
-        // Prioritera alltid stabil, extern URL från input-fältet först
-        if (pdfUrlInput.value && pdfUrlInput.value.trim() !== '' && 
-            pdfUrlInput.value.trim().startsWith('http')) {
-          // Om vi har en inmatad URL, använd den som primär källa (garanterar att vi kan öppna den igen)
-          newPdf.url = pdfUrlInput.value.trim();
-          newPdf.usableUrl = true; // Markera som en URL som kan användas igen
-          newPdf.originalSource = 'url_input';
-          console.log("1. Sparar PDF med extern URL från input:", newPdf.url);
-        } 
-        // Näst prioritera direkt URL som är externt tillgänglig
-        else if (currentPdfUrl && currentPdfUrl.startsWith('http')) {
+        // Prioritera filhantering
+        if (currentPdfFile) {
+          // Spara metadata om filen
+          newPdf.fileInfo = {
+            name: currentPdfFile.name,
+            size: currentPdfFile.size,
+            type: currentPdfFile.type,
+            lastModified: currentPdfFile.lastModified
+          };
+          
+          // För denna session, spara blob URL
           newPdf.url = currentPdfUrl;
-          newPdf.usableUrl = true; // Markera som en URL som kan användas igen
-          newPdf.originalSource = 'url_direct';
-          console.log("2. Sparar PDF med direkt extern URL:", newPdf.url);
+          newPdf.originalSource = 'file';
+          console.log("1. Sparar PDF från lokal fil:", currentPdfFile.name);
+        } 
+        // Fallback till URL om det finns
+        else if (currentPdfUrl) {
+          newPdf.url = currentPdfUrl;
+          newPdf.originalSource = 'url';
+          console.log("2. Sparar PDF med URL:", currentPdfUrl);
         }
         // Näst bästa är lokal fil som vi kan serialisera (endast för små filer)
         else if (pdfFileInput.files && pdfFileInput.files[0]) {
@@ -1109,7 +1115,6 @@
     // Visa PDF i dialogrutan
     showPdfBtn.addEventListener('click', function() {
       const file = pdfFileInput.files[0];
-      const url = pdfUrlInput.value.trim();
       
       if (file) {
         // Om vi har en fil, använd den
@@ -1122,18 +1127,8 @@
         infoSize.textContent = formatFileSize(file.size);
         infoCreated.textContent = formatDate(new Date());
         infoModified.textContent = formatDate(new Date());
-      } else if (url) {
-        // Om vi har en URL, använd den
-        currentPdfUrl = url;
-        currentPdfFile = null;
-        currentPdfId = generateUniqueId(); // Skapa ett unikt ID för denna nya PDF
-        
-        const urlParts = url.split('/');
-        const filename = urlParts[urlParts.length - 1] || 'dokument.pdf';
-        filenameDisplay.textContent = filename;
-        infoFilename.textContent = filename;
       } else {
-        alert('Välj en fil eller ange en URL');
+        alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
         return;
       }
       
