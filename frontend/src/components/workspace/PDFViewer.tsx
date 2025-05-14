@@ -41,6 +41,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Log when PDFViewer mounts or updates with a new PDF
+  useEffect(() => {
+    if (pdf) {
+      console.log('PDFViewer mounted/updated with PDF:', pdf);
+    }
+  }, [pdf]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -81,11 +88,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  if (!pdf) return null;
-
+  // Check if PDF exists and log
+  const isPDFAvailable = !!pdf;
+  console.log('Modal should be open:', isPDFAvailable);
+  
+  if (!isPDFAvailable) {
+    console.log('No PDF available, not rendering modal');
+    return null;
+  }
+  
   return (
     <Modal
-      open={!!pdf}
+      open={true}
       onClose={onClose}
       sx={{ 
         display: 'flex', 
