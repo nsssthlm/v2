@@ -121,7 +121,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
           maxHeight: '98vh',
           width: '95%',
           height: '95%',
-          boxShadow: 'lg'
+          boxShadow: 'lg',
+          minHeight: '85vh',
+          m: 0,
+          bgcolor: 'background.body'
         }}
       >
         <Box 
@@ -215,7 +218,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
               alignItems: 'flex-start',
               bgcolor: 'background.level2',
               p: 2,
-              height: '100%'
+              height: '100%',
+              position: 'relative' // Lägg till relativ positionering
             }}>
               <Box sx={{ 
                 transform: `scale(${zoom})`, 
@@ -223,8 +227,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 transition: 'transform 0.2s ease-in-out',
                 width: `calc(100% / ${zoom})`, 
                 height: `calc(100% / ${zoom})`,
+                position: 'absolute', // Använd absolut positionering
+                top: 16, // Lägg till lite utrymme i toppen
+                left: '50%', // Centrera horisontellt
+                transform: `translateX(-50%) scale(${zoom})`, // Centrera horisontellt med transformering
                 maxWidth: '100%',
-                minHeight: '600px'
+                bgcolor: 'background.surface',
+                boxShadow: 'md',
+                borderRadius: 'md'
               }}>
                 <SimplePDFViewer 
                   pdfUrl={`/api/workspace/pdfs/${pdf.id}/content/`}

@@ -29,11 +29,18 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
     const fetchPdf = async () => {
       try {
         // Skapa korrekt URL för backend-begäran
-        const apiUrl = pdfUrl.startsWith('/api/') 
-          ? pdfUrl 
-          : pdfUrl.startsWith('/workspace/') 
-            ? `/api${pdfUrl}` 
-            : pdfUrl.replace(/^http:\/\/0\.0\.0\.0:8001\/api/, '');
+        let apiUrl = pdfUrl;
+        
+        // Om URL:en inte börjar med /api/, lägg till det
+        if (!pdfUrl.startsWith('/api/')) {
+          // Om URL:en börjar med /workspace/, lägg till /api före
+          if (pdfUrl.startsWith('/workspace/')) {
+            apiUrl = `/api${pdfUrl}`;
+          }
+        }
+        
+        // Ta bort eventuella http://0.0.0.0:8001/api prefix 
+        apiUrl = apiUrl.replace(/^http:\/\/0\.0\.0\.0:8001\/api/, '/api');
             
         console.log('Fetching PDF from URL:', apiUrl);
         
@@ -137,10 +144,13 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
                   border: 'none',
                   backgroundColor: 'white',
                   minHeight: '600px',
-                  maxWidth: '100%'
+                  maxWidth: '100%',
+                  display: 'block' // Säkerställ att iframe visas i block-läge
                 }}
                 onError={handleIframeError}
                 title={title || "PDF Dokument"}
+                sandbox="allow-same-origin allow-scripts"
+                allow="fullscreen"
               />
             ) : (
               <Typography level="body-md">
