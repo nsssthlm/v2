@@ -48,11 +48,11 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
             
         console.log('Fetching PDF from URL:', apiUrl);
         
-        // Fixa fel i URL före API-anrop
-        // Om URL:en har dubbla api-prefix, åtgärda det
-        if (apiUrl.includes('/api/api/')) {
-          apiUrl = apiUrl.replace('/api/api/', '/api/');
-          console.log('Fixed double /api/ prefix, new URL:', apiUrl);
+        // Fixa fel i URL före API-anrop - vi måste ta bort ALL /api/ prefix eftersom det läggs till av Axios baseURL
+        if (apiUrl.startsWith('/api/')) {
+          // Ta bort /api/ prefixet eftersom api.get kommer att lägga till det automatiskt
+          apiUrl = apiUrl.substring(5); // Ta bort de första 5 tecknen (/api/)
+          console.log('Removed /api/ prefix since Axios will add it. New URL:', apiUrl);
         }
         
         // Ladda ner PDF som blob med autentiserade begäran
