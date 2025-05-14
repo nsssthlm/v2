@@ -22,6 +22,14 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+// Interface för menyobjekt
+interface SubmenuItem {
+  name: string;
+  path: string;
+  icon?: React.ReactNode;
+  hasAddButton?: boolean;
+}
+
 // Komponent för varje nod (fil/mapp) i filsystemet
 interface FileSystemNodeProps {
   node: SidebarFileNode;
@@ -65,14 +73,14 @@ const FileSystemNode = ({
           sx={{ 
             py: 0.3,
             pl: 0.5,
-            pr: 0, 
+            pr: 5, // Se till att det alltid finns utrymme för plustecknet
             borderRadius: '4px',
             color: 'neutral.700',
             fontSize: '0.875rem',
             display: 'flex',
             flexWrap: 'nowrap',
             alignItems: 'center',
-            width: 'auto',
+            width: '100%',
             minWidth: 0,
             overflow: 'visible',
             position: 'relative'
@@ -120,32 +128,32 @@ const FileSystemNode = ({
             </Typography>
           </ListItemContent>
           
-          {/* Visa plustecken för mappar för att skapa nya undermappar, med förbättrad position för djupa nivåer */}
+          {/* Fast positionerad plusknapp för mappar med samma avstånd för alla nivåer */}
           {isFolder && (
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto', minWidth: 22 }}>
-              <IconButton 
-                size="sm" 
-                variant="plain" 
-                color="neutral"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddNewFolder(node.id);
-                }}
-                sx={{ 
-                  opacity: 0.7,
-                  minWidth: '18px',
-                  height: '18px',
-                  p: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(0, 0, 0, 0.04)'
-                  }
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                </svg>
-              </IconButton>
-            </Box>
+            <IconButton 
+              size="sm" 
+              variant="plain" 
+              color="neutral"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddNewFolder(node.id);
+              }}
+              sx={{ 
+                position: 'absolute',
+                right: 5, // Fast avstånd från högerkanten
+                opacity: 0.7,
+                minWidth: '18px',
+                height: '18px',
+                p: '2px',
+                '&:hover': {
+                  bgcolor: 'rgba(0, 0, 0, 0.04)'
+                }
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+            </IconButton>
           )}
         </ListItemButton>
       </ListItem>
@@ -625,7 +633,7 @@ const Sidebar = () => {
                         </ListItemContent>
                         
                         {/* Add plus button for Files */}
-                        {'hasAddButton' in subitem && subitem.hasAddButton && (
+                        {'hasAddButton' in subitem && subitem.hasAddButton === true && (
                           <IconButton 
                             size="sm" 
                             variant="plain" 
