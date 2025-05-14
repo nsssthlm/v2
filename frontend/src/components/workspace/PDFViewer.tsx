@@ -16,7 +16,7 @@ import {
   Divider,
   CircularProgress
 } from '@mui/joy';
-import ReactPDFViewer from './ReactPDFViewer';
+import BasePDFViewer from './BasePDFViewer';
 import {
   ZoomIn as ZoomInIcon,
   ZoomOut as ZoomOutIcon,
@@ -269,7 +269,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 transformOrigin: 'center top' // Skala från centrum överst
               }}>
                 {pdf && (
-                  <ReactPDFViewer 
+                  <BasePDFViewer 
                     pdfUrl={`workspace/pdfs/${pdf.id}/content/`}
                     title={pdf?.title}
                     key={pdf?.id} // Lägg till key för att tvinga omrendering
