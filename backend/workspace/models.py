@@ -1,59 +1,62 @@
 from django.db import models
 from django.conf import settings
-from core.models import Project, User, RoleAccess
+from core.models import Project, User
 
 class FileNode(models.Model):
-    """File node model for workspace tree structure (folders/files)"""
-    FOLDER = 'folder'
+    """Model for representing a file or folder in the project file structure"""
     FILE = 'file'
+    FOLDER = 'folder'
     
     TYPE_CHOICES = [
-        (FOLDER, 'Folder'),
         (FILE, 'File'),
+        (FOLDER, 'Folder'),
     ]
     
     name = models.CharField(max_length=255)
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default=FILE)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='workspace_nodes')
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='file_nodes')
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_nodes')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_file_nodes')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         unique_together = ('name', 'project', 'parent')
-        ordering = ['name']
+        ordering = ['type', 'name']
     
     def __str__(self):
         return f"{self.name} ({self.get_type_display()})"
     
     def get_path(self):
-        """Return the full path of the node"""
+        """Return the full path of the file node"""
         if self.parent:
             return f"{self.parent.get_path()}/{self.name}"
-        return self.name
-
+        return f"/{self.name}"
 
 class FileVersion(models.Model):
-    """File version model for tracking version history"""
+    """Model for storing versions of files"""
     file_node = models.ForeignKey(FileNode, on_delete=models.CASCADE, related_name='versions')
+    version = models.PositiveIntegerField()
     file = models.FileField(upload_to='workspace_files/%Y/%m/%d/')
-    version_number = models.PositiveIntegerField()
     content_type = models.CharField(max_length=100)
     size = models.BigIntegerField()  # Size in bytes
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_versions')
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_file_versions')
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ('file_node', 'version_number')
-        ordering = ['-version_number']
+        unique_together = ('file_node', 'version')
+        ordering = ['-version']
     
     def __str__(self):
-        return f"{self.file_node.name} (v{self.version_number})"
-
+        return f"{self.file_node.name} v{self.version}"
+    
+    @property
+    def file_url(self):
+        """Return the URL to access the file"""
+        return self.file.url
 
 class FileComment(models.Model):
-    """Comment model for file versions"""
+    """Model for comments on file versions"""
     file_version = models.ForeignKey(FileVersion, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='file_comments')
     content = models.TextField()
@@ -64,11 +67,10 @@ class FileComment(models.Model):
         ordering = ['created_at']
     
     def __str__(self):
-        return f"Comment on {self.file_version} by {self.user.username}"
-
+        return f"Comment by {self.user.username} on {self.file_version}"
 
 class WikiArticle(models.Model):
-    """Wiki article model for project documentation"""
+    """Model for wiki articles"""
     title = models.CharField(max_length=255)
     content = models.TextField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='workspace_wiki_articles')
@@ -81,29 +83,29 @@ class WikiArticle(models.Model):
         ordering = ['title']
     
     def __str__(self):
-        return f"{self.title} - {self.project.name}"
-
+        return self.title
 
 class ProjectDashboard(models.Model):
-    """Project dashboard model for customized views"""
+    """Model for customizable project dashboard settings"""
     project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='dashboard')
     welcome_message = models.TextField(blank=True)
     show_recent_files = models.BooleanField(default=True)
     show_recent_wiki = models.BooleanField(default=True)
     show_team_activity = models.BooleanField(default=True)
     custom_config = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"Dashboard for {self.project.name}"
 
-
 class PDFDocument(models.Model):
-    """PDF document model"""
+    """Model for PDF documents"""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    file = models.FileField(upload_to='workspace_pdfs/%Y/%m/%d/')
+    file = models.FileField(upload_to='pdf_documents/%Y/%m/%d/')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='pdf_documents')
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_pdfs')
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_pdf_documents')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -112,3 +114,8 @@ class PDFDocument(models.Model):
     
     def __str__(self):
         return self.title
+    
+    @property
+    def file_url(self):
+        """Return the URL to access the PDF file"""
+        return self.file.url

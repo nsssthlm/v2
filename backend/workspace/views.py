@@ -1,221 +1,215 @@
-from rest_framework import viewsets, permissions, filters, status
+from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
-
 from .models import FileNode, FileVersion, FileComment, WikiArticle, ProjectDashboard, PDFDocument
 from .serializers import (
     FileNodeSerializer, FileVersionSerializer, FileCommentSerializer,
     WikiArticleSerializer, ProjectDashboardSerializer, PDFDocumentSerializer
 )
-from core.models import RoleAccess, Project
+from core.models import Project, RoleAccess
 
-
-class IsProjectMemberOrReadOnly(permissions.BasePermission):
+class WorkspacePermission(permissions.BasePermission):
     """
-    Permission to only allow members of a project to edit objects.
+    Custom permission to only allow members of a project to access its workspace.
     """
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return False
+        
+        # For certain views like ProjectDashboard specific endpoints
+        if getattr(view, 'no_project_check', False):
             return True
         
-        project_id = request.data.get('project')
+        # Check if project_id is in the request
+        project_id = request.query_params.get('project')
+        if not project_id:
+            # Check if it's in the data for create operations
+            project_id = request.data.get('project')
+            
         if not project_id:
             return False
         
+        # Check if user has access to the project
         return RoleAccess.objects.filter(
             user=request.user,
             project_id=project_id
         ).exists()
     
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request
-        if request.method in permissions.SAFE_METHODS:
-            return RoleAccess.objects.filter(
-                user=request.user,
-                project=obj.project
-            ).exists()
+        # Check if user is a member of the object's project
+        project = None
         
-        # Write permissions for project members
+        if hasattr(obj, 'project'):
+            project = obj.project
+        elif hasattr(obj, 'file_node'):
+            project = obj.file_node.project
+        elif hasattr(obj, 'file_version'):
+            project = obj.file_version.file_node.project
+            
+        if not project:
+            return False
+            
         return RoleAccess.objects.filter(
             user=request.user,
-            project=obj.project
+            project=project
         ).exists()
 
-
 class FileNodeViewSet(viewsets.ModelViewSet):
+    """API endpoint for file nodes (files and folders)"""
     queryset = FileNode.objects.all()
     serializer_class = FileNodeSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProjectMemberOrReadOnly]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    permission_classes = [WorkspacePermission]
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    ordering_fields = ['name', 'type', 'created_at', 'updated_at']
     search_fields = ['name']
-    ordering_fields = ['name', 'created_at', 'updated_at']
     
     def get_queryset(self):
-        user = self.request.user
-        accessible_projects = Project.objects.filter(
-            user_roles__user=user
-        ).values_list('id', flat=True)
+        queryset = FileNode.objects.all()
         
-        queryset = FileNode.objects.filter(project__id__in=accessible_projects)
-        
-        # Filter by project if specified
+        # Filter by project
         project_id = self.request.query_params.get('project')
         if project_id:
-            queryset = queryset.filter(project__id=project_id)
+            project = get_object_or_404(Project, id=project_id)
+            queryset = queryset.filter(project=project)
         
-        # Filter by parent if specified (or root level)
+        # Filter by parent
         parent_id = self.request.query_params.get('parent')
-        if parent_id and parent_id.lower() != 'null':
-            queryset = queryset.filter(parent__id=parent_id)
-        elif parent_id and parent_id.lower() == 'null':
-            queryset = queryset.filter(parent__isnull=True)
-            
+        if parent_id:
+            if parent_id.lower() == 'null':
+                queryset = queryset.filter(parent__isnull=True)
+            else:
+                queryset = queryset.filter(parent_id=parent_id)
+                
         # Filter by type
         node_type = self.request.query_params.get('type')
         if node_type:
             queryset = queryset.filter(type=node_type)
             
+        # Search by name
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+        
         return queryset
-    
-    @action(detail=True, methods=['get'])
-    def children(self, request, pk=None):
-        """Get all children of a node"""
-        node = self.get_object()
-        children = FileNode.objects.filter(parent=node)
-        serializer = self.get_serializer(children, many=True)
-        return Response(serializer.data)
-
 
 class FileVersionViewSet(viewsets.ModelViewSet):
+    """API endpoint for file versions"""
     queryset = FileVersion.objects.all()
     serializer_class = FileVersionSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProjectMemberOrReadOnly]
+    permission_classes = [WorkspacePermission]
     
     def get_queryset(self):
-        user = self.request.user
-        accessible_projects = Project.objects.filter(
-            user_roles__user=user
-        ).values_list('id', flat=True)
+        queryset = FileVersion.objects.all()
         
-        queryset = FileVersion.objects.filter(file_node__project__id__in=accessible_projects)
-        
-        # Filter by file_node if specified
+        # Filter by file node
         file_node_id = self.request.query_params.get('file_node')
         if file_node_id:
-            queryset = queryset.filter(file_node__id=file_node_id)
-            
+            file_node = get_object_or_404(FileNode, id=file_node_id)
+            queryset = queryset.filter(file_node=file_node)
+        
         return queryset
-
 
 class FileCommentViewSet(viewsets.ModelViewSet):
+    """API endpoint for file comments"""
     queryset = FileComment.objects.all()
     serializer_class = FileCommentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProjectMemberOrReadOnly]
+    permission_classes = [WorkspacePermission]
     
     def get_queryset(self):
-        user = self.request.user
-        accessible_projects = Project.objects.filter(
-            user_roles__user=user
-        ).values_list('id', flat=True)
+        queryset = FileComment.objects.all()
         
-        queryset = FileComment.objects.filter(
-            file_version__file_node__project__id__in=accessible_projects
-        )
-        
-        # Filter by file_version if specified
+        # Filter by file version
         file_version_id = self.request.query_params.get('file_version')
         if file_version_id:
-            queryset = queryset.filter(file_version__id=file_version_id)
+            queryset = queryset.filter(file_version_id=file_version_id)
             
         return queryset
-
 
 class WikiArticleViewSet(viewsets.ModelViewSet):
+    """API endpoint for wiki articles"""
     queryset = WikiArticle.objects.all()
     serializer_class = WikiArticleSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProjectMemberOrReadOnly]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['title', 'content']
+    permission_classes = [WorkspacePermission]
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
     ordering_fields = ['title', 'created_at', 'updated_at']
+    search_fields = ['title', 'content']
     
     def get_queryset(self):
-        user = self.request.user
-        accessible_projects = Project.objects.filter(
-            user_roles__user=user
-        ).values_list('id', flat=True)
+        queryset = WikiArticle.objects.all()
         
-        queryset = WikiArticle.objects.filter(project__id__in=accessible_projects)
-        
-        # Filter by project if specified
+        # Filter by project
         project_id = self.request.query_params.get('project')
         if project_id:
-            queryset = queryset.filter(project__id=project_id)
+            project = get_object_or_404(Project, id=project_id)
+            queryset = queryset.filter(project=project)
             
         return queryset
 
-
 class ProjectDashboardViewSet(viewsets.ModelViewSet):
+    """API endpoint for project dashboards"""
     queryset = ProjectDashboard.objects.all()
     serializer_class = ProjectDashboardSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProjectMemberOrReadOnly]
+    permission_classes = [WorkspacePermission]
     
     def get_queryset(self):
-        user = self.request.user
-        accessible_projects = Project.objects.filter(
-            user_roles__user=user
-        ).values_list('id', flat=True)
+        queryset = ProjectDashboard.objects.all()
         
-        return ProjectDashboard.objects.filter(project__id__in=accessible_projects)
+        # Filter by project
+        project_id = self.request.query_params.get('project')
+        if project_id:
+            queryset = queryset.filter(project_id=project_id)
+            
+        return queryset
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='for_project')
     def for_project(self, request):
-        """Get dashboard for a specific project, create if it doesn't exist"""
+        """Get or create dashboard for a project"""
         project_id = request.query_params.get('project')
         if not project_id:
-            return Response(
-                {"error": "Project ID is required"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+            return Response({'error': 'Project ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
         # Check if user has access to the project
-        if not RoleAccess.objects.filter(user=request.user, project_id=project_id).exists():
-            return Response(
-                {"error": "You don't have access to this project"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        has_access = RoleAccess.objects.filter(
+            user=request.user,
+            project_id=project_id
+        ).exists()
         
+        if not has_access:
+            return Response({'error': 'You do not have access to this project'}, status=status.HTTP_403_FORBIDDEN)
+            
         # Get or create dashboard
         dashboard, created = ProjectDashboard.objects.get_or_create(
             project_id=project_id,
             defaults={
-                "welcome_message": "Welcome to your project workspace!"
+                'welcome_message': 'Welcome to your project dashboard!',
+                'show_recent_files': True,
+                'show_recent_wiki': True,
+                'show_team_activity': True
             }
         )
         
         serializer = self.get_serializer(dashboard)
         return Response(serializer.data)
 
-
 class PDFDocumentViewSet(viewsets.ModelViewSet):
+    """API endpoint for PDF documents"""
     queryset = PDFDocument.objects.all()
     serializer_class = PDFDocumentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProjectMemberOrReadOnly]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['title', 'description']
+    permission_classes = [WorkspacePermission]
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
     ordering_fields = ['title', 'created_at', 'updated_at']
+    search_fields = ['title', 'description']
     
     def get_queryset(self):
-        user = self.request.user
-        accessible_projects = Project.objects.filter(
-            user_roles__user=user
-        ).values_list('id', flat=True)
+        queryset = PDFDocument.objects.all()
         
-        queryset = PDFDocument.objects.filter(project__id__in=accessible_projects)
-        
-        # Filter by project if specified
+        # Filter by project
         project_id = self.request.query_params.get('project')
         if project_id:
-            queryset = queryset.filter(project__id=project_id)
+            project = get_object_or_404(Project, id=project_id)
+            queryset = queryset.filter(project=project)
             
         return queryset

@@ -4,7 +4,7 @@ from . import views
 
 router = DefaultRouter()
 router.register(r'files', views.FileNodeViewSet)
-router.register(r'versions', views.FileVersionViewSet)
+router.register(r'file-versions', views.FileVersionViewSet)
 router.register(r'comments', views.FileCommentViewSet)
 router.register(r'wiki', views.WikiArticleViewSet)
 router.register(r'dashboard', views.ProjectDashboardViewSet)
