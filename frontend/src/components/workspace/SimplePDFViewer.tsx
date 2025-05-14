@@ -146,9 +146,9 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
             alignItems: 'center'
           }}>
             {objectUrl ? (
-              <iframe
-                ref={iframeRef}
+              <embed
                 src={objectUrl}
+                type="application/pdf"
                 style={{ 
                   width: '100%', 
                   height: '100%', 
@@ -156,14 +156,10 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
                   backgroundColor: 'white',
                   minHeight: '600px',
                   maxWidth: '100%',
-                  display: 'block', // Säkerställ att iframe visas i block-läge
+                  display: 'block',
                   margin: 0,
                   padding: 0
                 }}
-                onError={handleIframeError}
-                title={title || "PDF Dokument"}
-                sandbox="allow-same-origin allow-scripts"
-                allow="fullscreen"
               />
             ) : (
               <Typography level="body-md">
