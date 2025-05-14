@@ -70,7 +70,7 @@ export default function FileBrowser({
   const handleContextMenu = (
     event: React.MouseEvent, 
     nodeId: string,
-    isFolder: boolean
+    nodeIsFolder: boolean
   ) => {
     event.preventDefault();
     event.stopPropagation();
@@ -106,7 +106,7 @@ export default function FileBrowser({
   };
 
   // Rekursiv funktion för att rita upp filer och mappar
-  const renderNode = (node: FileTreeNode, parentId: string | null = null) => {
+  const renderNode = (node: FileTreeNode) => {
     const isFolder = node.type === 'folder';
     const isExpanded = node.isExpanded;
 
@@ -178,7 +178,7 @@ export default function FileBrowser({
         {/* Render children if folder is expanded */}
         {isFolder && isExpanded && (
           <Box>
-            {node.children.map(childNode => renderNode(childNode, node.id))}
+            {node.children.map(childNode => renderNode(childNode))}
             
             {/* Render files inside the folder */}
             {node.files.map(file => (

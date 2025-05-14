@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Box, Grid, Typography, Breadcrumbs, Link, Divider } from '@mui/joy';
 import FileBrowser from '../../../components/files/FileBrowser';
 import FileView from '../../../components/files/FileView';
