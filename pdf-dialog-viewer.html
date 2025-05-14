@@ -713,8 +713,22 @@
         // Visa filnamnet som feedback
         const file = files[0];
         if (file.type === 'application/pdf') {
+          // Sätt titeln baserat på filnamnet
           pdfTitleInput.value = file.name.replace('.pdf', '');
-          alert('PDF-fil uppladdad: ' + file.name);
+          
+          // Uppdatera gränssnittet så användaren ser att en fil har valts
+          filenameDisplay.textContent = file.name;
+          infoFilename.textContent = file.name;
+          infoSize.textContent = formatFileSize(file.size);
+          
+          // Uppdatera drop-rutan för att visa att fil är vald
+          dropArea.classList.add('has-file');
+          dropArea.innerHTML = '<div class="drop-message"><strong>✓ Fil vald:</strong> ' + file.name + '</div>';
+          
+          // Skapa en blob URL för visning
+          currentPdfFile = file;
+          currentPdfUrl = URL.createObjectURL(file);
+          currentPdfId = generateUniqueId();
         } else {
           alert('Endast PDF-filer är tillåtna.');
         }
