@@ -75,16 +75,14 @@ const FileSystemNode = ({
           sx={{ 
             py: 0.3,
             pl: 0.5,
-            pr: 6, // Större utrymme för plustecknet
             borderRadius: '4px',
             color: 'neutral.700',
             fontSize: '0.875rem',
-            display: 'flex',
-            flexWrap: 'nowrap',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(20px, 20px) auto minmax(30px, 30px)',
+            gridGap: '4px',
             alignItems: 'center',
             width: '100%',
-            minWidth: '100%', // Se till att knappen alltid tar upp full bredd
-            maxWidth: '100%',
             overflow: 'visible',
             position: 'relative'
           }}
@@ -110,27 +108,19 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Filnamn/mappnamn utan textavklippning */}
-          <ListItemContent sx={{ 
-            width: 'calc(100% - 35px)', // Fast bredd med plats för plusknappen (lite bredare marginal)
-            mr: 0,
-            flexGrow: 0,
-            flexShrink: 0,
-            overflow: 'visible'
-          }}>
-            <Typography 
-              level="body-xs" 
-              sx={{ 
-                overflow: 'visible',
-                whiteSpace: 'nowrap',
-                wordBreak: 'keep-all',
-                display: 'inline',
-                textOverflow: 'clip'
-              }}
-            >
-              {node.name}
-            </Typography>
-          </ListItemContent>
+          {/* Filnamn/mappnamn i egen grid-cell */}
+          <Typography 
+            level="body-xs" 
+            sx={{ 
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              wordBreak: 'keep-all',
+              display: 'block',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            {node.name}
+          </Typography>
           
           {/* Fast positionerad plusknapp för mappar med exakt samma position för alla nivåer */}
           {isFolder && (
@@ -145,6 +135,7 @@ const FileSystemNode = ({
               sx={{ 
                 position: 'absolute',
                 right: '5px',
+                zIndex: 10,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 display: 'flex',
