@@ -15,7 +15,7 @@ import {
   TabPanel,
   Divider
 } from '@mui/joy';
-import SimplePDFViewer from './SimplePDFViewer';
+import AdvancedPDFViewer from './AdvancedPDFViewer';
 import {
   ZoomIn as ZoomInIcon,
   ZoomOut as ZoomOutIcon,
@@ -233,7 +233,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 borderRadius: 'md',
                 overflow: 'hidden'
               }}>
-                <SimplePDFViewer 
+                <AdvancedPDFViewer 
                   pdfUrl={`workspace/pdfs/${pdf.id}/content/`}
                   title={pdf.title}
                   key={pdf.id} // Lägg till key för att tvinga omrendering
