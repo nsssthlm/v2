@@ -16,7 +16,8 @@ import {
   Modal,
   ModalDialog,
   ModalClose,
-  Sheet
+  Sheet,
+  Button
 } from '@mui/joy';
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
@@ -255,13 +256,28 @@ const Workspace: React.FC = () => {
                 </Typography>
               </Box>
               
-              <iframe
-                src={selectedPDF.file}
-                title={selectedPDF.title}
-                width="100%"
-                height="100%"
-                style={{ border: 'none', flex: 1 }}
-              />
+              {/* Visa en knapp för att öppna PDF i ny flik istället för iframe */}
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                p: 4, 
+                flex: 1,
+                textAlign: 'center'
+              }}>
+                <Typography level="body-md" sx={{ mb: 3 }}>
+                  PDF kan inte visas direkt i applikationen på grund av säkerhetsinställningar.
+                </Typography>
+                <Button 
+                  variant="solid" 
+                  color="primary" 
+                  size="lg"
+                  onClick={() => window.open(`http://0.0.0.0:8001${selectedPDF.file_url}`, '_blank', 'noopener,noreferrer')}
+                >
+                  Öppna PDF i nytt fönster
+                </Button>
+              </Box>
             </Sheet>
           </ModalDialog>
         </Modal>
