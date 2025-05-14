@@ -179,6 +179,40 @@
     .secondary-btn:hover {
       background-color: #d1d5db;
     }
+    
+    /* Styles for our table and PDF file list */
+    .pdf-icon-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .file-icon {
+      flex-shrink: 0;
+    }
+    
+    .comment-count {
+      background-color: var(--primary);
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 12px;
+      display: inline-block;
+    }
+    
+    .clickable-row {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .clickable-row:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .clickable-row td.filename-cell {
+      font-weight: 500;
+      color: var(--primary);
+    }
 
     .icon-btn {
       padding: 0.5rem;
@@ -1022,37 +1056,35 @@
       const row = document.createElement('tr');
       row.setAttribute('data-id', pdfData.id);
       row.setAttribute('data-folder-id', pdfData.folderId || 'null'); // 'null' som sträng för rotmappen
+      row.setAttribute('data-search', (pdfData.title + ' ' + pdfData.description).toLowerCase());
+      row.classList.add('clickable-row'); // Markera raden som klickbar
+      
+      // Skapa datum-strängar 
+      const uploadedDate = pdfData.date ? formatDate(new Date(pdfData.date)) : formatDate(new Date());
+      
+      // Skapa version-nummer
+      const versionNumber = pdfData.version || 1;
+      
+      // Skapa kommentarsräknare
+      const commentCount = pdfData.commentCount || 0;
       
       row.innerHTML = `
-        <td style="padding: 0.75rem; border: 1px solid var(--border);">${pdfData.title}</td>
-        <td style="padding: 0.75rem; border: 1px solid var(--border);">${pdfData.description}</td>
-        <td style="padding: 0.75rem; border: 1px solid var(--border);">${formatDate(pdfData.date)}</td>
-        <td style="padding: 0.75rem; border: 1px solid var(--border);">
-          <button class="view-pdf-btn icon-btn" title="Visa PDF">
-            <svg class="icon" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path>
-            </svg>
-          </button>
-          <button class="delete-pdf-btn icon-btn" title="Ta bort" style="color: #ef4444;">
-            <svg class="icon" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
-            </svg>
-          </button>
+        <td class="filename-cell">
+          <div class="pdf-icon-name">
+            <img src="https://img.icons8.com/office/25/000000/pdf.png" alt="PDF" class="file-icon">
+            <span>${pdfData.title || 'Namnlös PDF'}</span>
+          </div>
         </td>
+        <td>v${versionNumber}</td>
+        <td>${pdfData.description || '--'}</td>
+        <td>${uploadedDate}</td>
+        <td>Du</td>
+        <td>${commentCount > 0 ? `<span class="comment-count">${commentCount}</span>` : '--'}</td>
       `;
       
-      // Lägg till händelsehanterare för knapparna
-      const viewBtn = row.querySelector('.view-pdf-btn');
-      const deleteBtn = row.querySelector('.delete-pdf-btn');
-      
-      viewBtn.addEventListener('click', function() {
+      // Lägg till händelsehanterare för hela raden så man kan klicka var som helst på raden
+      row.addEventListener('click', function() {
         openSavedPdf(pdfData);
-      });
-      
-      deleteBtn.addEventListener('click', function() {
-        deletePdf(pdfData.id);
-        row.remove();
-        updatePdfListVisibility();
       });
       
       pdfListBody.appendChild(row);
@@ -1364,7 +1396,46 @@
     // Ladda sparade PDF-filer vid sidladdning 
     document.addEventListener('DOMContentLoaded', function() {
       loadSavedPdfs();
+      
+      // Implementera sökfunktionen
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          const searchTerm = this.value.trim().toLowerCase();
+          filterPdfsBySearch(searchTerm);
+        });
+      }
     });
+    
+    // Funktion för att filtrera PDF-filer baserat på sökterm
+    function filterPdfsBySearch(searchTerm) {
+      const rows = pdfListBody.querySelectorAll('tr');
+      
+      if (!searchTerm) {
+        // Om söktermen är tom, visa alla rader
+        rows.forEach(row => { row.style.display = ''; });
+        return;
+      }
+      
+      // Gå igenom alla rader och kontrollera om de matchar sökningen
+      rows.forEach(row => {
+        const searchData = row.getAttribute('data-search') || '';
+        if (searchData.includes(searchTerm)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Uppdatera meddelandet om inga resultat hittades
+      const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+      if (visibleRows.length === 0) {
+        noPdfsMessage.textContent = 'Inga PDF-filer hittades som matchar din sökning.';
+        noPdfsMessage.style.display = 'block';
+      } else {
+        noPdfsMessage.style.display = 'none';
+      }
+    }
     
     // Spara PDF-knapp hanterare
     // *** Nya eventlisteners för den uppdaterade designen ***
