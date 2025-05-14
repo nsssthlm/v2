@@ -244,10 +244,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 flexShrink: 0
               }}
             >
-              <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)}>
+              <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val as number)}>
                 <TabList>
-                  <Tab startDecorator={<InfoIcon />}>Info</Tab>
-                  <Tab startDecorator={<DescriptionIcon />} disabled>Anteckningar</Tab>
+                  <Tab>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <InfoIcon />
+                      <span>Info</span>
+                    </Box>
+                  </Tab>
+                  <Tab disabled>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <DescriptionIcon />
+                      <span>Anteckningar</span>
+                    </Box>
+                  </Tab>
                 </TabList>
                 <TabPanel value={0} sx={{ p: 2 }}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

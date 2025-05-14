@@ -83,9 +83,7 @@ const Workspace: React.FC = () => {
     fetchProject();
   }, [projectId]);
   
-  const handleTabChange = (event: React.SyntheticEvent | null, newValue: number) => {
-    setActiveTab(newValue);
-  };
+  // Tab change is handled inline with the onChange handler
   
   const handleOpenPDF = (pdf: PDFDocument) => {
     setSelectedPDF(pdf);
@@ -129,14 +127,34 @@ const Workspace: React.FC = () => {
       <Card variant="outlined">
         <Tabs
           value={activeTab}
-          onChange={handleTabChange}
+          onChange={(e, val) => setActiveTab(val as number)}
           aria-label="Workspace tabs"
         >
           <TabList>
-            <Tab startDecorator={<FolderIcon />}>Filer</Tab>
-            <Tab startDecorator={<DescriptionIcon />}>PDFer</Tab>
-            <Tab startDecorator={<ListAltIcon />}>Wiki</Tab>
-            <Tab startDecorator={<DashboardIcon />}>Dashboard</Tab>
+            <Tab>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FolderIcon />
+                <span>Filer</span>
+              </Box>
+            </Tab>
+            <Tab>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <DescriptionIcon />
+                <span>PDFer</span>
+              </Box>
+            </Tab>
+            <Tab>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ListAltIcon />
+                <span>Wiki</span>
+              </Box>
+            </Tab>
+            <Tab>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <DashboardIcon />
+                <span>Dashboard</span>
+              </Box>
+            </Tab>
           </TabList>
           
           <CardContent>
