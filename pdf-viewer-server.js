@@ -7,9 +7,9 @@ const port = 5000;
 // Serve static files
 app.use(express.static(__dirname));
 
-// Route for the basic PDF viewer
+// Route for the basic PDF viewer - redirects to dialog page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pdf-viewer-modal.html'));
+    res.redirect('/dialog');
 });
 
 // Route for the enhanced PDF dialog viewer
