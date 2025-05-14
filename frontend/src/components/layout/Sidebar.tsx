@@ -52,7 +52,10 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1.5 // Indentera baserat på nivå
+          pl: level * 1.5, // Indentera baserat på nivå
+          pr: 0,
+          position: 'relative',
+          overflow: 'visible'
         }}
       >
         <ListItemButton
@@ -60,9 +63,14 @@ const FileSystemNode = ({
           sx={{ 
             py: 0.3,
             pl: 0.5,
+            pr: 2.5, // Extra padding till höger för plustecknet
             borderRadius: '4px',
             color: 'neutral.700',
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
+            display: 'flex',
+            flexWrap: 'nowrap',
+            overflow: 'visible',
+            position: 'relative'
           }}
         >
           {/* Ikon för fil/mapp */}
@@ -87,8 +95,14 @@ const FileSystemNode = ({
           </Box>
           
           {/* Filnamn/mappnamn */}
-          <ListItemContent>
-            <Typography level="body-xs">
+          <ListItemContent sx={{ 
+            minWidth: 0,  // Viktigt för att låta texten krympa
+            mr: 2,        // Marginal till höger för att ge plats åt plustecknet
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            <Typography level="body-xs" noWrap>
               {node.name}
             </Typography>
           </ListItemContent>
@@ -103,7 +117,14 @@ const FileSystemNode = ({
                 e.stopPropagation();
                 handleAddNewFolder(node.id);
               }}
-              sx={{ ml: 'auto', opacity: 0.6 }}
+              sx={{ 
+                position: 'absolute',
+                right: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                opacity: 0.6,
+                zIndex: 2
+              }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -115,7 +136,11 @@ const FileSystemNode = ({
       
       {/* Rekursivt visa barnens innehåll om det är en öppen mapp */}
       {isFolder && isOpen && children.length > 0 && (
-        <Box sx={{ ml: 2 }}>
+        <Box sx={{ 
+          ml: 1,
+          width: '100%',
+          position: 'relative'
+        }}>
           {children.map(child => (
             <FileSystemNode
               key={child.id}
@@ -684,9 +709,12 @@ const Sidebar = () => {
                   size="sm" 
                   sx={{ 
                     '--ListItem-radius': '4px',
-                    pl: 2.5,
+                    pl: 1.5,
                     mt: 0.5,
-                    mb: 0.5
+                    mb: 0.5,
+                    position: 'relative',
+                    maxWidth: '100%',
+                    overflow: 'visible'
                   }}
                 >
                   {/* Visa mappar på rotnivå */}
