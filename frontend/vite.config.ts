@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
       },
       // Add the Replit domain to allowed hosts
       origin: '0.0.0.0:5000',
-      allowedHosts: ['all'],
+      allowedHosts: ['all', '3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev'],
     },
     define: {
       // Expose environment variables to your client-side code
