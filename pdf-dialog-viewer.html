@@ -1157,7 +1157,7 @@
     // Spara PDF till localStorage
     function savePdf() {
       // Kontrollera att vi har en PDF att spara
-      if (!currentPdfUrl && !pdfFileInput.files[0]) {
+      if (!currentPdfFile) {
         alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
         return;
       }
@@ -1367,34 +1367,104 @@
     });
     
     // Spara PDF-knapp hanterare
-    savePdfBtn.addEventListener('click', function() {
-      savePdf();
+    // *** Nya eventlisteners för den uppdaterade designen ***
+    
+    // 1. Ladda upp-knapp visar uppladdningspanelen
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadPanel = document.getElementById('upload-panel');
+    const cancelUploadBtn = document.getElementById('cancel-upload-btn');
+    
+    uploadBtn.addEventListener('click', function() {
+      uploadPanel.style.display = 'block';
     });
     
-    // Visa PDF i dialogrutan
-    showPdfBtn.addEventListener('click', function() {
-      const file = pdfFileInput.files[0];
+    // 2. Avbryt-knappen döljer uppladdningspanelen och återställer
+    cancelUploadBtn.addEventListener('click', function() {
+      uploadPanel.style.display = 'none';
+      // Återställ uppladdningsområdet
+      if (dropArea && dropArea.classList.contains('has-file')) {
+        dropArea.classList.remove('has-file');
+        dropArea.innerHTML = `
+          <img src="https://img.icons8.com/office/80/000000/pdf.png" alt="PDF Icon" class="pdf-icon">
+          <p>Dra och släpp PDF-filer här<br>eller</p>
+          <label for="pdf-file" class="file-label">Välj PDF-fil</label>
+          <input type="file" id="pdf-file" accept=".pdf" style="display: none;" />
+        `;
+        
+        // Återaktivera eventlisteners för nya input-elementet
+        const newPdfFileInput = document.getElementById('pdf-file');
+        if (newPdfFileInput) {
+          newPdfFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+              handleFileSelection(this.files[0]);
+            }
+          });
+        }
+      }
       
-      if (file) {
-        // Om vi har en fil, använd den
+      // Återställ variabler
+      currentPdfFile = null;
+      currentPdfUrl = null;
+      currentPdfDataUrl = null;
+      pdfTitleInput.value = '';
+      pdfDescriptionInput.value = '';
+    });
+    
+    // 3. Spara PDF-knappen
+    savePdfBtn.addEventListener('click', function() {
+      if (currentPdfFile) {
+        savePdf();
+        // Dölj uppladdningspanelen efter att ha sparat
+        if (uploadPanel) {
+          uploadPanel.style.display = 'none';
+        }
+      } else {
+        alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
+      }
+    });
+    
+    // Hjälpfunktion för att hantera filer som valts (från både drag-drop och filväljare)
+    function handleFileSelection(file) {
+      if (file.type === 'application/pdf') {
+        // Uppdatera currentPdfFile och URL
         currentPdfFile = file;
         currentPdfUrl = URL.createObjectURL(file);
-        currentPdfId = generateUniqueId(); // Skapa ett unikt ID för denna nya PDF
+        currentPdfId = generateUniqueId();
         
+        // Sätt titeln baserat på filnamnet om det inte redan finns
+        if (!pdfTitleInput.value) {
+          pdfTitleInput.value = file.name.replace('.pdf', '');
+        }
+        
+        // Uppdatera UI
+        if (dropArea) {
+          dropArea.classList.add('has-file');
+          dropArea.innerHTML = '<div class="drop-message"><strong>✓ Fil vald:</strong> ' + file.name + '</div>';
+        }
+        
+        // För PDF-metadata och visning
         filenameDisplay.textContent = file.name;
         infoFilename.textContent = file.name;
         infoSize.textContent = formatFileSize(file.size);
         infoCreated.textContent = formatDate(new Date());
         infoModified.textContent = formatDate(new Date());
+        
+        // Konvertera till dataURL för lagring om filen inte är för stor
+        if (file.size < 5*1024*1024) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            currentPdfDataUrl = e.target.result;
+            console.log("Filen har konverterats till data-URL");
+          };
+          reader.readAsDataURL(file);
+        } else {
+          console.log("Filen är för stor för att konverteras till data-URL:", formatFileSize(file.size));
+          currentPdfDataUrl = null;
+        }
       } else {
-        alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
-        return;
+        alert('Endast PDF-filer är tillåtna.');
       }
-      
-      // Visa dialogrutan och ladda PDF
-      pdfDialogOverlay.style.display = 'block';
-      loadPdf(currentPdfUrl);
-    });
+    }
 
     // Close dialog
     pdfDialogClose.addEventListener('click', function() {
