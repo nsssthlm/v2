@@ -1,10 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import replitCompat from "./vite-plugin-replit";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), replitCompat()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -18,15 +19,10 @@ export default defineConfig({
     },
   },
   server: {
-    host: true,
+    host: "0.0.0.0",
     port: 5000,
     strictPort: true,
-    cors: {
-      origin: "*",
-      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-      preflightContinue: false,
-      optionsSuccessStatus: 204
-    },
+    cors: true,
     hmr: {
       clientPort: 443,
     },
@@ -35,14 +31,6 @@ export default defineConfig({
         target: "http://0.0.0.0:8001",
         changeOrigin: true,
       },
-    },
-    fs: {
-      strict: false,
-    },
-    watch: {
-      usePolling: true,
-      interval: 1000
-    },
-    allowedHosts: ["fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww3ixj0zyl.janeway.replit.dev"]
+    }
   },
 });
