@@ -1,11 +1,28 @@
 const express = require('express');
 const path = require('path');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 const port = 5000;
 
 // Serve static files
 app.use(express.static(__dirname));
+
+// Setup proxy for API requests to backend Django server
+app.use('/api', createProxyMiddleware({
+  target: 'http://0.0.0.0:8001',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api': '/api', // No need to rewrite the path
+  },
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err);
+    res.status(500).json({
+      error: 'Proxy error',
+      message: 'Could not connect to backend server'
+    });
+  }
+}));
 
 // Route for the basic PDF viewer - redirects to dialog page
 app.get('/', (req, res) => {
