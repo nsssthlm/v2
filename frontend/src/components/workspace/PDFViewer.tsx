@@ -183,7 +183,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
               <Tooltip title="Ladda ner">
                 <IconButton 
                   component="a" 
-                  href={`${pdf.file_url}?token=${localStorage.getItem('access_token')}`} 
+                  href={pdf.file_url} 
                   download 
                   target="_blank" 
                   size="sm"
@@ -220,7 +220,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 maxWidth: '100%'
               }}>
                 <iframe 
-                  src={`${pdf.file_url}?token=${localStorage.getItem('access_token')}#toolbar=0&navpanes=0`} 
+                  src={`${pdf.file_url}#toolbar=0&navpanes=0`} 
                   style={{ 
                     width: '100%', 
                     height: '100%', 
