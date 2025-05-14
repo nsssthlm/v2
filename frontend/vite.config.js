@@ -18,25 +18,30 @@ export default defineConfig({
     },
   },
   server: {
-    host: "0.0.0.0",
+    host: true,
     port: 5000,
-    cors: true,
+    strictPort: true,
+    cors: {
+      origin: "*",
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      preflightContinue: false,
+      optionsSuccessStatus: 204
+    },
     hmr: {
       clientPort: 443,
     },
     proxy: {
       "/api": {
-        target: "http://localhost:8001",
+        target: "http://0.0.0.0:8001",
         changeOrigin: true,
       },
     },
     fs: {
       strict: false,
     },
-    origin:
-      "https://fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww31xj0zy1.janeway.replit.dev",
-    strictPort: true,
-    allowedHosts:
-      "fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww3ixj0zy1.janeway.replit.dev",
+    watch: {
+      usePolling: true,
+      interval: 1000
+    }
   },
 });
