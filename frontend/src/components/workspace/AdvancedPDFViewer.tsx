@@ -4,32 +4,34 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import api from '../../services/api';
 
 // För PDF.js
-import { pdfjs } from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist';
+import { pdfjs } from 'react-pdf';
 
-// Sätt upp arbetare för PDF.js lokalt
-// Detta sätter upp PDF.js arbetare på ett sätt som fungerar med Vite
-const pdfjsVersion = '4.0.379'; // Kontrollera att denna version stämmer med installerad version
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
+// Sätt upp arbetare för PDF.js (via react-pdf som redan har konfigurerat arbetare)
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 interface AdvancedPDFViewerProps {
   pdfUrl: string;
   title?: string;
 }
 
+import { Document, Page } from 'react-pdf';
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+
 export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pdfDocument, setPdfDocument] = useState<pdfjs.PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.5);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [fullPdfUrl, setFullPdfUrl] = useState<string>('');
 
-  // Ladda PDF-innehållet med autentisering
+  // Förbered URL för PDF-visning
   useEffect(() => {
     setLoading(true);
     setError(null);
-    setPdfDocument(null);
     
     if (!pdfUrl) {
       setError('Ingen PDF-URL tillhandahållen');
@@ -37,89 +39,58 @@ export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerPr
       return;
     }
     
-    const loadPDF = async () => {
-      try {
-        // Förbered URL för API-anrop
-        let apiUrl = pdfUrl;
-        
-        // Kontrollera och rensa URL:en för att undvika dubbla /api/ prefix
-        if (apiUrl.startsWith('/api/')) {
-          // URL:en har redan /api/ prefix - använd den direkt men ta bort /api/ prefixet eftersom api.get kommer att lägga till det
-          apiUrl = apiUrl.substring(5); // Ta bort de första 5 tecknen (/api/)
-          console.log('Removed /api/ prefix since Axios will add it. New URL:', apiUrl);
-        } else if (apiUrl.startsWith('workspace/')) {
-          // Om URL:en börjar med workspace/ (utan slash), använd den direkt
-          console.log('URL starts with workspace/, using as is:', apiUrl);
-        } else if (apiUrl.startsWith('/workspace/')) {
-          // Om URL:en börjar med /workspace/, ta bort den inledande slashen
-          apiUrl = apiUrl.substring(1);
-          console.log('Removed leading slash from /workspace/, new URL:', apiUrl);
-        }
-        
-        // Logga den slutliga URL:en som används
-        console.log('Final API URL for PDF fetch:', apiUrl);
-        
-        // Hämta PDF-data som array buffer
-        const response = await api.get(apiUrl, {
-          responseType: 'arraybuffer'
-        });
-        
-        // Ladda PDF med PDF.js
-        const loadingTask = pdfjsLib.getDocument({ data: response.data });
-        const pdf = await loadingTask.promise;
-        
-        setPdfDocument(pdf);
-        setNumPages(pdf.numPages);
-        setLoading(false);
-      } catch (err) {
-        console.error('Fel vid laddning av PDF:', err);
-        setError('Kunde inte ladda PDF-dokumentet. Försök öppna i nytt fönster istället.');
-        setLoading(false);
+    try {
+      // Hantera URL-format
+      let apiUrl = pdfUrl;
+      const baseApiUrl = '/api/';
+      
+      // Kontrollera och rensa URL:en för att undvika dubbla /api/ prefix
+      if (apiUrl.startsWith('/api/')) {
+        // URL:en har redan /api/ prefix - använd den direkt
+        console.log('URL already starts with /api/, using as is:', apiUrl);
+      } else if (apiUrl.startsWith('workspace/')) {
+        // Om URL:en börjar med workspace/ (utan slash), lägg till /api/ prefix
+        apiUrl = baseApiUrl + apiUrl;
+        console.log('Added /api/ prefix. New URL:', apiUrl);
+      } else if (apiUrl.startsWith('/workspace/')) {
+        // Om URL:en börjar med /workspace/, ta bort / och lägg till /api/
+        apiUrl = baseApiUrl + apiUrl.substring(1);
+        console.log('Fixed URL format with /api/ prefix. New URL:', apiUrl);
       }
-    };
-    
-    loadPDF();
-    
-    // Städa upp när komponenten avmonteras
-    return () => {
-      if (pdfDocument) {
-        pdfDocument.destroy().catch(console.error);
+      
+      // Lägg till auth token till URL för att undvika CORS-problem
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        // Om URL redan har parametrar, använd &, annars använd ?
+        const separator = apiUrl.includes('?') ? '&' : '?';
+        apiUrl = `${apiUrl}${separator}token=${token}`;
       }
-    };
+      
+      // Logga slutlig URL (men dölj token i loggen)
+      console.log('Final PDF URL (auth token hidden):', apiUrl.split('token=')[0] + 'token=HIDDEN');
+      
+      setFullPdfUrl(apiUrl);
+      setLoading(false);
+    } catch (err) {
+      console.error('Fel vid förberedelse av PDF-URL:', err);
+      setError('Kunde inte förbereda PDF-URL.');
+      setLoading(false);
+    }
   }, [pdfUrl]);
 
-  // Rendera aktuell sida när pdfDocument eller currentPage ändras
-  useEffect(() => {
-    if (!pdfDocument || !canvasRef.current) return;
-    
-    const renderPage = async () => {
-      try {
-        const page = await pdfDocument.getPage(currentPage);
-        const viewport = page.getViewport({ scale });
-        
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        
-        const context = canvas.getContext('2d');
-        if (!context) return;
-        
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        
-        const renderContext = {
-          canvasContext: context,
-          viewport
-        };
-        
-        await page.render(renderContext).promise;
-      } catch (err) {
-        console.error('Fel vid rendering av PDF-sida:', err);
-        setError('Kunde inte rendera PDF-sidan.');
-      }
-    };
-    
-    renderPage();
-  }, [pdfDocument, currentPage, scale]);
+  // Hanterar framgångsrik inläsning av dokument
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+    setLoading(false);
+    console.log('PDF document loaded successfully with', numPages, 'pages');
+  }
+  
+  // Hanterar fel vid dokumentinläsning
+  function onDocumentLoadError(error: Error) {
+    console.error('Error loading PDF document:', error);
+    setError(`Kunde inte ladda PDF-dokumentet: ${error.message}`);
+    setLoading(false);
+  }
 
   // Navigera mellan sidor
   const goToPreviousPage = () => {
@@ -176,17 +147,20 @@ export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerPr
       height: '100%' 
     }}>
       {/* PDF-visningsområde */}
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center',
-        overflow: 'auto',
-        p: 2,
-        bgcolor: 'background.level1', 
-        borderRadius: 'md'
-      }}>
-        {loading ? (
+      <Box 
+        ref={containerRef}
+        sx={{ 
+          flex: 1, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          overflow: 'auto',
+          p: 2,
+          bgcolor: 'background.level1', 
+          borderRadius: 'md'
+        }}
+      >
+        {loading && !fullPdfUrl ? (
           <CircularProgress size="lg" sx={{ my: 4 }} />
         ) : (
           <Box 
@@ -203,7 +177,30 @@ export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerPr
               height: '100%'
             }}
           >
-            <canvas ref={canvasRef} />
+            <Document
+              file={fullPdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={<CircularProgress />}
+              error={
+                <Typography color="danger" level="body-md">
+                  Kunde inte ladda dokumentet
+                </Typography>
+              }
+            >
+              <Page 
+                pageNumber={currentPage}
+                scale={scale}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                loading={<CircularProgress />}
+                error={
+                  <Typography color="danger" level="body-md">
+                    Kunde inte visa sidan
+                  </Typography>
+                }
+              />
+            </Document>
           </Box>
         )}
       </Box>
@@ -255,7 +252,7 @@ export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerPr
           </Button>
           
           <Typography>
-            {currentPage} / {numPages}
+            {currentPage} / {numPages || 1}
           </Typography>
           
           <Button 
@@ -270,7 +267,7 @@ export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerPr
         </Box>
         
         <Button 
-          onClick={() => window.open(pdfUrl, '_blank')}
+          onClick={() => window.open(fullPdfUrl || pdfUrl, '_blank')}
           variant="outlined"
           color="primary"
           size="sm"

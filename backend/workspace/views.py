@@ -275,12 +275,44 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
     def content(self, request, pk=None):
         """
         Get PDF content with headers that exempt it from X-Frame-Options restrictions
+        
+        Supports both session-based authentication and token-based authentication
+        via a 'token' query parameter for direct access from PDF.js or iframe.
         """
-        # Undvik permissions på denna endpunkt för att säkerställa enkel åtkomst
-        # av PDF-innehåll från inloggade användare
+        # Om token finns i query params, validera och autentisera användaren
+        token = request.query_params.get('token')
+        if token and not request.user.is_authenticated:
+            # Importera JWT-verifiering
+            from rest_framework_simplejwt.tokens import AccessToken
+            from rest_framework_simplejwt.exceptions import TokenError
+            from django.contrib.auth import get_user_model
+            
+            User = get_user_model()
+            
+            try:
+                # Validera token och hämta användar-ID
+                token_obj = AccessToken(token)
+                user_id = token_obj['user_id']
+                
+                # Hämta användaren
+                user = User.objects.get(id=user_id)
+                # Sätt användaren på request-objektet
+                request.user = user
+                print(f"Authenticated user {user.username} via token")
+            except (TokenError, User.DoesNotExist) as e:
+                print(f"Token authentication failed: {str(e)}")
+                # Token är ogiltig eller användaren finns inte
+                # Fortsätt utan autentisering, permission check kommer att hantera det
+                pass
+        
+        # Tillåt autentiserade användare att hämta PDF
         self.permission_classes = [permissions.IsAuthenticated]
         
-        pdf = self.get_object()
+        try:
+            pdf = self.get_object()
+        except Exception as e:
+            return Response({"error": f"Kunde inte hämta PDF: {str(e)}"}, status=404)
+            
         from django.http import FileResponse
         import os
         
@@ -295,8 +327,8 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
             as_attachment=False
         )
         
-        # Säkerställ att X-Frame-Options inte sätts (tillåt embedding i iframe)
-        response['X-Frame-Options'] = 'SAMEORIGIN'  # Tillåt endast inom samma domain
+        # Säkerställ att X-Frame-Options inte sätts (tillåt embedding överallt)
+        response['X-Frame-Options'] = 'ALLOWALL'
         
         # Lägg till Content-Disposition header för att säkerställa inline-visning
         response['Content-Disposition'] = f'inline; filename="{pdf.title}.pdf"'
