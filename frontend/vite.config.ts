@@ -25,10 +25,31 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: 5000,
+      strictPort: true,
+      cors: true,
+      hmr: {
+        host: '0.0.0.0',
+      },
+      watch: {
+        usePolling: true,
+      },
+      // Add allowedHosts to fix the blocking issue with Replit domain
+      proxy: {},
+      fs: {
+        strict: true,
+        allow: ['.'],
+      },
+      // Add the Replit domain to allowed hosts
+      origin: '0.0.0.0:5000',
+      allowedHosts: ['all'],
     },
     define: {
       // Expose environment variables to your client-side code
       'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://localhost:8000/api'),
     },
+    preview: {
+      port: 5000,
+      strictPort: true,
+    }
   };
 });
