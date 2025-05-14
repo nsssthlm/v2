@@ -9,18 +9,25 @@ import Workspace from './pages/Workspace';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFound';
 import { Box, CircularProgress, Typography } from '@mui/joy';
+import { useState, useEffect } from 'react';
 
-// Inner component that uses the AuthContext
-function AppRoutes() {
-  const { authState } = useAuth();
-  const { isAuthenticated, loading } = authState;
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Login success callback (no longer needed but kept for compatibility)
+  // Check authentication status from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    setIsAuthenticated(!!token);
+    setLoading(false);
+  }, []);
+
+  // Handle login success
   const handleLoginSuccess = () => {
-    // Login is now handled by the AuthContext
+    setIsAuthenticated(true);
   };
 
-  // Skydda rutter som kräver inloggning
+  // Protected route component
   const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     if (loading) {
       return (
@@ -44,63 +51,56 @@ function AppRoutes() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={
-          isAuthenticated ? <Navigate to="/" /> : <LoginPage onLoginSuccess={handleLoginSuccess} />
-        } />
-        
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/calendar" element={
-          <ProtectedRoute>
-            <Layout>
-              <Calendar />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/notice-board" element={
-          <ProtectedRoute>
-            <Layout>
-              <NoticeBoardPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/vault" element={
-          <ProtectedRoute>
-            <Layout>
-              <VaultPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/workspace/*" element={
-          <ProtectedRoute>
-            <Layout>
-              <Workspace />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-// Main App component with AuthProvider
-function App() {
-  return (
     <AuthProvider>
-      <AppRoutes />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={
+            isAuthenticated ? <Navigate to="/" /> : <LoginPage onLoginSuccess={handleLoginSuccess} />
+          } />
+          
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/calendar" element={
+            <ProtectedRoute>
+              <Layout>
+                <Calendar />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/notice-board" element={
+            <ProtectedRoute>
+              <Layout>
+                <NoticeBoardPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vault" element={
+            <ProtectedRoute>
+              <Layout>
+                <VaultPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/workspace/*" element={
+            <ProtectedRoute>
+              <Layout>
+                <Workspace />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
