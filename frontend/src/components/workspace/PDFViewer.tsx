@@ -222,19 +222,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
               position: 'relative' // Lägg till relativ positionering
             }}>
               <Box sx={{ 
-                transform: `scale(${zoom})`, 
-                transformOrigin: 'top center',
-                transition: 'transform 0.2s ease-in-out',
-                width: `calc(100% / ${zoom})`, 
-                height: `calc(100% / ${zoom})`,
+                width: '95%', 
+                height: 'auto',
                 position: 'absolute', // Använd absolut positionering
                 top: 16, // Lägg till lite utrymme i toppen
                 left: '50%', // Centrera horisontellt
-                transform: `translateX(-50%) scale(${zoom})`, // Centrera horisontellt med transformering
-                maxWidth: '100%',
+                transform: `translateX(-50%) scale(${zoom})`, // Centrera horisontellt med skalning
                 bgcolor: 'background.surface',
                 boxShadow: 'md',
-                borderRadius: 'md'
+                borderRadius: 'md',
+                overflow: 'hidden'
               }}>
                 <SimplePDFViewer 
                   pdfUrl={`/api/workspace/pdfs/${pdf.id}/content/`}
