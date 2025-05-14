@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Sheet, 
   List, 
@@ -60,6 +60,7 @@ const FileSystemNode = ({
       >
         <ListItemButton
           onClick={() => isFolder && toggleFolder(node.id)}
+          component="div"
           sx={{ 
             py: 0.3,
             pl: 0.5,
@@ -285,46 +286,21 @@ const Sidebar = () => {
   // Håll reda på öppna filer/mappar i filsystemet
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   
-  // State för förvaringen av filer och mappar i systemet
-  const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>([
-    // Några exempel-mappar och filer för att illustrera strukturen
-    {
-      id: 'folder1',
-      name: 'Projektdokument',
-      type: 'folder',
-      parent_id: null
-    },
-    {
-      id: 'folder2',
-      name: 'Ritningar',
-      type: 'folder',
-      parent_id: null
-    },
-    {
-      id: 'file1',
-      name: 'README.txt',
-      type: 'file',
-      parent_id: null
-    },
-    {
-      id: 'subfolder1',
-      name: 'Fas 1',
-      type: 'folder',
-      parent_id: 'folder1'
-    },
-    {
-      id: 'file2',
-      name: 'Kravspecifikation.pdf',
-      type: 'file',
-      parent_id: 'folder1'
-    },
-    {
-      id: 'file3',
-      name: 'Byggnadsplan.pdf',
-      type: 'file',
-      parent_id: 'subfolder1'
+  // Hämta sparade mappar från localStorage när sidan laddas
+  const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>(() => {
+    // Försök hämta sparade filer/mappar från localStorage
+    const savedNodes = localStorage.getItem('filesystemNodes');
+    if (savedNodes) {
+      try {
+        return JSON.parse(savedNodes);
+      } catch (error) {
+        console.error('Fel vid läsning av sparade filer:', error);
+        return [];
+      }
     }
-  ]);
+    // Inga sparade mappar, börja med en tom lista
+    return [];
+  });
   
   // State för att hantera dialogrutan för att skapa nya mappar
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
@@ -379,6 +355,11 @@ const Sidebar = () => {
     setNewFolderDialogOpen(true);
   };
   
+  // Spara ändringar i filsystemet till localStorage
+  useEffect(() => {
+    localStorage.setItem('filesystemNodes', JSON.stringify(filesystemNodes));
+  }, [filesystemNodes]);
+  
   // Skapa ny mapp
   const createNewFolder = () => {
     if (newFolderName.trim() === '') return;
@@ -391,6 +372,7 @@ const Sidebar = () => {
       parent_id: currentParentId
     };
     
+    // Uppdatera state och spara automatiskt till localStorage via useEffect
     setFilesystemNodes(prev => [...prev, newFolder]);
     setNewFolderDialogOpen(false);
     setNewFolderName('');
@@ -654,6 +636,7 @@ const Sidebar = () => {
               <ListItem sx={{ mb: 0.5 }}>
                 <ListItemButton 
                   onClick={() => setOpenFolders(prev => ({...prev, 'files_root': !prev['files_root']}))}
+                  component="div"
                   sx={{ 
                     py: 0.75,
                     pl: 1.5,
