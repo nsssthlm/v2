@@ -256,7 +256,7 @@ const Workspace: React.FC = () => {
               </Box>
               
               <iframe
-                src={`${selectedPDF.file_url}#toolbar=1&navpanes=1`}
+                src={selectedPDF.file}
                 title={selectedPDF.title}
                 width="100%"
                 height="100%"
