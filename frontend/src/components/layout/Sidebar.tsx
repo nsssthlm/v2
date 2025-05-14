@@ -112,7 +112,7 @@ const FileSystemNode = ({
           
           {/* Filnamn/mappnamn utan textavklippning */}
           <ListItemContent sx={{ 
-            width: 'calc(100% - 30px)', // Fast bredd med plats för plusknappen
+            width: 'calc(100% - 35px)', // Fast bredd med plats för plusknappen (lite bredare marginal)
             mr: 0,
             flexGrow: 0,
             flexShrink: 0,
@@ -122,8 +122,8 @@ const FileSystemNode = ({
               level="body-xs" 
               sx={{ 
                 overflow: 'visible',
-                whiteSpace: 'normal',
-                wordBreak: 'break-word',
+                whiteSpace: 'nowrap',
+                wordBreak: 'keep-all',
                 display: 'inline',
                 textOverflow: 'clip'
               }}
@@ -155,8 +155,13 @@ const FileSystemNode = ({
                 width: '18px',
                 height: '18px',
                 p: '2px',
+                bgcolor: 'transparent',
                 '&:hover': {
                   bgcolor: 'rgba(0, 0, 0, 0.04)'
+                },
+                '&:focus': {
+                  outline: 'none',
+                  bgcolor: 'transparent'
                 }
               }}
             >
