@@ -272,7 +272,6 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         
     @action(detail=True, methods=['get'])
     @method_decorator(xframe_options_exempt)
-    @method_decorator(xframe_options_exempt)
     def content(self, request, pk=None):
         """
         Get PDF content with headers that exempt it from X-Frame-Options restrictions
@@ -294,12 +293,13 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
             as_attachment=False
         )
         
-        # Explicit ta bort X-Frame-Options för att tillåta embedding i iframe
-        if 'X-Frame-Options' in response:
-            del response['X-Frame-Options']
+        # Säkerställ att X-Frame-Options inte sätts (tillåt embedding i iframe)
+        response['X-Frame-Options'] = 'ALLOWALL'  # Detta överskriver Django:s standardinställning
         
-        # Sätt Content-Disposition för att visa inline
-        response['Content-Disposition'] = f'inline; filename="{pdf.title}"'
+        # Lägg till Content-Disposition header för att säkerställa inline-visning
+        response['Content-Disposition'] = f'inline; filename="{pdf.title}.pdf"'
+        
+        # Tillåt embedding i iframe från alla domäner
         response['Content-Security-Policy'] = 'frame-ancestors *'
         response['Access-Control-Allow-Origin'] = '*'
         
