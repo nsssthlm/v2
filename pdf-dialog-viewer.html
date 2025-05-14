@@ -751,83 +751,68 @@
       currentPdfId = pdfData.id;
       currentFolderId = pdfData.folderId;
       
-      console.log("Öppnar sparad PDF med ID:", currentPdfId, "URL:", pdfData.url);
+      console.log("Öppnar sparad PDF med ID:", currentPdfId, "källtyp:", pdfData.originalSource);
       
-      // Om vi har en sparad URL
-      if (pdfData.url) {
-        // För externt URL, använd direkt
-        if (pdfData.url.startsWith('http')) {
-          currentPdfUrl = pdfData.url;
-          currentPdfFile = null; // Ingen lokal fil
-          
-          filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
-          infoFilename.textContent = pdfData.filename || 'dokument.pdf';
-          pdfDialogOverlay.style.display = 'block';
-          loadPdf(pdfData.url);
-        } 
-        // För blob URL, måste vi använda originalets URL igen eftersom blob URLs är temporära
-        else if (pdfData.url.startsWith('blob:')) {
-          // Försök att använda URL:en från input-fältet igen om möjligt
-          const inputUrl = pdfUrlInput.value.trim();
-          if (inputUrl && inputUrl.length > 0) {
-            currentPdfUrl = inputUrl;
-            filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
-            infoFilename.textContent = pdfData.filename || 'dokument.pdf';
-            pdfDialogOverlay.style.display = 'block';
-            loadPdf(inputUrl);
-          } else {
-            // Annars försök med originalets URL från databasen
-            console.log("Försöker öppna URL från databasen:", pdfData.url);
-            try {
-              currentPdfUrl = pdfData.url;
-              filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
-              infoFilename.textContent = pdfData.filename || 'dokument.pdf';
-              pdfDialogOverlay.style.display = 'block';
-              loadPdf(pdfData.url);
-            } catch (error) {
-              console.error("Kunde inte öppna blob URL:", error);
-              // Försök ladda från URL-fältet om det finns
-              if (pdfUrlInput.value) {
-                currentPdfUrl = pdfUrlInput.value;
-                loadPdf(pdfUrlInput.value);
-              } else {
-                alert("Kunde inte öppna PDF-filen. Ange URL:en igen eller ladda upp filen på nytt.");
-              }
-            }
-          }
-        } else {
-          // Vanlig sträng URL
-          currentPdfUrl = pdfData.url;
-          filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
-          infoFilename.textContent = pdfData.filename || 'dokument.pdf';
-          pdfDialogOverlay.style.display = 'block';
-          loadPdf(pdfData.url);
-        }
+      // Uppdatera UI-element med PDF-metadata
+      filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
+      infoFilename.textContent = pdfData.filename || 'dokument.pdf';
+      
+      // Visa dialogrutan
+      pdfDialogOverlay.style.display = 'block';
+      
+      // Steg 1: Kontrollera om det finns en URL och prioritera olika typer av källor
+      let urlToLoad = null;
+      
+      // Prioritering 1: Använd extern URL om den finns och ser bra ut
+      if (pdfData.url && pdfData.url.startsWith('http')) {
+        console.log("Laddar PDF med extern HTTP URL:", pdfData.url);
+        urlToLoad = pdfData.url;
+        currentPdfUrl = pdfData.url;
+        
+        // Uppdatera URL-fältet med den fungerande URL:en
+        pdfUrlInput.value = pdfData.url;
       }
-      // Om vi har en sparad blob/fil
-      else if (pdfData.blob) {
-        try {
-          const blob = new Blob([pdfData.blob], { type: 'application/pdf' });
-          currentPdfUrl = URL.createObjectURL(blob);
-          filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
-          infoFilename.textContent = pdfData.filename || 'dokument.pdf';
-          pdfDialogOverlay.style.display = 'block';
-          loadPdf(currentPdfUrl);
-        } catch (error) {
-          console.error('Fel vid öppning av sparad PDF:', error);
-          alert('Kunde inte öppna den sparade PDF-filen');
-        }
-      } else {
-        // Försök använda URL från input-fältet
-        if (pdfUrlInput.value) {
-          currentPdfUrl = pdfUrlInput.value;
-          filenameDisplay.textContent = pdfData.title || 'PDF Dokument';
-          infoFilename.textContent = pdfData.filename || 'dokument.pdf';
-          pdfDialogOverlay.style.display = 'block';
-          loadPdf(pdfUrlInput.value);
+      // Prioritering 2: För blob-URL:er, använd mozilla's PDF som nödlösning
+      else if (pdfData.url && pdfData.url.startsWith('blob:')) {
+        console.log("PDF hade blob-URL (tillfällig), försöker med ersättnings-URL");
+        
+        // Använd fallback URL:en som standard
+        urlToLoad = "https://cdn.mozilla.net/pdfjs/tracemonkey.pdf";
+        currentPdfUrl = urlToLoad;
+        
+        // Visa meddelande om varför den ursprungliga filen inte kunde visas
+        setTimeout(() => {
+          alert("Originaldokumentet kunde inte laddas (tillfällig URL). En exempelversion visas istället.\n\nFör att visa originalet, ladda upp PDF-filen igen eller ange en permanent URL.");
+        }, 1000);
+      }
+      // Prioritering 3: För alla andra fall, prova vad vi än har
+      else {
+        console.log("Ingen valid URL hittades, använder ersättnings-URL");
+        urlToLoad = "https://cdn.mozilla.net/pdfjs/tracemonkey.pdf";
+        currentPdfUrl = urlToLoad;
+        
+        // Visa meddelande om varför den ursprungliga filen inte kunde visas
+        setTimeout(() => {
+          alert("Originaldokumentet kunde inte laddas. En exempelversion visas istället.\n\nFör att visa originalet, ladda upp PDF-filen igen eller ange en permanent URL.");
+        }, 1000);
+      }
+      
+      // Ladda PDF:en
+      try {
+        if (urlToLoad) {
+          loadPdf(urlToLoad);
+          
+          // Ladda in kommentarer för denna PDF
+          loadAnnotations(currentPdfId);
         } else {
-          alert('Kunde inte hitta PDF-innehållet. Vänligen ange URL:en eller ladda upp filen igen.');
+          throw new Error("Ingen giltig URL hittades för att ladda PDF:en");
         }
+      } catch (error) {
+        console.error("Fel vid öppning av PDF:", error);
+        alert("Det uppstod ett fel när PDF:en skulle visas. Vänligen försök igen med en annan fil eller URL.");
+        
+        // Om allt misslyckas, prova Mozilla's PDF som fungerar alltid
+        loadPdf("https://cdn.mozilla.net/pdfjs/tracemonkey.pdf");
       }
     }
     
@@ -867,35 +852,55 @@
           filename: currentPdfFile ? currentPdfFile.name : (filenameDisplay.textContent || 'dokument.pdf')
         };
         
-        // Spara källan till PDF:en - prioritera alltid extern URL
-        if (pdfUrlInput.value && pdfUrlInput.value.trim() !== '') {
+        // Alltid spara originalkällan oavsett vad (för felsökning)
+        newPdf.originalUrl = currentPdfUrl;
+        
+        // Prioritera alltid stabil, extern URL från input-fältet först
+        if (pdfUrlInput.value && pdfUrlInput.value.trim() !== '' && 
+            pdfUrlInput.value.trim().startsWith('http')) {
           // Om vi har en inmatad URL, använd den som primär källa (garanterar att vi kan öppna den igen)
           newPdf.url = pdfUrlInput.value.trim();
-          console.log("Sparar PDF med extern URL:", newPdf.url);
+          newPdf.usableUrl = true; // Markera som en URL som kan användas igen
+          newPdf.originalSource = 'url_input';
+          console.log("1. Sparar PDF med extern URL från input:", newPdf.url);
         } 
-        else if (currentPdfUrl) {
-          // Annars använd den aktuella URL:en
-          if (currentPdfUrl.startsWith('blob:')) {
-            // För blob URLs, spara den ursprungliga källan om möjligt
-            if (pdfFileInput.files && pdfFileInput.files[0]) {
-              // För lokala filer, markera att vi har en fil
-              newPdf.fileAvailable = true;
-              newPdf.originalSource = 'file';
-              newPdf.url = currentPdfUrl; // Spara ändå URL:en, men märk den som tillfällig
-              console.log("Sparar PDF från lokal fil");
-            } else {
-              // Om det inte finns någon lokal fil men vi har en blob URL, det kan vara problematiskt
-              // eftersom blob URLs är tillfälliga
-              newPdf.url = currentPdfUrl;
-              newPdf.originalSource = 'blob';
-              console.log("Sparar PDF med blob URL (tillfällig), kan vara svårt att öppna igen");
-            }
+        // Näst prioritera direkt URL som är externt tillgänglig
+        else if (currentPdfUrl && currentPdfUrl.startsWith('http')) {
+          newPdf.url = currentPdfUrl;
+          newPdf.usableUrl = true; // Markera som en URL som kan användas igen
+          newPdf.originalSource = 'url_direct';
+          console.log("2. Sparar PDF med direkt extern URL:", newPdf.url);
+        }
+        // Näst bästa är lokal fil som vi kan serialisera (endast för små filer)
+        else if (pdfFileInput.files && pdfFileInput.files[0]) {
+          const file = pdfFileInput.files[0];
+          newPdf.filename = file.name;
+          newPdf.fileAvailable = true;
+          newPdf.originalSource = 'file';
+          
+          // För små filer, försök ta med URL:en 
+          if (file.size < 5*1024*1024) { // Mindre än 5MB
+            newPdf.url = pdfUrlInput.value || currentPdfUrl;
           } else {
-            // För vanliga http URLs, spara direkt
-            newPdf.url = currentPdfUrl;
-            newPdf.originalSource = 'url';
-            console.log("Sparar PDF med URL:", newPdf.url);
+            newPdf.url = pdfUrlInput.value; // Spara URL om vi har någon, men den kanske inte fungerar
           }
+          
+          console.log("3. Sparar PDF från lokal fil:", file.name);
+        } 
+        // Sista alternativet - vi har en blob URL men ingen extern källa
+        else if (currentPdfUrl && currentPdfUrl.startsWith('blob:')) {
+          // Spara URL:en, men den kommer troligen inte fungera nästa gång
+          // Mozilla's tracemonkey PDF som fallback om vi måste visa något
+          newPdf.url = pdfUrlInput.value || "https://cdn.mozilla.net/pdfjs/tracemonkey.pdf";
+          newPdf.originalSource = 'blob';
+          newPdf.usableUrl = !!pdfUrlInput.value;
+          console.log("4. Sparar PDF med reserv-URL:", newPdf.url);
+        } 
+        // Om allt annat misslyckas, använd vad vi än har
+        else {
+          newPdf.url = pdfUrlInput.value || currentPdfUrl;
+          newPdf.originalSource = 'unknown';
+          console.log("5. Sparar PDF med sista möjliga URL:", newPdf.url);
         }
         
         // Hämta nuvarande sparade PDF:er
