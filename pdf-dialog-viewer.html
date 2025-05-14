@@ -1153,19 +1153,43 @@
       // Ladda PDF:en
       try {
         if (urlToLoad) {
-          loadPdf(urlToLoad);
-          
-          // Ladda in kommentarer för denna PDF
-          loadAnnotations(currentPdfId);
+          // Här använder vi den globala funktionen för att ladda PDF-dokument
+          if (typeof loadPdf === 'function') {
+            loadPdf(urlToLoad);
+            
+            // Ladda in kommentarer för denna PDF
+            loadAnnotations(currentPdfId);
+          } else {
+            console.error("loadPdf-funktionen är inte definierad");
+            // Använd PDF.js direkt istället
+            pdfjsLib.getDocument(urlToLoad).promise.then(function(pdf) {
+              pdfDoc = pdf;
+              if (infoPages) infoPages.textContent = pdf.numPages;
+              if (pageInfo) pageInfo.textContent = `Sida: ${pageNum} / ${pdf.numPages}`;
+              
+              // Render first page
+              renderPage(pageNum);
+              
+              // Load annotations for this PDF
+              loadAnnotationsForCurrentPdf();
+              
+              // Enable/disable navigation buttons
+              updateUIState();
+              
+              // Hide loading spinner
+              if (loadingSpinner) loadingSpinner.style.display = 'none';
+              if (canvasContainer) canvasContainer.style.display = 'block';
+            }).catch(function(error) {
+              console.error("Fel vid laddning av PDF:", error);
+              alert("Det uppstod ett fel när PDF:en skulle visas. Vänligen försök igen med en annan fil eller URL.");
+            });
+          }
         } else {
           throw new Error("Ingen giltig URL hittades för att ladda PDF:en");
         }
       } catch (error) {
         console.error("Fel vid öppning av PDF:", error);
         alert("Det uppstod ett fel när PDF:en skulle visas. Vänligen försök igen med en annan fil eller URL.");
-        
-        // Om allt misslyckas, prova Mozilla's PDF som fungerar alltid
-        loadPdf("https://cdn.mozilla.net/pdfjs/tracemonkey.pdf");
       }
     }
     
