@@ -71,14 +71,14 @@ const Workspace: React.FC = () => {
         if (projectId) {
           console.log('Fetching project data for ID:', projectId);
           // Use our configured API client with auth headers
-          const response = await api.get(`/core/projects/${projectId}/`);
+          const response = await api.get(`/projects/${projectId}/`);
           console.log('Project data:', response.data);
           setProject(response.data);
           setError(null);
         } else {
           // If no projectId, fetch all projects and use the first one
           console.log('No project ID provided, fetching all projects');
-          const response = await api.get('/core/projects/');
+          const response = await api.get('/projects/');
           if (response.data && response.data.length > 0) {
             console.log('Found projects:', response.data);
             const firstProject = response.data[0];
