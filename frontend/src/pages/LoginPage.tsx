@@ -3,10 +3,19 @@ import { Box, Typography, Container } from '@mui/joy';
 import LoginForm from '../components/auth/LoginForm';
 import { useNavigate } from 'react-router-dom';
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  onLoginSuccess?: () => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
 
   const handleLoginSuccess = () => {
+    // Anropa förälderns callback om den finns
+    if (onLoginSuccess) {
+      onLoginSuccess();
+    }
+    
     // Omdirigera till dashboard efter lyckad inloggning
     navigate('/');
   };
@@ -22,7 +31,11 @@ const LoginPage: React.FC = () => {
         
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography level="body-md" sx={{ color: 'text.secondary' }}>
-            Denna plattform är under utveckling. Kontakta supporten vid problem.
+            Använd följande inloggningsuppgifter för testanvändaren:
+            <br />
+            Användarnamn: <strong>projectleader</strong>
+            <br />
+            Lösenord: <strong>123456</strong>
           </Typography>
         </Box>
       </Box>

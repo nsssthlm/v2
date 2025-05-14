@@ -34,6 +34,25 @@ interface Project {
   updated_at: string;
 }
 
+// Import the PDF document type
+interface PDFDocument {
+  id: number;
+  title: string;
+  description: string;
+  file_url: string;
+  version: number;
+  size: number;
+  uploaded_by_details: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
 const Workspace: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -42,6 +61,7 @@ const Workspace: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPDF, setSelectedPDF] = useState<PDFDocument | null>(null);
   
   useEffect(() => {
     const fetchProject = async () => {
@@ -67,6 +87,14 @@ const Workspace: React.FC = () => {
     setActiveTab(newValue);
   };
   
+  const handleOpenPDF = (pdf: PDFDocument) => {
+    setSelectedPDF(pdf);
+  };
+  
+  const handleClosePDF = () => {
+    setSelectedPDF(null);
+  };
+  
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -82,6 +110,9 @@ const Workspace: React.FC = () => {
       </Container>
     );
   }
+
+  // Default to project ID 1 if none is provided
+  const currentProjectId = projectId ? parseInt(projectId) : 1;
   
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>
@@ -114,7 +145,10 @@ const Workspace: React.FC = () => {
             </TabPanel>
             
             <TabPanel value={1}>
-              <PDFViewer projectId={parseInt(projectId || '1')} />
+              <PDFList 
+                projectId={currentProjectId} 
+                onOpenPDF={handleOpenPDF} 
+              />
             </TabPanel>
             
             <TabPanel value={2}>
@@ -127,6 +161,12 @@ const Workspace: React.FC = () => {
           </CardContent>
         </Tabs>
       </Card>
+      
+      {/* PDF Viewer Modal */}
+      <PDFViewer 
+        pdf={selectedPDF} 
+        onClose={handleClosePDF} 
+      />
     </Container>
   );
 };

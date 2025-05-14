@@ -19,7 +19,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,16 +30,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     try {
-      await axios.post('/api/login/', {
-        email,
+      // Använd JWT token endpoint
+      const response = await axios.post('/api/token_obtain_pair/', {
+        username,
         password
       });
+
+      // Spara tokens i localStorage
+      const { access, refresh } = response.data;
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      
+      // Konfigurera axios för att använda token i alla framtida requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
 
       // Om inloggningen lyckas
       onLoginSuccess();
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.response?.data || 'Inloggning misslyckades. Kontrollera dina uppgifter.');
+      setError(err.response?.data?.detail || 'Inloggning misslyckades. Kontrollera dina uppgifter.');
     } finally {
       setLoading(false);
     }
@@ -63,13 +72,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
         <form onSubmit={handleSubmit}>
           <Stack spacing={2}>
             <FormControl>
-              <FormLabel>E-post</FormLabel>
+              <FormLabel>Användarnamn</FormLabel>
               <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="projectleader@example.com"
+                placeholder="projectleader"
               />
             </FormControl>
             
@@ -93,7 +102,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
             </Button>
             
             <Typography level="body-sm" sx={{ textAlign: 'center', color: 'text.tertiary' }}>
-              Testinloggning: projectleader@example.com / 123456
+              Testinloggning: projectleader / 123456
             </Typography>
           </Stack>
         </form>

@@ -1,239 +1,305 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  CircularProgress,
-  Typography,
-  Stack,
-  Divider,
-  IconButton,
-  Button,
-  Alert,
-  Grid,
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Box, 
+  IconButton, 
+  Typography, 
+  Button, 
+  Tooltip,
+  Sheet,
+  Modal,
+  ModalDialog,
+  ModalClose,
   Tabs,
   TabList,
   Tab,
-  TabPanel
+  TabPanel,
+  Divider
 } from '@mui/joy';
-import DownloadIcon from '@mui/icons-material/Download';
-import DeleteIcon from '@mui/icons-material/Delete';
-import UploadIcon from '@mui/icons-material/Upload';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import axios from 'axios';
+import {
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
+  Fullscreen as FullscreenIcon,
+  FullscreenExit as FullscreenExitIcon,
+  NavigateBefore as PrevIcon,
+  NavigateNext as NextIcon,
+  Download as DownloadIcon,
+  Description as DescriptionIcon,
+  Info as InfoIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
 import { format } from 'date-fns';
-import { useParams, useNavigate } from 'react-router-dom';
-import PDFList from './PDFList';
+import { sv } from 'date-fns/locale';
 
+// Import the PDF document type from PDFList
 interface PDFDocument {
   id: number;
   title: string;
   description: string;
-  file: string;
   file_url: string;
-  project: number;
-  uploaded_by: number;
+  version: number;
+  size: number;
   uploaded_by_details: {
     id: number;
     username: string;
     first_name: string;
     last_name: string;
+    email: string;
   };
   created_at: string;
   updated_at: string;
-  size?: number;
-  version?: number;
 }
 
 interface PDFViewerProps {
-  projectId: number;
+  pdf: PDFDocument | null;
+  onClose: () => void;
 }
 
-const PDFViewer: React.FC<PDFViewerProps> = ({ projectId }) => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  
-  const [pdfs, setPdfs] = useState<PDFDocument[]>([]);
-  const [selectedPdf, setSelectedPdf] = useState<PDFDocument | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<number>(0); // 0 = list view, 1 = single pdf view
-  
-  // Fetch PDF documents for the project
+const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
+  const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const fetchPdfs = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get('/api/workspace/pdf/', {
-          params: { project: projectId }
-        });
-        
-        // Add version field to each document (default 1)
-        const pdfsWithVersion = response.data.map((pdf: PDFDocument) => ({
-          ...pdf,
-          version: 1
-        }));
-        
-        setPdfs(pdfsWithVersion);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching PDF documents:', err);
-        setError('Failed to load PDF documents');
-      } finally {
-        setLoading(false);
-      }
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
     };
-    
-    fetchPdfs();
-  }, [projectId]);
-  
-  // Load selected PDF by ID from URL params
-  useEffect(() => {
-    if (id && pdfs.length > 0) {
-      const pdf = pdfs.find(p => p.id === parseInt(id));
-      if (pdf) {
-        setSelectedPdf(pdf);
-        setViewMode(1); // Switch to single pdf view
-      } else {
-        setError(`PDF with ID ${id} not found`);
-      }
-    } else if (pdfs.length > 0 && !id) {
-      // Stay in list view
-      setViewMode(0);
-    }
-  }, [id, pdfs]);
-  
-  const handlePdfSelect = (pdf: PDFDocument) => {
-    setSelectedPdf(pdf);
-    setViewMode(1); // Switch to single pdf view
-    navigate(`/workspace/pdf/${pdf.id}`);
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.25, 3));
   };
-  
-  const handleDelete = async () => {
-    if (!selectedPdf) return;
-    
-    if (!confirm(`Är du säker på att du vill ta bort "${selectedPdf.title}"?`)) {
-      return;
-    }
-    
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.25, 0.5));
+  };
+
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return;
+
     try {
-      await axios.delete(`/api/workspace/pdf/${selectedPdf.id}/`);
-      
-      // Remove from PDF list
-      const newPdfList = pdfs.filter(p => p.id !== selectedPdf.id);
-      setPdfs(newPdfList);
-      
-      // Switch back to list view
-      setSelectedPdf(null);
-      setViewMode(0);
-      navigate(`/workspace/pdf`);
+      if (!isFullscreen) {
+        await containerRef.current.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
     } catch (err) {
-      console.error('Error deleting PDF:', err);
-      setError('Failed to delete PDF');
+      console.error('Error toggling fullscreen mode:', err);
     }
   };
-  
-  const handleBackToList = () => {
-    setViewMode(0);
-    navigate(`/workspace/pdf`);
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
-  
-  if (loading && pdfs.length === 0) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-  
+
+  if (!pdf) return null;
+
   return (
-    <Box sx={{ width: '100%' }}>
-      <Tabs value={viewMode} onChange={(e, v) => setViewMode(v as number)} sx={{ display: selectedPdf ? 'block' : 'none' }}>
-        <TabList sx={{ mb: 2 }}>
-          <Tab startDecorator={<ListAltIcon />} onClick={handleBackToList}>Lista</Tab>
-          <Tab startDecorator={<PictureAsPdfIcon />} disabled={!selectedPdf}>PDF Visare</Tab>
-        </TabList>
-      </Tabs>
-      
-      {viewMode === 0 ? (
-        // List View
-        <PDFList 
-          projectId={projectId} 
-          onSelectPDF={handlePdfSelect}
-        />
-      ) : (
-        // Single PDF View
-        selectedPdf && (
-          <Card variant="outlined" sx={{ height: '100%' }}>
-            <CardContent>
-              {error && (
-                <Alert color="danger" sx={{ mb: 2 }}>
-                  {error}
-                </Alert>
-              )}
+    <Modal
+      open={!!pdf}
+      onClose={onClose}
+      sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+      }}
+    >
+      <ModalDialog 
+        layout="fullscreen" 
+        sx={{ 
+          p: 0, 
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Box 
+          ref={containerRef} 
+          sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            height: '100%',
+            width: '100%',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ 
+            p: 2, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            bgcolor: 'background.level1',
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}>
+            <Typography level="h3" noWrap sx={{ flex: 1 }}>
+              {pdf.title}
+            </Typography>
+            <IconButton onClick={onClose} variant="plain" size="sm">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {/* Toolbar */}
+          <Box sx={{ 
+            p: 1, 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            bgcolor: 'background.level1',
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="Zooma in">
+                <IconButton onClick={handleZoomIn} size="sm">
+                  <ZoomInIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Zooma ut">
+                <IconButton onClick={handleZoomOut} size="sm">
+                  <ZoomOutIcon />
+                </IconButton>
+              </Tooltip>
+              <Typography level="body-sm" sx={{ alignSelf: 'center' }}>
+                {Math.round(zoom * 100)}%
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title={isFullscreen ? "Avsluta helskärm" : "Helskärm"}>
+                <IconButton onClick={toggleFullscreen} size="sm">
+                  {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              </Tooltip>
               
-              <Stack 
-                direction="row" 
-                justifyContent="space-between" 
-                alignItems="center" 
-                sx={{ mb: 2 }}
-              >
-                <Box>
-                  <Typography level="h4">{selectedPdf.title}</Typography>
-                  <Typography level="body-sm" sx={{ color: 'text.tertiary' }}>
-                    Uppladdad av {selectedPdf.uploaded_by_details.first_name} {selectedPdf.uploaded_by_details.last_name} 
-                    den {format(new Date(selectedPdf.created_at), 'd MMM yyyy')}
-                  </Typography>
-                </Box>
-                
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="outlined"
-                    color="neutral"
-                    onClick={handleBackToList}
-                  >
-                    Tillbaka till listan
-                  </Button>
-                  <IconButton 
-                    variant="outlined"
-                    color="primary"
-                    component="a"
-                    href={selectedPdf.file_url}
-                    download
-                  >
-                    <DownloadIcon />
-                  </IconButton>
-                  <IconButton 
-                    variant="outlined"
-                    color="danger"
-                    onClick={handleDelete}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Stack>
-              </Stack>
-              
-              {selectedPdf.description && (
-                <Typography level="body-md" sx={{ mb: 2 }}>
-                  {selectedPdf.description}
-                </Typography>
-              )}
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <Box sx={{ height: 'calc(100vh - 300px)', minHeight: '500px', width: '100%' }}>
+              <Tooltip title="Ladda ner">
+                <IconButton 
+                  component="a" 
+                  href={pdf.file_url} 
+                  download 
+                  target="_blank" 
+                  size="sm"
+                >
+                  <DownloadIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          {/* Main content */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexGrow: 1,
+            height: 'calc(100% - 110px)',
+            overflow: 'hidden'
+          }}>
+            {/* PDF Content */}
+            <Box sx={{ 
+              flexGrow: 1, 
+              overflow: 'auto',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              bgcolor: 'background.level2',
+              p: 2
+            }}>
+              <Box sx={{ 
+                transform: `scale(${zoom})`, 
+                transformOrigin: 'top center',
+                transition: 'transform 0.2s ease-in-out',
+                width: `calc(100% / ${zoom})`, 
+                height: `calc(100% / ${zoom})`,
+                maxWidth: '100%'
+              }}>
                 <iframe 
-                  src={`${selectedPdf.file_url}#view=FitH`}
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                  title={selectedPdf.title}
+                  src={`${pdf.file_url}#toolbar=0&navpanes=0`} 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    border: 'none',
+                    backgroundColor: 'white',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.1)'
+                  }} 
+                  title={pdf.title}
                 />
               </Box>
-            </CardContent>
-          </Card>
-        )
-      )}
-    </Box>
+            </Box>
+
+            {/* Sidebar */}
+            <Sheet 
+              sx={{ 
+                width: 300, 
+                borderLeft: '1px solid', 
+                borderColor: 'divider',
+                overflow: 'auto',
+                display: { xs: 'none', md: 'block' },
+                flexShrink: 0
+              }}
+            >
+              <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)}>
+                <TabList>
+                  <Tab startDecorator={<InfoIcon />}>Info</Tab>
+                  <Tab startDecorator={<DescriptionIcon />} disabled>Anteckningar</Tab>
+                </TabList>
+                <TabPanel value={0} sx={{ p: 2 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Typography level="h4">Dokumentinformation</Typography>
+                    
+                    <Box>
+                      <Typography level="title-sm">Titel</Typography>
+                      <Typography>{pdf.title}</Typography>
+                    </Box>
+                    
+                    {pdf.description && (
+                      <Box>
+                        <Typography level="title-sm">Beskrivning</Typography>
+                        <Typography>{pdf.description}</Typography>
+                      </Box>
+                    )}
+                    
+                    <Divider />
+                    
+                    <Box>
+                      <Typography level="title-sm">Uppladdad av</Typography>
+                      <Typography>
+                        {pdf.uploaded_by_details.first_name 
+                          ? `${pdf.uploaded_by_details.first_name} ${pdf.uploaded_by_details.last_name}` 
+                          : pdf.uploaded_by_details.username}
+                      </Typography>
+                    </Box>
+                    
+                    <Box>
+                      <Typography level="title-sm">Datum</Typography>
+                      <Typography>
+                        {format(new Date(pdf.created_at), 'dd MMMM yyyy, HH:mm', { locale: sv })}
+                      </Typography>
+                    </Box>
+                    
+                    <Box>
+                      <Typography level="title-sm">Filstorlek</Typography>
+                      <Typography>{formatFileSize(pdf.size)}</Typography>
+                    </Box>
+                    
+                    <Box>
+                      <Typography level="title-sm">Version</Typography>
+                      <Typography>v{pdf.version}</Typography>
+                    </Box>
+                  </Box>
+                </TabPanel>
+              </Tabs>
+            </Sheet>
+          </Box>
+        </Box>
+      </ModalDialog>
+    </Modal>
   );
 };
 
