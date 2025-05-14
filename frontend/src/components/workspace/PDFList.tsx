@@ -267,7 +267,10 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
                         size="sm" 
                         variant="plain" 
                         color="primary" 
-                        onClick={() => onOpenPDF(doc)}
+                        onClick={() => {
+                          console.log('Clicked View PDF button for:', doc.title);
+                          onOpenPDF(doc);
+                        }}
                       >
                         <ViewIcon />
                       </IconButton>
