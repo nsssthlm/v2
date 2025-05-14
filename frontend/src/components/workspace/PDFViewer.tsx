@@ -36,7 +36,14 @@ interface PDFViewerProps {
   onClose: () => void;
 }
 
+// Debug value for development
+let renderCount = 0;
+
 const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
+  // Increment render count for debugging
+  renderCount++;
+  console.log(`PDFViewer render #${renderCount}, pdf:`, pdf ? pdf.id : 'null');
+
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
@@ -88,14 +95,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  // Check if PDF exists and log
-  const isPDFAvailable = !!pdf;
-  console.log('Modal should be open:', isPDFAvailable);
-  
-  if (!isPDFAvailable) {
-    console.log('No PDF available, not rendering modal');
-    return null;
-  }
+  console.log('Starting PDFViewer render with:', pdf?.title);
   
   return (
     <Modal
@@ -105,6 +105,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
+        zIndex: 1400
       }}
     >
       <ModalDialog 
