@@ -69,12 +69,21 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
       setError(null);
       
       try {
-        const response = await axios.get(`/api/workspace/pdfs/?project=${projectId}`);
+        console.log('Fetching PDFs for project:', projectId);
+        const response = await axios.get(`/api/workspace/pdfs/?project=${projectId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        console.log('PDF response:', response.data);
         setDocuments(response.data);
         setFilteredDocuments(response.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching PDF documents', err);
-        setError('Kunde inte hämta PDF-dokument. Försök igen senare.');
+        const errorMessage = err.response?.data?.detail || 
+                            err.response?.data?.message || 
+                            'Kunde inte hämta PDF-dokument. Försök igen senare.';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -125,22 +134,31 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
     formData.append('project', String(projectId));
 
     try {
+      console.log('Uploading PDF:', uploadData.title);
+      const token = localStorage.getItem('access_token');
       const response = await axios.post('/api/workspace/pdfs/', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
         }
       });
       
+      console.log('Upload response:', response.data);
       // Add the new document to the list
       setDocuments(prev => [response.data, ...prev]);
+      setFilteredDocuments(prev => [response.data, ...prev]);
       
       // Reset form
       setUploadFile(null);
       setUploadData({ title: '', description: '' });
       setUploadOpen(false);
-    } catch (err) {
+      setError(null); // Clear any previous errors
+    } catch (err: any) {
       console.error('Error uploading PDF', err);
-      setError('Kunde inte ladda upp PDF. Kontrollera att filen är en giltig PDF.');
+      const errorMessage = err.response?.data?.detail || 
+                           err.response?.data?.message ||
+                           'Kunde inte ladda upp PDF. Kontrollera att filen är en giltig PDF.';
+      setError(errorMessage);
     } finally {
       setUploading(false);
     }

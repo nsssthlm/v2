@@ -170,12 +170,23 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins in development/Replit
 CORS_ALLOW_CREDENTIALS = True
 
-# Add specific allowed origins if needed
+# Add specific allowed origins if needed - these will be used if CORS_ALLOW_ALL_ORIGINS is False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5000",
+    "http://0.0.0.0:5000",
     # Add Replit domains pattern
+    "https://*.repl.co",
     "https://*.replit.app",
     "https://*.replit.dev",
+    "https://*.janeway.replit.dev",
+]
+
+# Required for wildcard origins to work
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.repl\.co$",
+    r"^https://.*\.replit\.app$",
+    r"^https://.*\.replit\.dev$",
+    r"^https://.*\.janeway\.replit\.dev$",
 ]
 
 # Allow all headers and methods for development/Replit
