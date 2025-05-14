@@ -292,7 +292,7 @@ const Workspace: React.FC = () => {
                   </IconButton>
                 </Box>
                 
-                {/* PDF-visare med avancerad visning */}
+                {/* PDF-visare med avancerad PDF.js-integrering */}
                 <Box sx={{ 
                   flex: 1, 
                   overflow: 'auto',
@@ -308,28 +308,20 @@ const Workspace: React.FC = () => {
                     flexDirection: 'column',
                     alignItems: 'center'
                   }}>
-                    <object 
-                      data={`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`}
-                      type="application/pdf"
-                      style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        border: 'none',
-                        borderRadius: '4px'
-                      }}
+                    <SimplePDFViewer 
+                      pdfUrl={`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`}
+                      title={selectedPDF.title}
+                    />
+                    <Button 
+                      onClick={() => window.open(`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`, '_blank')}
+                      variant="outlined"
+                      color="primary"
+                      size="sm"
+                      startDecorator={<OpenInNewIcon />}
+                      sx={{ mt: 2 }}
                     >
-                      <Typography color="danger" sx={{ mb: 2, display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        Din webbläsare kan inte visa PDF-filen direkt. 
-                      </Typography>
-                      <Button 
-                        onClick={() => window.open(`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`, '_blank')}
-                        variant="solid"
-                        color="primary"
-                        startDecorator={<OpenInNewIcon />}
-                      >
-                        Öppna i nytt fönster
-                      </Button>
-                    </object>
+                      Öppna i nytt fönster
+                    </Button>
                   </Box>
                 </Box>
                 
