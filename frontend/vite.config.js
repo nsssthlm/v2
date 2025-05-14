@@ -32,6 +32,7 @@ export default defineConfig({
         target: "http://0.0.0.0:8001",
         changeOrigin: true,
       },
-    }
+    },
+    allowedHosts: ["fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww3ixj0zy1.janeway.replit.dev"]
   },
 });
