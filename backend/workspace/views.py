@@ -267,3 +267,23 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+        
+    @action(detail=True, methods=['get'])
+    def content(self, request, pk=None):
+        """
+        Get PDF content with headers that exempt it from X-Frame-Options restrictions
+        """
+        pdf = self.get_object()
+        from django.http import HttpResponse
+        
+        # Create response that allows the PDF to be embedded in an iframe
+        response = HttpResponse()
+        response['Content-Type'] = 'application/pdf'
+        response['X-Frame-Options'] = 'ALLOWALL'
+        response['Content-Security-Policy'] = 'frame-ancestors *'
+        response['Content-Disposition'] = f'inline; filename="{pdf.title}"'
+        
+        # Redirect to the actual file URL
+        response['Location'] = pdf.file.url
+        response.status_code = 302
+        return response

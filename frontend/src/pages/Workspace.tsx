@@ -292,7 +292,7 @@ const Workspace: React.FC = () => {
                   </IconButton>
                 </Box>
                 
-                {/* PDF-visare med direkt inbäddad iframe */}
+                {/* PDF-visare med avancerad visning */}
                 <Box sx={{ 
                   flex: 1, 
                   overflow: 'auto',
@@ -303,21 +303,33 @@ const Workspace: React.FC = () => {
                 }}>
                   <Box sx={{ 
                     width: '100%', 
-                    height: '80vh', 
+                    height: '80vh',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center'
                   }}>
-                    <iframe 
-                      src={`http://0.0.0.0:8001${selectedPDF.file_url}`}
+                    <object 
+                      data={`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`}
+                      type="application/pdf"
                       style={{ 
                         width: '100%', 
                         height: '100%', 
                         border: 'none',
                         borderRadius: '4px'
                       }}
-                      title={selectedPDF.title}
-                    />
+                    >
+                      <Typography color="danger" sx={{ mb: 2, display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        Din webbläsare kan inte visa PDF-filen direkt. 
+                      </Typography>
+                      <Button 
+                        onClick={() => window.open(`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`, '_blank')}
+                        variant="solid"
+                        color="primary"
+                        startDecorator={<OpenInNewIcon />}
+                      >
+                        Öppna i nytt fönster
+                      </Button>
+                    </object>
                   </Box>
                 </Box>
                 
