@@ -17,8 +17,13 @@ import {
   ModalDialog,
   ModalClose,
   Sheet,
-  Button
+  Button,
+  IconButton
 } from '@mui/joy';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { Document, Page, pdfjs } from 'react-pdf';
+// Initialize PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -50,6 +55,14 @@ const Workspace: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPDF, setSelectedPDF] = useState<PDFDocument | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    console.log('PDF loaded with', numPages, 'pages');
+    setNumPages(numPages);
+    setPageNumber(1);
+  }
   
   useEffect(() => {
     const fetchProject = async () => {
@@ -256,27 +269,86 @@ const Workspace: React.FC = () => {
                 </Typography>
               </Box>
               
-              {/* Visa en knapp för att öppna PDF i ny flik istället för iframe */}
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                p: 4, 
+                height: '100%',
                 flex: 1,
-                textAlign: 'center'
+                position: 'relative'
               }}>
-                <Typography level="body-md" sx={{ mb: 3 }}>
-                  PDF kan inte visas direkt i applikationen på grund av säkerhetsinställningar.
-                </Typography>
-                <Button 
-                  variant="solid" 
-                  color="primary" 
-                  size="lg"
-                  onClick={() => window.open(`http://0.0.0.0:8001${selectedPDF.file_url}`, '_blank', 'noopener,noreferrer')}
-                >
-                  Öppna PDF i nytt fönster
-                </Button>
+                {/* Toolbar med knapp för att öppna i nytt fönster */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end',
+                  padding: 1,
+                  borderBottom: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  <IconButton 
+                    variant="outlined" 
+                    color="neutral"
+                    onClick={() => window.open(`http://0.0.0.0:8001${selectedPDF.file_url}`, '_blank', 'noopener,noreferrer')}
+                    title="Öppna i nytt fönster"
+                  >
+                    <OpenInNewIcon />
+                  </IconButton>
+                </Box>
+                
+                {/* PDF-visare */}
+                <Box sx={{ 
+                  flex: 1, 
+                  overflow: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: 2
+                }}>
+                  <Document
+                    file={`http://0.0.0.0:8001${selectedPDF.file_url}`}
+                    onLoadSuccess={onDocumentLoadSuccess}
+                    loading={<CircularProgress />}
+                    onLoadError={(error) => console.error('Error loading PDF:', error)}
+                    renderMode="canvas"
+                  >
+                    <Page 
+                      pageNumber={pageNumber}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                      width={550}
+                    />
+                  </Document>
+                </Box>
+                
+                {/* Pagination */}
+                {numPages && (
+                  <Box sx={{ 
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: 2,
+                    gap: 2,
+                    borderTop: '1px solid',
+                    borderColor: 'divider'
+                  }}>
+                    <Button 
+                      variant="outlined" 
+                      disabled={pageNumber <= 1}
+                      onClick={() => setPageNumber(prev => Math.max(prev - 1, 1))}
+                    >
+                      Föregående
+                    </Button>
+                    <Typography>
+                      Sida {pageNumber} av {numPages}
+                    </Typography>
+                    <Button 
+                      variant="outlined" 
+                      disabled={pageNumber >= numPages}
+                      onClick={() => setPageNumber(prev => Math.min(prev + 1, numPages || 1))}
+                    >
+                      Nästa
+                    </Button>
+                  </Box>
+                )}
               </Box>
             </Sheet>
           </ModalDialog>
