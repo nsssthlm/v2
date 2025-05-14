@@ -396,6 +396,44 @@
     .file-input-label:hover {
       background-color: var(--primary-dark);
     }
+    
+    /* Drag and drop styles */
+    .drop-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background-color: #f9f9f9;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    
+    .drop-area.highlight {
+      border-color: var(--primary);
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+    
+    .pdf-icon {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 15px;
+    }
+    
+    .file-label {
+      background-color: var(--primary);
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .file-label:hover {
+      background-color: var(--primary-dark);
+    }
 
     /* Responsive styles */
     @media (max-width: 768px) {
@@ -424,14 +462,16 @@
     <p>Klicka på knappen nedan för att ladda en PDF-fil och öppna den i en modal visare med stöd för anteckningar och versionshantering.</p>
 
     <div class="file-selection">
-      <div class="form-group">
-        <label for="pdf-file">Välj PDF-fil</label>
-        <input type="file" id="pdf-file" accept=".pdf" />
+      <div class="form-group" id="drop-container">
+        <div class="drop-area" id="drop-area">
+          <img src="https://img.icons8.com/office/80/000000/pdf.png" alt="PDF Icon" class="pdf-icon">
+          <p>Dra och släpp PDF-filer här<br>eller</p>
+          <label for="pdf-file" class="file-label">Välj PDF-fil</label>
+          <input type="file" id="pdf-file" accept=".pdf" style="display: none;" />
+        </div>
       </div>
-      <div class="form-group">
-        <label for="pdf-url">Eller ange URL till PDF</label>
-        <input type="text" id="pdf-url" placeholder="https://example.com/document.pdf" value="https://cdn.mozilla.net/pdfjs/tracemonkey.pdf" />
-      </div>
+      <!-- URL-fältet borttaget enligt instruktion -->
+      <input type="hidden" id="pdf-url" value="" />
       <div class="form-group">
         <label for="pdf-title">Titel (valfritt)</label>
         <input type="text" id="pdf-title" placeholder="Ange en titel för PDF-filen" />
