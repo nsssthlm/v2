@@ -2,26 +2,13 @@ import axios from 'axios';
 
 // Function to dynamically determine the API URL based on the current environment
 const getApiUrl = () => {
+  // In development on localhost
   if (window.location.hostname === 'localhost') {
     return 'http://localhost:8001/api';
   }
   
-  // For Replit - replace '00-' with '01-' in hostname to target backend
-  const hostname = window.location.hostname;
-  
-  // We're in the Replit web editor preview
-  if (hostname.includes('janeway.replit.dev')) {
-    const parts = hostname.split('-');
-    const replId = parts.slice(0, 3).join('-');
-    return `https://${replId.replace('00-', '01-')}.${parts.slice(3).join('-')}/api`;
-  }
-  
-  // We're deployed to replit.app domain
-  if (hostname.includes('replit.app')) {
-    return `https://${hostname.replace('00-', '01-')}/api`;
-  }
-  
-  // Default fallback for other environments
+  // For Replit environment, use the relative API path
+  // This is the simplest and most reliable approach in Replit's proxied env
   return '/api';
 };
 
@@ -66,7 +53,7 @@ api.interceptors.response.use(
         
         if (refreshToken) {
           console.log('Attempting to refresh token');
-          const response = await axios.post(`${API_URL}/token-refresh/`, {
+          const response = await axios.post(`${API_URL}/token/refresh/`, {
             refresh: refreshToken,
           });
           
