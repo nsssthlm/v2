@@ -355,6 +355,20 @@ const Sidebar = () => {
     setNewFolderDialogOpen(true);
   };
   
+  // Funktion för att rensa filsystemet 
+  const clearFilesystem = () => {
+    localStorage.removeItem('filesystemNodes');
+    setFilesystemNodes([]);
+  };
+
+  // Rensa direkt i den här versionen
+  useEffect(() => {
+    // Rensa allt filsystem relaterat till localStorage
+    localStorage.removeItem('filesystemNodes');
+    localStorage.removeItem('fileBrowserInitialized');
+    setFilesystemNodes([]);
+  }, []);
+  
   // Spara ändringar i filsystemet till localStorage
   useEffect(() => {
     localStorage.setItem('filesystemNodes', JSON.stringify(filesystemNodes));
