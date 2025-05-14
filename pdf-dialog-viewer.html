@@ -728,6 +728,21 @@
           // Skapa en blob URL för visning
           currentPdfFile = file;
           currentPdfUrl = URL.createObjectURL(file);
+          
+          // För att senare kunna spara som data-URL, skapa också en FileReader om filen är lämplig storlek
+          if (file.size < 5*1024*1024) { // Begränsa till 5 MB för localStorage
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              // Spara base64-encoded data för att kunna återskapa senare
+              // Detta används inte direkt nu, men kommer att sparas när användaren klickar på Spara
+              currentPdfDataUrl = e.target.result;
+              console.log("Filen har konverterats till data-URL för lagring");
+            };
+            reader.readAsDataURL(file);
+          } else {
+            console.log("Filen är för stor för att lagras som data-URL:", formatFileSize(file.size));
+            currentPdfDataUrl = null;
+          }
           currentPdfId = generateUniqueId();
         } else {
           alert('Endast PDF-filer är tillåtna.');
@@ -885,29 +900,38 @@
         
         // URL-fältet är borttaget, behöver inte uppdateras längre
       }
-      // Prioritering 2: För blob-URL:er, använd mozilla's PDF som nödlösning
-      else if (pdfData.url && pdfData.url.startsWith('blob:')) {
-        console.log("PDF hade blob-URL (tillfällig), försöker med ersättnings-URL");
-        
-        // Använd fallback URL:en som standard
-        urlToLoad = "https://cdn.mozilla.net/pdfjs/tracemonkey.pdf";
+      // Prioritering 2: Kolla om vi har sparat PDF-fil som data-URL (base64)
+      else if (pdfData.fileData && pdfData.fileData.startsWith('data:application/pdf')) {
+        console.log("Använder sparad PDF-data från localStorage (base64)");
+        urlToLoad = pdfData.fileData;
         currentPdfUrl = urlToLoad;
         
-        // Visa meddelande om varför den ursprungliga filen inte kunde visas
-        setTimeout(() => {
-          alert("Originaldokumentet kunde inte laddas (tillfällig URL). En exempelversion visas istället.\n\nFör att visa originalet, ladda upp PDF-filen igen eller ange en permanent URL.");
-        }, 1000);
+        // Informera om att vi använder lokalt sparad data
+        console.log("Laddar PDF från sparad base64-data");
       }
-      // Prioritering 3: För alla andra fall, prova vad vi än har
-      else {
-        console.log("Ingen valid URL hittades, använder ersättnings-URL");
-        urlToLoad = "https://cdn.mozilla.net/pdfjs/tracemonkey.pdf";
-        currentPdfUrl = urlToLoad;
+      // Prioritering 3: För blob-URL:er, be användaren välja filen igen
+      else if (pdfData.url && pdfData.url.startsWith('blob:')) {
+        console.log("PDF hade blob-URL (tillfällig), kan inte återskapa");
         
         // Visa meddelande om varför den ursprungliga filen inte kunde visas
         setTimeout(() => {
-          alert("Originaldokumentet kunde inte laddas. En exempelversion visas istället.\n\nFör att visa originalet, ladda upp PDF-filen igen eller ange en permanent URL.");
-        }, 1000);
+          alert("Originaldokumentet kunde inte laddas eftersom det endast var tillfälligt sparat.\n\nFör att visa PDF:en igen, vänligen välj samma fil på nytt genom att dra och släppa den i rutan.");
+        }, 500);
+        
+        // Avbryt laddningen eftersom vi inte har en giltig PDF
+        urlToLoad = null;
+      }
+      // Prioritering 4: För alla andra fall, informera användaren om att PDF-filen saknas
+      else {
+        console.log("Ingen valid PDF-data hittades");
+        
+        // Visa meddelande om varför den ursprungliga filen inte kunde visas
+        setTimeout(() => {
+          alert("Kunde inte hitta eller ladda PDF-dokumentet.\n\nVänligen välj filen igen genom att dra och släppa den i rutan.");
+        }, 500);
+        
+        // Avbryt laddningen eftersom vi inte har en giltig PDF
+        urlToLoad = null;
       }
       
       // Ladda PDF:en
