@@ -25,6 +25,7 @@ import {
 import axios from 'axios';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import api from '../../services/api';
 
 interface PDFDocument {
   id: number;
@@ -70,11 +71,7 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
       
       try {
         console.log('Fetching PDFs for project:', projectId);
-        const response = await axios.get(`/api/workspace/pdfs/?project=${projectId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
-        });
+        const response = await api.get(`/workspace/pdfs/?project=${projectId}`);
         console.log('PDF response:', response.data);
         setDocuments(response.data);
         setFilteredDocuments(response.data);
@@ -135,11 +132,9 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
 
     try {
       console.log('Uploading PDF:', uploadData.title);
-      const token = localStorage.getItem('access_token');
-      const response = await axios.post('/api/workspace/pdfs/', formData, {
+      const response = await api.post('/workspace/pdfs/', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'multipart/form-data'
         }
       });
       
@@ -169,12 +164,7 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
     
     try {
       console.log('Deleting PDF with ID:', id);
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`/api/workspace/pdfs/${id}/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      await api.delete(`/workspace/pdfs/${id}/`);
       
       console.log('PDF deleted successfully');
       // Remove the document from both lists
