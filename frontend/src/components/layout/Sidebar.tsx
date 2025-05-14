@@ -517,6 +517,34 @@ const Sidebar = () => {
           </IconButton>
         </Box>
       </Box>
+      
+      {/* Modal för att skapa ny mapp */}
+      <Modal open={newFolderDialogOpen} onClose={() => setNewFolderDialogOpen(false)}>
+        <ModalDialog>
+          <DialogTitle>Skapa ny mapp</DialogTitle>
+          <DialogContent>
+            <FormControl>
+              <FormLabel>Namn på mappen</FormLabel>
+              <Input 
+                autoFocus 
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    createNewFolder();
+                  }
+                }}
+              />
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="plain" color="neutral" onClick={() => setNewFolderDialogOpen(false)}>
+              Avbryt
+            </Button>
+            <Button onClick={createNewFolder}>Skapa</Button>
+          </DialogActions>
+        </ModalDialog>
+      </Modal>
     </Sheet>
   );
 };
