@@ -11,43 +11,36 @@ import NotFoundPage from './pages/NotFound';
 import { Box, CircularProgress, Typography } from '@mui/joy';
 import { useState, useEffect } from 'react';
 
+// Define the ProtectedRoute component outside of the main App function
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { authState } = useAuth();
+  
+  if (authState.loading) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        <CircularProgress size="lg" />
+        <Typography level="body-lg" sx={{ mt: 2 }}>
+          Laddar ValvX...
+        </Typography>
+      </Box>
+    );
+  }
+  
+  if (!authState.isAuthenticated) return <Navigate to="/login" />;
+  return children;
+};
+
+// The main App component doesn't access context directly
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Check authentication status from localStorage
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    setIsAuthenticated(!!token);
-    setLoading(false);
-  }, []);
-
-  // Handle login success
+  // Handle login success - can be empty now as AuthContext handles the state
   const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-  };
-
-  // Protected route component
-  const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-    if (loading) {
-      return (
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh' 
-        }}>
-          <CircularProgress size="lg" />
-          <Typography level="body-lg" sx={{ mt: 2 }}>
-            Laddar ValvX...
-          </Typography>
-        </Box>
-      );
-    }
-    
-    if (!isAuthenticated) return <Navigate to="/login" />;
-    return children;
+    console.log('Login successful');
   };
 
   return (
@@ -55,7 +48,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={
-            isAuthenticated ? <Navigate to="/" /> : <LoginPage onLoginSuccess={handleLoginSuccess} />
+            <AppAuthRoute onLoginSuccess={handleLoginSuccess} />
           } />
           
           <Route path="/" element={
