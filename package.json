@@ -25,6 +25,7 @@
     "http-proxy-middleware": "^3.0.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-pdf": "^9.2.1",
     "react-router-dom": "^7.6.0",
     "sass": "^1.88.0",
     "typescript": "^5.8.3",
