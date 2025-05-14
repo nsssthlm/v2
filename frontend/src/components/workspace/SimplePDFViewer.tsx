@@ -29,7 +29,12 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
     const fetchPdf = async () => {
       try {
         // Skapa korrekt URL för backend-begäran
-        const apiUrl = pdfUrl.replace(/^http:\/\/0\.0\.0\.0:8001\/api/, '');
+        const apiUrl = pdfUrl.startsWith('/api/') 
+          ? pdfUrl 
+          : pdfUrl.startsWith('/workspace/') 
+            ? `/api${pdfUrl}` 
+            : pdfUrl.replace(/^http:\/\/0\.0\.0\.0:8001\/api/, '');
+            
         console.log('Fetching PDF from URL:', apiUrl);
         
         // Ladda ner PDF som blob med autentiserade begäran
@@ -117,7 +122,10 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
             boxShadow: 'md', 
             borderRadius: 'md',
             backgroundColor: 'white',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
           }}>
             {objectUrl ? (
               <iframe
@@ -126,7 +134,10 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
                 style={{ 
                   width: '100%', 
                   height: '100%', 
-                  border: 'none' 
+                  border: 'none',
+                  backgroundColor: 'white',
+                  minHeight: '600px',
+                  maxWidth: '100%'
                 }}
                 onError={handleIframeError}
                 title={title || "PDF Dokument"}
