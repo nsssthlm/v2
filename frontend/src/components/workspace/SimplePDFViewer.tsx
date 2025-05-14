@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/joy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import api from '../../services/api';
 
 interface SimplePDFViewerProps {
   pdfUrl: string;
@@ -11,10 +10,8 @@ interface SimplePDFViewerProps {
 export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [fullUrl, setFullUrl] = useState<string>('');
 
-  // Ladda PDF-innehållet med autentisering
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -25,70 +22,45 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
       return;
     }
     
-    // Använd axios för att hämta PDF-filen med autentisering
-    const fetchPdf = async () => {
-      try {
-        // Förbered URL för API-anrop
-        let apiUrl = pdfUrl;
-        
-        // Kontrollera och rensa URL:en för att undvika dubbla /api/ prefix
-        if (apiUrl.startsWith('/api/')) {
-          // URL:en har redan /api/ prefix - använd den direkt
-          // Ingen åtgärd behövs
-        } else if (apiUrl.startsWith('workspace/')) {
-          // Om URL:en börjar med workspace/ (utan slash), lägg till /api/
-          apiUrl = `/api/${apiUrl}`;
-        } else if (apiUrl.startsWith('/workspace/')) {
-          // Om URL:en börjar med /workspace/, lägg till /api före
-          apiUrl = `/api${apiUrl}`;
-        }
-        
-        // Ta bort eventuella http://0.0.0.0:8001/api prefix 
-        apiUrl = apiUrl.replace(/^http:\/\/0\.0\.0\.0:8001\/api/, '/api');
-            
-        console.log('Fetching PDF from URL:', apiUrl);
-        
-        // Fixa fel i URL före API-anrop - vi måste ta bort ALL /api/ prefix eftersom det läggs till av Axios baseURL
-        if (apiUrl.startsWith('/api/')) {
-          // Ta bort /api/ prefixet eftersom api.get kommer att lägga till det automatiskt
-          apiUrl = apiUrl.substring(5); // Ta bort de första 5 tecknen (/api/)
-          console.log('Removed /api/ prefix since Axios will add it. New URL:', apiUrl);
-        }
-        
-        // Ladda ner PDF som blob med autentiserade begäran
-        const response = await api.get(apiUrl, {
-          responseType: 'blob'
-        });
-        
-        // Skapa en blob URL från responsen
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        
-        setObjectUrl(url);
-        setLoading(false);
-      } catch (err) {
-        console.error('Fel vid hämtning av PDF:', err);
-        setError('Kunde inte ladda PDF-dokumentet. Försök öppna i nytt fönster istället.');
-        setLoading(false);
+    try {
+      // Hantera URL-format
+      let apiUrl = pdfUrl;
+      const baseApiUrl = '/api/';
+      
+      // Kontrollera och formatera URL:en korrekt
+      if (apiUrl.startsWith('/api/')) {
+        // URL:en har redan /api/ prefix - använd den direkt
+        console.log('URL already starts with /api/, using as is:', apiUrl);
+      } else if (apiUrl.startsWith('workspace/')) {
+        // Om URL:en börjar med workspace/ (utan slash), lägg till /api/ prefix
+        apiUrl = baseApiUrl + apiUrl;
+        console.log('Added /api/ prefix. New URL:', apiUrl);
+      } else if (apiUrl.startsWith('/workspace/')) {
+        // Om URL:en börjar med /workspace/, ta bort / och lägg till /api/
+        apiUrl = baseApiUrl + apiUrl.substring(1);
+        console.log('Fixed URL format with /api/ prefix. New URL:', apiUrl);
       }
-    };
-    
-    fetchPdf();
-    
-    // Rensa blob URL när komponenten avmonteras
-    return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
+      
+      // Lägg till auth token till URL
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        // Om URL redan har parametrar, använd &, annars använd ?
+        const separator = apiUrl.includes('?') ? '&' : '?';
+        apiUrl = `${apiUrl}${separator}token=${token}`;
       }
-    };
+      
+      // Logga slutlig URL (men dölj token i loggen)
+      console.log('Final PDF URL (auth token hidden):', apiUrl.split('token=')[0] + 'token=HIDDEN');
+      
+      // Sätt URL för iframe
+      setFullUrl(apiUrl);
+      setLoading(false);
+    } catch (err) {
+      console.error('Fel vid förberedelse av PDF-URL:', err);
+      setError('Kunde inte förbereda PDF-URL.');
+      setLoading(false);
+    }
   }, [pdfUrl]);
-
-  // Hantera iframe fel
-  const handleIframeError = () => {
-    console.error('Kunde inte ladda PDF i iframe');
-    setError('Kunde inte ladda PDF-dokumentet. Försök öppna i nytt fönster istället.');
-    setLoading(false);
-  };
 
   if (error) {
     return (
@@ -120,66 +92,46 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      height: '100%' 
+      height: '100%',
+      width: '100%'
     }}>
-      {/* PDF viewer */}
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center',
-        overflow: 'auto',
-        p: 2 
-      }}>
-        {loading ? (
+      {loading ? (
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100%' 
+        }}>
           <CircularProgress size="lg" />
-        ) : (
-          <Box sx={{ 
-            width: '100%',
-            height: '100%',
-            boxShadow: 'md', 
-            borderRadius: 'md',
-            backgroundColor: 'white',
-            overflow: 'hidden',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            {objectUrl ? (
-              <embed
-                src={objectUrl}
-                type="application/pdf"
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  border: 'none',
-                  backgroundColor: 'white',
-                  minHeight: '600px',
-                  maxWidth: '100%',
-                  display: 'block',
-                  margin: 0,
-                  padding: 0
-                }}
-              />
-            ) : (
-              <Typography level="body-md">
-                Laddar PDF-innehåll...
-              </Typography>
-            )}
-          </Box>
-        )}
-      </Box>
+        </Box>
+      ) : (
+        <Box sx={{ 
+          flex: 1, 
+          height: 'calc(100% - 50px)',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 'md',
+          overflow: 'hidden',
+          bgcolor: 'background.body'
+        }}>
+          <iframe 
+            src={fullUrl}
+            title={title || "PDF Viewer"}
+            width="100%"
+            height="100%"
+            style={{ border: 'none' }}
+            allow="fullscreen"
+          />
+        </Box>
+      )}
       
-      {/* Controls */}
       <Box sx={{ 
+        mt: 2, 
         display: 'flex', 
-        justifyContent: 'center', 
-        p: 2,
-        borderTop: '1px solid',
-        borderColor: 'divider'
+        justifyContent: 'center' 
       }}>
         <Button 
-          onClick={() => window.open(pdfUrl, '_blank')}
+          onClick={() => window.open(fullUrl, '_blank')}
           variant="outlined"
           color="primary"
           size="sm"
