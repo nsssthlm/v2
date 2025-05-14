@@ -220,7 +220,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 maxWidth: '100%'
               }}>
                 <SimplePDFViewer 
-                  pdfUrl={`http://0.0.0.0:8001/api/workspace/pdfs/${pdf.id}/content/`}
+                  pdfUrl={`/api/workspace/pdfs/${pdf.id}/content/`}
                   title={pdf.title}
                 />
               </Box>

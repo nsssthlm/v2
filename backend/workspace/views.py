@@ -277,9 +277,18 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         from django.http import HttpResponse, FileResponse
         import os
         
-        # Använd FileResponse istället för att läsa in hela filen i minnet
-        # Detta kan hantera större filer mer effektivt
-        response = FileResponse(open(pdf.file.path, 'rb'), content_type='application/pdf')
+        # Lägg till extra säkerhet på filhantering
+        if not os.path.exists(pdf.file.path):
+            return Response({"error": "File not found"}, status=404)
+        
+        # Skapa ett binärt svar för att hantera alla typer av Accept-headers
+        with open(pdf.file.path, 'rb') as f:
+            file_content = f.read()
+        
+        response = HttpResponse(
+            file_content,
+            content_type='application/pdf'
+        )
         
         # Override default Django X-Frame-Options header för att tillåta embedding
         response['X-Frame-Options'] = 'ALLOWALL'
