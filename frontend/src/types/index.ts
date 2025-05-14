@@ -123,6 +123,7 @@ export interface PDFDocument {
   unique_id: string;
   title: string;
   description: string;
+  file: string;
   file_url: string;
   content_type: string;
   version: number;
