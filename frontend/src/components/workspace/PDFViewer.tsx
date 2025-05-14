@@ -113,11 +113,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
         layout="fullscreen" 
         sx={{ 
           p: 0, 
+          border: 'none',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          maxWidth: '100vw',
-          maxHeight: '100vh'
+          maxWidth: '98vw',
+          maxHeight: '98vh',
+          width: '95%',
+          height: '95%',
+          boxShadow: 'lg'
         }}
       >
         <Box 
@@ -199,7 +203,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
             display: 'flex', 
             flexGrow: 1,
             height: 'calc(100% - 110px)',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            position: 'relative'
           }}>
             {/* PDF Content */}
             <Box sx={{ 
@@ -209,7 +214,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
               justifyContent: 'center',
               alignItems: 'flex-start',
               bgcolor: 'background.level2',
-              p: 2
+              p: 2,
+              height: '100%'
             }}>
               <Box sx={{ 
                 transform: `scale(${zoom})`, 
@@ -217,7 +223,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 transition: 'transform 0.2s ease-in-out',
                 width: `calc(100% / ${zoom})`, 
                 height: `calc(100% / ${zoom})`,
-                maxWidth: '100%'
+                maxWidth: '100%',
+                minHeight: '600px'
               }}>
                 <SimplePDFViewer 
                   pdfUrl={`/api/workspace/pdfs/${pdf.id}/content/`}
