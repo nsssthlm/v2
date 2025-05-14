@@ -272,6 +272,7 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         
     @action(detail=True, methods=['get'])
     @method_decorator(xframe_options_exempt)
+    @method_decorator(xframe_options_exempt)
     def content(self, request, pk=None):
         """
         Get PDF content with headers that exempt it from X-Frame-Options restrictions
