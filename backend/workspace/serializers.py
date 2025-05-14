@@ -32,26 +32,20 @@ class FileVersionSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'version', 'file_url', 'content_type', 'size', 'created_at', 'uploaded_by_details']
     
     def get_file_url(self, obj):
-        return obj.file.url
+        if obj.file and hasattr(obj.file, 'url'):
+            request = self.context.get('request')
+            return request.build_absolute_uri(obj.file.url) if request else obj.file.url
+        return None
     
     def create(self, validated_data):
         validated_data['uploaded_by'] = self.context['request'].user
         
-        # Auto-increment version number
-        file_node = validated_data['file_node']
-        latest_version = FileVersion.objects.filter(file_node=file_node).order_by('-version').first()
-        
-        if latest_version:
-            validated_data['version'] = latest_version.version + 1
-        else:
-            validated_data['version'] = 1
-        
-        # Get file size and content type
+        # Extract file metadata
         file = validated_data.get('file')
         if file:
             validated_data['size'] = file.size
             validated_data['content_type'] = file.content_type
-        
+            
         return super().create(validated_data)
 
 class FileCommentSerializer(serializers.ModelSerializer):
@@ -109,7 +103,10 @@ class PDFDocumentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'file_url', 'uploaded_by', 'uploaded_by_details', 'created_at', 'updated_at']
     
     def get_file_url(self, obj):
-        return obj.file.url
+        if obj.file and hasattr(obj.file, 'url'):
+            request = self.context.get('request')
+            return request.build_absolute_uri(obj.file.url) if request else obj.file.url
+        return None
     
     def create(self, validated_data):
         validated_data['uploaded_by'] = self.context['request'].user

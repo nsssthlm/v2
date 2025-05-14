@@ -1,9 +1,9 @@
 from django.db import models
 from django.conf import settings
-from core.models import Project, User
+from core.models import Project
 
 class FileNode(models.Model):
-    """Model for representing a file or folder in the project file structure"""
+    """Model for files and folders in project workspace"""
     FILE = 'file'
     FOLDER = 'folder'
     
@@ -16,31 +16,34 @@ class FileNode(models.Model):
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='file_nodes')
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_file_nodes')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_files')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         unique_together = ('name', 'project', 'parent')
-        ordering = ['type', 'name']
+        ordering = ['name']
     
     def __str__(self):
-        return f"{self.name} ({self.get_type_display()})"
+        return self.name
     
     def get_path(self):
-        """Return the full path of the file node"""
-        if self.parent:
-            return f"{self.parent.get_path()}/{self.name}"
-        return f"/{self.name}"
+        """Get full path of the file or folder"""
+        if self.parent_id:
+            parent_path = ""
+            if hasattr(self.parent, 'get_path'):
+                parent_path = self.parent.get_path()
+            return f"{parent_path}/{self.name}"
+        return self.name
 
 class FileVersion(models.Model):
-    """Model for storing versions of files"""
+    """Model for file versions"""
     file_node = models.ForeignKey(FileNode, on_delete=models.CASCADE, related_name='versions')
-    version = models.PositiveIntegerField()
-    file = models.FileField(upload_to='workspace_files/%Y/%m/%d/')
+    version = models.IntegerField(default=1)
+    file = models.FileField(upload_to='files/%Y/%m/%d/')
     content_type = models.CharField(max_length=100)
-    size = models.BigIntegerField()  # Size in bytes
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_file_versions')
+    size = models.IntegerField()
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_versions')
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -48,12 +51,14 @@ class FileVersion(models.Model):
         ordering = ['-version']
     
     def __str__(self):
-        return f"{self.file_node.name} v{self.version}"
+        return f"{self.file_node.name} (v{self.version})"
     
-    @property
-    def file_url(self):
-        """Return the URL to access the file"""
-        return self.file.url
+    def save(self, *args, **kwargs):
+        # Auto-increment version
+        if not self.pk:
+            last_version = FileVersion.objects.filter(file_node=self.file_node).order_by('-version').first()
+            self.version = (last_version.version + 1) if last_version else 1
+        super().save(*args, **kwargs)
 
 class FileComment(models.Model):
     """Model for comments on file versions"""
@@ -67,7 +72,9 @@ class FileComment(models.Model):
         ordering = ['created_at']
     
     def __str__(self):
-        return f"Comment by {self.user.username} on {self.file_version}"
+        user_str = str(self.user)
+        file_version_str = str(self.file_version)
+        return f"Comment by {user_str} on {file_version_str}"
 
 class WikiArticle(models.Model):
     """Model for wiki articles"""
@@ -103,9 +110,9 @@ class PDFDocument(models.Model):
     """Model for PDF documents"""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    file = models.FileField(upload_to='pdf_documents/%Y/%m/%d/')
+    file = models.FileField(upload_to='pdfs/%Y/%m/%d/')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='pdf_documents')
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_pdf_documents')
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_pdfs')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -114,8 +121,3 @@ class PDFDocument(models.Model):
     
     def __str__(self):
         return self.title
-    
-    @property
-    def file_url(self):
-        """Return the URL to access the PDF file"""
-        return self.file.url
