@@ -112,8 +112,9 @@ const FileSystemNode = ({
           
           {/* Filnamn/mappnamn utan textavklippning */}
           <ListItemContent sx={{ 
-            mr: 3,          
-            flexGrow: 1,
+            width: 'calc(100% - 30px)', // Fast bredd med plats för plusknappen
+            mr: 0,
+            flexGrow: 0,
             flexShrink: 0,
             overflow: 'visible'
           }}>
@@ -143,9 +144,12 @@ const FileSystemNode = ({
               }}
               sx={{ 
                 position: 'absolute',
-                right: '10px', // Fast avstånd från högerkanten
+                right: '5px',
                 top: '50%',
                 transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 opacity: 0.7,
                 minWidth: '18px',
                 width: '18px',
