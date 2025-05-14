@@ -1294,6 +1294,9 @@
         
         // Skapa hjälpfunktion för att spara och använda finalizeSave
         finalizeSave(newPdf);
+      } catch (error) {
+        console.error('Fel vid sparande av PDF:', error);
+        alert('Det uppstod ett problem vid sparande av PDF-filen.');
       }
     }
     
@@ -1334,6 +1337,10 @@
             existingRow.remove();
           }
         }
+      } catch (error) {
+        console.error('Fel vid sparande av PDF i localStorage:', error);
+        alert('Ett fel uppstod när PDF-filen skulle sparas.');
+      }
         
         // Lägg till i tabellen
         addPdfToTable(newPdf);
