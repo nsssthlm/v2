@@ -1389,6 +1389,17 @@
     // Slutför sparandet av PDF
     function finalizeSave(newPdf) {
       try {
+        // Om fileData är större än 2MB, spara utan fileData för att undvika localStorage-begränsningar
+        if (newPdf.fileData && newPdf.fileData.length > 2000000) {
+          console.log("Filen är för stor för localStorage, sparar endast metadata");
+          const tempFileData = newPdf.fileData;
+          delete newPdf.fileData; // Ta bort fileData tillfälligt för att spara utrymme
+          
+          // Lägg till en markering att fileData har tagits bort
+          newPdf.fileDataRemoved = true;
+          newPdf.filesizeTooLarge = true;
+        }
+          
         // Hämta nuvarande sparade PDF:er
         let savedPdfs = [];
         const existingSaved = localStorage.getItem('savedPdfs');
@@ -1412,8 +1423,31 @@
           savedPdfs.push(newPdf);
         }
         
-        // Spara till localStorage
-        localStorage.setItem('savedPdfs', JSON.stringify(savedPdfs));
+        try {
+          // Spara till localStorage
+          localStorage.setItem('savedPdfs', JSON.stringify(savedPdfs));
+        } catch (storageError) {
+          console.error('localStorage är full, försöker med alternativ metod:', storageError);
+          
+          // Om det är för mycket att spara, ta bort fileData från alla PDF:er och försök igen
+          savedPdfs = savedPdfs.map(pdf => {
+            const pdfCopy = {...pdf};
+            if (pdfCopy.fileData) {
+              delete pdfCopy.fileData;
+              pdfCopy.fileDataRemoved = true;
+            }
+            return pdfCopy;
+          });
+          
+          // Försök spara igen med nedbantad data
+          try {
+            localStorage.setItem('savedPdfs', JSON.stringify(savedPdfs));
+            console.log('Sparade PDF:er utan fileData på grund av storleksbegränsningar');
+          } catch (finalError) {
+            console.error('Kunde inte spara ens med nedbantad data:', finalError);
+            throw new Error('Kunde inte spara PDF-data även efter optimering. Lokallagringen kan vara full.');
+          }
+        }
         
         // Uppdatera tabellen
         if (existingIndex >= 0) {
@@ -1425,7 +1459,11 @@
         }
       } catch (error) {
         console.error('Fel vid sparande av PDF i localStorage:', error);
-        alert('Ett fel uppstod när PDF-filen skulle sparas.');
+        alert('Ett fel uppstod när PDF-filen skulle sparas: ' + error.message + '\n\nPDF-filen är förmodligen för stor för lokallagringen. Endast metadata har sparats.');
+        
+        // Lägg till i tabellen ändå så metadata visas
+        addPdfToTable(newPdf);
+        
         return;
       }
       
