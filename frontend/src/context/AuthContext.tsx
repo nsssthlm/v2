@@ -139,7 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         console.log('Token found, verifying...');
         // Token exists, attempt to validate by getting user info
-        const response = await api.get('/user-me/');
+        const response = await api.get('/me/');
         
         console.log('User data received:', response.data);
         setAuthState({
@@ -191,7 +191,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Now fetch user data with the token
       api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
-      const userResponse = await api.get('/user-me/');
+      const userResponse = await api.get('/me/');
       console.log('User data received:', userResponse.data);
       
       setAuthState({
