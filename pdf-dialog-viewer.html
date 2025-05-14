@@ -1158,7 +1158,18 @@
         // Avbryt laddningen eftersom vi inte har en giltig PDF
         urlToLoad = null;
       }
-      // Prioritering 4: För alla andra fall, informera användaren om att PDF-filen saknas
+      // Prioritering 4: Kontrollera om fileData tagits bort pga storleksbegränsningar
+      else if (pdfData.fileDataRemoved || pdfData.filesizeTooLarge) {
+        console.warn("PDF-data har tagits bort pga storleksbegränsningar:", pdfData.id);
+        
+        // Visa meddelande om varför PDF-filen saknas
+        setTimeout(() => {
+          alert("Denna PDF-fil var för stor för att sparas i webbläsarens lokallagring. Du behöver ladda upp den igen för att visa den.");
+        }, 500);
+        
+        // Avbryt laddningen eftersom vi inte har en giltig PDF
+      }
+      // Prioritering 5: För alla andra fall, informera användaren om att PDF-filen saknas
       else {
         console.log("Ingen valid PDF-data hittades");
         
