@@ -869,8 +869,7 @@
         urlToLoad = pdfData.url;
         currentPdfUrl = pdfData.url;
         
-        // Uppdatera URL-fältet med den fungerande URL:en
-        pdfUrlInput.value = pdfData.url;
+        // URL-fältet är borttaget, behöver inte uppdateras längre
       }
       // Prioritering 2: För blob-URL:er, använd mozilla's PDF som nödlösning
       else if (pdfData.url && pdfData.url.startsWith('blob:')) {
@@ -983,27 +982,27 @@
           newPdf.fileAvailable = true;
           newPdf.originalSource = 'file';
           
-          // För små filer, försök ta med URL:en 
+          // För små filer, spara temporär URL
           if (file.size < 5*1024*1024) { // Mindre än 5MB
-            newPdf.url = pdfUrlInput.value || currentPdfUrl;
+            newPdf.url = currentPdfUrl;
           } else {
-            newPdf.url = pdfUrlInput.value; // Spara URL om vi har någon, men den kanske inte fungerar
+            // För stora filer sparar vi bara metadata, inte innehållet
+            newPdf.url = null;
           }
           
           console.log("3. Sparar PDF från lokal fil:", file.name);
         } 
         // Sista alternativet - vi har en blob URL men ingen extern källa
         else if (currentPdfUrl && currentPdfUrl.startsWith('blob:')) {
-          // Spara URL:en, men den kommer troligen inte fungera nästa gång
-          // Mozilla's tracemonkey PDF som fallback om vi måste visa något
-          newPdf.url = pdfUrlInput.value || "https://cdn.mozilla.net/pdfjs/tracemonkey.pdf";
+          // Spara blob-URL för denna session
+          newPdf.url = currentPdfUrl;
           newPdf.originalSource = 'blob';
-          newPdf.usableUrl = !!pdfUrlInput.value;
-          console.log("4. Sparar PDF med reserv-URL:", newPdf.url);
+          newPdf.usableUrl = false; // Blob-URL:er fungerar inte efter omladdning
+          console.log("4. Sparar PDF med blob-URL:", currentPdfUrl);
         } 
         // Om allt annat misslyckas, använd vad vi än har
         else {
-          newPdf.url = pdfUrlInput.value || currentPdfUrl;
+          newPdf.url = currentPdfUrl;
           newPdf.originalSource = 'unknown';
           console.log("5. Sparar PDF med sista möjliga URL:", newPdf.url);
         }
