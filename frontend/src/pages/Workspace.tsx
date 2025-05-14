@@ -12,7 +12,11 @@ import {
   Breadcrumbs, 
   Link, 
   CircularProgress,
-  Alert
+  Alert,
+  Modal,
+  ModalDialog,
+  ModalClose,
+  Sheet
 } from '@mui/joy';
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
@@ -192,12 +196,70 @@ const Workspace: React.FC = () => {
         </Tabs>
       </Card>
       
-      {/* PDF Viewer Modal - explicit modal rendering control */}
+      {/* PDF Viewer Modal - implemented directly in Workspace */}
       {selectedPDF && (
-        <PDFViewer 
-          pdf={selectedPDF} 
-          onClose={handleClosePDF} 
-        />
+        <Modal
+          open={true}
+          onClose={handleClosePDF}
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            zIndex: 1400
+          }}
+        >
+          <ModalDialog 
+            variant="outlined"
+            layout="fullscreen" 
+            sx={{ 
+              p: 3, 
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              maxWidth: '90vw',
+              maxHeight: '90vh'
+            }}
+          >
+            <ModalClose />
+            <Typography level="h4" sx={{ mb: 2 }}>
+              {selectedPDF.title}
+            </Typography>
+            
+            <Sheet 
+              variant="outlined"
+              sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                flex: 1,
+                overflow: 'hidden',
+                borderRadius: 'sm'
+              }}
+            >
+              <Box sx={{ p: 2, mb: 2 }}>
+                <Typography level="body-sm">
+                  <strong>Filnamn:</strong> {selectedPDF.title}
+                </Typography>
+                <Typography level="body-sm">
+                  <strong>Uppladdad av:</strong> {selectedPDF.uploaded_by_details.first_name} {selectedPDF.uploaded_by_details.last_name}
+                </Typography>
+                <Typography level="body-sm">
+                  <strong>Uppladdad:</strong> {new Date(selectedPDF.created_at).toLocaleDateString('sv-SE')}
+                </Typography>
+                <Typography level="body-sm">
+                  <strong>Filstorlek:</strong> {Math.round(selectedPDF.size / 1024 / 1024 * 10) / 10} MB
+                </Typography>
+              </Box>
+              
+              <iframe
+                src={`${selectedPDF.file}#toolbar=1&navpanes=1`}
+                title={selectedPDF.title}
+                width="100%"
+                height="100%"
+                style={{ border: 'none', flex: 1 }}
+              />
+            </Sheet>
+          </ModalDialog>
+        </Modal>
       )}
     </Container>
   );
