@@ -1,12 +1,9 @@
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { Box, IconButton } from '@mui/joy';
 import Sidebar from './Sidebar';
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-const Layout = ({ children }: LayoutProps) => {
+const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
@@ -36,7 +33,7 @@ const Layout = ({ children }: LayoutProps) => {
           </IconButton>
         </Box>
         
-        {children}
+        <Outlet />
       </Box>
     </Box>
   );
