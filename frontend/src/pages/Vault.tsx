@@ -58,7 +58,7 @@ const getFileIcon = (fileType?: string) => {
   if (fileType.includes('pdf')) return <PdfIcon color="error" />;
   if (fileType.includes('doc') || fileType.includes('word')) return <DocIcon color="primary" />;
   if (fileType.includes('zip') || fileType.includes('rar')) return <ArchiveIcon color="warning" />;
-  if (fileType.includes('code') || fileType.includes('json') || fileType.includes('html')) return <CodeIcon color="neutral" />;
+  if (fileType.includes('code') || fileType.includes('json') || fileType.includes('html')) return <CodeIcon color="primary" />;
   
   return <FileIcon />;
 };
