@@ -303,22 +303,21 @@ const Workspace: React.FC = () => {
                 }}>
                   <Box sx={{ 
                     width: '100%', 
-                    height: '500px', 
+                    height: '80vh', 
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center'
                   }}>
-                    <Typography color="danger" sx={{ mb: 2, display: 'flex', justifyContent: 'center', width: '100%' }}>
-                      Kunde inte ladda PDF-filen. Försök öppna den i ett nytt fönster istället.
-                    </Typography>
-                    <Button 
-                      onClick={() => window.open(`http://0.0.0.0:8001${selectedPDF.file_url}`, '_blank')}
-                      variant="solid"
-                      color="primary"
-                      startDecorator={<OpenInNewIcon />}
-                    >
-                      Öppna i nytt fönster
-                    </Button>
+                    <iframe 
+                      src={`http://0.0.0.0:8001${selectedPDF.file_url}`}
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        border: 'none',
+                        borderRadius: '4px'
+                      }}
+                      title={selectedPDF.title}
+                    />
                   </Box>
                 </Box>
                 
