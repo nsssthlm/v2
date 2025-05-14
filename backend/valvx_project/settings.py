@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'files',
     'wiki',
     'notifications',
+    'workspace',
 ]
 
 MIDDLEWARE = [
