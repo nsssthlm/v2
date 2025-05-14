@@ -280,7 +280,8 @@ const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
                         variant="plain" 
                         color="primary" 
                         onClick={() => {
-                          window.open(`http://0.0.0.0:8001${doc.file_url}`, '_blank');
+                          // Använd content-endpointen för att öppna PDF i nytt fönster
+                          window.open(`http://0.0.0.0:8001/api/workspace/pdfs/${doc.id}/content/`, '_blank');
                         }}
                       >
                         <OpenInNewIcon />

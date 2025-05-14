@@ -31,8 +31,6 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
     setLoading(false);
   };
 
-
-
   if (error) {
     return (
       <Box sx={{ 
@@ -45,6 +43,16 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
         <Typography color="danger" level="body-lg">
           {error}
         </Typography>
+        <Button 
+          onClick={() => window.open(pdfUrl, '_blank')}
+          variant="outlined"
+          color="primary"
+          size="sm"
+          startDecorator={<OpenInNewIcon />}
+          sx={{ mt: 2 }}
+        >
+          Öppna i nytt fönster
+        </Button>
       </Box>
     );
   }
@@ -68,14 +76,24 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
           <CircularProgress size="lg" />
         ) : (
           <Box sx={{ 
+            width: '100%',
+            height: '100%',
             boxShadow: 'md', 
             borderRadius: 'md',
             backgroundColor: 'white',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
+            overflow: 'hidden'
           }}>
-            <canvas id="pdf-canvas" style={{ maxWidth: '100%' }} />
+            <iframe
+              ref={iframeRef}
+              src={pdfUrl}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                border: 'none' 
+              }}
+              onError={handleIframeError}
+              title={title || "PDF Dokument"}
+            />
           </Box>
         )}
       </Box>
@@ -84,62 +102,19 @@ export default function SimplePDFViewer({ pdfUrl, title }: SimplePDFViewerProps)
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'center', 
-        gap: 2, 
         p: 2,
         borderTop: '1px solid',
         borderColor: 'divider'
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <button 
-            onClick={() => changePage(currentPage - 1)} 
-            disabled={currentPage <= 1 || loading}
-            style={{ 
-              padding: '8px 16px',
-              cursor: currentPage <= 1 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Föregående
-          </button>
-          
-          <Typography>
-            {currentPage} / {numPages}
-          </Typography>
-          
-          <button 
-            onClick={() => changePage(currentPage + 1)} 
-            disabled={currentPage >= numPages || loading}
-            style={{ 
-              padding: '8px 16px',
-              cursor: currentPage >= numPages ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Nästa
-          </button>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <button 
-            onClick={() => zoom(-0.1)} 
-            disabled={scale <= 0.5 || loading}
-            style={{ 
-              padding: '8px 16px',
-              cursor: scale <= 0.5 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Zooma ut
-          </button>
-          
-          <button 
-            onClick={() => zoom(0.1)} 
-            disabled={scale >= 3.0 || loading}
-            style={{ 
-              padding: '8px 16px',
-              cursor: scale >= 3.0 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Zooma in
-          </button>
-        </Box>
+        <Button 
+          onClick={() => window.open(pdfUrl, '_blank')}
+          variant="outlined"
+          color="primary"
+          size="sm"
+          startDecorator={<OpenInNewIcon />}
+        >
+          Öppna i nytt fönster
+        </Button>
       </Box>
     </Box>
   );
