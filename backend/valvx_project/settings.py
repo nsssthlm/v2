@@ -167,13 +167,38 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all origins in development
-if not DEBUG:
-    CORS_ALLOWED_ORIGINS = [
-        # Production frontend URL would go here
-        "http://localhost:5000",
-    ]
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins in development/Replit
 CORS_ALLOW_CREDENTIALS = True
+
+# Add specific allowed origins if needed
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5000",
+    # Add Replit domains pattern
+    "https://*.replit.app",
+    "https://*.replit.dev",
+]
+
+# Allow all headers and methods for development/Replit
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
