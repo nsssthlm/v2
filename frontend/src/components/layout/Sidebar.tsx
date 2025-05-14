@@ -122,44 +122,41 @@ const FileSystemNode = ({
             {node.name}
           </Typography>
           
-          {/* Fast positionerad plusknapp för mappar med exakt samma position för alla nivåer */}
+          {/* Plusknapp i egen grid-cell med fast avstånd */}
           {isFolder && (
-            <IconButton 
-              size="sm" 
-              variant="plain" 
-              color="neutral"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddNewFolder(node.id);
-              }}
-              sx={{ 
-                position: 'absolute',
-                right: '5px',
-                zIndex: 10,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: 0.7,
-                minWidth: '18px',
-                width: '18px',
-                height: '18px',
-                p: '2px',
-                bgcolor: 'transparent',
-                '&:hover': {
-                  bgcolor: 'rgba(0, 0, 0, 0.04)'
-                },
-                '&:focus': {
-                  outline: 'none',
-                  bgcolor: 'transparent'
-                }
-              }}
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <IconButton 
+                size="sm" 
+                variant="plain" 
+                color="neutral"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddNewFolder(node.id);
+                }}
+                sx={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: 0.7,
+                  minWidth: '18px',
+                  width: '18px',
+                  height: '18px',
+                  p: '2px',
+                  bgcolor: 'transparent',
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  },
+                  '&:focus': {
+                    outline: 'none',
+                    bgcolor: 'transparent'
+                  }
+                }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
               </svg>
             </IconButton>
+            </Box>
           )}
         </ListItemButton>
       </ListItem>
