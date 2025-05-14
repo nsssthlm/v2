@@ -1,363 +1,382 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
+import { 
+  Box, 
   Table, 
-  Sheet,
-  Typography,
+  Typography, 
+  IconButton, 
+  Chip,
   Button,
-  IconButton,
+  Sheet,
+  Divider, 
   Input,
-  Dropdown,
-  MenuButton,
-  Menu,
-  MenuItem,
-  Divider,
-  CircularProgress,
-  Alert,
+  Textarea,
   Modal,
   ModalDialog,
-  ModalClose,
-  FormControl,
-  FormLabel,
-  Stack
+  ModalClose
 } from '@mui/joy';
-import SearchIcon from '@mui/icons-material/Search';
-import UploadIcon from '@mui/icons-material/Upload';
-import DeleteIcon from '@mui/icons-material/Delete';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { format } from 'date-fns';
+import { 
+  Search as SearchIcon, 
+  Download as DownloadIcon, 
+  Visibility as ViewIcon,
+  Delete as DeleteIcon,
+  CloudUpload as UploadIcon,
+  Edit as EditIcon
+} from '@mui/icons-material';
 import axios from 'axios';
+import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
 
 interface PDFDocument {
   id: number;
   title: string;
   description: string;
   file_url: string;
-  file: string;
-  project: number;
-  uploaded_by: number;
+  version: number;
+  size: number;
   uploaded_by_details: {
     id: number;
     username: string;
     first_name: string;
     last_name: string;
+    email: string;
   };
   created_at: string;
   updated_at: string;
-  size?: number; // Size in bytes
-  version?: number; // Might be needed for version tracking
 }
 
 interface PDFListProps {
   projectId: number;
-  onSelectPDF: (pdf: PDFDocument) => void;
+  onOpenPDF: (pdf: PDFDocument) => void;
 }
 
-const PDFList: React.FC<PDFListProps> = ({ projectId, onSelectPDF }) => {
-  const [pdfs, setPdfs] = useState<PDFDocument[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+const PDFList: React.FC<PDFListProps> = ({ projectId, onOpenPDF }) => {
+  const [documents, setDocuments] = useState<PDFDocument[]>([]);
+  const [filteredDocuments, setFilteredDocuments] = useState<PDFDocument[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [uploadModalOpen, setUploadModalOpen] = useState<boolean>(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadTitle, setUploadTitle] = useState<string>('');
-  const [uploadDescription, setUploadDescription] = useState<string>('');
-  const [uploading, setUploading] = useState<boolean>(false);
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadData, setUploadData] = useState({
+    title: '',
+    description: ''
+  });
+  const [uploading, setUploading] = useState(false);
 
-  // Fetch PDFs for the project
   useEffect(() => {
-    if (!projectId) return;
-    
-    const fetchPDFs = async () => {
+    const fetchDocuments = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
-        const response = await axios.get('/api/workspace/pdf/', {
-          params: { project: projectId }
-        });
-        
-        // Add version number 1 to each document
-        const pdfWithVersions = response.data.map((pdf: PDFDocument) => ({
-          ...pdf,
-          version: 1
-        }));
-        
-        setPdfs(pdfWithVersions);
-        setError(null);
+        const response = await axios.get(`/api/workspace/pdfs/?project=${projectId}`);
+        setDocuments(response.data);
+        setFilteredDocuments(response.data);
       } catch (err) {
-        console.error('Error fetching PDFs:', err);
-        setError('Failed to load PDF documents');
+        console.error('Error fetching PDF documents', err);
+        setError('Kunde inte hämta PDF-dokument. Försök igen senare.');
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchPDFs();
+
+    if (projectId) {
+      fetchDocuments();
+    }
   }, [projectId]);
 
-  const filteredPDFs = pdfs.filter(pdf => 
-    pdf.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredDocuments(documents);
+    } else {
+      const filtered = documents.filter(doc => 
+        doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        doc.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredDocuments(filtered);
+    }
+  }, [searchQuery, documents]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      // Use filename as default title if not specified
-      if (!uploadTitle) {
-        setUploadTitle(file.name);
-      }
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setUploadFile(e.target.files[0]);
+      // Auto-fill title with filename (without extension)
+      const fileName = e.target.files[0].name;
+      const titleWithoutExtension = fileName.split('.').slice(0, -1).join('.');
+      setUploadData({
+        ...uploadData,
+        title: titleWithoutExtension || fileName
+      });
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      setError('No file selected');
-      return;
-    }
-    
+    if (!uploadFile || !uploadData.title) return;
+
     setUploading(true);
-    
     const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('title', uploadTitle || selectedFile.name);
-    formData.append('description', uploadDescription);
-    formData.append('project', projectId.toString());
-    
+    formData.append('title', uploadData.title);
+    formData.append('description', uploadData.description);
+    formData.append('file', uploadFile);
+    formData.append('project', String(projectId));
+
     try {
-      const response = await axios.post('/api/workspace/pdf/', formData, {
+      const response = await axios.post('/api/workspace/pdfs/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      // Add the new PDF to the list with version 1
-      setPdfs(prev => [...prev, { ...response.data, version: 1 }]);
+      // Add the new document to the list
+      setDocuments(prev => [response.data, ...prev]);
       
-      // Close modal and reset form
-      setUploadModalOpen(false);
-      setSelectedFile(null);
-      setUploadTitle('');
-      setUploadDescription('');
-      setError(null);
+      // Reset form
+      setUploadFile(null);
+      setUploadData({ title: '', description: '' });
+      setUploadOpen(false);
     } catch (err) {
-      console.error('Error uploading PDF:', err);
-      setError('Failed to upload PDF document');
+      console.error('Error uploading PDF', err);
+      setError('Kunde inte ladda upp PDF. Kontrollera att filen är en giltig PDF.');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDeletePDF = async (pdfId: number) => {
-    if (!confirm('Är du säker på att du vill ta bort denna PDF?')) {
-      return;
-    }
+  const handleDelete = async (id: number) => {
+    if (!confirm('Är du säker på att du vill ta bort detta dokument?')) return;
     
     try {
-      await axios.delete(`/api/workspace/pdf/${pdfId}/`);
-      
-      // Remove the PDF from the list
-      setPdfs(prev => prev.filter(pdf => pdf.id !== pdfId));
+      await axios.delete(`/api/workspace/pdfs/${id}/`);
+      // Remove the document from the list
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
     } catch (err) {
-      console.error('Error deleting PDF:', err);
-      setError('Failed to delete PDF document');
+      console.error('Error deleting PDF', err);
+      setError('Kunde inte ta bort dokumentet. Försök igen senare.');
     }
   };
 
-  const formatFileSize = (bytes?: number): string => {
-    if (!bytes) return '0 B';
-    
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  if (loading && pdfs.length === 0) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ width: '100%' }}>
-      {error && (
-        <Alert color="danger" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      
-      {/* Header with path, search and actions */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', color: 'primary.500', mr: 2 }}>
-          <IconButton component="a" href="/vault" size="sm" variant="plain" color="neutral">
-            <InsertDriveFileIcon />
-          </IconButton>
-          <Typography component="span" sx={{ mx: 0.5 }}>&gt;</Typography>
-          <Typography component="span" sx={{ fontWeight: 'bold' }}>Filer</Typography>
-          {selectedFolder && (
-            <>
-              <Typography component="span" sx={{ mx: 0.5 }}>&gt;</Typography>
-              <Typography component="span">{selectedFolder}</Typography>
-            </>
-          )}
-        </Box>
-      </Box>
-      
-      {/* Toolbar */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Input
-          startDecorator={<SearchIcon />}
-          placeholder="Sök efter fil..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: 300 }}
-        />
-        
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Dropdown>
-            <MenuButton
-              variant="outlined"
-              color="neutral"
-              endDecorator={<KeyboardArrowDownIcon />}
-            >
-              Alla versioner
-            </MenuButton>
-            <Menu>
-              <MenuItem>Alla versioner</MenuItem>
-              <MenuItem>Senaste versioner</MenuItem>
-            </Menu>
-          </Dropdown>
-          
+    <Box sx={{ width: '100%', overflow: 'auto' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography level="h3">PDF-dokument</Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Input 
+            placeholder="Sök dokument..." 
+            startDecorator={<SearchIcon />} 
+            value={searchQuery}
+            onChange={handleSearch}
+            sx={{ width: 250 }}
+          />
           <Button 
             startDecorator={<UploadIcon />} 
-            color="primary"
-            onClick={() => setUploadModalOpen(true)}
+            onClick={() => setUploadOpen(true)}
           >
             Ladda upp
           </Button>
-          
-          <Button 
-            startDecorator={<DeleteIcon />} 
-            color="danger"
-            disabled={true} // Enable when items are selected
-          >
-            Ta bort mapp
-          </Button>
         </Box>
       </Box>
-      
-      {/* PDF Table */}
-      <Sheet variant="outlined" sx={{ borderRadius: 'sm' }}>
-        <Table stickyHeader hoverRow>
+
+      {error && (
+        <Box sx={{ mb: 2, p: 2, bgcolor: 'danger.softBg', borderRadius: 'sm' }}>
+          <Typography color="danger">{error}</Typography>
+        </Box>
+      )}
+
+      <Sheet variant="outlined" sx={{ borderRadius: 'md', overflow: 'auto' }}>
+        <Table stickyHeader sx={{ '--TableCell-headBackground': 'var(--joy-palette-background-level1)' }}>
           <thead>
             <tr>
-              <th style={{ width: '40%' }}>Namn</th>
-              <th style={{ width: '10%' }}>Version</th>
-              <th style={{ width: '15%' }}>Beskrivning</th>
-              <th style={{ width: '15%' }}>Uppladdad</th>
-              <th style={{ width: '10%' }}>Uppladdad av</th>
+              <th style={{ width: '40%' }}>Dokument</th>
+              <th style={{ width: '15%' }}>Uppladdad av</th>
+              <th style={{ width: '15%' }}>Datum</th>
               <th style={{ width: '10%' }}>Storlek</th>
+              <th style={{ width: '10%' }}>Version</th>
+              <th style={{ width: '10%' }}>Åtgärder</th>
             </tr>
           </thead>
           <tbody>
-            {filteredPDFs.length === 0 ? (
+            {loading ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>
-                  Inga PDF-dokument hittades
+                <td colSpan={6}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <Typography>Laddar dokument...</Typography>
+                  </Box>
+                </td>
+              </tr>
+            ) : filteredDocuments.length === 0 ? (
+              <tr>
+                <td colSpan={6}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <Typography>Inga dokument hittades</Typography>
+                  </Box>
                 </td>
               </tr>
             ) : (
-              filteredPDFs.map((pdf) => (
-                <tr key={pdf.id} onClick={() => onSelectPDF(pdf)} style={{ cursor: 'pointer' }}>
+              filteredDocuments.map((doc) => (
+                <tr key={doc.id}>
                   <td>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <InsertDriveFileIcon color="error" sx={{ mr: 1 }} />
-                      {pdf.title}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Typography fontWeight="lg">{doc.title}</Typography>
+                      <Typography level="body-sm" noWrap sx={{ maxWidth: 350 }}>
+                        {doc.description || <i>Ingen beskrivning</i>}
+                      </Typography>
                     </Box>
                   </td>
-                  <td>{pdf.version || 1}</td>
-                  <td>{pdf.description || 'Ingen beskrivning'}</td>
-                  <td>{format(new Date(pdf.created_at), 'd MMM yyyy HH:mm')}</td>
-                  <td>{pdf.uploaded_by_details?.username || 'Unknown'}</td>
-                  <td>{formatFileSize(pdf.size) || '92 KB'}</td>
+                  <td>
+                    <Typography>
+                      {doc.uploaded_by_details.first_name 
+                        ? `${doc.uploaded_by_details.first_name} ${doc.uploaded_by_details.last_name}` 
+                        : doc.uploaded_by_details.username}
+                    </Typography>
+                  </td>
+                  <td>
+                    <Typography>
+                      {format(new Date(doc.created_at), 'dd MMM yyyy', { locale: sv })}
+                    </Typography>
+                  </td>
+                  <td>
+                    <Chip size="sm" variant="soft">
+                      {formatFileSize(doc.size)}
+                    </Chip>
+                  </td>
+                  <td>
+                    <Typography>v{doc.version}</Typography>
+                  </td>
+                  <td>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton 
+                        size="sm" 
+                        variant="plain" 
+                        color="primary" 
+                        onClick={() => onOpenPDF(doc)}
+                      >
+                        <ViewIcon />
+                      </IconButton>
+                      <IconButton 
+                        size="sm" 
+                        variant="plain" 
+                        component="a" 
+                        href={doc.file_url} 
+                        download 
+                        target="_blank"
+                      >
+                        <DownloadIcon />
+                      </IconButton>
+                      <IconButton 
+                        size="sm" 
+                        variant="plain" 
+                        color="danger" 
+                        onClick={() => handleDelete(doc.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </Table>
       </Sheet>
-      
+
       {/* Upload Modal */}
-      <Modal open={uploadModalOpen} onClose={() => setUploadModalOpen(false)}>
-        <ModalDialog>
+      <Modal open={uploadOpen} onClose={() => setUploadOpen(false)}>
+        <ModalDialog
+          aria-labelledby="upload-modal-title"
+          aria-describedby="upload-modal-description"
+          sx={{ maxWidth: 500 }}
+        >
           <ModalClose />
-          <Typography level="h4">Ladda upp PDF</Typography>
+          <Typography id="upload-modal-title" level="h2">
+            Ladda upp PDF-dokument
+          </Typography>
+          <Divider sx={{ my: 2 }} />
           
-          <Box sx={{ mt: 2 }}>
-            <input
-              accept="application/pdf"
-              style={{ display: 'none' }}
-              id="pdf-upload-input"
-              type="file"
-              onChange={handleFileSelect}
+          <Box
+            component="form"
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              '& > div': { width: '100%' },
+            }}
+          >
+            <Box sx={{ textAlign: 'center', py: 2, border: '1px dashed', borderRadius: 'sm', borderColor: 'neutral.500' }}>
+              {uploadFile ? (
+                <Box>
+                  <Typography>{uploadFile.name}</Typography>
+                  <Typography level="body-sm">{formatFileSize(uploadFile.size)}</Typography>
+                  <Button 
+                    size="sm" 
+                    variant="soft" 
+                    color="danger" 
+                    sx={{ mt: 1 }}
+                    onClick={() => setUploadFile(null)}
+                  >
+                    Ta bort
+                  </Button>
+                </Box>
+              ) : (
+                <Box>
+                  <Typography sx={{ mb: 1 }}>Dra och släpp en PDF-fil här</Typography>
+                  <Button
+                    component="label"
+                    startDecorator={<UploadIcon />}
+                  >
+                    Välj fil
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      hidden
+                      onChange={handleFileChange}
+                    />
+                  </Button>
+                </Box>
+              )}
+            </Box>
+
+            <Input 
+              placeholder="Titel"
+              value={uploadData.title}
+              onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
+              required
             />
-            <label htmlFor="pdf-upload-input">
-              <Button 
-                component="span"
-                variant="outlined"
+
+            <Textarea
+              placeholder="Beskrivning (valfri)"
+              value={uploadData.description}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUploadData({ ...uploadData, description: e.target.value })}
+              minRows={3}
+            />
+
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1 }}>
+              <Button
+                variant="plain"
                 color="neutral"
-                fullWidth
-                startDecorator={<UploadIcon />}
+                onClick={() => setUploadOpen(false)}
               >
-                Välj PDF-fil
+                Avbryt
               </Button>
-            </label>
-            {selectedFile && (
-              <Typography level="body-sm" sx={{ mt: 1 }}>
-                Vald fil: {selectedFile.name}
-              </Typography>
-            )}
+              <Button
+                startDecorator={<UploadIcon />}
+                loading={uploading}
+                disabled={!uploadFile || !uploadData.title || uploading}
+                onClick={handleUpload}
+              >
+                Ladda upp
+              </Button>
+            </Box>
           </Box>
-          
-          <FormControl sx={{ mt: 2 }}>
-            <FormLabel>Titel</FormLabel>
-            <Input
-              value={uploadTitle}
-              onChange={(e) => setUploadTitle(e.target.value)}
-              placeholder="Ange dokumenttitel..."
-            />
-          </FormControl>
-          
-          <FormControl sx={{ mt: 2 }}>
-            <FormLabel>Beskrivning (valfritt)</FormLabel>
-            <Input
-              value={uploadDescription}
-              onChange={(e) => setUploadDescription(e.target.value)}
-              placeholder="Ange en kort beskrivning..."
-            />
-          </FormControl>
-          
-          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
-            <Button 
-              variant="plain" 
-              color="neutral" 
-              onClick={() => setUploadModalOpen(false)}
-            >
-              Avbryt
-            </Button>
-            <Button 
-              onClick={handleUpload}
-              loading={uploading}
-              disabled={!selectedFile}
-            >
-              Ladda upp
-            </Button>
-          </Stack>
         </ModalDialog>
       </Modal>
     </Box>
