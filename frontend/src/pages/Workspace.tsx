@@ -23,6 +23,7 @@ import PDFViewer from '../components/workspace/PDFViewer';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import api from '../services/api';
+import { PDFDocument } from '../types';
 
 interface Project {
   id: number;
@@ -31,27 +32,6 @@ interface Project {
   start_date: string;
   end_date: string | null;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-// Import the PDF document type
-interface PDFDocument {
-  id: number;
-  unique_id: string;
-  title: string;
-  description: string;
-  file_url: string;
-  content_type: string;
-  version: number;
-  size: number;
-  uploaded_by_details: {
-    id: number;
-    username: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
   created_at: string;
   updated_at: string;
 }

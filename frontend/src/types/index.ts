@@ -117,6 +117,27 @@ export interface WikiArticle {
   order: number;
 }
 
+// PDF Document types
+export interface PDFDocument {
+  id: number;
+  unique_id: string;
+  title: string;
+  description: string;
+  file_url: string;
+  content_type: string;
+  version: number;
+  size: number;
+  uploaded_by_details: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
 // Time reporting types
 export interface TimeReport {
   id: number;
