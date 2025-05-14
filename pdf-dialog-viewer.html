@@ -1549,6 +1549,13 @@
         uploadBtn.addEventListener('click', function(e) {
           e.preventDefault();
           console.log('Ladda upp-knapp klickad');
+          
+          // Skapa overlay för modal-effekt
+          const overlay = document.createElement('div');
+          overlay.className = 'overlay';
+          overlay.id = 'upload-overlay';
+          document.body.appendChild(overlay);
+          
           if (uploadPanel) {
             uploadPanel.style.display = 'block';
           } else {
@@ -1567,6 +1574,12 @@
           console.log('Avbryt uppladdning klickad');
           if (uploadPanel) {
             uploadPanel.style.display = 'none';
+          }
+          
+          // Ta bort overlay
+          const overlay = document.getElementById('upload-overlay');
+          if (overlay) {
+            overlay.remove();
           }
           // Återställ uppladdningsområdet
           if (dropArea && dropArea.classList.contains('has-file')) {
