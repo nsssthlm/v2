@@ -824,13 +824,6 @@
   <script>
     // Set PDF.js worker path
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.worker.min.js';
-    
-    // Deklarera globala PDF-variabler som används i flera funktioner
-    let pdfDoc = null;
-    let pageNum = 1;
-    let pageRendering = false;
-    let pageNumPending = null;
-    let currentScale = 1.0;
 
     // DOM Elements
     const pdfFileInput = document.getElementById('pdf-file');
