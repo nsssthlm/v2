@@ -90,7 +90,11 @@ const mainMenuItems = [
       { name: 'Home', path: '/vault/home' },
       { name: 'Comments', path: '/vault/comments' },
       { name: 'Review Package', path: '/vault/review' },
-      { name: 'Files', path: '/vault/files' },
+      { 
+        name: 'Files', 
+        path: '/vault/files',
+        hasAddButton: true  // Lägg till denna flagga
+      },
       { name: 'Versionsset', path: '/vault/versions' },
       { name: 'Meetings', path: '/vault/meetings' }
     ],
@@ -340,6 +344,26 @@ const Sidebar = () => {
                             {subitem.name}
                           </Typography>
                         </ListItemContent>
+                        
+                        {/* Add plus button for Files */}
+                        {'hasAddButton' in subitem && subitem.hasAddButton && (
+                          <IconButton 
+                            size="sm" 
+                            variant="plain" 
+                            color="neutral"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // Här kommer vi att lägga till logik för att skapa ny mapp
+                              console.log('Add new folder');
+                            }}
+                            sx={{ ml: 'auto', opacity: 0.6 }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                          </IconButton>
+                        )}
                       </ListItemButton>
                     </ListItem>
                   ))}
