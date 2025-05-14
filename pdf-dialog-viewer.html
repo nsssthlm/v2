@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDF Dialog Viewer</title>
+  <!-- API integration script -->
+  <script src="pdf-api-integration.js"></script>
   <style>
     :root {
       --primary: #3b82f6;
@@ -1284,8 +1286,8 @@
       }
     }
     
-    // Spara PDF till localStorage
-    function savePdf() {
+    // Spara PDF till server eller localStorage
+    async function savePdf() {
       // Kontrollera att vi har en PDF att spara
       if (!currentPdfFile) {
         alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
@@ -1293,6 +1295,61 @@
       }
       
       try {
+        // Visa laddningsindikator
+        const loadingElement = document.createElement('div');
+        loadingElement.id = 'loading-indicator';
+        loadingElement.style.cssText = 'display:flex; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;';
+        loadingElement.innerHTML = '<div style="background:white; padding:20px; border-radius:5px;"><h3>Laddar upp PDF...</h3><p>Vänligen vänta</p></div>';
+        document.body.appendChild(loadingElement);
+        
+        // Förbered metadata som ska skickas till servern
+        const metadata = {
+          title: pdfTitleInput.value || 'Namnlös PDF',
+          description: pdfDescriptionInput.value || '',
+          projectId: 1, // Standard-projektid (bör hämtas från användarkontexten i en riktig implementation)
+          folderId: currentFolderId || null
+        };
+        
+        console.log("Laddar upp PDF-fil till servern:", currentPdfFile.name);
+        
+        try {
+          // Använd API Service för att ladda upp PDF-filen till servern
+          const uploadResult = await window.PDFAPIService.uploadPDF(currentPdfFile, metadata);
+          console.log("PDF uppladdad till servern:", uploadResult);
+          
+          // Ta bort laddningsindikator
+          document.body.removeChild(loadingElement);
+          
+          // Skapa nytt PDF-objekt med data från servern
+          const newPdf = {
+            id: uploadResult.id || currentPdfId || generateUniqueId(),
+            title: uploadResult.title,
+            description: uploadResult.description,
+            date: uploadResult.created_at || new Date().toISOString(),
+            folderId: currentFolderId || null,
+            filename: currentPdfFile.name,
+            version: uploadResult.version || 1,
+            url: uploadResult.url,
+            originalSource: 'server', // Markera att denna PDF nu finns på servern
+            serverStored: true
+          };
+          
+          // Slutför sparandet
+          finalizeSave(newPdf);
+          
+          // Visa meddelande
+          alert('PDF-filen har laddats upp och sparats på servern!');
+          return;
+        } catch (apiError) {
+          console.error("Fel vid uppladdning till API:", apiError);
+          // Ta bort laddningsindikator
+          document.body.removeChild(loadingElement);
+          // Fortsätt till fallback nedan...
+        }
+        
+        // Om API-uppladdning misslyckades, fallback till lokallagring
+        console.log("Använder lokallagring som fallback...");
+        
         // Skapa ett nytt objekt för PDF-data
         const newPdf = {
           id: currentPdfId || generateUniqueId(),
