@@ -176,7 +176,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Attempting login with:', { username });
       
       // Get token - use the Django JWT endpoint
-      const tokenResponse = await api.post('/token/', { username, password });
+      // Note: Django requires email, not username for authentication
+      const tokenResponse = await api.post('/token/', { email: username, password });
       console.log('Token response received:', tokenResponse.data);
       
       // Extract tokens

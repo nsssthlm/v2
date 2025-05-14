@@ -66,13 +66,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
         <form onSubmit={handleSubmit}>
           <Stack spacing={2}>
             <FormControl>
-              <FormLabel>Användarnamn</FormLabel>
+              <FormLabel>E-postadress</FormLabel>
               <Input
-                type="text"
+                type="email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="projectleader"
+                placeholder="projectleader@example.com"
               />
             </FormControl>
             
@@ -96,7 +96,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
             </Button>
             
             <Typography level="body-sm" sx={{ textAlign: 'center', color: 'text.tertiary' }}>
-              Testinloggning: projectleader / 123456
+              Testinloggning: projectleader@example.com / 123456
             </Typography>
           </Stack>
         </form>
