@@ -56,6 +56,40 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
       console.log('PDFViewer mounted/updated with PDF:', pdf);
     }
   }, [pdf]);
+  
+  // Om PDF är null, visa en laddningsindikator istället
+  if (!pdf) {
+    return (
+      <Modal
+        open={true}
+        onClose={onClose}
+      >
+        <ModalDialog
+          variant="outlined"
+          sx={{
+            maxWidth: '98vw',
+            maxHeight: '98vh',
+            width: '95%',
+            height: '95%',
+            boxShadow: 'lg',
+            minHeight: '85vh',
+            m: 0,
+            bgcolor: 'background.body',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography level="body-lg" mb={2}>Laddar PDF...</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <div className="loading-spinner" />
+            </Box>
+          </Box>
+        </ModalDialog>
+      </Modal>
+    );
+  }
 
   useEffect(() => {
     const handleFullscreenChange = () => {
