@@ -7,12 +7,18 @@ const port = 5000;
 // Serve static files
 app.use(express.static(__dirname));
 
-// Route for the PDF viewer
+// Route for the basic PDF viewer
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'pdf-viewer-modal.html'));
+});
+
+// Route for the enhanced PDF dialog viewer
+app.get('/dialog', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pdf-dialog-viewer.html'));
 });
 
 // Start server
 app.listen(port, '0.0.0.0', () => {
     console.log(`PDF Viewer server running at http://0.0.0.0:${port}`);
+    console.log(`Enhanced PDF Dialog Viewer: http://0.0.0.0:${port}/dialog`);
 });
