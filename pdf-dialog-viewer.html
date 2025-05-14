@@ -1340,20 +1340,17 @@
       } catch (error) {
         console.error('Fel vid sparande av PDF i localStorage:', error);
         alert('Ett fel uppstod när PDF-filen skulle sparas.');
+        return;
       }
-        
-        // Lägg till i tabellen
-        addPdfToTable(newPdf);
-        
-        alert('PDF sparad!');
-        
-        // Rensa formulär
-        pdfTitleInput.value = '';
-        pdfDescriptionInput.value = '';
-      } catch (error) {
-        console.error('Fel vid sparande av PDF:', error);
-        alert('Kunde inte spara PDF-filen: ' + error.message);
-      }
+      
+      // Lägg till i tabellen
+      addPdfToTable(newPdf);
+      
+      alert('PDF sparad!');
+      
+      // Rensa formulär
+      pdfTitleInput.value = '';
+      pdfDescriptionInput.value = '';
     }
 
     // Status colors
@@ -1453,9 +1450,19 @@
     const uploadPanel = document.getElementById('upload-panel');
     const cancelUploadBtn = document.getElementById('cancel-upload-btn');
     
-    uploadBtn.addEventListener('click', function() {
-      uploadPanel.style.display = 'block';
-    });
+    if (uploadBtn) {
+      uploadBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Ladda upp-knapp klickad');
+        if (uploadPanel) {
+          uploadPanel.style.display = 'block';
+        } else {
+          console.error('Kunde inte hitta uploadPanel element');
+        }
+      });
+    } else {
+      console.error('Kunde inte hitta uploadBtn element');
+    }
     
     // 2. Avbryt-knappen döljer uppladdningspanelen och återställer
     cancelUploadBtn.addEventListener('click', function() {
