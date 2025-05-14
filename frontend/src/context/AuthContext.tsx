@@ -1,6 +1,23 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@services/api';
-import { User, AuthState } from '@types/index';
+
+// Define types locally instead of importing from types
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  profile_pic?: string;
+}
+
+interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  error: string | null;
+}
 
 // Initial auth state
 const initialState: AuthState = {
