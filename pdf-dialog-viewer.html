@@ -1299,6 +1299,7 @@
     
     // Slutför sparandet av PDF
     function finalizeSave(newPdf) {
+      try {
         // Hämta nuvarande sparade PDF:er
         let savedPdfs = [];
         const existingSaved = localStorage.getItem('savedPdfs');
