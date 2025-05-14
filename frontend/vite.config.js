@@ -42,6 +42,7 @@ export default defineConfig({
     watch: {
       usePolling: true,
       interval: 1000
-    }
+    },
+    allowedHosts: ["fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww3ixj0zyl.janeway.replit.dev"]
   },
 });
