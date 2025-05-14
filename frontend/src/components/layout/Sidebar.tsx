@@ -22,6 +22,116 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+// Komponent för varje nod (fil/mapp) i filsystemet
+interface FileSystemNodeProps {
+  node: SidebarFileNode;
+  level: number;
+  filesystemNodes: SidebarFileNode[];
+  openFolders: Record<string, boolean>;
+  toggleFolder: (id: string) => void;
+  handleAddNewFolder: (parentId: string | null) => void;
+}
+
+// Komponent som representerar en fil eller mapp i sidomenyn
+const FileSystemNode = ({
+  node,
+  level,
+  filesystemNodes,
+  openFolders,
+  toggleFolder,
+  handleAddNewFolder
+}: FileSystemNodeProps) => {
+  const isFolder = node.type === 'folder';
+  const isOpen = openFolders[node.id] || false;
+  
+  // Hitta alla barn till denna nod
+  const children = filesystemNodes.filter(n => n.parent_id === node.id);
+  
+  return (
+    <>
+      <ListItem 
+        sx={{ 
+          mb: 0.5,
+          pl: level * 1.5 // Indentera baserat på nivå
+        }}
+      >
+        <ListItemButton
+          onClick={() => isFolder && toggleFolder(node.id)}
+          sx={{ 
+            py: 0.5,
+            pl: 1,
+            borderRadius: '6px',
+            color: 'neutral.600'
+          }}
+        >
+          {/* Ikon för fil/mapp */}
+          <Box
+            sx={{
+              width: 18,
+              height: 18,
+              mr: 1,
+              color: isFolder ? 'warning.500' : 'info.500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              {isFolder ? (
+                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+              ) : (
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+              )}
+            </svg>
+          </Box>
+          
+          {/* Filnamn/mappnamn */}
+          <ListItemContent>
+            <Typography level="body-xs">
+              {node.name}
+            </Typography>
+          </ListItemContent>
+          
+          {/* Visa plustecken för mappar för att skapa nya undermappar */}
+          {isFolder && (
+            <IconButton 
+              size="sm" 
+              variant="plain" 
+              color="neutral"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddNewFolder(node.id);
+              }}
+              sx={{ ml: 'auto', opacity: 0.6 }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+            </IconButton>
+          )}
+        </ListItemButton>
+      </ListItem>
+      
+      {/* Rekursivt visa barnens innehåll om det är en öppen mapp */}
+      {isFolder && isOpen && children.length > 0 && (
+        <Box sx={{ ml: 2 }}>
+          {children.map(child => (
+            <FileSystemNode
+              key={child.id}
+              node={child}
+              level={level + 1}
+              filesystemNodes={filesystemNodes}
+              openFolders={openFolders}
+              toggleFolder={toggleFolder}
+              handleAddNewFolder={handleAddNewFolder}
+            />
+          ))}
+        </Box>
+      )}
+    </>
+  );
+};
+
 // Interface för filer och mappar i sidomenyn
 interface SidebarFileNode {
   id: string;
@@ -444,6 +554,50 @@ const Sidebar = () => {
                           </IconButton>
                         )}
                       </ListItemButton>
+                      
+                      {/* Rendera filsystemet under "Files" */}
+                      {subitem.name === 'Files' && (
+                        <List 
+                          size="sm" 
+                          sx={{ 
+                            '--ListItem-radius': '6px',
+                            pl: 3,
+                            pt: 1,
+                            mb: 0.5
+                          }}
+                        >
+                          {/* Visa mappar på rotnivå */}
+                          {filesystemNodes
+                            .filter(node => node.parent_id === null)
+                            .map(node => (
+                              <FileSystemNode 
+                                key={node.id} 
+                                node={node} 
+                                level={0}
+                                filesystemNodes={filesystemNodes}
+                                openFolders={openFolders}
+                                toggleFolder={toggleFolder}
+                                handleAddNewFolder={handleAddNewFolder}
+                              />
+                            ))
+                          }
+                          
+                          {/* Om inga filer/mappar finns, visa en text */}
+                          {filesystemNodes.filter(node => node.parent_id === null).length === 0 && (
+                            <Typography 
+                              level="body-xs" 
+                              sx={{ 
+                                pl: 2, 
+                                py: 1, 
+                                color: 'neutral.500', 
+                                fontStyle: 'italic' 
+                              }}
+                            >
+                              Inga filer eller mappar
+                            </Typography>
+                          )}
+                        </List>
+                      )}
                     </ListItem>
                   ))}
                 </List>
