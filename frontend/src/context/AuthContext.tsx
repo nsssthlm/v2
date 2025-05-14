@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from '@services/api';
+import api from '../services/api';
 
 // Define types locally instead of importing from types
 interface User {
@@ -31,8 +31,8 @@ const initialState: AuthState = {
 // Create context
 interface AuthContextProps {
   authState: AuthState;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -46,11 +46,24 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>(initialState);
 
+  // Listen for logout events (from token refresh failure)
+  useEffect(() => {
+    const handleLogout = () => {
+      logout();
+    };
+    
+    window.addEventListener('auth:logout', handleLogout);
+    
+    return () => {
+      window.removeEventListener('auth:logout', handleLogout);
+    };
+  }, []);
+
   // Check if user is already logged in when component mounts
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         
         if (!token) {
           setAuthState({
@@ -61,7 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         // Token exists, attempt to validate by getting user info
-        const response = await api.get('/users/me/');
+        const response = await api.get('/me/');
         
         setAuthState({
           isAuthenticated: true,
@@ -72,7 +85,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
       } catch (error) {
         // Token invalid or other error
-        localStorage.removeItem('token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         setAuthState({
           ...initialState,
           loading: false,
@@ -84,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Login function
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (username: string, password: string): Promise<void> => {
     try {
       setAuthState((prev) => ({
         ...prev,
@@ -93,47 +107,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }));
 
       // Get token
-      const tokenResponse = await api.post('/token/', { email, password });
-      const { access, refresh } = tokenResponse.data;
+      const tokenResponse = await api.post('/login/', { username, password });
+      const { access, refresh, user } = tokenResponse.data;
       
       // Store tokens
-      localStorage.setItem('token', access);
-      localStorage.setItem('refreshToken', refresh);
-      
-      // Get user info
-      const userResponse = await api.get('/users/me/');
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
       
       setAuthState({
         isAuthenticated: true,
-        user: userResponse.data as User,
+        user: user as User,
         token: access,
         loading: false,
         error: null,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Login error:', error);
       setAuthState((prev) => ({
         ...prev,
         isAuthenticated: false,
         user: null,
         token: null,
         loading: false,
-        error: 'Invalid credentials or server error',
+        error: error.response?.data?.detail || 'Invalid credentials or server error',
       }));
     }
   };
 
   // Logout function
-  const logout = (): void => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      token: null,
-      loading: false,
-      error: null,
-    });
+  const logout = async (): Promise<void> => {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (refreshToken) {
+        // Call backend logout endpoint to blacklist token
+        await api.post('/logout/', { refresh: refreshToken });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear tokens and reset state regardless of API call success
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        loading: false,
+        error: null,
+      });
+    }
   };
 
   // Clear any error messages
