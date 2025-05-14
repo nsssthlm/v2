@@ -1,6 +1,35 @@
 import { useState } from 'react';
-import { Sheet, List, ListItem, ListItemButton, ListItemContent, Typography, Box, Input, IconButton, Divider } from '@mui/joy';
+import { 
+  Sheet, 
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemContent, 
+  Typography, 
+  Box, 
+  Input, 
+  IconButton, 
+  Divider,
+  Modal,
+  ModalDialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  FormControl,
+  FormLabel
+} from '@mui/joy';
 import { Link, useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+
+// Interface för filer och mappar i sidomenyn
+interface SidebarFileNode {
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  parent_id: string | null;
+  children?: SidebarFileNode[];
+}
 
 // Define top-level menu items
 const mainMenuItems = [
@@ -121,6 +150,17 @@ const Sidebar = () => {
     '/3dviewer': true,
     '/vault': true
   });
+  
+  // Håll reda på öppna filer/mappar i filsystemet
+  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+  
+  // State för förvaringen av filer och mappar i systemet
+  const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>([]);
+  
+  // State för att hantera dialogrutan för att skapa nya mappar
+  const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [currentParentId, setCurrentParentId] = useState<string | null>(null);
 
   // Toggle submenu
   const toggleSubmenu = (path: string) => {
@@ -128,6 +168,45 @@ const Sidebar = () => {
       ...prev,
       [path]: !prev[path]
     }));
+  };
+  
+  // Växla mellan öppen/stängd mapp i filsystemet
+  const toggleFolder = (folderId: string) => {
+    setOpenFolders(prev => ({
+      ...prev,
+      [folderId]: !prev[folderId]
+    }));
+  };
+  
+  // Hantera klick på plustecknet för att skapa ny mapp
+  const handleAddNewFolder = (parentId: string | null) => {
+    setCurrentParentId(parentId);
+    setNewFolderName('');
+    setNewFolderDialogOpen(true);
+  };
+  
+  // Skapa ny mapp
+  const createNewFolder = () => {
+    if (newFolderName.trim() === '') return;
+    
+    const newFolder: SidebarFileNode = {
+      id: uuidv4(),
+      name: newFolderName.trim(),
+      type: 'folder',
+      parent_id: currentParentId,
+      children: []
+    };
+    
+    setFilesystemNodes(prev => [...prev, newFolder]);
+    setNewFolderDialogOpen(false);
+    
+    // Automatiskt öppna föräldramappen
+    if (currentParentId) {
+      setOpenFolders(prev => ({
+        ...prev,
+        [currentParentId]: true
+      }));
+    }
   };
 
   // Check if a menu item is active
@@ -354,8 +433,8 @@ const Sidebar = () => {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              // Här kommer vi att lägga till logik för att skapa ny mapp
-                              console.log('Add new folder');
+                              // Öppna dialogen för att skapa en ny mapp
+                              handleAddNewFolder('files_root');
                             }}
                             sx={{ ml: 'auto', opacity: 0.6 }}
                           >
