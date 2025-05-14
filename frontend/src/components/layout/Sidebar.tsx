@@ -109,11 +109,10 @@ const FileSystemNode = ({
           
           {/* Filnamn/mappnamn utan textavklippning */}
           <ListItemContent sx={{ 
-            mr: 5,  // Större marginal för att ge plats för plusikonen        
+            mr: 3,          
             flexGrow: 1,
             flexShrink: 0,
-            overflow: 'visible',
-            maxWidth: 'calc(100% - 30px)' // Begränsa bredden för att undvika överlapp med plusikonen
+            overflow: 'visible'
           }}>
             <Typography 
               level="body-xs" 
@@ -129,7 +128,7 @@ const FileSystemNode = ({
             </Typography>
           </ListItemContent>
           
-          {/* Plusknapp med konsekvent avstånd */}
+          {/* Fast positionerad plusknapp för mappar med samma avstånd för alla nivåer */}
           {isFolder && (
             <IconButton 
               size="sm" 
@@ -141,7 +140,7 @@ const FileSystemNode = ({
               }}
               sx={{ 
                 position: 'absolute',
-                right: 8, // Fast avstånd för konsekvent mellanrum
+                right: 5, // Fast avstånd från högerkanten
                 opacity: 0.7,
                 minWidth: '18px',
                 height: '18px',
