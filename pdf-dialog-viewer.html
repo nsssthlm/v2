@@ -824,6 +824,13 @@
   <script>
     // Set PDF.js worker path
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.worker.min.js';
+    
+    // Deklarera globala PDF-variabler som används i flera funktioner
+    let pdfDoc = null;
+    let pageNum = 1;
+    let pageRendering = false;
+    let pageNumPending = null;
+    let currentScale = 1.0;
 
     // DOM Elements
     const pdfFileInput = document.getElementById('pdf-file');
@@ -1158,23 +1165,64 @@
             loadPdf(urlToLoad);
             
             // Ladda in kommentarer för denna PDF
-            loadAnnotations(currentPdfId);
+            // Kontrollera om loadAnnotations finns, annars använd loadAnnotationsForCurrentPdf
+            if (typeof loadAnnotations === 'function') {
+              loadAnnotations(currentPdfId);
+            } else if (typeof loadAnnotationsForCurrentPdf === 'function') {
+              loadAnnotationsForCurrentPdf();
+            } else {
+              console.warn("Varken loadAnnotations eller loadAnnotationsForCurrentPdf är tillgänglig");
+            }
           } else {
-            console.error("loadPdf-funktionen är inte definierad");
-            // Använd PDF.js direkt istället
+            console.error("loadPdf-funktionen är inte definierad, använder inbyggd laddningsmetod");
+            // Använd inbyggd funktion för att ladda PDF
+            // Reset page number
+            pageNum = 1;
+            
+            // Show loading spinner
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
+            if (canvasContainer) canvasContainer.style.display = 'none';
+            
+            // Load PDF document
             pdfjsLib.getDocument(urlToLoad).promise.then(function(pdf) {
               pdfDoc = pdf;
               if (infoPages) infoPages.textContent = pdf.numPages;
               if (pageInfo) pageInfo.textContent = `Sida: ${pageNum} / ${pdf.numPages}`;
               
               // Render first page
-              renderPage(pageNum);
+              if (typeof renderPage === 'function') {
+                renderPage(pageNum);
+              } else {
+                console.error("renderPage funktionen är inte definierad!");
+                // Fallback rendering
+                pdf.getPage(pageNum).then(function(page) {
+                  const viewport = page.getViewport({ scale: currentScale });
+                  
+                  const canvas = document.getElementById('pdf-canvas');
+                  const context = canvas.getContext('2d');
+                  canvas.height = viewport.height;
+                  canvas.width = viewport.width;
+                  
+                  const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                  };
+                  
+                  page.render(renderContext);
+                });
+              }
               
               // Load annotations for this PDF
-              loadAnnotationsForCurrentPdf();
+              if (typeof loadAnnotationsForCurrentPdf === 'function') {
+                loadAnnotationsForCurrentPdf();
+              } else {
+                console.warn("loadAnnotationsForCurrentPdf är inte tillgänglig");
+              }
               
               // Enable/disable navigation buttons
-              updateUIState();
+              if (typeof updateUIState === 'function') {
+                updateUIState();
+              }
               
               // Hide loading spinner
               if (loadingSpinner) loadingSpinner.style.display = 'none';
