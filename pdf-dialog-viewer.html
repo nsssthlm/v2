@@ -1410,6 +1410,9 @@
           filterPdfsBySearch(searchTerm);
         });
       }
+      
+      // Initiera eventlyssnare för uppladdningsknappen och andra knappar
+      initializeButtons();
     });
     
     // Funktion för att filtrera PDF-filer baserat på sökterm
@@ -1445,28 +1448,34 @@
     // Spara PDF-knapp hanterare
     // *** Nya eventlisteners för den uppdaterade designen ***
     
-    // 1. Ladda upp-knapp visar uppladdningspanelen
-    const uploadBtn = document.getElementById('upload-btn');
-    const uploadPanel = document.getElementById('upload-panel');
-    const cancelUploadBtn = document.getElementById('cancel-upload-btn');
-    
-    if (uploadBtn) {
-      uploadBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        console.log('Ladda upp-knapp klickad');
-        if (uploadPanel) {
-          uploadPanel.style.display = 'block';
-        } else {
-          console.error('Kunde inte hitta uploadPanel element');
-        }
-      });
-    } else {
-      console.error('Kunde inte hitta uploadBtn element');
-    }
-    
-    // 2. Avbryt-knappen döljer uppladdningspanelen och återställer
-    if (cancelUploadBtn) {
-      cancelUploadBtn.addEventListener('click', function(e) {
+    // Funktion för att initiera alla knappar och event handlers
+    function initializeButtons() {
+      console.log('Initierar knappar och event handlers');
+      
+      // 1. Ladda upp-knapp visar uppladdningspanelen
+      const uploadBtn = document.getElementById('upload-btn');
+      const uploadPanel = document.getElementById('upload-panel');
+      const cancelUploadBtn = document.getElementById('cancel-upload-btn');
+      
+      if (uploadBtn) {
+        console.log('Hittade upload-btn element');
+        uploadBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Ladda upp-knapp klickad');
+          if (uploadPanel) {
+            uploadPanel.style.display = 'block';
+          } else {
+            console.error('Kunde inte hitta uploadPanel element');
+          }
+        });
+      } else {
+        console.error('Kunde inte hitta uploadBtn element');
+      }
+      
+      // 2. Avbryt-knappen döljer uppladdningspanelen och återställer
+      if (cancelUploadBtn) {
+        console.log('Hittade cancel-upload-btn element');
+        cancelUploadBtn.addEventListener('click', function(e) {
         e.preventDefault();
         console.log('Avbryt uppladdning klickad');
         if (uploadPanel) {
