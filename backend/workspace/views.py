@@ -276,10 +276,12 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         """
         Get PDF content with headers that exempt it from X-Frame-Options restrictions
         """
+        # Undvik permissions på denna endpunkt för att säkerställa enkel åtkomst
+        # av PDF-innehåll från inloggade användare
+        self.permission_classes = [permissions.IsAuthenticated]
+        
         pdf = self.get_object()
         from django.http import FileResponse
-        from django.views.decorators.clickjacking import xframe_options_exempt
-        from django.utils.decorators import method_decorator
         import os
         
         # Lägg till extra säkerhet på filhantering
@@ -294,16 +296,20 @@ class PDFDocumentViewSet(viewsets.ModelViewSet):
         )
         
         # Säkerställ att X-Frame-Options inte sätts (tillåt embedding i iframe)
-        response['X-Frame-Options'] = 'ALLOWALL'  # Detta överskriver Django:s standardinställning
+        response['X-Frame-Options'] = 'SAMEORIGIN'  # Tillåt endast inom samma domain
         
         # Lägg till Content-Disposition header för att säkerställa inline-visning
         response['Content-Disposition'] = f'inline; filename="{pdf.title}.pdf"'
         
+        # Sätt CORS-headers för att tillåta åtkomst från frontend
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        
         # Tillåt embedding i iframe från alla domäner
         response['Content-Security-Policy'] = 'frame-ancestors *'
-        response['Access-Control-Allow-Origin'] = '*'
         
-        # Lägg till caching headers för bättre prestanda
-        response['Cache-Control'] = 'public, max-age=86400'
+        # Hjälp webbläsare att tolka innehållet korrekt
+        response['Content-Type'] = 'application/pdf'
         
         return response
