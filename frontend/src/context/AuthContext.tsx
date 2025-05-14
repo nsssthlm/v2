@@ -76,6 +76,8 @@ const setupAxiosInterceptors = () => {
             refresh: refreshToken
           });
           
+          console.log('Token refresh successful');
+          
           const { access } = response.data;
           
           // Update stored token
@@ -174,11 +176,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Attempting login with:', { username });
       
       // Get token - use the Django JWT endpoint
-      const tokenResponse = await api.post('/token-auth/', { username, password });
-      console.log('Token response received');
+      const tokenResponse = await api.post('/token/', { username, password });
+      console.log('Token response received:', tokenResponse.data);
       
-      // Extract tokens and data
-      const { access, refresh, user } = tokenResponse.data;
+      // Extract tokens
+      const { access, refresh } = tokenResponse.data;
       
       console.log('Login successful, storing tokens');
       
@@ -186,10 +188,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('access_token', access);
       localStorage.setItem('refresh_token', refresh);
       
-      // Django response includes user data directly
+      // Now fetch user data with the token
+      api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+      const userResponse = await api.get('/user-me/');
+      console.log('User data received:', userResponse.data);
+      
       setAuthState({
         isAuthenticated: true,
-        user: user as User,
+        user: userResponse.data as User,
         token: access,
         loading: false,
         error: null,
