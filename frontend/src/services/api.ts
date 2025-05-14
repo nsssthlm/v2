@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 // Get the API_URL using a compatible approach
-const API_URL = 'http://localhost:8001/api';
+// Use environment-based URL detection to support both local and Replit environments
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:8001/api' 
+  : `https://${window.location.hostname.replace('00-', '01-')}/api`;
 
 // Create an axios instance with defaults
 const api = axios.create({
