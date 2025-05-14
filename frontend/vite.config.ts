@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
       },
       allowedHosts: [
         'localhost',
+        '*.replit.dev',
         'fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww31xj0zy1.janeway.replit.dev'
       ],
     },
