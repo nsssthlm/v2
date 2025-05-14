@@ -57,6 +57,119 @@
     .primary-btn:hover {
       background-color: var(--primary-dark);
     }
+    
+    /* Stilar för nya UI-komponenter som matchar skärmbilden */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    
+    .header-navigation {
+      margin-bottom: 20px;
+    }
+    
+    .breadcrumb {
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    
+    .breadcrumb-link {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .breadcrumb-current {
+      color: var(--text-secondary);
+    }
+    
+    .file-actions-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .search-container {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 8px 12px;
+      padding-left: 30px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+    
+    .version-dropdown select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: white;
+    }
+    
+    .upload-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    
+    .delete-folder-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    
+    .file-list-container {
+      margin-top: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    
+    .file-list {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .file-list th, .file-list td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px;
+      text-align: left;
+    }
+    
+    .file-list th {
+      background-color: #f9fafb;
+      font-weight: 500;
+    }
+    
+    .file-list tr:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .upload-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+    }
 
     .secondary-btn {
       background-color: var(--bg-tertiary);
@@ -458,10 +571,38 @@
 </head>
 <body>
   <div class="container">
-    <h1>PDF Viewer Demo</h1>
-    <p>Klicka på knappen nedan för att ladda en PDF-fil och öppna den i en modal visare med stöd för anteckningar och versionshantering.</p>
+    <div class="header-navigation">
+      <div class="breadcrumb">
+        <a href="#" class="breadcrumb-link"><i class="fa fa-vault"></i> Vault</a> &gt; 
+        <a href="#" class="breadcrumb-link">Files</a> &gt;
+        <span class="breadcrumb-current">Test2</span>
+      </div>
+    </div>
 
-    <div class="file-selection">
+    <div class="file-actions-bar">
+      <div class="search-container">
+        <input type="text" id="search-input" placeholder="Sök efter fil..." class="search-input" />
+        <i class="fa fa-search search-icon"></i>
+      </div>
+      
+      <div class="version-dropdown">
+        <select id="version-filter">
+          <option value="all">Alla versioner</option>
+          <option value="latest">Senaste versioner</option>
+        </select>
+      </div>
+      
+      <button id="upload-btn" class="upload-btn">
+        <i class="fa fa-upload"></i> Ladda upp
+      </button>
+      
+      <button id="delete-folder-btn" class="delete-folder-btn">
+        <i class="fa fa-trash"></i> Ta bort mapp
+      </button>
+    </div>
+
+    <!-- Dolt uppladdningsområde som visas när man klickar på "Ladda upp" -->
+    <div class="file-selection" id="upload-panel" style="display: none;">
       <div class="form-group" id="drop-container">
         <div class="drop-area" id="drop-area">
           <img src="https://img.icons8.com/office/80/000000/pdf.png" alt="PDF Icon" class="pdf-icon">
@@ -470,8 +611,6 @@
           <input type="file" id="pdf-file" accept=".pdf" style="display: none;" />
         </div>
       </div>
-      <!-- URL-fältet borttaget enligt instruktion -->
-      <!-- URL-input borttagen - endast filuppladdning tillåts nu -->
       <div class="form-group">
         <label for="pdf-title">Titel (valfritt)</label>
         <input type="text" id="pdf-title" placeholder="Ange en titel för PDF-filen" />
@@ -480,19 +619,22 @@
         <label for="pdf-description">Beskrivning (valfritt)</label>
         <textarea id="pdf-description" placeholder="Ange en beskrivning" style="width: 100%; height: 80px; padding: 0.625rem; border: 1px solid var(--border); border-radius: var(--radius);"></textarea>
       </div>
-      <button id="show-pdf-btn" class="primary-btn">Visa PDF</button>
-      <button id="save-pdf-btn" class="primary-btn" style="margin-left: 10px; background-color: #10b981;">Spara PDF</button>
+      <div class="upload-actions">
+        <button id="cancel-upload-btn" class="secondary-btn">Avbryt</button>
+        <button id="save-pdf-btn" class="primary-btn" style="margin-left: 10px; background-color: #10b981;">Spara PDF</button>
+      </div>
     </div>
 
-    <div style="margin-top: 2rem;">
-      <h2>Sparade PDF-filer</h2>
-      <table id="pdf-list" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+    <div class="file-list-container">
+      <table id="pdf-list" class="file-list">
         <thead>
-          <tr style="background-color: var(--bg-tertiary); text-align: left;">
-            <th style="padding: 0.75rem; border: 1px solid var(--border);">Titel</th>
-            <th style="padding: 0.75rem; border: 1px solid var(--border);">Beskrivning</th>
-            <th style="padding: 0.75rem; border: 1px solid var(--border);">Datum</th>
-            <th style="padding: 0.75rem; border: 1px solid var(--border);">Åtgärder</th>
+          <tr>
+            <th>Namn</th>
+            <th>Version</th>
+            <th>Beskrivning</th>
+            <th>Uppladdad</th>
+            <th>Uppladdad av</th>
+            <th>Noteringar</th>
           </tr>
         </thead>
         <tbody id="pdf-list-body">
