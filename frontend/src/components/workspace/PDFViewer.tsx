@@ -224,20 +224,22 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
               <Box sx={{ 
                 width: '95%', 
                 height: 'auto',
-                position: 'absolute', // Använd absolut positionering
-                top: 16, // Lägg till lite utrymme i toppen
-                left: '50%', // Centrera horisontellt
-                transform: `translateX(-50%) scale(${zoom})`, // Centrera horisontellt med skalning
+                position: 'relative', // Använd relativ positionering istället för absolut
+                mx: 'auto', // Auto marginaler för centrering
                 bgcolor: 'background.surface',
                 boxShadow: 'md',
                 borderRadius: 'md',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                transform: `scale(${zoom})`, // Enbart skalning, utan positionering
+                transformOrigin: 'center top' // Skala från centrum överst
               }}>
-                <AdvancedPDFViewer 
-                  pdfUrl={`workspace/pdfs/${pdf.id}/content/`}
-                  title={pdf.title}
-                  key={pdf.id} // Lägg till key för att tvinga omrendering
-                />
+                {pdf && (
+                  <AdvancedPDFViewer 
+                    pdfUrl={`workspace/pdfs/${pdf.id}/content/`}
+                    title={pdf?.title}
+                    key={pdf?.id} // Lägg till key för att tvinga omrendering
+                  />
+                )}
               </Box>
             </Box>
 

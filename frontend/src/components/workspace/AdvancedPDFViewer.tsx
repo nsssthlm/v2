@@ -5,9 +5,14 @@ import api from '../../services/api';
 
 // För PDF.js
 import * as pdfjsLib from 'pdfjs-dist';
-// Sätt upp arbetare för PDF.js
-// @ts-ignore - Ignorerar TypeScript-fel för dynamisk import
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Sätt upp arbetare för PDF.js lokalt
+import { pdfjs } from 'pdfjs-dist';
+
+// Ladda PDF.js arbetare från lokal build
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
 
 interface AdvancedPDFViewerProps {
   pdfUrl: string;
@@ -40,11 +45,22 @@ export default function AdvancedPDFViewer({ pdfUrl, title }: AdvancedPDFViewerPr
         // Förbered URL för API-anrop
         let apiUrl = pdfUrl;
         
-        // Rensa URL:en för att undvika dubbla /api/ prefix
+        // Kontrollera och rensa URL:en för att undvika dubbla /api/ prefix
         if (apiUrl.startsWith('/api/')) {
-          apiUrl = apiUrl.substring(5); // Ta bort /api/ prefixet
+          // URL:en har redan /api/ prefix - använd den direkt men ta bort /api/ prefixet eftersom api.get kommer att lägga till det
+          apiUrl = apiUrl.substring(5); // Ta bort de första 5 tecknen (/api/)
           console.log('Removed /api/ prefix since Axios will add it. New URL:', apiUrl);
+        } else if (apiUrl.startsWith('workspace/')) {
+          // Om URL:en börjar med workspace/ (utan slash), använd den direkt
+          console.log('URL starts with workspace/, using as is:', apiUrl);
+        } else if (apiUrl.startsWith('/workspace/')) {
+          // Om URL:en börjar med /workspace/, ta bort den inledande slashen
+          apiUrl = apiUrl.substring(1);
+          console.log('Removed leading slash from /workspace/, new URL:', apiUrl);
         }
+        
+        // Logga den slutliga URL:en som används
+        console.log('Final API URL for PDF fetch:', apiUrl);
         
         // Hämta PDF-data som array buffer
         const response = await api.get(apiUrl, {
