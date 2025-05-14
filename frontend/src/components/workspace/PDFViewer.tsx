@@ -15,6 +15,7 @@ import {
   TabPanel,
   Divider
 } from '@mui/joy';
+import SimplePDFViewer from './SimplePDFViewer';
 import {
   ZoomIn as ZoomInIcon,
   ZoomOut as ZoomOutIcon,
@@ -114,7 +115,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
           p: 0, 
           overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          maxWidth: '100vw',
+          maxHeight: '100vh'
         }}
       >
         <Box 
@@ -216,15 +219,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 height: `calc(100% / ${zoom})`,
                 maxWidth: '100%'
               }}>
-                <iframe 
-                  src={`http://0.0.0.0:8001/api/workspace/pdfs/${pdf.id}/content/`}
-                  style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    border: 'none',
-                    backgroundColor: 'white',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.1)'
-                  }} 
+                <SimplePDFViewer 
+                  pdfUrl={`http://0.0.0.0:8001/api/workspace/pdfs/${pdf.id}/content/`}
                   title={pdf.title}
                 />
               </Box>
