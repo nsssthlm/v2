@@ -265,7 +265,45 @@ const Sidebar = () => {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   
   // State för förvaringen av filer och mappar i systemet
-  const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>([]);
+  const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>([
+    // Några exempel-mappar och filer för att illustrera strukturen
+    {
+      id: 'folder1',
+      name: 'Projektdokument',
+      type: 'folder',
+      parent_id: null
+    },
+    {
+      id: 'folder2',
+      name: 'Ritningar',
+      type: 'folder',
+      parent_id: null
+    },
+    {
+      id: 'file1',
+      name: 'README.txt',
+      type: 'file',
+      parent_id: null
+    },
+    {
+      id: 'subfolder1',
+      name: 'Fas 1',
+      type: 'folder',
+      parent_id: 'folder1'
+    },
+    {
+      id: 'file2',
+      name: 'Kravspecifikation.pdf',
+      type: 'file',
+      parent_id: 'folder1'
+    },
+    {
+      id: 'file3',
+      name: 'Byggnadsplan.pdf',
+      type: 'file',
+      parent_id: 'subfolder1'
+    }
+  ]);
   
   // State för att hantera dialogrutan för att skapa nya mappar
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
@@ -288,6 +326,31 @@ const Sidebar = () => {
     }));
   };
   
+  // Öppna en specifik mapp
+  const openFolder = (folderId: string) => {
+    setOpenFolders(prev => ({
+      ...prev,
+      [folderId]: true
+    }));
+    
+    // Öppna också alla föräldramappar till denna mapp
+    const openParentFolders = (nodeId: string) => {
+      const node = filesystemNodes.find(n => n.id === nodeId);
+      if (node && node.parent_id) {
+        setOpenFolders(prev => ({
+          ...prev,
+          [node.parent_id!]: true
+        }));
+        openParentFolders(node.parent_id);
+      }
+    };
+    
+    const folder = filesystemNodes.find(n => n.id === folderId);
+    if (folder && folder.parent_id) {
+      openParentFolders(folder.parent_id);
+    }
+  };
+  
   // Hantera klick på plustecknet för att skapa ny mapp
   const handleAddNewFolder = (parentId: string | null) => {
     setCurrentParentId(parentId);
@@ -299,23 +362,24 @@ const Sidebar = () => {
   const createNewFolder = () => {
     if (newFolderName.trim() === '') return;
     
+    const newFolderId = uuidv4();
     const newFolder: SidebarFileNode = {
-      id: uuidv4(),
+      id: newFolderId,
       name: newFolderName.trim(),
       type: 'folder',
-      parent_id: currentParentId,
-      children: []
+      parent_id: currentParentId
     };
     
     setFilesystemNodes(prev => [...prev, newFolder]);
     setNewFolderDialogOpen(false);
+    setNewFolderName('');
     
-    // Automatiskt öppna föräldramappen
+    // Automatiskt öppna den nya mappen och dess föräldrar
+    openFolder(newFolderId);
+    
+    // Automatiskt öppna föräldramappen också
     if (currentParentId) {
-      setOpenFolders(prev => ({
-        ...prev,
-        [currentParentId]: true
-      }));
+      openFolder(currentParentId);
     }
   };
 
@@ -544,7 +608,7 @@ const Sidebar = () => {
                               e.preventDefault();
                               e.stopPropagation();
                               // Öppna dialogen för att skapa en ny mapp
-                              handleAddNewFolder('files_root');
+                              handleAddNewFolder(null);
                             }}
                             sx={{ ml: 'auto', opacity: 0.6 }}
                           >
@@ -675,7 +739,12 @@ const Sidebar = () => {
       {/* Modal för att skapa ny mapp */}
       <Modal open={newFolderDialogOpen} onClose={() => setNewFolderDialogOpen(false)}>
         <ModalDialog>
-          <DialogTitle>Skapa ny mapp</DialogTitle>
+          <DialogTitle>
+            {currentParentId 
+              ? `Skapa ny mapp i ${filesystemNodes.find(n => n.id === currentParentId)?.name || 'mapp'}`
+              : 'Skapa ny mapp på rotnivå'
+            }
+          </DialogTitle>
           <DialogContent>
             <FormControl>
               <FormLabel>Namn på mappen</FormLabel>
@@ -683,11 +752,12 @@ const Sidebar = () => {
                 autoFocus 
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newFolderName.trim() !== '') {
                     createNewFolder();
                   }
                 }}
+                placeholder="Ange mappnamn"
               />
             </FormControl>
           </DialogContent>
@@ -695,7 +765,7 @@ const Sidebar = () => {
             <Button variant="plain" color="neutral" onClick={() => setNewFolderDialogOpen(false)}>
               Avbryt
             </Button>
-            <Button onClick={createNewFolder}>Skapa</Button>
+            <Button onClick={createNewFolder} disabled={newFolderName.trim() === ''}>Skapa</Button>
           </DialogActions>
         </ModalDialog>
       </Modal>
