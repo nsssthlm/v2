@@ -234,7 +234,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
                 overflow: 'hidden'
               }}>
                 <SimplePDFViewer 
-                  pdfUrl={`/api/workspace/pdfs/${pdf.id}/content/`}
+                  pdfUrl={`workspace/pdfs/${pdf.id}/content/`}
                   title={pdf.title}
                   key={pdf.id} // Lägg till key för att tvinga omrendering
                 />
