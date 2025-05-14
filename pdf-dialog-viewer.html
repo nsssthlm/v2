@@ -689,6 +689,47 @@
           pdfFileInput.click();
         }
       });
+      
+      // Hantera vald fil via filinmatningsfältet
+      pdfFileInput.addEventListener('change', function(e) {
+        if (this.files.length > 0) {
+          const file = this.files[0];
+          if (file.type === 'application/pdf') {
+            // Sätt titeln baserat på filnamnet
+            pdfTitleInput.value = file.name.replace('.pdf', '');
+            
+            // Uppdatera gränssnittet
+            filenameDisplay.textContent = file.name;
+            infoFilename.textContent = file.name;
+            infoSize.textContent = formatFileSize(file.size);
+            
+            // Uppdatera drop-rutan för att visa att fil är vald
+            dropArea.classList.add('has-file');
+            dropArea.innerHTML = '<div class="drop-message"><strong>✓ Fil vald:</strong> ' + file.name + '</div>';
+            
+            // Skapa en blob URL för visning
+            currentPdfFile = file;
+            currentPdfUrl = URL.createObjectURL(file);
+            
+            // Konvertera till data-URL för lagring om filen inte är för stor
+            if (file.size < 5*1024*1024) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                currentPdfDataUrl = e.target.result;
+                console.log("Filen har konverterats till data-URL");
+              };
+              reader.readAsDataURL(file);
+            } else {
+              console.log("Filen är för stor för att konverteras till data-URL:", formatFileSize(file.size));
+              currentPdfDataUrl = null;
+            }
+            
+            currentPdfId = generateUniqueId();
+          } else {
+            alert('Endast PDF-filer är tillåtna.');
+          }
+        }
+      });
     }
     
     function preventDefaults(e) {
@@ -804,6 +845,7 @@
     let currentPdfUrl = null;
     let currentPdfFile = null;
     let currentPdfData = null;
+    let currentPdfDataUrl = null; // Base64-encoded PDF data för persistent lagring
     let currentPdfId = null;
     let currentFolderId = null; // För att hålla reda på vilken mapp PDF:en tillhör
     
@@ -1004,15 +1046,24 @@
           
           // Spara filen direkt i base64-format för att kunna återskapa den senare
           if (currentPdfFile.size < 5*1024*1024) { // Begränsa till 5MB för lokallagring
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              // Spara base64-encoded data direkt
-              newPdf.fileData = e.target.result;
-              
-              // Slutför sparandet med korrekt data
+            if (currentPdfDataUrl) {
+              // Använd redan konverterad data om tillgänglig
+              console.log("Använder redan konverterad data-URL");
+              newPdf.fileData = currentPdfDataUrl;
               finalizeSave(newPdf);
-            };
-            reader.readAsDataURL(currentPdfFile);
+            } else {
+              // Konvertera filen till data-URL om det inte redan gjorts
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                // Spara base64-encoded data direkt
+                currentPdfDataUrl = e.target.result;
+                newPdf.fileData = currentPdfDataUrl;
+                
+                // Slutför sparandet med korrekt data
+                finalizeSave(newPdf);
+              };
+              reader.readAsDataURL(currentPdfFile);
+            }
             
             // För denna session, spara blob URL
             newPdf.url = currentPdfUrl;
