@@ -16,7 +16,8 @@ import {
   Description as WikiIcon,
   Message as MessageIcon,
   Settings as SettingsIcon,
-  ViewInAr as ViewInArIcon
+  ViewInAr as ViewInArIcon,
+  Work as WorkspaceIcon
 } from '@mui/icons-material';
 
 // Menu items for the sidebar
@@ -24,6 +25,7 @@ const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Anslagstavla', icon: <MessageIcon />, path: '/notice-board' },
   { text: 'Kalender', icon: <CalendarIcon />, path: '/calendar' },
+  { text: 'Workspace', icon: <WorkspaceIcon />, path: '/workspace' },
   { text: 'Projektplanering', icon: <AssignmentIcon />, path: '/project-planning' },
   { text: 'Tidsrapportering', icon: <AssignmentIcon />, path: '/time-reporting' },
   { text: 'Vault', icon: <FolderIcon />, path: '/vault' },

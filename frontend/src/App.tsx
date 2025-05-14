@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Calendar from './pages/Calendar';
 import NoticeBoardPage from './pages/NoticeBoard';
 import VaultPage from './pages/Vault';
+import Workspace from './pages/Workspace';
 import NotFoundPage from './pages/NotFound';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/notice-board" element={<NoticeBoardPage />} />
             <Route path="/vault" element={<VaultPage />} />
+            <Route path="/workspace/*" element={<Workspace />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Layout>
