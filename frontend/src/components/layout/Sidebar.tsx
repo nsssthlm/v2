@@ -52,10 +52,11 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: Math.min(level * 1.5, 8), // Begränsa indenteringen för djupa nivåer
+          pl: level * 1.5, // Låt indenteringen fortsätta för varje nivå
           pr: 0,
           position: 'relative',
-          overflow: 'visible'
+          overflow: 'visible',
+          display: 'block'
         }}
       >
         <ListItemButton
@@ -64,16 +65,16 @@ const FileSystemNode = ({
           sx={{ 
             py: 0.3,
             pl: 0.5,
-            pr: 1, 
+            pr: 0, 
             borderRadius: '4px',
             color: 'neutral.700',
             fontSize: '0.875rem',
             display: 'flex',
             flexWrap: 'nowrap',
-            width: '100%',
-            maxWidth: '100%',
-            flexGrow: 1,
-            overflow: 'hidden',
+            alignItems: 'center',
+            width: 'auto',
+            minWidth: 0,
+            overflow: 'visible',
             position: 'relative'
           }}
         >
@@ -98,24 +99,21 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Filnamn/mappnamn med förbättrad hantering för djupa nivåer */}
+          {/* Filnamn/mappnamn utan textavklippning */}
           <ListItemContent sx={{ 
-            minWidth: 0,    // Viktigt för att låta texten krympa
-            mr: 3,          // Utökad marginal till höger för att ge mer plats åt plustecknet
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            mr: 3,          
             flexGrow: 1,
-            flexShrink: 1
+            flexShrink: 0,
+            overflow: 'visible'
           }}>
             <Typography 
               level="body-xs" 
-              noWrap
-              title={node.name} // Lägg till tooltip som visar hela namnet vid hover
               sx={{ 
-                width: '100%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                overflow: 'visible',
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                display: 'inline',
+                textOverflow: 'clip'
               }}
             >
               {node.name}
@@ -715,20 +713,17 @@ const Sidebar = () => {
               {/* Visa filsystemet om Filer är expanderad */}
               {openFolders['files_root'] && (
                 <Box sx={{
-                  maxHeight: '60vh', 
-                  overflowY: 'auto',
-                  overflowX: 'hidden',
-                  scrollbarWidth: 'thin',
+                  maxHeight: '60vh',
                   width: '100%',
+                  overflowY: 'auto',
+                  overflowX: 'visible',
+                  scrollbarWidth: 'thin',
                   '&::-webkit-scrollbar': {
                     width: '4px',
                   },
                   '&::-webkit-scrollbar-thumb': {
                     backgroundColor: 'rgba(0,0,0,0.2)',
                     borderRadius: '4px',
-                  },
-                  '& .MuiListItem-root': {
-                    maxWidth: '100%'
                   }
                 }}>
                   <List 
