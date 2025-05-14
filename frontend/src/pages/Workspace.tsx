@@ -21,9 +21,7 @@ import {
   IconButton
 } from '@mui/joy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Document, Page, pdfjs } from 'react-pdf';
-// Initialize PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+import SimplePDFViewer from '../components/workspace/SimplePDFViewer';
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -303,52 +301,10 @@ const Workspace: React.FC = () => {
                   alignItems: 'center',
                   padding: 2
                 }}>
-                  <Document
-                    file={`http://0.0.0.0:8001${selectedPDF.file_url}`}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    loading={<CircularProgress />}
-                    onLoadError={(error) => console.error('Error loading PDF:', error)}
-                    renderMode="canvas"
-                  >
-                    <Page 
-                      pageNumber={pageNumber}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                      width={550}
-                    />
-                  </Document>
+                  <SimplePDFViewer url={`http://0.0.0.0:8001${selectedPDF.file_url}`} />
                 </Box>
                 
-                {/* Pagination */}
-                {numPages && (
-                  <Box sx={{ 
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 2,
-                    gap: 2,
-                    borderTop: '1px solid',
-                    borderColor: 'divider'
-                  }}>
-                    <Button 
-                      variant="outlined" 
-                      disabled={pageNumber <= 1}
-                      onClick={() => setPageNumber(prev => Math.max(prev - 1, 1))}
-                    >
-                      Föregående
-                    </Button>
-                    <Typography>
-                      Sida {pageNumber} av {numPages}
-                    </Typography>
-                    <Button 
-                      variant="outlined" 
-                      disabled={pageNumber >= numPages}
-                      onClick={() => setPageNumber(prev => Math.min(prev + 1, numPages || 1))}
-                    >
-                      Nästa
-                    </Button>
-                  </Box>
-                )}
+                {/* Pagination ingår nu i SimplePDFViewer */}
               </Box>
             </Sheet>
           </ModalDialog>
