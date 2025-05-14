@@ -764,6 +764,7 @@ const Sidebar = () => {
                     </Typography>
                   )}
                 </List>
+              </Box>
               )}
             </Box>
           )}
