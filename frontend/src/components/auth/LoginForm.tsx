@@ -12,7 +12,7 @@ import {
   Alert,
   Divider
 } from '@mui/joy';
-import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -23,6 +23,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,21 +31,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     setError(null);
 
     try {
-      // Använd JWT token endpoint
-      const response = await axios.post('/api/token/', {
-        username,
-        password
-      });
-
-      // Spara tokens i localStorage
-      const { access, refresh } = response.data;
-      localStorage.setItem('access_token', access);
-      localStorage.setItem('refresh_token', refresh);
+      // Use context login function
+      await login(username, password);
       
-      // Konfigurera axios för att använda token i alla framtida requests
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
-
-      // Om inloggningen lyckas
+      // If login succeeds, call the success handler
       onLoginSuccess();
     } catch (err: any) {
       console.error('Login error:', err);
