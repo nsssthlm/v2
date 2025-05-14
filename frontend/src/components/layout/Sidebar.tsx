@@ -64,13 +64,16 @@ const FileSystemNode = ({
           sx={{ 
             py: 0.3,
             pl: 0.5,
-            pr: 2.5, // Extra padding till höger för plustecknet
+            pr: 1, 
             borderRadius: '4px',
             color: 'neutral.700',
             fontSize: '0.875rem',
             display: 'flex',
             flexWrap: 'nowrap',
-            overflow: 'visible',
+            width: '100%',
+            maxWidth: '100%',
+            flexGrow: 1,
+            overflow: 'hidden',
             position: 'relative'
           }}
         >
@@ -95,55 +98,56 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Filnamn/mappnamn med förbättrad textomvandling vid många nivåer */}
+          {/* Filnamn/mappnamn med förbättrad hantering för djupa nivåer */}
           <ListItemContent sx={{ 
-            minWidth: 0,  // Viktigt för att låta texten krympa
-            mr: 3,        // Utökad marginal till höger för att ge mer plats åt plustecknet
+            minWidth: 0,    // Viktigt för att låta texten krympa
+            mr: 3,          // Utökad marginal till höger för att ge mer plats åt plustecknet
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            flexGrow: 1,
+            flexShrink: 1
           }}>
             <Typography 
               level="body-xs" 
-              noWrap 
+              noWrap
+              title={node.name} // Lägg till tooltip som visar hela namnet vid hover
               sx={{ 
-                maxWidth: `calc(100% - ${Math.min(level, 5) * 12}px)`, // Anpassar maxbredd baserat på nivå
-                display: 'inline-block' 
+                width: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
               }}
             >
               {node.name}
             </Typography>
           </ListItemContent>
           
-          {/* Visa plustecken för mappar för att skapa nya undermappar */}
+          {/* Visa plustecken för mappar för att skapa nya undermappar, med förbättrad position för djupa nivåer */}
           {isFolder && (
-            <IconButton 
-              size="sm" 
-              variant="plain" 
-              color="neutral"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddNewFolder(node.id);
-              }}
-              sx={{ 
-                position: 'absolute',
-                right: 1,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                opacity: 0.7,
-                zIndex: 2,
-                minWidth: '18px',
-                height: '18px',
-                p: '2px',
-                '&:hover': {
-                  bgcolor: 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-              </svg>
-            </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto', minWidth: 22 }}>
+              <IconButton 
+                size="sm" 
+                variant="plain" 
+                color="neutral"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddNewFolder(node.id);
+                }}
+                sx={{ 
+                  opacity: 0.7,
+                  minWidth: '18px',
+                  height: '18px',
+                  p: '2px',
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+              </IconButton>
+            </Box>
           )}
         </ListItemButton>
       </ListItem>
@@ -713,13 +717,18 @@ const Sidebar = () => {
                 <Box sx={{
                   maxHeight: '60vh', 
                   overflowY: 'auto',
+                  overflowX: 'hidden',
                   scrollbarWidth: 'thin',
+                  width: '100%',
                   '&::-webkit-scrollbar': {
                     width: '4px',
                   },
                   '&::-webkit-scrollbar-thumb': {
                     backgroundColor: 'rgba(0,0,0,0.2)',
                     borderRadius: '4px',
+                  },
+                  '& .MuiListItem-root': {
+                    maxWidth: '100%'
                   }
                 }}>
                   <List 
