@@ -23,6 +23,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 // Interface för menyobjekt
+// Används för att typa submenu-items i sidebar-navigationen
 interface SubmenuItem {
   name: string;
   path: string;
@@ -64,7 +65,8 @@ const FileSystemNode = ({
           pr: 0,
           position: 'relative',
           overflow: 'visible',
-          display: 'block'
+          display: 'block',
+          paddingRight: '20px' // Extra utrymme till höger för att säkerställa plats åt plusknappen
         }}
       >
         <ListItemButton
@@ -73,7 +75,7 @@ const FileSystemNode = ({
           sx={{ 
             py: 0.3,
             pl: 0.5,
-            pr: 5, // Se till att det alltid finns utrymme för plustecknet
+            pr: 6, // Större utrymme för plustecknet
             borderRadius: '4px',
             color: 'neutral.700',
             fontSize: '0.875rem',
@@ -81,7 +83,8 @@ const FileSystemNode = ({
             flexWrap: 'nowrap',
             alignItems: 'center',
             width: '100%',
-            minWidth: 0,
+            minWidth: '100%', // Se till att knappen alltid tar upp full bredd
+            maxWidth: '100%',
             overflow: 'visible',
             position: 'relative'
           }}
@@ -128,7 +131,7 @@ const FileSystemNode = ({
             </Typography>
           </ListItemContent>
           
-          {/* Fast positionerad plusknapp för mappar med samma avstånd för alla nivåer */}
+          {/* Fast positionerad plusknapp för mappar med exakt samma position för alla nivåer */}
           {isFolder && (
             <IconButton 
               size="sm" 
@@ -140,9 +143,12 @@ const FileSystemNode = ({
               }}
               sx={{ 
                 position: 'absolute',
-                right: 5, // Fast avstånd från högerkanten
+                right: '10px', // Fast avstånd från högerkanten
+                top: '50%',
+                transform: 'translateY(-50%)',
                 opacity: 0.7,
                 minWidth: '18px',
+                width: '18px',
                 height: '18px',
                 p: '2px',
                 '&:hover': {
@@ -585,7 +591,7 @@ const Sidebar = () => {
                     mb: 0.5
                   }}
                 >
-                  {item.submenu.map((subitem) => (
+                  {item.submenu.map((subitem: SubmenuItem) => (
                     <ListItem key={subitem.path} sx={{ mb: 0.5 }}>
                       <ListItemButton 
                         component={Link} 
@@ -633,7 +639,7 @@ const Sidebar = () => {
                         </ListItemContent>
                         
                         {/* Add plus button for Files */}
-                        {'hasAddButton' in subitem && subitem.hasAddButton === true && (
+                        {('hasAddButton' in subitem && Boolean(subitem.hasAddButton)) && (
                           <IconButton 
                             size="sm" 
                             variant="plain" 
