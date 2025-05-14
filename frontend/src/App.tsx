@@ -48,6 +48,16 @@ function App() {
             <Route path="files" element={<ComingSoonPage title="Dokument" />} />
             <Route path="team" element={<ComingSoonPage title="Team" />} />
             <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
+            
+            {/* Vault routes */}
+            <Route path="vault">
+              <Route path="home" element={<HomePage />} />
+              <Route path="comments" element={<CommentsPage />} />
+              <Route path="review" element={<ReviewPage />} />
+              <Route path="files" element={<FilesPage />} />
+              <Route path="versions" element={<VersionsPage />} />
+              <Route path="meetings" element={<MeetingsPage />} />
+            </Route>
           </Route>
           
           {/* 404 route */}
