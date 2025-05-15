@@ -60,54 +60,20 @@ const FileSystemNode = ({
   return (
     <>
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
-      {/* Container för anslutningslinjerna */}
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-          pointerEvents: 'none', // Så att den inte blockerar klick
-          zIndex: 0
-        }}
-      >
-        {/* Vertikala anslutningslinjer för varje nivå i hierarkin */}
-        {level > 0 && Array.from({ length: level }).map((_, i) => {
-          // Beräkna vänsterposition för varje vertikal linje
-          const leftPos = (i + 0.4) * 1.5;
-          
-          return (
-            <Box
-              key={`vline-${i}`}
-              sx={{
-                position: 'absolute',
-                top: -100, // Sträck linjerna längre uppåt
-                bottom: -100, // Sträck linjerna längre nedåt
-                left: `${leftPos}rem`,
-                width: '1px',
-                backgroundColor: 'rgba(160, 174, 192, 0.2)',
-                zIndex: 0
-              }}
-            />
-          );
-        })}
-        
-        {/* Horisontell anslutningslinje */}
-        {level > 0 && (
-          <Box
-            sx={{
-              position: 'absolute',
-              left: `${(level - 0.6) * 1.5}rem`,
-              top: '50%',
-              width: '0.8rem',
-              height: '1px',
-              backgroundColor: 'rgba(160, 174, 192, 0.3)',
-              zIndex: 0
-            }}
-          />
-        )}
-      </Box>
+      {/* Enkel linje som kopplar till föräldern, bara för nivå > 0 */}
+      {level > 0 && (
+        <Box 
+          sx={{ 
+            position: 'absolute',
+            left: (level - 0.7) * 1.5 + 'rem', // Positionera till vänster om nuvarande indenteringsnivå
+            top: '50%',
+            height: '1px',
+            width: '0.5rem',
+            backgroundColor: 'rgba(160, 174, 192, 0.5)',
+            zIndex: 0
+          }}
+        />
+      )}
       
       <ListItem 
         sx={{ 
@@ -141,7 +107,20 @@ const FileSystemNode = ({
             position: 'relative'
           }}
         >
-          {/* Horisontella linjer hanteras nu i containern */}
+          {/* Vertikal linje till vänster om mappen för att visa att den är en del av hierarkin */}
+          {level > 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                left: (level - 0.7) * 1.5 + 'rem',
+                top: -10,
+                height: 40, // Tillräckligt för att synas utan att ta över
+                width: '1px',
+                bgcolor: 'rgba(160, 174, 192, 0.5)',
+                zIndex: 0
+              }}
+            />
+          )}
           
           {/* Ikon för fil/mapp */}
           <Box
