@@ -20,6 +20,10 @@ args = "backend"
 task = "workflow.run"
 args = "pdf-viewer"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "pdf-manager"
+
 [[workflows.workflow]]
 name = "backend"
 author = "agent"
@@ -36,6 +40,15 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node pdf-viewer-server.js"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "pdf-manager"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd basic-pdf-manager && node server.js"
 waitForPort = 5000
 
 [deployment]
