@@ -140,13 +140,14 @@ const FileSystemNode = ({
             
             {/* Linje med fast bredd mellan texten och plusknappen */}
             <Box sx={{ 
-              width: '220px', // Ännu längre fast bredd för alla linjer
+              width: '250px', // Ännu längre fast bredd för alla linjer
               height: '1px', 
               mx: 1,
               backgroundColor: 'rgba(0,0,0,0.1)',
               flexShrink: 0, // Förhindra att linjen krymper
               position: 'relative', // För absolut positionering
-              zIndex: 1 // Säkerställ att linjen syns ovanför andra element
+              zIndex: 1, // Säkerställ att linjen syns ovanför andra element
+              whiteSpace: 'nowrap'
             }} />
           
             {/* Plusknapp med exakt samma avstånd från texten */}
@@ -183,9 +184,11 @@ const FileSystemNode = ({
       {isFolder && isOpen && children.length > 0 && (
         <Box sx={{ 
           ml: 0.5, // Minska marginalen för att ge mer horisontellt utrymme
-          width: 'auto', // Låt den växa med innehållet
+          width: 'auto !important', // Låt den växa med innehållet
           minWidth: '200px', // Men säkerställ att vi har tillräckligt med utrymme
-          position: 'relative'
+          position: 'relative',
+          overflow: 'visible !important',
+          maxWidth: 'none !important'
         }}>
           {children.map(child => (
             <FileSystemNode
@@ -761,9 +764,12 @@ const Sidebar = () => {
                     <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'center',
-                      width: '100%',
+                      width: 'auto !important',
+                      minWidth: '100%',
                       flexWrap: 'nowrap',
-                      overflow: 'visible'
+                      overflow: 'visible !important',
+                      maxWidth: 'none !important',
+                      whiteSpace: 'nowrap'
                     }}>
                       <Typography 
                         level="body-sm" 
@@ -779,12 +785,14 @@ const Sidebar = () => {
                       
                       {/* Linje med fast bredd mellan texten och plusknappen */}
                       <Box sx={{ 
-                        width: '220px', // Ännu längre fast bredd för alla linjer
+                        width: '250px', // Ännu längre fast bredd för alla linjer
                         height: '1px', 
                         mx: 1,
                         backgroundColor: 'rgba(0,0,0,0.1)',
                         flexShrink: 0, // Förhindra att linjen krymper
-                        position: 'relative' // För absolut positionering
+                        position: 'relative', // För absolut positionering
+                        zIndex: 1, // Högre z-index för att synas över allt
+                        whiteSpace: 'nowrap'
                       }} />
                     </Box>
                   </ListItemContent>
