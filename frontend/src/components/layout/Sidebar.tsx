@@ -42,8 +42,7 @@ interface FileSystemNodeProps {
   handleAddNewFolder: (parentId: string | null) => void;
 }
 
-// Komponent som representerar en fil eller mapp i sidomenyn
-// Helt ombyggd komponent med individuell klickyta för varje mapp
+// Helt ny och förenklad komponent för filsystemet
 const FileSystemNode = ({
   node,
   level,
@@ -58,73 +57,58 @@ const FileSystemNode = ({
   // Hitta alla barn till denna nod
   const children = filesystemNodes.filter(n => n.parent_id === node.id);
   
-  // Hantera klick för denna specifika mapp
-  const handleClick = (event: React.MouseEvent) => {
-    // Stoppa klickhändelsen från att nå andra element
-    event.stopPropagation();
-    
-    // Växla mappstatus bara om det är en mapp
-    if (isFolder) {
-      toggleFolder(node.id);
-    }
-  };
-  
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        mb: 0.5,
-        width: '100%'
-      }}
-    >
+    <div style={{ position: 'relative', marginBottom: '4px', width: '100%' }}>
       {/* L-streck för hierarkin */}
       {level > 0 && (
-        <Box
-          sx={{
-            position: 'absolute',
-            left: `${level * 1.5 - 0.5}rem`,
-            top: 0,
-            width: '10px',
-            height: '20px',
-            borderLeft: '1px solid #A0A0A0',
-            borderBottom: '1px solid #A0A0A0',
-            pointerEvents: 'none',
-            zIndex: 0
-          }}
-        />
+        <div style={{
+          position: 'absolute',
+          left: `${level * 24 - 8}px`,
+          top: 0,
+          width: '10px',
+          height: '20px',
+          borderLeft: '1px solid #A0A0A0',
+          borderBottom: '1px solid #A0A0A0',
+          pointerEvents: 'none'
+        }} />
       )}
-
-      {/* Den klickbara raden */}
-      <Box
-        onClick={handleClick}
-        sx={{
-          pl: `calc(${level * 1.5}rem + 0.7rem)`,
-          pr: 1,
-          py: 0.3,
+      
+      {/* Den faktiska raden med mappnamn som används för klick */}
+      <div 
+        style={{
+          paddingLeft: `${level * 24 + 12}px`,
+          paddingRight: '8px',
+          paddingTop: '4px',
+          paddingBottom: '4px',
           display: 'flex',
           alignItems: 'center',
           cursor: isFolder ? 'pointer' : 'default',
           borderRadius: '4px',
-          transition: 'background-color 0.2s',
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)'
-          },
-          position: 'relative'
+          position: 'relative',
+          transition: 'background-color 0.2s'
+        }}
+        className="folder-row"
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isFolder) toggleFolder(node.id);
+        }}
+        onMouseOver={(e) => {
+          (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+        }}
+        onMouseOut={(e) => {
+          (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent';
         }}
       >
         {/* Mapp/filikon */}
-        <Box
-          sx={{
-            width: 16,
-            height: 16,
-            mr: 1.5,
-            color: isFolder ? '#e3a008' : '#3182ce',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1
-          }}
-        >
+        <div style={{
+          width: '16px',
+          height: '16px',
+          marginRight: '10px',
+          color: isFolder ? '#e3a008' : '#3182ce',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             {isFolder ? (
               <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
@@ -132,64 +116,59 @@ const FileSystemNode = ({
               <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
             )}
           </svg>
-        </Box>
+        </div>
         
         {/* Namn */}
-        <Typography 
-          level="body-xs" 
-          sx={{ 
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            minWidth: '50px',
-            maxWidth: '70px',
-            width: '60px',
-            flexShrink: 0,
-            zIndex: 1
-          }}
-        >
+        <div style={{
+          fontSize: '0.875rem',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          minWidth: '50px',
+          maxWidth: '100px',
+          width: 'auto',
+          flexShrink: 0
+        }}>
           {node.name}
-        </Typography>
+        </div>
         
-        {/* Plusknapp - viktigt att stoppa event propagation */}
+        {/* Plusknapp */}
         {isFolder && (
-          <IconButton 
-            size="sm" 
-            variant="plain" 
-            color="neutral"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddNewFolder(node.id);
-            }}
-            sx={{ 
+          <div 
+            style={{
               opacity: 0.7,
               minWidth: '20px',
               width: '20px',
               height: '20px',
-              p: '2px',
-              ml: 1,
-              '&:hover': {
-                bgcolor: 'rgba(0, 0, 0, 0.04)'
-              },
-              zIndex: 1
+              padding: '2px',
+              marginLeft: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              borderRadius: '4px'
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddNewFolder(node.id);
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent';
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-          </IconButton>
+          </div>
         )}
-      </Box>
+      </div>
       
-      {/* Rekursivt visa barnens innehåll om det är en öppen mapp */}
+      {/* Barnmappar - notera att vi använder display: block och inte Box-komponenten */}
       {isFolder && isOpen && children.length > 0 && (
-        <Box 
-          onClick={(e) => e.stopPropagation()} // Stoppa event propagation inom barn
-          sx={{ 
-            width: '100%',
-            position: 'relative'
-          }}
-        >
+        <div style={{ display: 'block', width: '100%' }}>
           {children.map(child => (
             <FileSystemNode
               key={child.id}
@@ -201,9 +180,9 @@ const FileSystemNode = ({
               handleAddNewFolder={handleAddNewFolder}
             />
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
