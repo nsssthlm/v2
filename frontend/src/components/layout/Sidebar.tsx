@@ -109,7 +109,7 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Ny struktur som förhindrar radbrytning mellan text och plusknapp */}
+          {/* Ny struktur med lång linje mellan texten och plusknappen enligt bild 2 */}
           <Box sx={{ 
             display: 'flex', 
             width: '100%',
@@ -118,25 +118,28 @@ const FileSystemNode = ({
             flexWrap: 'nowrap',
             overflow: 'visible'
           }}>
-            {/* Namn utan textavklippning med förhindrad radbrytning men med scrollning vid behov */}
+            {/* Namn med fast bredd */}
+            <Typography 
+              level="body-xs" 
+              sx={{ 
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                width: '60px', // Fast bredd för alla texter
+                flexShrink: 0
+              }}
+            >
+              {node.name}
+            </Typography>
+            
+            {/* Linje mellan texten och plusknappen */}
             <Box sx={{ 
-              maxWidth: { xs: '120px', sm: '150px' }, // Dynamisk bredd beroende på skärmstorlek
-              minWidth: '60px', // Säkerställ att vi har minst 60px bredd
-              width: `calc(180px - ${level * 10}px)`, // Minska bredden baserat på indenteringsnivå
-              overflow: 'auto', // Tillåt scrolling horisontellt om texten är för lång
-              mr: 2, // Fast mellanrum mellan texten och plustecknet (16px)
-              '&::-webkit-scrollbar': { display: 'none' } // Göm scrollbar för renare utseende
-            }}>
-              <Typography 
-                level="body-xs" 
-                sx={{ 
-                  whiteSpace: 'nowrap', // Förhindra radbrytning
-                  display: 'inline',
-                }}
-              >
-                {node.name}
-              </Typography>
-            </Box>
+              flexGrow: 1, 
+              height: '1px', 
+              mx: 1,
+              bgcolor: 'rgba(0,0,0,0.1)',
+              display: { xs: 'none', sm: 'block' } // Göm på små skärmar
+            }} />
           
             {/* Plusknapp med exakt samma avstånd från texten */}
             {isFolder && (
@@ -743,13 +746,22 @@ const Sidebar = () => {
                         level="body-sm" 
                         fontWeight={500} 
                         sx={{ 
-                          mr: 2,
-                          whiteSpace: 'nowrap', // Förhindra radbrytning
-                          overflow: 'visible'
+                          whiteSpace: 'nowrap',
+                          width: '60px', // Samma bredd som för mappnamn
+                          flexShrink: 0
                         }}
                       >
                         Filer
                       </Typography>
+                      
+                      {/* Linje mellan texten och plusknappen */}
+                      <Box sx={{ 
+                        flexGrow: 1, 
+                        height: '1px', 
+                        mx: 1,
+                        bgcolor: 'rgba(0,0,0,0.1)',
+                        display: { xs: 'none', sm: 'block' } // Göm på små skärmar
+                      }} />
                     </Box>
                   </ListItemContent>
                   
