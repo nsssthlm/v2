@@ -65,10 +65,11 @@ const FileSystemNode = ({
           pl: level * 1.5, // Indentering för hierarkin
           pr: 1,
           position: 'relative',
-          overflow: 'visible',
+          overflow: 'visible !important',
           display: 'block',
           minWidth: '100%',
-          width: 'auto' // Tillåt elementet att växa utanför containern vid behov
+          maxWidth: 'none !important', // Ta bort maxbredbegränsningen
+          width: 'auto !important' // Tillåt elementet att växa utanför containern vid behov
         }}
       >
         <ListItemButton
@@ -114,11 +115,12 @@ const FileSystemNode = ({
           {/* Ny struktur med lång linje mellan texten och plusknappen enligt bild 2 */}
           <Box sx={{ 
             display: 'flex', 
-            width: '100%',
+            width: 'auto !important',
+            minWidth: '100%',
             alignItems: 'center',
             position: 'relative',
             flexWrap: 'nowrap',
-            overflow: 'visible'
+            overflow: 'visible !important'
           }}>
             {/* Namn med fast bredd */}
             <Typography 
