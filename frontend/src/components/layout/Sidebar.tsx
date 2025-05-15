@@ -100,19 +100,22 @@ const FileSystemNode = ({
             pr: 0,
             borderRadius: '4px',
             color: 'neutral.700',
-            // Se till att texten inte går in i linjerna
+            // Se till att texten inte går in i linjerna och att klickytan är konsekvent
             '& > *': {
               position: 'relative',
               zIndex: 1
             },
+            // Se till att hela området är klickbart
+            minHeight: '26px',
+            width: '100%',
             fontSize: '0.875rem',
             display: 'flex',
             flexWrap: 'nowrap',
             alignItems: 'center',
             minWidth: '100%',
-            width: 'auto',
             overflow: 'visible',
-            position: 'relative'
+            position: 'relative',
+            cursor: 'pointer'  // Tydlig markör för att visa att det är klickbart
           }}
         >
           {/* Tar bort vertikal linje eftersom den nu hanteras med ::after i ListItem */}
