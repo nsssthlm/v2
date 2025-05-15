@@ -139,6 +139,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
+      width: 100%;
     }
     
     .list-header {
@@ -153,53 +154,132 @@
       font-size: 1.25rem;
       margin: 0;
     }
+
+    .actions-container {
+      display: flex;
+      gap: 0.5rem;
+    }
     
     .pdf-list-items {
-      max-height: 600px;
-      overflow-y: auto;
+      width: 100%;
+      overflow-x: auto;
     }
     
-    .pdf-item {
+    /* PDF Table Style */
+    .pdf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    
+    .pdf-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background-color: var(--background);
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+    
+    .pdf-table td {
       padding: 0.75rem 1rem;
       border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background-color 0.2s;
+      vertical-align: top;
     }
     
-    .pdf-item:last-child {
-      border-bottom: none;
-    }
-    
-    .pdf-item:hover {
+    .pdf-table tbody tr:hover {
       background-color: var(--background);
     }
     
-    .pdf-item.active {
-      background-color: var(--primary-light);
+    .pdf-file-icon {
+      color: #e74c3c;
+      margin-right: 0.25rem;
     }
     
-    .pdf-item-title {
+    .pdf-filename {
       font-weight: 500;
-      margin-bottom: 0.25rem;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: none;
     }
     
-    .pdf-item-meta {
-      font-size: 0.875rem;
+    .pdf-filename:hover {
+      text-decoration: underline;
+    }
+    
+    .pdf-actions {
+      display: flex;
+      gap: 0.25rem;
+      justify-content: flex-end;
+    }
+    
+    .action-icon {
+      border: none;
+      background: none;
       color: var(--text-light);
-      display: flex;
-      justify-content: space-between;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: var(--radius);
+      transition: background-color 0.2s;
     }
     
-    .pdf-item-actions {
-      margin-top: 0.5rem;
-      display: flex;
-      gap: 0.5rem;
+    .action-icon:hover {
+      background-color: var(--border);
+      color: var(--text);
+    }
+    
+    .delete-icon {
+      color: var(--danger);
     }
     
     .empty-list {
       padding: 2rem 1rem;
       text-align: center;
       color: var(--text-light);
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+    
+    .search-box {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background-color: var(--white);
+    }
+    
+    .search-icon {
+      padding: 0.5rem 0.75rem;
+      color: var(--text-light);
+    }
+    
+    .search-input {
+      flex: 1;
+      border: none;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .search-input:focus {
+      outline: none;
+    }
+    
+    .filter-select {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: var(--white);
+      font-size: 0.9rem;
+      cursor: pointer;
     }
     
     .pdf-viewer {
@@ -555,37 +635,73 @@
   
   <div class="container">
     <main id="main-content" style="display: none;">
+      <div class="search-container">
+        <div class="search-box">
+          <div class="search-icon">🔍</div>
+          <input type="text" id="search-input" class="search-input" placeholder="Sök efter fil...">
+        </div>
+        <select id="version-filter" class="filter-select">
+          <option value="all">Alla versioner</option>
+          <option value="latest">Senaste versioner</option>
+        </select>
+        <div class="actions-container">
+          <button type="button" id="new-pdf-btn" class="btn">Ladda upp</button>
+          <button type="button" id="delete-folder-btn" class="btn btn-danger">Ta bort mapp</button>
+        </div>
+      </div>
+
       <section class="pdf-list">
-        <div class="list-header">
-          <h2>Mina PDF:er</h2>
-          <button type="button" id="new-pdf-btn" class="btn">Ny PDF</button>
-        </div>
         <div class="pdf-list-items" id="pdf-list-items">
-          <div class="empty-list">
-            <p>Inga PDF-filer hittades.</p>
-            <p>Klicka på "Ny PDF" för att ladda upp din första fil.</p>
-          </div>
-        </div>
-      </section>
-      
-      <section class="pdf-viewer">
-        <div class="viewer-header">
-          <h3 id="viewer-title">Ingen fil vald</h3>
-          <div class="pdf-controls">
-            <button type="button" id="prev-page" class="btn btn-secondary btn-sm" disabled>Föregående</button>
-            <span id="page-info" class="page-info">Sida 0 av 0</span>
-            <button type="button" id="next-page" class="btn btn-secondary btn-sm" disabled>Nästa</button>
-          </div>
-        </div>
-        <div class="viewer-container" id="viewer-container">
-          <div class="viewer-placeholder">
-            <div class="icon-placeholder">📄</div>
-            <h3>Ingen PDF vald</h3>
-            <p>Välj en PDF från listan till vänster för att visa den här.</p>
-          </div>
+          <table class="pdf-table">
+            <thead>
+              <tr>
+                <th>Namn</th>
+                <th>Version</th>
+                <th>Beskrivning</th>
+                <th>Uppladdad</th>
+                <th>Uppladdad av</th>
+                <th>Nummer</th>
+                <th>Status</th>
+                <th>Annat</th>
+                <th>Åtgärder</th>
+              </tr>
+            </thead>
+            <tbody id="pdf-table-body">
+              <!-- PDF-filer kommer att läggas till här dynamiskt -->
+              <tr>
+                <td colspan="9" class="empty-list">
+                  <p>Inga PDF-filer hittades.</p>
+                  <p>Klicka på "Ladda upp" för att ladda upp din första fil.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </main>
+  </div>
+  
+  <!-- PDF Viewer Dialog -->
+  <div id="pdf-view-modal" class="modal">
+    <div class="modal-content" style="width: 90%; max-width: 900px; height: 90vh; max-height: 800px; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="pdf-modal-title">PDF Visare</h3>
+        <button type="button" class="modal-close" id="pdf-view-close">&times;</button>
+      </div>
+      <div class="viewer-header" style="padding: 0.5rem 1rem;">
+        <div class="pdf-controls">
+          <button type="button" id="prev-page" class="btn btn-secondary btn-sm" disabled>Föregående</button>
+          <span id="page-info" class="page-info">Sida 0 av 0</span>
+          <button type="button" id="next-page" class="btn btn-secondary btn-sm" disabled>Nästa</button>
+        </div>
+      </div>
+      <div class="viewer-container" id="viewer-container" style="flex: 1; overflow: auto; background-color: #ddd; padding: 1rem;">
+        <div class="viewer-placeholder">
+          <div class="icon-placeholder">📄</div>
+          <h3>Laddar PDF...</h3>
+        </div>
+      </div>
+    </div>
   </div>
   
   <script>
@@ -782,55 +898,89 @@
     
     // Rendera PDF-listan
     function renderPdfList() {
+      const tableBody = document.getElementById('pdf-table-body');
+      
       if (pdfFiles.length === 0) {
-        pdfListItems.innerHTML = `
-          <div class="empty-list">
-            <p>Inga PDF-filer hittades.</p>
-            <p>Klicka på "Ny PDF" för att ladda upp din första fil.</p>
-          </div>
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty-list">
+              <p>Inga PDF-filer hittades.</p>
+              <p>Klicka på "Ladda upp" för att ladda upp din första fil.</p>
+            </td>
+          </tr>
         `;
         return;
       }
       
-      pdfListItems.innerHTML = '';
+      tableBody.innerHTML = '';
       
-      pdfFiles.forEach(pdf => {
-        const pdfItem = document.createElement('div');
-        pdfItem.className = 'pdf-item';
-        pdfItem.setAttribute('data-id', pdf.id);
-        
-        const uploadDate = new Date(pdf.uploadedAt).toLocaleDateString('sv-SE');
-        
-        pdfItem.innerHTML = `
-          <div class="pdf-item-title">${pdf.filename}</div>
-          <div class="pdf-item-meta">
-            <span>${uploadDate}</span>
-            <span>${formatFileSize(pdf.size)}</span>
-          </div>
-          <div class="pdf-item-actions">
-            <button type="button" class="btn btn-sm btn-danger delete-pdf" data-id="${pdf.id}">Ta bort</button>
-          </div>
-        `;
-        
-        pdfItem.addEventListener('click', function(e) {
-          // Ignorera klick på ta bort-knappen
-          if (e.target.classList.contains('delete-pdf')) {
-            e.stopPropagation();
-            openDeleteModal(pdf.id);
-            return;
-          }
-          
-          // Markera vald PDF
-          document.querySelectorAll('.pdf-item').forEach(item => {
-            item.classList.remove('active');
-          });
-          this.classList.add('active');
-          
-          // Visa PDF
-          openPdf(pdf);
+      pdfFiles.forEach((pdf, index) => {
+        const uploadDate = new Date(pdf.uploadedAt).toLocaleDateString('sv-SE', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
         });
         
-        pdfListItems.appendChild(pdfItem);
+        const row = document.createElement('tr');
+        row.setAttribute('data-id', pdf.id);
+        
+        row.innerHTML = `
+          <td>
+            <a href="#" class="pdf-filename" data-id="${pdf.id}">
+              <span class="pdf-file-icon">📄</span> ${pdf.filename}
+            </a>
+          </td>
+          <td>1</td>
+          <td>${pdf.description || 'Ingen beskrivning'}</td>
+          <td>${uploadDate}</td>
+          <td>${pdf.uploadedBy}</td>
+          <td>${90 - index}</td>
+          <td>-</td>
+          <td>-</td>
+          <td>
+            <div class="pdf-actions">
+              <button type="button" class="action-icon delete-icon" data-id="${pdf.id}" title="Ta bort">🗑️</button>
+            </div>
+          </td>
+        `;
+        
+        // Lägg till event listeners
+        const deleteBtn = row.querySelector('.delete-icon');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openDeleteModal(pdf.id);
+        });
+        
+        const pdfLink = row.querySelector('.pdf-filename');
+        pdfLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          openPdfModal(pdf);
+        });
+        
+        tableBody.appendChild(row);
+      });
+    }
+    
+    // Öppna PDF i ett modal-fönster
+    function openPdfModal(pdf) {
+      const pdfViewModal = document.getElementById('pdf-view-modal');
+      const pdfModalTitle = document.getElementById('pdf-modal-title');
+      
+      // Sätt titeln på modal-fönstret
+      pdfModalTitle.textContent = pdf.filename;
+      
+      // Visa modal-fönstret
+      pdfViewModal.classList.add('active');
+      
+      // Ladda PDF:en
+      openPdf(pdf);
+      
+      // Lägg till stängningsfunktion
+      const closeBtn = document.getElementById('pdf-view-close');
+      closeBtn.addEventListener('click', () => {
+        pdfViewModal.classList.remove('active');
       });
     }
     
