@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   Sheet, 
   List, 
@@ -17,11 +17,12 @@ import {
   DialogActions,
   Button,
   FormControl,
-  FormLabel
+  FormLabel,
+  CircularProgress
 } from '@mui/joy';
 import { Link, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import directoryService, { ApiDirectory } from '../../services/directoryService';
+import directoryService, { DirectoryInput } from '../../services/directoryService';
 
 // Interface för menyobjekt
 // Används för att typa submenu-items i sidebar-navigationen
@@ -778,35 +779,44 @@ const Sidebar = () => {
                       width: '100%'
                     }}
                 >
-                  {/* Visa mappar på rotnivå */}
-                  {filesystemNodes
-                    .filter(node => node.parent_id === null)
-                    .map(node => (
-                      <FileSystemNode 
-                        key={node.id} 
-                        node={node} 
-                        level={0}
-                        filesystemNodes={filesystemNodes}
-                        openFolders={openFolders}
-                        toggleFolder={toggleFolder}
-                        handleAddNewFolder={handleAddNewFolder}
-                      />
-                    ))
-                  }
-                  
-                  {/* Om inga filer/mappar finns, visa en text */}
-                  {filesystemNodes.filter(node => node.parent_id === null).length === 0 && (
-                    <Typography 
-                      level="body-xs" 
-                      sx={{ 
-                        pl: 2, 
-                        py: 1, 
-                        color: 'neutral.500', 
-                        fontStyle: 'italic' 
-                      }}
-                    >
-                      Inga filer eller mappar
-                    </Typography>
+                  {/* Visa laddningsindikator */}
+                  {isLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                      <CircularProgress size="sm" />
+                    </Box>
+                  ) : (
+                    <>
+                      {/* Visa mappar på rotnivå */}
+                      {filesystemNodes
+                        .filter(node => node.parent_id === null)
+                        .map(node => (
+                          <FileSystemNode 
+                            key={node.id} 
+                            node={node} 
+                            level={0}
+                            filesystemNodes={filesystemNodes}
+                            openFolders={openFolders}
+                            toggleFolder={toggleFolder}
+                            handleAddNewFolder={handleAddNewFolder}
+                          />
+                        ))
+                      }
+                      
+                      {/* Om inga filer/mappar finns, visa en text */}
+                      {!isLoading && filesystemNodes.filter(node => node.parent_id === null).length === 0 && (
+                        <Typography 
+                          level="body-xs" 
+                          sx={{ 
+                            pl: 2, 
+                            py: 1, 
+                            color: 'neutral.500', 
+                            fontStyle: 'italic' 
+                          }}
+                        >
+                          Inga filer eller mappar
+                        </Typography>
+                      )}
+                    </>
                   )}
                 </List>
               </Box>
