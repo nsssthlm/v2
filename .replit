@@ -49,7 +49,7 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd basic-pdf-manager && node server.js"
-waitForPort = 5000
+waitForPort = 5001
 
 [deployment]
 run = ["sh", "-c", "cd frontend && npm install @mui/joy @emotion/react @emotion/styled @mui/material react-router-dom axios && npm install -g vite && vite --port 5000 && cd ../backend && pip install django djangorestframework django-cors-headers djangorestframework-simplejwt dj-database-url pillow && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
