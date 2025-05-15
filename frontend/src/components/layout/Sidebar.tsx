@@ -60,10 +60,29 @@ const FileSystemNode = ({
   
   return (
     <Box
+      onClick={() => isFolder && toggleFolder(node.id)}
       sx={{
         position: 'relative',
         mb: 0.5,
-        width: '100%'
+        width: '100%',
+        cursor: isFolder ? 'pointer' : 'default',
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.04)'
+        },
+        borderRadius: '4px',
+        minHeight: '30px', // Minimum höjd för att säkerställa konsekvent klickyta
+        display: 'block', // Se till att det fyller ut hela bredden
+        // Kritiskt att förstå när man kan klicka
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+          borderRadius: '4px'
+        }
       }}
     >
       {/* L-streck för hierarkin */}
@@ -83,22 +102,19 @@ const FileSystemNode = ({
         />
       )}
 
-      {/* Hela raden är klickbar - allt är inuti onClick */}
+      {/* Innehållet i filen/mappen */}
       <Box
-        onClick={() => isFolder && toggleFolder(node.id)}
         sx={{
           pl: `calc(${level * 1.5}rem + 0.7rem)`,
           pr: 1,
           py: 0.3,
           display: 'flex',
           alignItems: 'center',
-          cursor: isFolder ? 'pointer' : 'default',
-          borderRadius: '4px',
-          transition: 'background-color 0.2s',
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)'
-          },
-          position: 'relative'
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+          // Viktigt - gör hela ytan större
+          minWidth: '200px'
         }}
       >
         {/* Mapp/filikon */}
@@ -123,18 +139,21 @@ const FileSystemNode = ({
           </svg>
         </Box>
         
-        {/* Namn */}
+        {/* Namn - hela ytan ska vara klickbar via parent */}
         <Typography 
           level="body-xs" 
           sx={{ 
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            minWidth: '50px',
-            maxWidth: '70px',
-            width: '60px',
+            minWidth: '120px', // Mycket bredare område för texten
+            maxWidth: '200px', // Maxbredd mycket större
+            flexGrow: 1, // Låt den växa och fylla ut utrymmet
             flexShrink: 0,
-            zIndex: 1
+            zIndex: 1,
+            userSelect: 'none', // Förhindra text-selection
+            px: 1, // Lägg till padding på sidorna för att utöka klickyta
+            py: 0.5 // Lägg till padding upptill/nedtill för att utöka klickyta
           }}
         >
           {node.name}
