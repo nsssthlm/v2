@@ -1103,6 +1103,14 @@
     // PDFjs setup
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     
+    // Speech synthesis variables
+    let speechSynthesis = window.speechSynthesis;
+    let speechUtterance = null;
+    let currentSpeechPage = 1;
+    let extractedTextContent = {};
+    let isSpeaking = false;
+    let highlightedTextElement = null;
+    
     // DOM Elements
     const loginSection = document.getElementById('login-section');
     const mainContent = document.getElementById('main-content');
@@ -1727,6 +1735,37 @@
         };
         
         await page.render(renderContext).promise;
+        
+        // Extract text content for speech synthesis
+        try {
+          const textContent = await page.getTextContent();
+          const textItems = textContent.items;
+          
+          // Create a string with proper spacing based on the text positions
+          let lastY;
+          let text = '';
+          
+          for (let i = 0; i < textItems.length; i++) {
+            const item = textItems[i];
+            
+            // Check if we're on a new line by comparing y-coordinates
+            if (lastY !== undefined && Math.abs(lastY - item.transform[5]) > 5) {
+              text += '\n'; // Add newline for significant y-position changes
+            } else if (i > 0 && item.hasEOL) {
+              text += '\n';
+            }
+            
+            text += item.str;
+            lastY = item.transform[5];
+          }
+          
+          // Store the extracted text for this page
+          extractedTextContent[num] = text;
+          
+        } catch (error) {
+          console.error('Error extracting text content:', error);
+          extractedTextContent[num] = 'Text could not be extracted from this page.';
+        }
         
         // Center canvas horizontally if needed
         if (canvas.width < pdfViewerContainer.clientWidth) {
