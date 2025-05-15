@@ -1530,17 +1530,33 @@
     // Open PDF viewer
     function openPdfViewer(pdf) {
       currentPdf = pdf;
-      currentPdfName.textContent = pdf.filename;
+      
+      // Set title
       pdfModalTitle.textContent = pdf.filename;
+      
+      // Uppdatera metadata i sidopanelen
+      document.getElementById('pdf-created-by').textContent = pdf.uploadedBy || 'användare';
+      document.getElementById('pdf-created-date').textContent = pdf.uploadedAt ? new Date(pdf.uploadedAt).toLocaleDateString() : '15 maj 2025';
+      document.getElementById('pdf-deadline').textContent = '22 maj 2025';
+      document.getElementById('version-author-name').textContent = pdf.uploadedBy || 'användare';
+      
+      // Visa modal 
       pdfViewModal.classList.add('active');
       
-      // Load PDF
-      viewerContent.innerHTML = `
+      // Clear container och visa laddningsindikator
+      const viewerContainer = document.getElementById('pdf-viewer-container');
+      viewerContainer.innerHTML = `
         <div class="spinner"></div>
         <p style="text-align: center; color: white; margin-top: 1rem;">Laddar PDF...</p>
       `;
       
+      // Ladda PDF 
       loadPdf(pdf);
+      
+      // Event för stäng-knappen
+      document.getElementById('close-pdf-btn').addEventListener('click', function() {
+        pdfViewModal.classList.remove('active');
+      });
     }
     
     // Load PDF
