@@ -78,16 +78,16 @@ const FolderPage = () => {
       {/* Brödsmulor */}
       <Box sx={{ display: 'flex', mb: 2, fontSize: '0.85rem' }}>
         <Typography level="body-sm" sx={{ color: 'primary.500' }}>
-          <a href="/folders" style={{ textDecoration: 'none' }}>Mappar</a>
+          <Link to="/folders" style={{ textDecoration: 'none' }}>Mappar</Link>
         </Typography>
         
         {folderData.parent_slug && (
           <>
             <Typography level="body-sm" sx={{ mx: 0.5 }}>/</Typography>
             <Typography level="body-sm" sx={{ color: 'primary.500' }}>
-              <a href={`/folders/${folderData.parent_slug}`} style={{ textDecoration: 'none' }}>
+              <Link to={`/folders/${folderData.parent_slug}`} style={{ textDecoration: 'none' }}>
                 {folderData.parent_name}
-              </a>
+              </Link>
             </Typography>
           </>
         )}
@@ -122,7 +122,7 @@ const FolderPage = () => {
                       </svg>
                     </span>
                     {subfolder.name}
-                  </a>
+                  </Link>
                 </ListItemContent>
               </ListItem>
             ))}
@@ -169,14 +169,14 @@ const FolderPage = () => {
         <Button 
           variant="outlined" 
           color="neutral"
-          onClick={() => window.open(`${DIRECT_API_URL}/files/web/${slug}/edit/`, '_blank')}
+          onClick={() => navigate(`/folders/${slug}/edit`)}
         >
           Redigera sida
         </Button>
         <Button 
           variant="solid" 
           color="primary"
-          onClick={() => window.open(`${DIRECT_API_URL}/files/web/${slug}/upload/`, '_blank')}
+          onClick={() => navigate(`/folders/${slug}/upload`)}
         >
           Ladda upp PDF
         </Button>
