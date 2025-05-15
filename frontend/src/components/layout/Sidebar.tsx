@@ -110,10 +110,10 @@ const FileSystemNode = ({
             <Box
               sx={{
                 position: 'absolute',
-                left: (level - 0.4) * 1.5 + 'rem', // Samma position som vertikala linjen
+                left: (level - 0.3) * 1.5 + 'rem', // Matcha position med vertikala linjen
                 width: '0.7rem', // Längd på horisontella linjen
                 height: '1px',
-                bgcolor: 'rgba(160, 174, 192, 0.2)', // Samma färg som vertikala
+                bgcolor: 'rgba(160, 174, 192, 0.3)', // Samma färg som vertikala
                 top: '50%',
                 zIndex: 1
               }}
@@ -215,6 +215,16 @@ const FileSystemNode = ({
           overflow: 'visible !important',
           maxWidth: 'none !important',
           '& > div': { position: 'relative' }, // Viktigt för att linjerna ska positioneras rätt
+          '& > div::before': { // Skapa en anslutningslinje för att knyta sista barn till förälder
+            content: '""',
+            position: 'absolute',
+            left: (level + 0.7) * 1.5 - 15 + 'px',
+            top: -10,
+            height: 15,
+            width: 1,
+            backgroundColor: 'rgba(160, 174, 192, 0.3)',
+            zIndex: 0
+          },
           pb: 0.5, // Extra padding för att linjer ska fortsätta under
           pt: 0.5 // Padding ovan så linjer fortsätter uppåt
         }}>

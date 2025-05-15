@@ -36,9 +36,10 @@ export default defineConfig(({ mode }) => {
       // Add allowedHosts to fix the blocking issue with Replit domain
       proxy: {
         '/api': {
-          target: 'http://0.0.0.0:8000',
+          target: 'http://f0a7b248ffad:8000',
           changeOrigin: true,
-          secure: false
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api/, '/api')
         }
       },
       fs: {
