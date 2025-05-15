@@ -14,6 +14,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
+
 args = "backend"
 
 [[workflows.workflow.tasks]]
@@ -26,6 +27,7 @@ args = "pdf-manager"
 
 [[workflows.workflow]]
 name = "backend"
+
 author = "agent"
 
 [[workflows.workflow.tasks]]
@@ -44,7 +46,7 @@ waitForPort = 5000
 
 [[workflows.workflow]]
 name = "pdf-manager"
-author = "agent"
+
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -66,9 +68,10 @@ externalPort = 3003
 localPort = 5000
 externalPort = 80
 
+
 [[ports]]
-localPort = 5001
-externalPort = 3000
+localPort = 5000
+externalPort = 80
 
 [[ports]]
 localPort = 5555
@@ -80,4 +83,4 @@ externalPort = 8000
 
 [[ports]]
 localPort = 8001
-externalPort = 3001
+externalPort = 3000
