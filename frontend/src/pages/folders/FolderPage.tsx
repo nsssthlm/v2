@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
+import PDFViewer from '../../components/PDFViewer';
 
 interface FolderData {
   name: string;
@@ -29,6 +30,9 @@ const FolderPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  
+  // PDF-visare
+  const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
 
   const fetchFolderData = async () => {
     setLoading(true);
@@ -149,19 +153,23 @@ const FolderPage = () => {
             {folderData.files.map((file) => (
               <ListItem key={file.name}>
                 <ListItemContent>
-                  <a 
-                    href={file.file} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+                  <Button
+                    variant="plain"
+                    color="neutral"
+                    onClick={() => setSelectedPdf({ url: file.file, name: file.name })}
+                    sx={{ 
+                      justifyContent: 'flex-start', 
+                      textAlign: 'left', 
+                      gap: 1 
+                    }}
                   >
-                    <span style={{ marginRight: '8px', color: '#3182ce' }}>
+                    <span style={{ color: '#3182ce' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
                       </svg>
                     </span>
                     {file.name}
-                  </a>
+                  </Button>
                 </ListItemContent>
               </ListItem>
             ))}
@@ -195,6 +203,16 @@ const FolderPage = () => {
         folderSlug={slug}
         onSuccess={handleUploadSuccess}
       />
+      
+      {/* PDF Viewer */}
+      {selectedPdf && (
+        <PDFViewer
+          open={selectedPdf !== null}
+          onClose={() => setSelectedPdf(null)}
+          pdfUrl={selectedPdf.url}
+          fileName={selectedPdf.name}
+        />
+      )}
     </Box>
   );
 };
