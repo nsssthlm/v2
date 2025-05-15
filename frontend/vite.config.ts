@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       // Add allowedHosts to fix the blocking issue with Replit domain
       proxy: {
         '/api': {
-          target: 'http://127.0.0.1:8000',
+          target: 'http://backend_workflow:8000',
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path
