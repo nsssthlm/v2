@@ -140,9 +140,9 @@ const FileSystemNode = ({
             
             {/* Linje med fast bredd mellan texten och plusknappen */}
             <Box sx={{ 
-              width: '120px', // Kortare linje för att minska mellanrummet
+              width: '10px', // Extremt kort linje, nästan obefintlig
               height: '1px', 
-              mx: 0.5,
+              mx: 0.2,
               backgroundColor: 'rgba(0,0,0,0.1)',
               flexShrink: 0, // Förhindra att linjen krymper
               position: 'relative', // För absolut positionering
@@ -785,9 +785,9 @@ const Sidebar = () => {
                       
                       {/* Linje med fast bredd mellan texten och plusknappen */}
                       <Box sx={{ 
-                        width: '120px', // Kortare linje för att minska mellanrummet
+                        width: '10px', // Extremt kort linje, nästan obefintlig
                         height: '1px', 
-                        mx: 0.5,
+                        mx: 0.2,
                         backgroundColor: 'rgba(0,0,0,0.1)',
                         flexShrink: 0, // Förhindra att linjen krymper
                         position: 'relative', // För absolut positionering
