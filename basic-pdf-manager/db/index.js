@@ -1,5 +1,5 @@
-const { drizzle } = require('drizzle-orm/node-postgres');
-const { Pool } = require('pg');
+const { drizzle } = require('drizzle-orm/neon-serverless');
+const { neon } = require('@neondatabase/serverless');
 const schema = require('./schema');
 const dotenv = require('dotenv');
 
@@ -12,17 +12,15 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL saknas i miljövariablerna');
 }
 
-// Skapa en pool av databasanslutningar
-const pool = new Pool({
-  connectionString: databaseUrl,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false
-});
+// Skapa sql-klienten för Neon-databas
+const sql = neon(databaseUrl);
 
 // Skapa en Drizzle-instans kopplad till databasen
-const db = drizzle(pool, { schema });
+const db = drizzle(sql, { schema });
 
+// Exportera databas-komponenter för användning i applikationen
 module.exports = {
   db,
   schema,
-  pool
+  sql
 };
