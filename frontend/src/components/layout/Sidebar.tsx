@@ -145,7 +145,8 @@ const FileSystemNode = ({
               mx: 1,
               backgroundColor: 'rgba(0,0,0,0.1)',
               flexShrink: 0, // Förhindra att linjen krymper
-              position: 'relative' // För absolut positionering
+              position: 'relative', // För absolut positionering
+              zIndex: 1 // Säkerställ att linjen syns ovanför andra element
             }} />
           
             {/* Plusknapp med exakt samma avstånd från texten */}
@@ -815,12 +816,25 @@ const Sidebar = () => {
               
               {/* Visa filsystemet om Filer är expanderad */}
               {openFolders['files_root'] && (
-                <Box sx={{
+                <Box 
+                  className="file-system-container"
+                  sx={{
                   maxHeight: '60vh',
                   width: '100%',
                   overflowY: 'auto',
                   overflowX: 'visible',
                   position: 'relative',
+                  zIndex: 0,
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    pointerEvents: 'none',
+                    zIndex: -1
+                  },
                   '& > ul': { 
                     overflow: 'visible !important',
                     width: 'auto !important'
@@ -842,7 +856,13 @@ const Sidebar = () => {
                       mt: 0.5,
                       mb: 0.5,
                       position: 'relative',
-                      width: '100%'
+                      width: '100%',
+                      overflow: 'visible !important',
+                      '& > li': {
+                        overflow: 'visible !important',
+                        width: 'auto !important',
+                        maxWidth: 'none !important'
+                      }
                     }}
                 >
                   {/* Visa laddningsindikator */}
