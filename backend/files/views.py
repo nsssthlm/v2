@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
@@ -12,6 +12,12 @@ class DirectoryViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']
+    
+    # Lägg till destroy-metod för att kunna ta bort alla mappar också
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     def get_permissions(self):
         """
@@ -27,6 +33,10 @@ class DirectoryViewSet(viewsets.ModelViewSet):
                     sidebar_create = True
             except:
                 pass
+        
+        # Tillåt DELETE-anrop utan autentisering (för att rensa mappar)
+        if self.request.method == 'DELETE':
+            return []
         
         if (self.request.method == 'GET' and is_sidebar_request) or sidebar_create:
             return []  # No permissions required for sidebar items
