@@ -92,6 +92,15 @@ app.get('/api/user', (req, res) => {
   }
 });
 
+// Check auth status endpoint
+app.get('/api/check-auth', (req, res) => {
+  if (req.session.user) {
+    res.status(200).json({ success: true, user: req.session.user });
+  } else {
+    res.status(200).json({ success: false, message: 'Inte inloggad' });
+  }
+});
+
 // Upload PDF file endpoint
 app.post('/api/upload', upload.single('file'), (req, res) => {
   try {
