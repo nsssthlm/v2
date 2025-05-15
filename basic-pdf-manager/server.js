@@ -4,6 +4,15 @@ const fs = require('fs');
 const multer = require('multer');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const { 
+  getFolders, 
+  createFolder, 
+  savePdf, 
+  getPdfs, 
+  getPdfById, 
+  deletePdf, 
+  generateUniqueId 
+} = require('./db');
 
 const app = express();
 const port = 5001;
@@ -59,8 +68,7 @@ const users = [
   { id: 1, username: 'user@example.com', password: 'password', name: 'Test User' }
 ];
 
-// In-memory PDF storage (ersätts senare med databas)
-let pdfFiles = [];
+// PDF-filer hanteras nu i databasen via db.js
 
 // Login endpoint
 app.post('/api/login', (req, res) => {
@@ -93,7 +101,7 @@ app.get('/api/user', (req, res) => {
 });
 
 // Upload PDF file endpoint
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ success: false, message: 'Inte inloggad' });
@@ -103,22 +111,38 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       return res.status(400).json({ success: false, message: 'Ingen fil uppladdad' });
     }
 
-    // Skapa PDF-objekt
-    const pdfFile = {
-      id: Date.now().toString(),
-      filename: req.body.title || req.file.originalname.replace('.pdf', ''),
+    // Generera unikt ID för PDF:en
+    const uniqueId = generateUniqueId();
+    
+    // Hämta tillhörande mapp om sådan angivits
+    const folderId = req.body.folder && req.body.folder !== 'root' ? req.body.folder : null;
+    
+    // Skapa PDF-objekt för databasen
+    const pdfData = {
+      uniqueId,
+      filename: req.file.originalname,
+      displayName: req.body.title || req.file.originalname.replace('.pdf', ''),
+      filePath: '/uploads/' + req.file.filename,
       description: req.body.description || '',
-      originalFilename: req.file.originalname,
-      storedFilename: req.file.filename,
-      fileUrl: '/uploads/' + req.file.filename,
-      size: req.file.size,
-      uploadedBy: req.session.user.username,
-      uploadedAt: new Date().toISOString(),
-      folder: req.body.folder || 'root'
+      folderId,
+      version: 1,
+      uploadedBy: req.session.user.username
     };
 
-    // Spara PDF-objektet
-    pdfFiles.push(pdfFile);
+    // Spara i databasen
+    const savedPdf = await savePdf(pdfData);
+    
+    // Formattera svar
+    const pdfFile = {
+      id: savedPdf.unique_id,
+      filename: savedPdf.display_name,
+      description: savedPdf.description,
+      originalFilename: savedPdf.filename,
+      fileUrl: savedPdf.file_path,
+      uploadedBy: savedPdf.uploaded_by,
+      uploadedAt: savedPdf.uploaded_at,
+      folder: savedPdf.folder_id || 'root'
+    };
 
     res.status(200).json({ success: true, file: pdfFile });
   } catch (error) {
@@ -128,64 +152,131 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 });
 
 // Get PDF list endpoint
-app.get('/api/pdfs', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ success: false, message: 'Inte inloggad' });
+app.get('/api/pdfs', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'Inte inloggad' });
+    }
+
+    const folder = req.query.folder || 'root';
+    
+    // Hämta PDFs från databasen baserat på mappfilter
+    let folderId = null;
+    if (folder !== 'all' && folder !== 'root') {
+      folderId = parseInt(folder);
+    }
+    
+    const pdfs = await getPdfs(folderId);
+    
+    // Formattera svaret för att matcha tidigare API
+    const formattedPdfs = pdfs.map(pdf => ({
+      id: pdf.unique_id,
+      filename: pdf.display_name,
+      description: pdf.description,
+      originalFilename: pdf.filename,
+      fileUrl: pdf.file_path,
+      uploadedBy: pdf.uploaded_by,
+      uploadedAt: pdf.uploaded_at,
+      folder: pdf.folder_id || 'root'
+    }));
+
+    res.status(200).json(formattedPdfs);
+  } catch (error) {
+    console.error('Fel vid hämtning av PDF-filer:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
-
-  const folder = req.query.folder || 'root';
-  
-  // Filtrera på mapp om angett
-  const filteredPdfs = folder === 'all' 
-    ? pdfFiles 
-    : pdfFiles.filter(pdf => pdf.folder === folder);
-
-  res.status(200).json(filteredPdfs);
 });
 
 // Get specific PDF endpoint
-app.get('/api/pdfs/:id', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ success: false, message: 'Inte inloggad' });
-  }
+app.get('/api/pdfs/:id', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'Inte inloggad' });
+    }
 
-  const pdf = pdfFiles.find(p => p.id === req.params.id);
-  
-  if (!pdf) {
-    return res.status(404).json({ success: false, message: 'PDF hittades inte' });
-  }
+    const pdfId = req.params.id;
+    const pdf = await getPdfById(pdfId);
+    
+    if (!pdf) {
+      return res.status(404).json({ success: false, message: 'PDF hittades inte' });
+    }
 
-  res.status(200).json(pdf);
+    // Formattera svaret för att matcha tidigare API
+    const formattedPdf = {
+      id: pdf.unique_id,
+      filename: pdf.display_name,
+      description: pdf.description,
+      originalFilename: pdf.filename,
+      fileUrl: pdf.file_path,
+      uploadedBy: pdf.uploaded_by,
+      uploadedAt: pdf.uploaded_at,
+      folder: pdf.folder_id || 'root'
+    };
+
+    res.status(200).json(formattedPdf);
+  } catch (error) {
+    console.error('Fel vid hämtning av specifik PDF:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Delete PDF endpoint
-app.delete('/api/pdfs/:id', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ success: false, message: 'Inte inloggad' });
-  }
-
-  const pdfIndex = pdfFiles.findIndex(p => p.id === req.params.id);
-  
-  if (pdfIndex === -1) {
-    return res.status(404).json({ success: false, message: 'PDF hittades inte' });
-  }
-
-  const pdf = pdfFiles[pdfIndex];
-
-  // Ta bort filen från filsystemet
+app.delete('/api/pdfs/:id', async (req, res) => {
   try {
-    const filePath = path.join(uploadsDir, pdf.storedFilename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'Inte inloggad' });
     }
+
+    const pdfId = req.params.id;
+    const deletedPdf = await deletePdf(pdfId);
+    
+    if (!deletedPdf) {
+      return res.status(404).json({ success: false, message: 'PDF hittades inte' });
+    }
+
+    res.status(200).json({ success: true });
   } catch (error) {
-    console.error('Fel vid borttagning av fil:', error);
+    console.error('Fel vid borttagning av PDF:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
+});
 
-  // Ta bort från arrayen
-  pdfFiles.splice(pdfIndex, 1);
+// === MAPPAR API ===
 
-  res.status(200).json({ success: true });
+// Hämta alla mappar
+app.get('/api/folders', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'Inte inloggad' });
+    }
+    
+    const folders = await getFolders();
+    res.status(200).json(folders);
+  } catch (error) {
+    console.error('Fel vid hämtning av mappar:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Skapa en ny mapp
+app.post('/api/folders', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'Inte inloggad' });
+    }
+    
+    const { name, description, parentId } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Mappnamn måste anges' });
+    }
+    
+    const folder = await createFolder(name, description, parentId || null);
+    res.status(201).json({ success: true, folder });
+  } catch (error) {
+    console.error('Fel vid skapande av mapp:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Main HTML endpoint
