@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       // Add allowedHosts to fix the blocking issue with Replit domain
       proxy: {
         '/api': {
-          target: 'http://localhost:8000',
+          target: 'http://0.0.0.0:8000',
           changeOrigin: true,
           secure: false
         }
@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       // Expose environment variables to your client-side code
-      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://localhost:8000/api'),
+      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://0.0.0.0:8000/api'),
     },
     preview: {
       port: 5000,

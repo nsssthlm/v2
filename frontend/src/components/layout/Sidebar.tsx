@@ -713,8 +713,19 @@ const Sidebar = () => {
           
           {/* Visa Filer-menyraden med dropdown-funktion */}
           {openSubmenus['/vault'] && (
-            <Box sx={{ ml: 2, mt: 0.5, mb: 1 }}>
-              <ListItem sx={{ mb: 0.5 }}>
+            <Box sx={{ 
+              ml: 2, 
+              mt: 0.5, 
+              mb: 1, 
+              overflow: 'visible',
+              position: 'relative'
+            }}>
+              <ListItem sx={{ 
+                mb: 0.5, 
+                overflow: 'visible',
+                width: 'auto',
+                minWidth: '100%'
+              }}>
                 <ListItemButton 
                   onClick={() => setOpenFolders(prev => ({...prev, 'files_root': !prev['files_root']}))}
                   component="div"
