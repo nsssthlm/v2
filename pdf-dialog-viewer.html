@@ -639,14 +639,15 @@
       <form id="login-form">
         <div class="form-group" style="margin-bottom: 15px;">
           <label for="username" style="display: block; margin-bottom: 5px;">E-post:</label>
-          <input type="email" id="username" name="username" placeholder="E-post" required 
+          <input type="email" id="username" name="username" placeholder="E-post" required value="projectleader@example.com"
                  style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
         </div>
         <div class="form-group" style="margin-bottom: 15px;">
           <label for="password" style="display: block; margin-bottom: 5px;">Lösenord:</label>
-          <input type="password" id="password" name="password" placeholder="Lösenord" required
+          <input type="password" id="password" name="password" placeholder="Lösenord" required value="123456"
                  style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
         </div>
+        <div id="login-error" style="display: none; color: #d32f2f; margin-bottom: 15px; padding: 10px; background-color: #ffebee; border-radius: 4px; text-align: center;"></div>
         <div class="form-actions" style="margin-top: 20px;">
           <button type="submit" class="btn btn-primary" 
                   style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
@@ -2504,7 +2505,7 @@
 <!-- Lägg till skript för inloggning och autentiseringskontroll -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Visa inloggningsmodalen när sidan laddar
+    // Referens till UI-element
     const loginModal = document.getElementById('login-modal');
     const userInfo = document.getElementById('user-info');
     const usernameDisplay = document.getElementById('username-display');
@@ -2512,16 +2513,39 @@
     const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
     
-    // Kontrollera om användaren redan är inloggad (har token i localStorage)
-    const token = localStorage.getItem('auth_token');
+    // Kontrollera inloggningsstatus
+    checkLoginStatus();
     
-    if (token) {
-      // Dölj inloggningsmodalen och visa användarinfo
-      loginModal.style.display = 'none';
-      userInfo.style.display = 'flex';
-      loadSavedPdfs(); // Ladda PDF-filer när användaren är inloggad
-    } else {
-      // Visa inloggningsmodalen
+    // Hämtar användarens inloggningsstatus från servern
+    async function checkLoginStatus() {
+      try {
+        const response = await fetch('/api/user', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          // Användaren är inloggad
+          loginModal.style.display = 'none';
+          userInfo.style.display = 'flex';
+          usernameDisplay.textContent = userData.username;
+          
+          // Ladda PDF-filer
+          loadSavedPdfs();
+        } else {
+          // Användaren är inte inloggad, visa inloggningsformuläret
+          showLoginForm();
+        }
+      } catch (error) {
+        console.error('Fel vid kontroll av inloggningsstatus:', error);
+        showLoginForm();
+      }
+    }
+    
+    // Visa inloggningsformuläret
+    function showLoginForm() {
       loginModal.style.display = 'flex';
       loginModal.style.position = 'fixed';
       loginModal.style.top = '0';
@@ -2535,7 +2559,7 @@
       loginModal.style.alignItems = 'center';
     }
     
-    // Hantera inloggning
+    // Hantera inloggningsförsök
     loginForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       const username = document.getElementById('username').value;
@@ -2548,29 +2572,26 @@
       loginBtn.disabled = true;
       
       try {
-        // Direkt anrop till Django-inloggning för att testa om det fungerar
-        // Detta är en alternativ metod utan JWT
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
-        
-        // Använd den inbyggda Django-inloggningsmekanism istället för JWT
-        const response = await fetch('/api/login/', {
+        // Anropa vår egen server-API för inloggning
+        const response = await fetch('/api/login', {
           method: 'POST',
-          body: formData,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
           credentials: 'include'
         });
         
         if (!response.ok) {
-          throw new Error('Inloggningen misslyckades');
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Inloggningen misslyckades');
         }
         
-        console.log('Inloggning lyckades');
+        const userData = await response.json();
+        console.log('Inloggning lyckades:', userData);
         
         // Uppdatera UI
         loginModal.style.display = 'none';
         userInfo.style.display = 'flex';
-        usernameDisplay.textContent = username;
+        usernameDisplay.textContent = userData.user.username;
         
         // Ladda PDF-filer
         loadSavedPdfs();
