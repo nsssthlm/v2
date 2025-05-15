@@ -21,6 +21,7 @@ import {
 } from '@mui/joy';
 import { Link, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import directoryService, { ApiDirectory } from '../../services/directoryService';
 
 // Interface för menyobjekt
 // Används för att typa submenu-items i sidebar-navigationen
@@ -194,6 +195,7 @@ interface SidebarFileNode {
   type: 'folder' | 'file';
   parent_id: string | null;
   children?: SidebarFileNode[];
+  db_id?: number;  // ID från databasen
 }
 
 // Define top-level menu items
