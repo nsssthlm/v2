@@ -63,11 +63,12 @@ const FileSystemNode = ({
         sx={{ 
           mb: 0.5,
           pl: level * 1.5, // Indentering för hierarkin
-          pr: 0,
+          pr: 1,
           position: 'relative',
           overflow: 'visible',
           display: 'block',
-          width: '100%' // Använd full bredd
+          minWidth: '100%',
+          width: 'auto' // Tillåt elementet att växa utanför containern vid behov
         }}
       >
         <ListItemButton
@@ -83,7 +84,8 @@ const FileSystemNode = ({
             display: 'flex',
             flexWrap: 'nowrap',
             alignItems: 'center',
-            width: '100%',
+            minWidth: '100%',
+            width: 'auto',
             overflow: 'visible',
             position: 'relative'
           }}
@@ -478,6 +480,10 @@ const Sidebar = () => {
         display: 'flex',
         flexDirection: 'column',
         bgcolor: '#fff',
+        position: 'relative',
+        overflowX: 'visible',
+        '& ul': { overflowX: 'visible !important' }, // Använd !important för att override andra stilar
+        '& li': { overflowX: 'visible !important' }, // Samma för list items
       }}
     >
       {/* Header with Logo */}
