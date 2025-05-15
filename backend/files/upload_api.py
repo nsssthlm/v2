@@ -58,10 +58,24 @@ def upload_file(request):
     user = User.objects.first()
     
     # Skapa fil-objektet
+    # Här finns en default-fallback för project om directory.project är None 
+    project = directory.project
+    if project is None:
+        # Använd första tillgängliga projektet om inget specifikt är angivet
+        from core.models import Project
+        project = Project.objects.first()
+        if project is None:
+            # Om inget projekt finns, skapa ett standardprojekt
+            project = Project.objects.create(
+                name="Default Projekt", 
+                description="Automatiskt skapat för filer", 
+                start_date="2025-05-15"
+            )
+    
     file_instance = File(
         name=name,
         directory=directory,
-        project=directory.project,
+        project=project,
         file=file_obj,
         content_type='application/pdf',
         size=file_obj.size,
