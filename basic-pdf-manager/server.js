@@ -4,6 +4,8 @@ const fs = require('fs');
 const multer = require('multer');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const { db, schema } = require('./db');
+const { eq } = require('drizzle-orm');
 
 const app = express();
 const port = 5001;
