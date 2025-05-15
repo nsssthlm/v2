@@ -109,34 +109,29 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Ny struktur med fast avstånd mellan mappens namn och plusknapp */}
+          {/* Ny struktur med fast mellanrum mellan texten och plusknappen */}
           <Box sx={{ 
             display: 'flex', 
             width: '100%',
             alignItems: 'center',
             position: 'relative'
           }}>
-            {/* Container med fast bredd för mappnamn */}
-            <Box sx={{ 
-              width: 140, // Fast bredd för alla text-containrar
-              pr: 1 // Lite padding till höger om texten
-            }}>
-              {/* Mappnamn utan textavklippning */}
-              <Typography 
-                level="body-xs" 
-                sx={{ 
-                  overflow: 'visible',
-                  whiteSpace: 'normal',
-                  wordBreak: 'break-word',
-                  display: 'inline',
-                  textOverflow: 'clip'
-                }}
-              >
-                {node.name}
-              </Typography>
-            </Box>
+            {/* Namn utan textavklippning */}
+            <Typography 
+              level="body-xs" 
+              sx={{ 
+                overflow: 'visible',
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                display: 'inline',
+                textOverflow: 'clip',
+                mr: 2 // Fast mellanrum mellan texten och plustecknet (16px)
+              }}
+            >
+              {node.name}
+            </Typography>
           
-            {/* Fast positionerad plusknapp för mappar */}
+            {/* Plusknapp med exakt samma avstånd från texten */}
             {isFolder && (
               <IconButton 
                 size="sm" 
@@ -148,17 +143,16 @@ const FileSystemNode = ({
                 }}
                 sx={{ 
                   opacity: 0.7,
-                  minWidth: '18px',
-                  width: '18px',
-                  height: '18px',
+                  minWidth: '20px',
+                  width: '20px',
+                  height: '20px',
                   p: '2px',
-                  ml: 1, // Litet mellanrum mellan text och knapp
                   '&:hover': {
                     bgcolor: 'rgba(0, 0, 0, 0.04)'
                   }
                 }}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                 </svg>
               </IconButton>
@@ -731,15 +725,9 @@ const Sidebar = () => {
                   </Box>
                   <ListItemContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      {/* Container med fast bredd för "Filer"-texten */}
-                      <Box sx={{ 
-                        width: 140, // Samma fasta bredd som mappar för enhetlighet
-                        pr: 1 // Lite padding till höger om texten
-                      }}>
-                        <Typography level="body-sm" fontWeight={500}>
-                          Filer
-                        </Typography>
-                      </Box>
+                      <Typography level="body-sm" fontWeight={500} sx={{ mr: 2 }}>
+                        Filer
+                      </Typography>
                     </Box>
                   </ListItemContent>
                   
@@ -754,9 +742,10 @@ const Sidebar = () => {
                     }}
                     sx={{ 
                       opacity: 0.8,
-                      minWidth: '18px',
-                      width: '18px',
-                      height: '18px'
+                      minWidth: '20px',
+                      width: '20px',
+                      height: '20px',
+                      p: '2px'
                     }}
                     title="Skapa ny mapp"
                   >
