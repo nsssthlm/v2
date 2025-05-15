@@ -104,74 +104,73 @@ const FileSystemNode = ({
         title={isFolder ? "Klicka för att expandera/kollapsa" : ""}
       >
         {/* Mappikon direkt i parent div utan extra span */}
-          {/* Ikon */}
-          <span style={{
-            display: 'inline-flex',
-            width: '16px',
-            height: '16px',
-            marginRight: '10px',
-            color: isFolder ? '#e3a008' : '#3182ce',
-            flexShrink: 0
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              {isFolder ? (
-                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-              ) : (
-                <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
-              )}
+        {/* Ikon */}
+        <span style={{
+          display: 'inline-flex',
+          width: '16px',
+          height: '16px',
+          marginRight: '10px',
+          color: isFolder ? '#e3a008' : '#3182ce',
+          flexShrink: 0
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            {isFolder ? (
+              <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+            ) : (
+              <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
+            )}
+          </svg>
+        </span>
+        
+        {/* Mappnamn */}
+        <span style={{
+          fontSize: '0.875rem',
+          display: 'inline-block',
+          fontWeight: 'normal',
+          whiteSpace: 'nowrap',
+          flexGrow: 1
+        }}>
+          {node.name}
+        </span>
+      
+        {/* Plusknapp - nu inom namnspannet men med stopPropagation för att undvika hoverproblem*/}
+        {isFolder && (
+          <span 
+            style={{
+              opacity: 0.7,
+              minWidth: '20px',
+              width: '20px',
+              height: '20px',
+              padding: '2px',
+              marginLeft: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              borderRadius: '4px',
+              flexShrink: 0,
+              position: 'relative',
+              zIndex: 1
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddNewFolder(node.id);
+            }}
+            onMouseOver={(e) => {
+              e.stopPropagation();
+              (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+            }}
+            onMouseOut={(e) => {
+              e.stopPropagation();
+              (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'transparent';
+            }}
+            title="Lägg till undermapp"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
           </span>
-          
-          {/* Mappnamn */}
-          <span style={{
-            fontSize: '0.875rem',
-            display: 'inline-block',
-            fontWeight: 'normal',
-            whiteSpace: 'nowrap',
-            flexGrow: 1
-          }}>
-            {node.name}
-          </span>
-        
-          {/* Plusknapp - nu inom namnspannet men med stopPropagation för att undvika hoverproblem*/}
-          {isFolder && (
-            <span 
-              style={{
-                opacity: 0.7,
-                minWidth: '20px',
-                width: '20px',
-                height: '20px',
-                padding: '2px',
-                marginLeft: '8px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                borderRadius: '4px',
-                flexShrink: 0,
-                position: 'relative',
-                zIndex: 1
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddNewFolder(node.id);
-              }}
-              onMouseOver={(e) => {
-                e.stopPropagation();
-                (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
-              }}
-              onMouseOut={(e) => {
-                e.stopPropagation();
-                (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'transparent';
-              }}
-              title="Lägg till undermapp"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-              </svg>
-            </span>
-          )}
-        </span>
+        )}
       </div>
       
       {/* Barnmappar */}
