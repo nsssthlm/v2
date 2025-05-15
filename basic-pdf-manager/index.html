@@ -1039,24 +1039,36 @@
         // Calculate scale to fit width
         const viewport = page.getViewport({ scale: 1 });
         const containerWidth = pdfViewerContainer.clientWidth - 40; // Account for padding
-        const scale = containerWidth / viewport.width;
-        const scaledViewport = page.getViewport({ scale });
+        const initialScale = containerWidth / viewport.width;
         
-        // Create or reuse canvas
+        // Skapa eller återanvänd canvas
         let canvas = document.getElementById('pdf-canvas');
         if (!canvas) {
+          // Reset the container
+          pdfViewerContainer.innerHTML = '';
+          
+          // Skapa canvas
           canvas = document.createElement('canvas');
           canvas.id = 'pdf-canvas';
-          pdfViewerContainer.innerHTML = '';
           pdfViewerContainer.appendChild(canvas);
+          
+          // Återställ scale när en ny PDF visas
+          scale = initialScale;
           
           // Add zoom and pan functionality
           setupZoomAndPan(pdfViewerContainer, canvas);
         }
         
+        // Använd aktuell scale för viewport
+        const scaledViewport = page.getViewport({ scale: initialScale });
+        
         const context = canvas.getContext('2d');
         canvas.height = scaledViewport.height;
         canvas.width = scaledViewport.width;
+        
+        // Återställ transform för att undvika dubbel-scaling
+        canvas.style.transform = `scale(${scale})`;
+        canvas.style.transformOrigin = '0 0';
         
         const renderContext = {
           canvasContext: context,
@@ -1065,10 +1077,25 @@
         
         await page.render(renderContext).promise;
         
-        // Update page info
+        // Center canvas horizontally if needed
+        if (canvas.width < pdfViewerContainer.clientWidth) {
+          const margin = Math.max(0, (pdfViewerContainer.clientWidth - canvas.width) / 2);
+          canvas.style.marginLeft = margin + 'px';
+        } else {
+          canvas.style.marginLeft = '0';
+        }
+        
+        // Update page info with zoom level
         updatePageInfo();
       } catch (error) {
         console.error('Error rendering page:', error);
+        pdfViewerContainer.innerHTML = `
+          <div style="text-align: center; color: white; padding: 2rem;">
+            <h3>Kunde inte visa PDF</h3>
+            <p>${error.message || 'Ett fel uppstod vid rendering av PDF.'}</p>
+            <p>Kontrollera att PDF-filen existerar på servern.</p>
+          </div>
+        `;
       }
     }
     
@@ -1106,9 +1133,22 @@
           
           const oldScale = scale;
           
+          // Get current mouse position relative to canvas
+          const rect = canvas.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          
+          // Get scroll position before zoom
+          const scrollXBefore = container.scrollLeft;
+          const scrollYBefore = container.scrollTop;
+          
+          // Calculate position on canvas before zoom
+          const canvasXBefore = scrollXBefore + mouseX;
+          const canvasYBefore = scrollYBefore + mouseY;
+          
           // Change scale based on scroll direction
           if (e.deltaY < 0) {
-            scale = Math.min(3, scale * 1.1); // Zoom in
+            scale = Math.min(5, scale * 1.1); // Zoom in with higher max zoom
           } else {
             scale = Math.max(0.5, scale / 1.1); // Zoom out
           }
@@ -1117,19 +1157,38 @@
           canvas.style.transformOrigin = '0 0';
           canvas.style.transform = `scale(${scale})`;
           
+          // Calculate new canvas dimensions
+          const newWidth = canvas.width * scale;
+          const newHeight = canvas.height * scale;
+          
+          // Calculate position on canvas after zoom
+          const canvasXAfter = canvasXBefore * (scale / oldScale);
+          const canvasYAfter = canvasYBefore * (scale / oldScale);
+          
+          // Calculate new scroll position to keep mouse position fixed
+          const scrollXAfter = canvasXAfter - mouseX;
+          const scrollYAfter = canvasYAfter - mouseY;
+          
+          // Set new scroll position
+          container.scrollLeft = scrollXAfter;
+          container.scrollTop = scrollYAfter;
+          
           // Update page info with zoom
           pageInfo.textContent = `Sida ${pageNum} av ${pdfDoc.numPages} (${Math.round(scale * 100)}%)`;
         }
       });
       
-      // Pan with mouse drag
+      // Set draggable cursor and initial state
+      container.style.cursor = 'grab';
+      
+      // Pan with mouse drag - significantly improved
       container.addEventListener('mousedown', function(e) {
-        if (e.target === canvas) {
-          isDragging = true;
-          startX = e.clientX;
-          startY = e.clientY;
-          container.style.cursor = 'grabbing';
-        }
+        // Allow dragging anywhere in the container, not just on canvas
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        container.style.cursor = 'grabbing';
+        e.preventDefault(); // Prevent text selection during drag
       });
       
       container.addEventListener('mousemove', function(e) {
@@ -1145,14 +1204,40 @@
         }
       });
       
-      container.addEventListener('mouseup', function() {
-        isDragging = false;
-        container.style.cursor = 'default';
+      // Mouse up event - works even if mouse is released outside the container
+      window.addEventListener('mouseup', function() {
+        if (isDragging) {
+          isDragging = false;
+          container.style.cursor = 'grab';
+        }
       });
       
-      container.addEventListener('mouseleave', function() {
+      // Touch support for mobile devices
+      container.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          e.preventDefault();
+        }
+      });
+      
+      container.addEventListener('touchmove', function(e) {
+        if (isDragging && e.touches.length === 1) {
+          const dx = e.touches[0].clientX - startX;
+          const dy = e.touches[0].clientY - startY;
+          
+          container.scrollLeft -= dx;
+          container.scrollTop -= dy;
+          
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          e.preventDefault();
+        }
+      });
+      
+      container.addEventListener('touchend', function() {
         isDragging = false;
-        container.style.cursor = 'default';
       });
     }
   </script>
