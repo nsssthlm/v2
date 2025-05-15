@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Sheet, 
   List, 
@@ -21,7 +21,6 @@ import {
   CircularProgress
 } from '@mui/joy';
 import { Link, useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import directoryService, { DirectoryInput } from '../../services/directoryService';
 
 // Interface för menyobjekt
@@ -412,7 +411,7 @@ const Sidebar = () => {
     
     try {
       // Skapa objekt för API-anrop
-      const newDirData = {
+      const newDirData: DirectoryInput = {
         name: newFolderName.trim(),
         type: 'folder',
         is_sidebar_item: true,
@@ -427,7 +426,7 @@ const Sidebar = () => {
         const newFolder: SidebarFileNode = {
           id: createdDir.id.toString(),
           name: createdDir.name,
-          type: 'folder',
+          type: 'folder' as 'folder' | 'file',
           parent_id: createdDir.parent ? createdDir.parent.toString() : null,
           db_id: createdDir.id
         };

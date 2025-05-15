@@ -34,7 +34,13 @@ export default defineConfig(({ mode }) => {
         usePolling: true,
       },
       // Add allowedHosts to fix the blocking issue with Replit domain
-      proxy: {},
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+          secure: false
+        }
+      },
       fs: {
         strict: true,
         allow: ['.'],

@@ -13,9 +13,26 @@ class DirectoryViewSet(viewsets.ModelViewSet):
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']
     
+    def get_permissions(self):
+        """
+        Allow get requests for directories without authentication for sidebar items
+        """
+        is_sidebar_request = self.request.query_params.get('is_sidebar') == 'true'
+        
+        if self.request.method == 'GET' and is_sidebar_request:
+            return []  # No permissions required for sidebar items
+        
+        # Default to authentication required
+        return [permissions.IsAuthenticated()]
+    
     def get_queryset(self):
         """Filter directories based on query parameters"""
         queryset = Directory.objects.all()
+        
+        # Filter by is_sidebar_item
+        is_sidebar = self.request.query_params.get('is_sidebar')
+        if is_sidebar == 'true':
+            queryset = queryset.filter(is_sidebar_item=True)
         
         # Filter by project (optional)
         project_id = self.request.query_params.get('project')
