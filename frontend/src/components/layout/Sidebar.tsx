@@ -109,7 +109,7 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Ny struktur med fast avstånd mellan text och plusknapp */}
+          {/* Ny struktur som säkerställer plustecknen hamnar på en rak diagonal linje */}
           <Box sx={{ 
             display: 'flex', 
             width: '100%',
@@ -125,12 +125,15 @@ const FileSystemNode = ({
                 wordBreak: 'break-word',
                 display: 'inline',
                 textOverflow: 'clip',
-                maxWidth: '70%', // Begränsa bredden för att inte tryckas ihop med plusknappen
-                mr: 6 // Fast avstånd till plusknappen
+                width: 'auto', // Låt texten ta sin naturliga bredd
+                flexGrow: 0 // Förhindra att texten expanderar
               }}
             >
               {node.name}
             </Typography>
+            
+            {/* Flexbox spacer som tar upp all tillgängligt utrymme */}
+            <Box sx={{ flexGrow: 1 }} />
           
             {/* Fast positionerad plusknapp för mappar */}
             {isFolder && (
@@ -143,13 +146,12 @@ const FileSystemNode = ({
                   handleAddNewFolder(node.id);
                 }}
                 sx={{ 
-                  position: 'absolute',
-                  right: 0,
                   opacity: 0.7,
                   minWidth: '18px',
                   width: '18px',
                   height: '18px',
                   p: '2px',
+                  ml: 1, // Litet mellanrum mellan text och knapp
                   '&:hover': {
                     bgcolor: 'rgba(0, 0, 0, 0.04)'
                   }
@@ -727,9 +729,14 @@ const Sidebar = () => {
                     </svg>
                   </Box>
                   <ListItemContent>
-                    <Typography level="body-sm" fontWeight={500}>
-                      Filer
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <Typography level="body-sm" fontWeight={500}>
+                        Filer
+                      </Typography>
+                      
+                      {/* Flexbox spacer som tar upp all tillgängligt utrymme */}
+                      <Box sx={{ flexGrow: 1 }} />
+                    </Box>
                   </ListItemContent>
                   
                   <IconButton 
@@ -741,7 +748,12 @@ const Sidebar = () => {
                       e.stopPropagation();
                       handleAddNewFolder(null);
                     }}
-                    sx={{ ml: 'auto', opacity: 0.8 }}
+                    sx={{ 
+                      opacity: 0.8,
+                      minWidth: '18px',
+                      width: '18px',
+                      height: '18px'
+                    }}
                     title="Skapa ny mapp"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
