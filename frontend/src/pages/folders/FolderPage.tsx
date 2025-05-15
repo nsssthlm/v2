@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
+import UploadDialog from '../../components/UploadDialog';
 
 interface FolderData {
   name: string;
@@ -22,32 +23,37 @@ interface FolderData {
 }
 
 const FolderPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug = '' } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+
+  const fetchFolderData = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await axios.get(`${API_BASE_URL}/files/web/${slug}/data/`);
+      setFolderData(response.data);
+    } catch (err: any) {
+      console.error('Fel vid hämtning av mappdata:', err);
+      setError(err.message || 'Ett fel uppstod vid hämtning av mappdata');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchFolderData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const response = await axios.get(`${API_BASE_URL}/files/web/${slug}/data/`);
-        setFolderData(response.data);
-      } catch (err: any) {
-        console.error('Fel vid hämtning av mappdata:', err);
-        setError(err.message || 'Ett fel uppstod vid hämtning av mappdata');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (slug) {
       fetchFolderData();
     }
   }, [slug]);
+
+  const handleUploadSuccess = () => {
+    fetchFolderData();
+  };
 
   if (loading) {
     return (
@@ -176,11 +182,19 @@ const FolderPage = () => {
         <Button 
           variant="solid" 
           color="primary"
-          onClick={() => window.open(`/api/files/web/${slug}/upload/`, '_blank')}
+          onClick={() => setUploadDialogOpen(true)}
         >
           Ladda upp PDF
         </Button>
       </Box>
+      
+      {/* Upload Dialog */}
+      <UploadDialog
+        open={uploadDialogOpen}
+        onClose={() => setUploadDialogOpen(false)}
+        folderSlug={slug}
+        onSuccess={handleUploadSuccess}
+      />
     </Box>
   );
 };
