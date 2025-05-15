@@ -139,7 +139,7 @@ const FileSystemNode = ({
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                // Här skulle vi navigera till den interna sidan
+                // Navigera till den interna sidan
                 window.location.href = `/folders/${node.slug}`;
               }}
               style={{

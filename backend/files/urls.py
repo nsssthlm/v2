@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import web_views
+from . import web_api
 
 # API router för RESTful endpoints
 router = DefaultRouter()
@@ -16,6 +17,9 @@ urlpatterns = [
     path('web/', include([
         # Lista alla mappar
         path('', web_views.DirectoryListView.as_view(), name='directory_list'),
+        
+        # API för att hämta mappdata i JSON-format
+        path('<slug:slug>/data/', web_api.directory_data, name='directory_data_api'),
         
         # En specifik mapps sida med URL-mönster: /files/web/mappe-namn-12/
         path('<slug:slug>/', web_views.DirectoryPageView.as_view(), name='directory_page'),

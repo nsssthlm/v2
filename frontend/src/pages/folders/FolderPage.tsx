@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert } from '@mui/joy';
 import { DIRECT_API_URL } from '../../config';
@@ -23,6 +23,7 @@ interface FolderData {
 
 const FolderPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
@@ -111,8 +112,8 @@ const FolderPage = () => {
             {folderData.subfolders.map((subfolder) => (
               <ListItem key={subfolder.slug}>
                 <ListItemContent>
-                  <a 
-                    href={`/folders/${subfolder.slug}`} 
+                  <Link 
+                    to={`/folders/${subfolder.slug}`} 
                     style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
                   >
                     <span style={{ marginRight: '8px', color: '#e3a008' }}>
