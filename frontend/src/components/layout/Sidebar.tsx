@@ -103,6 +103,7 @@ const FileSystemNode = ({
         onMouseOut={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';
         }}
+        title={isFolder ? "Klicka för att expandera/kollapsa" : ""}
       >
         {/* Mappikon och namn tillsammans i ett flöde */}
         <span style={{
@@ -164,13 +165,11 @@ const FileSystemNode = ({
               }}
               onMouseOver={(e) => {
                 e.stopPropagation();
-                // Ändra hover-effekten så att den ligger centrerad under plusikonen
-                (e.currentTarget as HTMLSpanElement).style.boxShadow = '0 0 0 16px rgba(0, 0, 0, 0.04)';
-                (e.currentTarget as HTMLSpanElement).style.borderRadius = '50%';
+                (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
               }}
               onMouseOut={(e) => {
                 e.stopPropagation();
-                (e.currentTarget as HTMLSpanElement).style.boxShadow = 'none';
+                (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'transparent';
               }}
               title="Lägg till undermapp"
             >
