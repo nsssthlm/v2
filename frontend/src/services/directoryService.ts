@@ -54,9 +54,18 @@ const directoryService = {
 
   // Skapa ett nytt directory
   createDirectory: async (directory: DirectoryInput): Promise<ApiDirectory> => {
-    // Vidarebefordra eventuella fel till den anropande komponenten
-    const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
-    return response.data;
+    try {
+      const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
+      return response.data;
+    } catch (error) {
+      console.error('Fel vid skapande av mapp:', error);
+      // För att underlätta debugging - visa mer detaljer i konsollen
+      if (error.response) {
+        console.error('API response data:', error.response.data);
+        console.error('API response status:', error.response.status);
+      }
+      throw error; // Kasta vidare felet så att komponenten kan hantera det
+    }
   },
 
   // Uppdatera ett directory
