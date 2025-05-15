@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Ladda upp PDF - {{ directory.name }} - ValvX{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Ladda upp PDF-dokument</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'directory_list' %}">Mappar</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'directory_page' directory.slug %}">{{ directory.name }}</a></li>
+                    <li class="breadcrumb-item active">Ladda upp</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-upload me-2"></i> Ladda upp PDF till mappen "{{ directory.name }}"
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Dokumentnamn</label>
+                            <input type="text" class="form-control" id="{{ form.name.id_for_label }}" 
+                                   name="{{ form.name.name }}" value="{{ form.name.value|default:'' }}" required>
+                            {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.file.id_for_label }}" class="form-label">PDF-fil</label>
+                            <input type="file" class="form-control" id="{{ form.file.id_for_label }}" 
+                                   name="{{ form.file.name }}" accept="application/pdf,.pdf" required>
+                            <div class="form-text">Max filstorlek: 20 MB. Endast PDF-filer är tillåtna.</div>
+                            {% if form.file.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.file.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Beskrivning (valfritt)</label>
+                            <textarea class="form-control" id="{{ form.description.id_for_label }}" 
+                                     name="{{ form.description.name }}" rows="3">{{ form.description.value|default:'' }}</textarea>
+                            <div class="form-text">En kort beskrivning av dokumentets innehåll eller användning</div>
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'directory_page' directory.slug %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Tillbaka till mappen
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i> Ladda upp PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-2"></i> Information
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Viktigt att veta:</strong>
+                    </p>
+                    <ul>
+                        <li>Filer som laddas upp till denna mapp kommer endast vara synliga här</li>
+                        <li>Endast PDF-filer är tillåtna</li>
+                        <li>Maximal filstorlek är 20 MB</li>
+                        <li>Alla uppladdade filer är sökbara inom projektet</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <p class="mb-1">
+                        <strong>Mapp:</strong> {{ directory.name }}
+                    </p>
+                    {% if directory.parent %}
+                    <p class="mb-0">
+                        <strong>Föräldermapp:</strong> 
+                        <a href="{% url 'directory_page' directory.parent.slug %}">
+                            {{ directory.parent.name }}
+                        </a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

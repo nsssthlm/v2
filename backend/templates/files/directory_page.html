@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ directory.page_title|default:directory.name }} - ValvX{% endblock %}
+
+{% block sidebar %}
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <h6 class="sidebar-heading px-3 mt-2 mb-2 text-muted">
+            <i class="fas fa-compass me-2"></i> Navigering
+        </h6>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'directory_list' %}">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Tillbaka till alla mappar
+                </a>
+            </li>
+            
+            {% if directory.parent %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'directory_page' directory.parent.slug %}">
+                    <i class="fas fa-level-up-alt me-2"></i>
+                    Upp till föräldermapp
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+        
+        {% if subdirectories %}
+        <hr>
+        <h6 class="sidebar-heading px-3 mt-2 mb-2 text-muted">
+            <i class="fas fa-folder me-2"></i> Undermappar
+        </h6>
+        <ul class="nav flex-column">
+            {% for subdir in subdirectories %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'directory_page' subdir.slug %}">
+                    <i class="fas fa-folder me-2 folder-icon"></i>
+                    {{ subdir.name }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">{{ directory.page_title|default:directory.name }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'directory_list' %}">Mappar</a></li>
+                    {% if directory.parent %}
+                    <li class="breadcrumb-item"><a href="{% url 'directory_page' directory.parent.slug %}">{{ directory.parent.name }}</a></li>
+                    {% endif %}
+                    <li class="breadcrumb-item active">{{ directory.name }}</li>
+                </ol>
+            </nav>
+        </div>
+        
+        <div class="btn-group">
+            <a href="{% url 'upload_pdf' directory.slug %}" class="btn btn-primary">
+                <i class="fas fa-upload me-1"></i> Ladda upp PDF
+            </a>
+            <a href="{% url 'edit_directory_page' directory.slug %}" class="btn btn-outline-secondary">
+                <i class="fas fa-edit me-1"></i> Redigera
+            </a>
+        </div>
+    </div>
+    
+    {% if directory.page_description %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Om denna mapp</h5>
+            <p class="card-text">{{ directory.page_description|linebreaks }}</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <h2 class="h4 mb-3">PDF-dokument</h2>
+    
+    {% if pdf_files %}
+    <div class="row">
+        {% for pdf in pdf_files %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-file-pdf pdf-icon me-2 fa-2x"></i>
+                        <h5 class="card-title mb-0 text-truncate">{{ pdf.name }}</h5>
+                    </div>
+                    
+                    {% if pdf.description %}
+                    <p class="card-text">{{ pdf.description|truncatewords:25 }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <small class="text-muted">Uppladdad: {{ pdf.created_at|date:"Y-m-d" }}</small>
+                        <small class="text-muted">{{ pdf.size|filesizeformat }}</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <div class="btn-group w-100">
+                        <a href="{{ pdf.file.url }}" class="btn btn-primary btn-sm" target="_blank">
+                            <i class="fas fa-eye me-1"></i> Visa
+                        </a>
+                        <a href="{{ pdf.file.url }}" class="btn btn-outline-secondary btn-sm" download>
+                            <i class="fas fa-download me-1"></i> Ladda ner
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> Det finns inga PDF-filer i denna mapp ännu.
+        <a href="{% url 'upload_pdf' directory.slug %}" class="alert-link">Ladda upp den första filen</a>
+    </div>
+    {% endif %}
+    
+    <!-- Formulär för att ladda upp PDF direkt på sidan -->
+    <div class="mt-5">
+        <h3 class="h5 mb-3">Snabbuppladdning</h3>
+        <div class="card">
+            <div class="card-body">
+                <form method="post" action="{% url 'upload_pdf' directory.slug %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Dokumentnamn</label>
+                        <input type="text" class="form-control" id="id_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_file" class="form-label">PDF-fil</label>
+                        <input type="file" class="form-control" id="id_file" name="file" accept="application/pdf,.pdf" required>
+                        <div class="form-text">Max filstorlek: 20 MB</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Beskrivning (valfritt)</label>
+                        <textarea class="form-control" id="id_description" name="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-upload me-1"></i> Ladda upp
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
