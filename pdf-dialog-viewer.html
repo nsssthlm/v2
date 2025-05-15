@@ -2496,5 +2496,81 @@
     // Stäng funktionen initializeButtons
     }
   </script>
+<!-- Lägg till skript för inloggning och autentiseringskontroll -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Visa inloggningsmodalen när sidan laddar
+    const loginModal = document.getElementById('login-modal');
+    const userInfo = document.getElementById('user-info');
+    const usernameDisplay = document.getElementById('username-display');
+    const logoutBtn = document.getElementById('logout-btn');
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+    
+    // Kontrollera om användaren redan är inloggad (har token i localStorage)
+    const token = localStorage.getItem('auth_token');
+    
+    if (token) {
+      // Dölj inloggningsmodalen och visa användarinfo
+      loginModal.style.display = 'none';
+      userInfo.style.display = 'flex';
+      loadSavedPdfs(); // Ladda PDF-filer när användaren är inloggad
+    } else {
+      // Visa inloggningsmodalen
+      loginModal.style.display = 'flex';
+      loginModal.style.position = 'fixed';
+      loginModal.style.top = '0';
+      loginModal.style.left = '0';
+      loginModal.style.width = '100%';
+      loginModal.style.height = '100%';
+      loginModal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      loginModal.style.zIndex = '9999';
+      loginModal.style.display = 'flex';
+      loginModal.style.justifyContent = 'center';
+      loginModal.style.alignItems = 'center';
+    }
+    
+    // Hantera inloggning
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        const userData = await window.loginUser(username, password);
+        console.log('Inloggning lyckades:', userData);
+        
+        // Uppdatera UI
+        loginModal.style.display = 'none';
+        userInfo.style.display = 'flex';
+        usernameDisplay.textContent = username;
+        
+        // Ladda PDF-filer
+        loadSavedPdfs();
+      } catch (error) {
+        console.error('Inloggningsfel:', error);
+        loginError.textContent = 'Inloggning misslyckades. Kontrollera dina uppgifter.';
+        loginError.style.display = 'block';
+      }
+    });
+    
+    // Hantera utloggning
+    logoutBtn.addEventListener('click', function() {
+      // Rensa tokens från localStorage
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      
+      // Uppdatera UI
+      loginModal.style.display = 'flex';
+      userInfo.style.display = 'none';
+      
+      // Rensa PDF-listan
+      const pdfList = document.getElementById('pdf-list');
+      if (pdfList && pdfList.querySelector('tbody')) {
+        pdfList.querySelector('tbody').innerHTML = '';
+      }
+    });
+  });
+</script>
 </body>
 </html>
