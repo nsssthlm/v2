@@ -62,12 +62,12 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1, // Minska indenteringen för att spara horisontellt utrymme
-          pr: 1,
+          pl: level * 1.5, // Indentering för hierarkin
+          pr: 0,
           position: 'relative',
           overflow: 'visible',
           display: 'block',
-          width: 'auto' // Låt elementet växa horisontellt vid behov
+          width: '100%' // Använd full bredd
         }}
       >
         <ListItemButton
@@ -132,13 +132,13 @@ const FileSystemNode = ({
               {node.name}
             </Typography>
             
-            {/* Linje mellan texten och plusknappen */}
+            {/* Linje med fast bredd mellan texten och plusknappen */}
             <Box sx={{ 
-              flexGrow: 1, 
+              width: '100px', // Fast bredd för alla linjer
               height: '1px', 
               mx: 1,
               bgcolor: 'rgba(0,0,0,0.1)',
-              display: { xs: 'none', sm: 'block' } // Göm på små skärmar
+              flexShrink: 0 // Förhindra att linjen krymper
             }} />
           
             {/* Plusknapp med exakt samma avstånd från texten */}
@@ -754,13 +754,13 @@ const Sidebar = () => {
                         Filer
                       </Typography>
                       
-                      {/* Linje mellan texten och plusknappen */}
+                      {/* Linje med fast bredd mellan texten och plusknappen */}
                       <Box sx={{ 
-                        flexGrow: 1, 
+                        width: '100px', // Fast bredd för alla linjer
                         height: '1px', 
                         mx: 1,
                         bgcolor: 'rgba(0,0,0,0.1)',
-                        display: { xs: 'none', sm: 'block' } // Göm på små skärmar
+                        flexShrink: 0 // Förhindra att linjen krymper
                       }} />
                     </Box>
                   </ListItemContent>
