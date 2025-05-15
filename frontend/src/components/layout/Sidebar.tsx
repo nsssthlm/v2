@@ -62,12 +62,13 @@ const FileSystemNode = ({
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
 
       
-      {/* Helt ny struktur för L-strecken som använder levels på ett konsekvent sätt */}
+      {/* Absolut konsekvent placering av L-strecken */}
       {level > 0 && (
         <Box
           sx={{
             position: 'absolute',
-            left: level === 1 ? '1.2rem' : `${level * 1.4 - 0.7}rem`, // Finjusterad position för att passa med nivåer
+            // Exakt samma formel för alla nivåer, baserat på nivå 
+            left: `${level * 1.5 - 0.5}rem`,
             top: 0,
             width: '10px',
             height: '20px',
@@ -81,7 +82,7 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: `calc(${level * 1.5}rem + 0.5rem)`, // Justerad padding för att passa med L-strecken
+          pl: `calc(${level * 1.5}rem + 0.7rem)`, // Justerad padding för att passa med L-strecken
           pr: 1,
           position: 'relative',
           overflow: 'visible !important',
