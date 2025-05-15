@@ -93,7 +93,13 @@ const FileSystemNode = ({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          if (isFolder) toggleFolder(node.id);
+          if (isFolder) {
+            toggleFolder(node.id);
+            // Om det är en mapp med en slug, navigera till mappens sida
+            if (node.slug) {
+              window.location.href = `/folders/${node.slug}`;
+            }
+          }
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
@@ -132,30 +138,19 @@ const FileSystemNode = ({
         }}>
           {node.name}
           
-          {/* Webbsidelänk om den har en slug */}
+          {/* Dold knapp för att navigera till mappen */}
           {isFolder && node.slug && (
-            <a 
-              href={`/folders/${node.slug}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                // Navigera till den interna sidan
-                window.location.href = `/folders/${node.slug}`;
-              }}
-              style={{
-                marginLeft: '8px',
-                fontSize: '0.75rem',
-                color: '#3182ce',
-                textDecoration: 'none'
-              }}
-            >
-              <span style={{ fontSize: '10px', verticalAlign: 'middle', marginRight: '2px' }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
-                </svg>
-              </span>
-              Sida
-            </a>
+            <div style={{ display: 'none' }}>
+              <a 
+                href={`/folders/${node.slug}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  // Navigera till den interna sidan
+                  window.location.href = `/folders/${node.slug}`;
+                }}
+              />
+            </div>
           )}
         </span>
       
