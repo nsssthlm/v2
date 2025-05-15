@@ -154,7 +154,9 @@ const FileSystemNode = ({
                 justifyContent: 'center',
                 cursor: 'pointer',
                 borderRadius: '4px',
-                flexShrink: 0
+                flexShrink: 0,
+                position: 'relative',
+                zIndex: 1
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -162,12 +164,15 @@ const FileSystemNode = ({
               }}
               onMouseOver={(e) => {
                 e.stopPropagation();
-                (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+                // Ändra hover-effekten så att den ligger centrerad under plusikonen
+                (e.currentTarget as HTMLSpanElement).style.boxShadow = '0 0 0 16px rgba(0, 0, 0, 0.04)';
+                (e.currentTarget as HTMLSpanElement).style.borderRadius = '50%';
               }}
               onMouseOut={(e) => {
                 e.stopPropagation();
-                (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'transparent';
+                (e.currentTarget as HTMLSpanElement).style.boxShadow = 'none';
               }}
+              title="Lägg till undermapp"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
