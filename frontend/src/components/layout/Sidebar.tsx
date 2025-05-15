@@ -89,7 +89,7 @@ const FileSystemNode = ({
           display: 'block',
           minWidth: '100%',
           maxWidth: 'none !important', // Ta bort maxbredbegränsningen
-          width: 'auto !important' // Tillåt elementet att växa utanför containern vid behov
+          width: '100%', // Säkerställer att hela bredden används 
         }}
       >
         <ListItemButton
@@ -101,14 +101,15 @@ const FileSystemNode = ({
             pr: 0,
             borderRadius: '4px',
             color: 'neutral.700',
+            inset: '0 !important', // Gör att knappen täcker hela ytan
             // Se till att texten inte går in i linjerna och att klickytan är konsekvent
             '& > *': {
               position: 'relative',
               zIndex: 1
             },
-            // Se till att hela området är klickbart
+            // Absolut säkerställ att HELA ytan är klickbar
             minHeight: '26px',
-            width: '100%',
+            width: '100%', 
             fontSize: '0.875rem',
             display: 'flex',
             flexWrap: 'nowrap',
@@ -116,7 +117,12 @@ const FileSystemNode = ({
             minWidth: '100%',
             overflow: 'visible',
             position: 'relative',
-            cursor: 'pointer'  // Tydlig markör för att visa att det är klickbart
+            cursor: 'pointer',  // Tydlig markör för att visa att det är klickbart
+            // Dessa egenskaper är viktiga för att utöka klickbarheten
+            transition: 'background-color 0.2s',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+            }
           }}
         >
           {/* Tar bort vertikal linje eftersom den nu hanteras med ::after i ListItem */}
