@@ -109,31 +109,32 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Ny struktur som säkerställer plustecknen hamnar på en rak diagonal linje */}
+          {/* Ny struktur med fast avstånd mellan mappens namn och plusknapp */}
           <Box sx={{ 
             display: 'flex', 
             width: '100%',
             alignItems: 'center',
             position: 'relative'
           }}>
-            {/* Mappnamn utan textavklippning */}
-            <Typography 
-              level="body-xs" 
-              sx={{ 
-                overflow: 'visible',
-                whiteSpace: 'normal',
-                wordBreak: 'break-word',
-                display: 'inline',
-                textOverflow: 'clip',
-                width: 'auto', // Låt texten ta sin naturliga bredd
-                flexGrow: 0 // Förhindra att texten expanderar
-              }}
-            >
-              {node.name}
-            </Typography>
-            
-            {/* Flexbox spacer som tar upp all tillgängligt utrymme */}
-            <Box sx={{ flexGrow: 1 }} />
+            {/* Container med fast bredd för mappnamn */}
+            <Box sx={{ 
+              width: 140, // Fast bredd för alla text-containrar
+              pr: 1 // Lite padding till höger om texten
+            }}>
+              {/* Mappnamn utan textavklippning */}
+              <Typography 
+                level="body-xs" 
+                sx={{ 
+                  overflow: 'visible',
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-word',
+                  display: 'inline',
+                  textOverflow: 'clip'
+                }}
+              >
+                {node.name}
+              </Typography>
+            </Box>
           
             {/* Fast positionerad plusknapp för mappar */}
             {isFolder && (
@@ -730,12 +731,15 @@ const Sidebar = () => {
                   </Box>
                   <ListItemContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <Typography level="body-sm" fontWeight={500}>
-                        Filer
-                      </Typography>
-                      
-                      {/* Flexbox spacer som tar upp all tillgängligt utrymme */}
-                      <Box sx={{ flexGrow: 1 }} />
+                      {/* Container med fast bredd för "Filer"-texten */}
+                      <Box sx={{ 
+                        width: 140, // Samma fasta bredd som mappar för enhetlighet
+                        pr: 1 // Lite padding till höger om texten
+                      }}>
+                        <Typography level="body-sm" fontWeight={500}>
+                          Filer
+                        </Typography>
+                      </Box>
                     </Box>
                   </ListItemContent>
                   
