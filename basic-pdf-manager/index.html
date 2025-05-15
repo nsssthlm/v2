@@ -762,6 +762,7 @@
     let viewportPosition = { x: 0, y: 0 };
     let minScale = 0.5;
     let maxScale = 3.0;
+    let pdfRenderScale = 1.0; // Den initiala skalan som används vid rendering
     
     // Kontrollera inloggningsstatus vid sidladdning
     document.addEventListener('DOMContentLoaded', checkLoginStatus);
@@ -1010,6 +1011,16 @@
       container.onmouseup = null;
       container.onmouseleave = null;
       
+      // Hitta canvas-elementet
+      const canvas = document.getElementById('pdf-canvas');
+      if (!canvas) return;
+      
+      // CSS-baserad zoomning istället för renderPlot för bättre prestanda
+      canvas.style.transition = 'transform 0.1s ease-out'; // Smooth transition för zoom
+      
+      // Uppdatera canvas initialt
+      updateCanvasTransform(canvas);
+      
       // Zooma med scrollhjulet när CTRL är nedtryckt
       container.onwheel = function(e) {
         // Endast zooma om CTRL är nedtryckt
@@ -1035,20 +1046,28 @@
           viewportPosition.x = mouseX - (mouseX - viewportPosition.x) * scaleFactor;
           viewportPosition.y = mouseY - (mouseY - viewportPosition.y) * scaleFactor;
           
-          // Rita om med ny skala
-          if (!pageRendering && pdfDoc) {
-            renderPage(currentPage);
+          // Uppdatera endast CSS transform istället för att rendera om PDF
+          updateCanvasTransform(canvas);
+          
+          // Uppdatera sidkontroller för att visa aktuell zoom-nivå
+          const pageInfo = document.getElementById('page-info');
+          if (pageInfo) {
+            pageInfo.textContent = `Sida ${currentPage} av ${pdfDoc ? pdfDoc.numPages : 0} (Zoom: ${Math.round(scale * 100)}%)`;
           }
         }
       };
       
       // Panorering med musklick och dra
       container.onmousedown = function(e) {
-        // Kontrollera att vi klickar på canvas, inte på andra element
-        if (e.target.tagName.toLowerCase() === 'canvas') {
+        // Kontrollera att vi klickar på canvas eller dess förälder, inte på andra element
+        if (e.target === canvas || e.target === container || e.target.id === 'canvas-wrapper') {
           isDragging = true;
           startX = e.clientX - viewportPosition.x;
           startY = e.clientY - viewportPosition.y;
+          
+          // Ta bort övergångseffekten under dragning för bättre responsivitet
+          canvas.style.transition = 'none';
+          
           container.style.cursor = 'grabbing';
           e.preventDefault();
         }
@@ -1060,10 +1079,7 @@
           viewportPosition.y = e.clientY - startY;
           
           // Uppdatera canvas-position
-          const canvas = document.getElementById('pdf-canvas');
-          if (canvas) {
-            canvas.style.transform = `translate(${viewportPosition.x}px, ${viewportPosition.y}px)`;
-          }
+          updateCanvasTransform(canvas);
         }
       };
       
@@ -1071,6 +1087,9 @@
         if (isDragging) {
           isDragging = false;
           container.style.cursor = 'default';
+          
+          // Återställ övergångseffekten efter dragning
+          canvas.style.transition = 'transform 0.1s ease-out';
         }
       };
       
@@ -1078,8 +1097,20 @@
         if (isDragging) {
           isDragging = false;
           container.style.cursor = 'default';
+          
+          // Återställ övergångseffekten efter dragning
+          canvas.style.transition = 'transform 0.1s ease-out';
         }
       };
+    }
+    
+    // Uppdatera canvas-transformationen baserat på aktuell skala och position
+    function updateCanvasTransform(canvas) {
+      if (!canvas) return;
+      
+      // Apllicera både skalning och förflyttning i en transform
+      canvas.style.transform = `translate(${viewportPosition.x}px, ${viewportPosition.y}px) scale(${scale / pdfRenderScale})`;
+      canvas.style.transformOrigin = '0 0';
     }
     
     // Öppna PDF
@@ -1167,16 +1198,13 @@
         const containerWidth = viewerContainer.clientWidth - 40; // Ta hänsyn till padding
         const viewport = page.getViewport({ scale: 1 });
         
-        // Använd antingen den globala skalan (från zoomning) eller beräkna en som passar containern
-        let effectiveScale = scale;
-        if (scale === 1.0) {
-          // Om ingen användarinducerad zoom har skett, anpassa till containern
-          effectiveScale = containerWidth / viewport.width;
-        }
+        // Beräkna grundskalan för att passa containern - denna används endast för initial rendering
+        pdfRenderScale = containerWidth / viewport.width;
         
-        const scaledViewport = page.getViewport({ scale: effectiveScale });
+        // Vi använder alltid pdfRenderScale för renderingen, och hanterar zoom separerat
+        const scaledViewport = page.getViewport({ scale: pdfRenderScale });
         
-        console.log('Beräknad skala:', effectiveScale, 'för containerWidth:', containerWidth);
+        console.log('Beräknad skala:', pdfRenderScale, 'för containerWidth:', containerWidth);
         
         // Skapa canvas om det inte finns
         let canvas = document.getElementById('pdf-canvas');
