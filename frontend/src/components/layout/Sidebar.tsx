@@ -43,6 +43,7 @@ interface FileSystemNodeProps {
 }
 
 // Komponent som representerar en fil eller mapp i sidomenyn
+// Helt ombyggd komponent för att garantera fullständig klickyta
 const FileSystemNode = ({
   node,
   level,
@@ -58,171 +59,123 @@ const FileSystemNode = ({
   const children = filesystemNodes.filter(n => n.parent_id === node.id);
   
   return (
-    <>
-      {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
-
-      
-      {/* Absolut konsekvent placering av L-strecken */}
+    <Box
+      sx={{
+        position: 'relative',
+        mb: 0.5,
+        width: '100%'
+      }}
+    >
+      {/* L-streck för hierarkin */}
       {level > 0 && (
         <Box
           sx={{
             position: 'absolute',
-            // Exakt samma formel för alla nivåer, baserat på nivå 
             left: `${level * 1.5 - 0.5}rem`,
             top: 0,
             width: '10px',
             height: '20px',
             borderLeft: '1px solid #A0A0A0',
             borderBottom: '1px solid #A0A0A0',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            zIndex: 0
           }}
         />
       )}
 
-      <ListItem 
-        sx={{ 
-          mb: 0.5,
-          pl: `calc(${level * 1.5}rem + 0.7rem)`, // Justerad padding för att passa med L-strecken
+      {/* Hela raden är klickbar - allt är inuti onClick */}
+      <Box
+        onClick={() => isFolder && toggleFolder(node.id)}
+        sx={{
+          pl: `calc(${level * 1.5}rem + 0.7rem)`,
           pr: 1,
-          position: 'relative',
-          overflow: 'visible !important',
-          display: 'block',
-          minWidth: '100%',
-          maxWidth: 'none !important', // Ta bort maxbredbegränsningen
-          width: '100%', // Säkerställer att hela bredden används 
+          py: 0.3,
+          display: 'flex',
+          alignItems: 'center',
+          cursor: isFolder ? 'pointer' : 'default',
+          borderRadius: '4px',
+          transition: 'background-color 0.2s',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.04)'
+          },
+          position: 'relative'
         }}
       >
-        <ListItemButton
-          onClick={() => isFolder && toggleFolder(node.id)}
-          component="div"
-          sx={{ 
-            py: 0.3,
-            pl: 0.5,
-            pr: 0,
-            borderRadius: '4px',
-            color: 'neutral.700',
-            inset: '0 !important', // Gör att knappen täcker hela ytan
-            // Se till att texten inte går in i linjerna och att klickytan är konsekvent
-            '& > *': {
-              position: 'relative',
-              zIndex: 1
-            },
-            // Absolut säkerställ att HELA ytan är klickbar
-            minHeight: '26px',
-            width: '100%', 
-            fontSize: '0.875rem',
+        {/* Mapp/filikon */}
+        <Box
+          sx={{
+            width: 16,
+            height: 16,
+            mr: 1.5,
+            color: isFolder ? '#e3a008' : '#3182ce',
             display: 'flex',
-            flexWrap: 'nowrap',
             alignItems: 'center',
-            minWidth: '100%',
-            overflow: 'visible',
-            position: 'relative',
-            cursor: 'pointer',  // Tydlig markör för att visa att det är klickbart
-            // Dessa egenskaper är viktiga för att utöka klickbarheten
-            transition: 'background-color 0.2s',
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)'
-            }
+            justifyContent: 'center',
+            zIndex: 1
           }}
         >
-          {/* Tar bort vertikal linje eftersom den nu hanteras med ::after i ListItem */}
-          
-          {/* Ikon för fil/mapp */}
-          <Box
-            sx={{
-              width: 16,
-              height: 16,
-              mr: 1.5,
-              color: isFolder ? '#e3a008' : '#3182ce',  // Mer exakta färger för mapparna/filerna
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            {isFolder ? (
+              <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+            ) : (
+              <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
+            )}
+          </svg>
+        </Box>
+        
+        {/* Namn */}
+        <Typography 
+          level="body-xs" 
+          sx={{ 
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            minWidth: '50px',
+            maxWidth: '70px',
+            width: '60px',
+            flexShrink: 0,
+            zIndex: 1
+          }}
+        >
+          {node.name}
+        </Typography>
+        
+        {/* Plusknapp - viktigt att stoppa event propagation */}
+        {isFolder && (
+          <IconButton 
+            size="sm" 
+            variant="plain" 
+            color="neutral"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddNewFolder(node.id);
+            }}
+            sx={{ 
+              opacity: 0.7,
+              minWidth: '20px',
+              width: '20px',
+              height: '20px',
+              p: '2px',
+              ml: 1,
+              '&:hover': {
+                bgcolor: 'rgba(0, 0, 0, 0.04)'
+              },
+              zIndex: 1
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              {isFolder ? (
-                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-              ) : (
-                <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
-              )}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-          </Box>
-          
-          {/* Ny struktur med lång linje mellan texten och plusknappen enligt bild 2 */}
-          <Box sx={{ 
-            display: 'flex', 
-            width: 'auto !important',
-            minWidth: '100%',
-            alignItems: 'center',
-            position: 'relative',
-            flexWrap: 'nowrap',
-            overflow: 'visible !important'
-          }}>
-            {/* Namn med fast bredd */}
-            <Typography 
-              level="body-xs" 
-              sx={{ 
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                minWidth: '50px', // Minsta bredd för alla texter
-                maxWidth: '70px', // Maxbredd för att förhindra för långa namn
-                width: '60px', // Fast bredd för alla texter
-                flexShrink: 0
-              }}
-            >
-              {node.name}
-            </Typography>
-            
-            {/* Inget mellanrum mellan text och plusknapp */}
-            <Box sx={{ 
-              width: '3px', 
-              height: '1px',
-              flexShrink: 0,
-              visibility: 'hidden' // Göm linjen helt
-            }} />
-          
-            {/* Plusknapp med exakt samma avstånd från texten */}
-            {isFolder && (
-              <IconButton 
-                size="sm" 
-                variant="plain" 
-                color="neutral"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddNewFolder(node.id);
-                }}
-                sx={{ 
-                  opacity: 0.7,
-                  minWidth: '20px',
-                  width: '20px',
-                  height: '20px',
-                  p: '2px',
-                  '&:hover': {
-                    bgcolor: 'rgba(0, 0, 0, 0.04)'
-                  }
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                </svg>
-              </IconButton>
-            )}
-          </Box>
-        </ListItemButton>
-      </ListItem>
+          </IconButton>
+        )}
+      </Box>
       
       {/* Rekursivt visa barnens innehåll om det är en öppen mapp */}
       {isFolder && isOpen && children.length > 0 && (
         <Box sx={{ 
-          ml: 0.5, // Minska marginalen för att ge mer horisontellt utrymme
-          width: 'auto !important', // Låt den växa med innehållet
-          minWidth: '200px', // Men säkerställ att vi har tillräckligt med utrymme
-          position: 'relative',
-          overflow: 'visible !important',
-          maxWidth: 'none !important'
+          width: '100%',
+          position: 'relative'
         }}>
-          {/* Ta bort vertikala linjer som ansluter barn */}
           {children.map(child => (
             <FileSystemNode
               key={child.id}
@@ -236,7 +189,7 @@ const FileSystemNode = ({
           ))}
         </Box>
       )}
-    </>
+    </Box>
   );
 };
 
