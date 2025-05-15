@@ -62,42 +62,26 @@ const FileSystemNode = ({
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
 
       
-      {/* Ett korrekt placerat L-streck för varje undermapp */}
+      {/* Helt ny struktur för L-strecken som använder levels på ett konsekvent sätt */}
       {level > 0 && (
-        <>
-          {/* Vertikalt streck (första delen av L) */}
-          <Box
-            sx={{
-              position: 'absolute',
-              left: level === 1 ? '2.0rem' : `${level * 2.0 - 0.5}rem`, // Justerad position för att matcha padding-left
-              top: '0', // Börja från toppen
-              height: '1.1rem', // Gå ner till mitten av elementet
-              width: '1px', 
-              backgroundColor: '#B0B0B0',
-              pointerEvents: 'none',
-              zIndex: 1
-            }}
-          />
-          {/* Horisontellt streck (andra delen av L) */}
-          <Box
-            sx={{
-              position: 'absolute',
-              left: level === 1 ? '2.0rem' : `${level * 2.0 - 0.5}rem`, // Samma position som vertikala strecket
-              top: '1.1rem', // Mitten av elementet
-              width: '0.8rem',
-              height: '1px', 
-              backgroundColor: '#B0B0B0',
-              pointerEvents: 'none',
-              zIndex: 1
-            }}
-          />
-        </>
+        <Box
+          sx={{
+            position: 'absolute',
+            left: level === 1 ? '1.2rem' : `${level * 1.4 - 0.7}rem`, // Finjusterad position för att passa med nivåer
+            top: 0,
+            width: '10px',
+            height: '20px',
+            borderLeft: '1px solid #A0A0A0',
+            borderBottom: '1px solid #A0A0A0',
+            pointerEvents: 'none'
+          }}
+        />
       )}
 
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level === 1 ? 2.8 : level * 2.0, // Anpassad padding baserad på nivån som matchar L-strecken
+          pl: `calc(${level * 1.5}rem + 0.5rem)`, // Justerad padding för att passa med L-strecken
           pr: 1,
           position: 'relative',
           overflow: 'visible !important',
