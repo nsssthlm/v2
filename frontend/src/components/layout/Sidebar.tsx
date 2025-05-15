@@ -59,20 +59,7 @@ const FileSystemNode = ({
   
   return (
     <>
-      {/* Vertikala guidlinjer visas för varje indenteringsnivå utom nivå 0 */}
-      {level > 0 && (
-        <Box
-          sx={{
-            position: 'absolute',
-            left: (level - 0.3) * 1.5 + 'rem', // Justerad position för att matcha horisontell
-            top: -8, // Börja ovanför elementet för en mer sammanhängande linje
-            bottom: -8, // Fortsätt under elementet
-            width: '1px',
-            bgcolor: 'rgba(160, 174, 192, 0.3)', // Ljusgrå subtil linje, något mer synlig
-            zIndex: 1
-          }}
-        />
-      )}
+      {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
       <ListItem 
         sx={{ 
           mb: 0.5,
@@ -83,7 +70,9 @@ const FileSystemNode = ({
           display: 'block',
           minWidth: '100%',
           maxWidth: 'none !important', // Ta bort maxbredbegränsningen
-          width: 'auto !important' // Tillåt elementet att växa utanför containern vid behov
+          width: 'auto !important', // Tillåt elementet att växa utanför containern vid behov
+          borderLeft: level > 0 ? '1px solid rgba(160, 174, 192, 0.15)' : 'none', // Diskret vertikal linje endast på nivå > 0
+          ml: level > 0 ? '3px' : 0 // Litet mellanrum för att linjen ska synas tydligt
         }}
       >
         <ListItemButton
@@ -105,17 +94,19 @@ const FileSystemNode = ({
             position: 'relative'
           }}
         >
-          {/* Horisontell linje som kopplar till den vertikala linjen (för nivå > 0) */}
+          {/* Bättre indikator för hierarkin */}
           {level > 0 && (
             <Box
               sx={{
                 position: 'absolute',
-                left: (level - 0.3) * 1.5 + 'rem', // Matcha position med vertikala linjen
-                width: '0.7rem', // Längd på horisontella linjen
-                height: '1px',
-                bgcolor: 'rgba(160, 174, 192, 0.3)', // Samma färg som vertikala
+                left: (level - 0.8) * 1.5 + 'rem',
                 top: '50%',
-                zIndex: 1
+                transform: 'translateY(-50%)',
+                width: '6px',
+                height: '1px',
+                bgcolor: 'rgba(160, 174, 192, 0.5)',
+                display: 'inline-block',
+                mr: 0.5
               }}
             />
           )}
@@ -213,20 +204,7 @@ const FileSystemNode = ({
           minWidth: '200px', // Men säkerställ att vi har tillräckligt med utrymme
           position: 'relative',
           overflow: 'visible !important',
-          maxWidth: 'none !important',
-          '& > div': { position: 'relative' }, // Viktigt för att linjerna ska positioneras rätt
-          '& > div::before': { // Skapa en anslutningslinje för att knyta sista barn till förälder
-            content: '""',
-            position: 'absolute',
-            left: (level + 0.7) * 1.5 - 15 + 'px',
-            top: -10,
-            height: 15,
-            width: 1,
-            backgroundColor: 'rgba(160, 174, 192, 0.3)',
-            zIndex: 0
-          },
-          pb: 0.5, // Extra padding för att linjer ska fortsätta under
-          pt: 0.5 // Padding ovan så linjer fortsätter uppåt
+          maxWidth: 'none !important'
         }}>
           {children.map(child => (
             <FileSystemNode
