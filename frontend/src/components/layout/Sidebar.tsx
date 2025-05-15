@@ -73,7 +73,7 @@ const FileSystemNode = ({
         }} />
       )}
       
-      {/* Den faktiska raden med mappnamn som används för klick */}
+      {/* Den faktiska raden med mappnamn som används för klick - 100% klickbar */}
       <div 
         style={{
           paddingLeft: `${level * 24 + 12}px`,
@@ -85,7 +85,9 @@ const FileSystemNode = ({
           cursor: isFolder ? 'pointer' : 'default',
           borderRadius: '4px',
           position: 'relative',
-          transition: 'background-color 0.2s'
+          transition: 'background-color 0.2s',
+          width: 'calc(100% - 16px)', // Viktigt: säkerställer full bredd minus marginal
+          whiteSpace: 'nowrap' // Hela raden behåller texten på en rad
         }}
         className="folder-row"
         onClick={(e) => {
@@ -107,7 +109,8 @@ const FileSystemNode = ({
           color: isFolder ? '#e3a008' : '#3182ce',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          flexShrink: 0 // Förhindra att ikonen krymper
         }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             {isFolder ? (
@@ -118,16 +121,15 @@ const FileSystemNode = ({
           </svg>
         </div>
         
-        {/* Namn */}
+        {/* Namn - med flex-grow för att fylla ut utrymmet och bli klickbar */}
         <div style={{
           fontSize: '0.875rem',
           whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          overflow: 'visible', // Visa alltid hela texten
+          textOverflow: 'clip',
           minWidth: '50px',
-          maxWidth: '100px',
-          width: 'auto',
-          flexShrink: 0
+          flexGrow: 1, // Viktigt: expandera för att fylla tillgängligt utrymme
+          cursor: isFolder ? 'pointer' : 'default'
         }}>
           {node.name}
         </div>
