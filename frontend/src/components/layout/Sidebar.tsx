@@ -69,7 +69,7 @@ const FileSystemNode = ({
           <Box
             sx={{
               position: 'absolute',
-              left: `${(level - 0.3) * 1.5}rem`,
+              left: level === 1 ? '2.0rem' : `${level * 2.0 - 0.5}rem`, // Justerad position för att matcha padding-left
               top: '0', // Börja från toppen
               height: '1.1rem', // Gå ner till mitten av elementet
               width: '1px', 
@@ -82,7 +82,7 @@ const FileSystemNode = ({
           <Box
             sx={{
               position: 'absolute',
-              left: `${(level - 0.3) * 1.5}rem`,
+              left: level === 1 ? '2.0rem' : `${level * 2.0 - 0.5}rem`, // Samma position som vertikala strecket
               top: '1.1rem', // Mitten av elementet
               width: '0.8rem',
               height: '1px', 
@@ -97,7 +97,7 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1.5 + 1.0, // Mer utrymme för att undvika överlappning
+          pl: level === 1 ? 2.8 : level * 2.0, // Anpassad padding baserad på nivån som matchar L-strecken
           pr: 1,
           position: 'relative',
           overflow: 'visible !important',
