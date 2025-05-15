@@ -1,60 +1,54 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Redigera {{ directory.name }} - ValvX{% endblock %}
+{% block title %}Redigera {{ directory.name }} | ValvX{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h2 mb-1">Redigera mappsida</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'directory_list' %}">Mappar</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'directory_page' directory.slug %}">{{ directory.name }}</a></li>
-                    <li class="breadcrumb-item active">Redigera</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
-    
+<div class="container">
+    <nav aria-label="breadcrumb" class="my-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'directory_list' %}">Mappar</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'directory_page' slug=directory.slug %}">{{ directory.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Redigera</li>
+        </ol>
+    </nav>
+
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-8 mx-auto">
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-edit me-2"></i> Uppdatera information om mappen
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i> Redigera mapp: {{ directory.name }}</h4>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
-                        
                         <div class="mb-3">
-                            <label for="{{ form.page_title.id_for_label }}" class="form-label">Rubrik för mappsidan</label>
-                            <input type="text" class="form-control" id="{{ form.page_title.id_for_label }}" 
-                                   name="{{ form.page_title.name }}" value="{{ form.page_title.value|default:directory.name }}">
-                            <div class="form-text">Sidans huvudrubrik (om tom används mappens namn)</div>
+                            <label for="{{ form.page_title.id_for_label }}" class="form-label">Sidrubrik</label>
+                            {{ form.page_title }}
                             {% if form.page_title.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.page_title.errors }}
-                            </div>
+                                <div class="text-danger mt-1">
+                                    {% for error in form.page_title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
                             {% endif %}
+                            <div class="form-text">Rubriken som visas på mappsidan. Om tom används mappnamnet.</div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="{{ form.page_description.id_for_label }}" class="form-label">Beskrivning</label>
-                            <textarea class="form-control" id="{{ form.page_description.id_for_label }}" 
-                                     name="{{ form.page_description.name }}" rows="5">{{ form.page_description.value|default:'' }}</textarea>
-                            <div class="form-text">En beskrivning av vad mappen innehåller eller används till</div>
+                            <label for="{{ form.page_description.id_for_label }}" class="form-label">Sidbeskrivning</label>
+                            {{ form.page_description }}
                             {% if form.page_description.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.page_description.errors }}
-                            </div>
+                                <div class="text-danger mt-1">
+                                    {% for error in form.page_description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
                             {% endif %}
+                            <div class="form-text">En beskrivande text som visas på mappsidan.</div>
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'directory_page' directory.slug %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-1"></i> Avbryt
-                            </a>
+                            <a href="{% url 'directory_page' slug=directory.slug %}" class="btn btn-outline-secondary">Avbryt</a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save me-1"></i> Spara ändringar
                             </button>
@@ -63,35 +57,22 @@
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card bg-light">
-                <div class="card-header">
-                    <i class="fas fa-info-circle me-2"></i> Om denna mapp
-                </div>
-                <div class="card-body">
-                    <dl>
-                        <dt>Mappnamn</dt>
-                        <dd>{{ directory.name }}</dd>
-                        
-                        <dt>Skapad</dt>
-                        <dd>{{ directory.created_at|date:"Y-m-d H:i" }}</dd>
-                        
-                        <dt>Antal filer</dt>
-                        <dd>{{ directory.files.count }}</dd>
-                        
-                        {% if directory.parent %}
-                        <dt>Föräldermapp</dt>
-                        <dd>
-                            <a href="{% url 'directory_page' directory.parent.slug %}">
-                                {{ directory.parent.name }}
-                            </a>
-                        </dd>
-                        {% endif %}
-                    </dl>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Formattera formulärfält med Bootstrap-klasser
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleField = document.getElementById('{{ form.page_title.id_for_label }}');
+        const descField = document.getElementById('{{ form.page_description.id_for_label }}');
+        
+        titleField.classList.add('form-control');
+        descField.classList.add('form-control');
+        
+        // Gör beskrivningsfältet högre
+        descField.setAttribute('rows', '5');
+    });
+</script>
 {% endblock %}
