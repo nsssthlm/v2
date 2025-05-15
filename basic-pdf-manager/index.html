@@ -988,21 +988,34 @@
       pdfViewModal.classList.add('active');
       
       // Ladda PDF:en
-      openPdf(pdf);
+      openPdf(pdf).then(() => {
+        // Lägg till eventlyssnare för zoomning och panorering efter PDF har laddats
+        setupZoomAndPan(viewerContainer);
+      });
       
       // Lägg till stängningsfunktion
       const closeBtn = document.getElementById('pdf-view-close');
-      closeBtn.addEventListener('click', () => {
+      closeBtn.onclick = () => {
         pdfViewModal.classList.remove('active');
-      });
-      
-      // Lägg till eventlyssnare för zoomning och panorering
-      setupZoomAndPan(viewerContainer);
+        // Ta bort evenemangslyssnarna vid stängning
+        if (viewerContainer) {
+          viewerContainer.onwheel = null;
+          viewerContainer.onmousedown = null;
+          viewerContainer.onmousemove = null;
+          viewerContainer.onmouseup = null;
+          viewerContainer.onmouseleave = null;
+        }
+      };
     }
     
     // Konfigurera zoom och panorering för PDF-visaren
     function setupZoomAndPan(container) {
-      if (!container) return;
+      if (!container) {
+        console.error('Ingen container för zoomning hittades');
+        return;
+      }
+      
+      console.log('Konfigurerar zoom och panorering...');
       
       // Ta bort eventuella tidigare lyssnare först
       container.onwheel = null;
@@ -1013,7 +1026,12 @@
       
       // Hitta canvas-elementet
       const canvas = document.getElementById('pdf-canvas');
-      if (!canvas) return;
+      if (!canvas) {
+        console.error('Inget canvas-element hittades för zoomning');
+        return;
+      }
+      
+      console.log('Canvas hittad, konfigurerar zoom-händelser');
       
       // CSS-baserad zoomning istället för renderPlot för bättre prestanda
       canvas.style.transition = 'transform 0.1s ease-out'; // Smooth transition för zoom
@@ -1021,11 +1039,14 @@
       // Uppdatera canvas initialt
       updateCanvasTransform(canvas);
       
-      // Zooma med scrollhjulet när CTRL är nedtryckt
-      container.onwheel = function(e) {
+      // Zooma med scrollhjulet när CTRL är nedtryckt - använd addEventListener istället för onwheel
+      container.addEventListener('wheel', function(e) {
+        console.log('Wheel event, ctrlKey:', e.ctrlKey);
+        
         // Endast zooma om CTRL är nedtryckt
         if (e.ctrlKey) {
           e.preventDefault();
+          e.stopPropagation();
           
           const oldScale = scale;
           
@@ -1035,6 +1056,8 @@
           } else {
             scale = Math.max(minScale, scale / 1.1); // Zooma ut
           }
+          
+          console.log('Ny skala:', scale);
           
           // Beräkna musposition relativt till containern
           const rect = container.getBoundingClientRect();
@@ -1055,12 +1078,13 @@
             pageInfo.textContent = `Sida ${currentPage} av ${pdfDoc ? pdfDoc.numPages : 0} (Zoom: ${Math.round(scale * 100)}%)`;
           }
         }
-      };
+      }, { passive: false });
       
-      // Panorering med musklick och dra
-      container.onmousedown = function(e) {
+      // Panorering med musklick och dra - använd addEventListener
+      container.addEventListener('mousedown', function(e) {
         // Kontrollera att vi klickar på canvas eller dess förälder, inte på andra element
         if (e.target === canvas || e.target === container || e.target.id === 'canvas-wrapper') {
+          console.log('Påbörjar dragning');
           isDragging = true;
           startX = e.clientX - viewportPosition.x;
           startY = e.clientY - viewportPosition.y;
@@ -1071,9 +1095,9 @@
           container.style.cursor = 'grabbing';
           e.preventDefault();
         }
-      };
+      });
       
-      container.onmousemove = function(e) {
+      container.addEventListener('mousemove', function(e) {
         if (isDragging) {
           viewportPosition.x = e.clientX - startX;
           viewportPosition.y = e.clientY - startY;
@@ -1081,27 +1105,29 @@
           // Uppdatera canvas-position
           updateCanvasTransform(canvas);
         }
-      };
+      });
       
-      container.onmouseup = function(e) {
+      container.addEventListener('mouseup', function(e) {
         if (isDragging) {
+          console.log('Avslutar dragning');
           isDragging = false;
           container.style.cursor = 'default';
           
           // Återställ övergångseffekten efter dragning
           canvas.style.transition = 'transform 0.1s ease-out';
         }
-      };
+      });
       
-      container.onmouseleave = function(e) {
+      container.addEventListener('mouseleave', function(e) {
         if (isDragging) {
+          console.log('Musen lämnade området, avslutar dragning');
           isDragging = false;
           container.style.cursor = 'default';
           
           // Återställ övergångseffekten efter dragning
           canvas.style.transition = 'transform 0.1s ease-out';
         }
-      };
+      });
     }
     
     // Uppdatera canvas-transformationen baserat på aktuell skala och position
