@@ -627,12 +627,46 @@
   </style>
 </head>
 <body>
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal" style="display: none;">
+    <div class="modal-content" style="width: 400px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+      <h2>Logga in</h2>
+      <form id="login-form">
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label for="username" style="display: block; margin-bottom: 5px;">E-post:</label>
+          <input type="email" id="username" name="username" placeholder="E-post" required 
+                 style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label for="password" style="display: block; margin-bottom: 5px;">Lösenord:</label>
+          <input type="password" id="password" name="password" placeholder="Lösenord" required
+                 style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="form-actions" style="margin-top: 20px;">
+          <button type="submit" class="btn btn-primary" 
+                  style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+            Logga in
+          </button>
+        </div>
+        <div id="login-error" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+        <div style="margin-top: 20px; font-size: 0.8rem; color: #666;">
+          <p>Testanvändare: projectleader@example.com</p>
+          <p>Lösenord: 123456</p>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="container">
     <div class="header-navigation">
       <div class="breadcrumb">
         <a href="#" class="breadcrumb-link"><i class="fa fa-vault"></i> Vault</a> &gt; 
         <a href="#" class="breadcrumb-link">Files</a> &gt;
         <span class="breadcrumb-current">Test2</span>
+      </div>
+      <div id="user-info" style="margin-left: auto; display: none;">
+        <span id="username-display" style="margin-right: 10px;">Inte inloggad</span>
+        <button id="logout-btn" class="btn" style="padding: 4px 8px; font-size: 0.8rem;">Logga ut</button>
       </div>
     </div>
 
