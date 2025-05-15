@@ -85,13 +85,16 @@ const FileSystemNode = ({
           paddingTop: '4px',
           paddingBottom: '4px',
           width: '100%',
+          minWidth: '100%',
+          maxWidth: '100%',
           display: 'flex',
           alignItems: 'center',
           cursor: isFolder ? 'pointer' : 'default',
           borderRadius: '4px',
           textAlign: 'left',
           whiteSpace: 'nowrap',
-          transition: 'background-color 0.15s'
+          transition: 'background-color 0.15s',
+          position: 'relative'
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -109,7 +112,8 @@ const FileSystemNode = ({
         <span style={{
           display: 'flex',
           alignItems: 'center',
-          width: '100%'
+          width: '100%',
+          minWidth: '100%'
         }}>
           {/* Ikon */}
           <span style={{
