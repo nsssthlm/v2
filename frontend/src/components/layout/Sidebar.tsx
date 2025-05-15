@@ -419,6 +419,18 @@ const Sidebar = () => {
   const createNewFolder = async () => {
     if (newFolderName.trim() === '') return;
     
+    // Kontrollera om det redan finns en mapp med samma namn på samma nivå
+    const parentId = currentParentId || null;
+    const siblingFolders = filesystemNodes.filter(node => node.parent_id === parentId);
+    const nameExists = siblingFolders.some(folder => 
+      folder.name.toLowerCase() === newFolderName.trim().toLowerCase()
+    );
+    
+    if (nameExists) {
+      alert('En mapp med detta namn finns redan. Vänligen välj ett annat namn.');
+      return;
+    }
+    
     // Om parent_id finns, konvertera från string till number för API
     const parentDbId = currentParentId 
       ? filesystemNodes.find(n => n.id === currentParentId)?.db_id ?? null

@@ -13,6 +13,33 @@ class DirectorySerializer(serializers.ModelSerializer):
             'parent': {'required': False, 'allow_null': True}
         }
     
+    def validate(self, data):
+        """
+        Validera att det inte finns en annan mapp med samma namn 
+        på samma nivå (med samma parent)
+        """
+        name = data.get('name')
+        parent = data.get('parent')
+        is_sidebar_item = data.get('is_sidebar_item', False)
+        
+        # Kontrollera om namnet redan finns på samma nivå
+        existing_directory = Directory.objects.filter(
+            name__iexact=name,
+            parent=parent,
+            is_sidebar_item=is_sidebar_item
+        )
+        
+        # Om vi uppdaterar en befintlig mapp, exkludera den från kontrollen
+        if self.instance:
+            existing_directory = existing_directory.exclude(id=self.instance.id)
+        
+        if existing_directory.exists():
+            raise serializers.ValidationError({
+                'name': 'En mapp med detta namn finns redan på denna nivå.'
+            })
+            
+        return data
+    
     def create(self, validated_data):
         request = self.context.get('request')
         if request and request.user.is_authenticated and 'created_by' not in validated_data:
