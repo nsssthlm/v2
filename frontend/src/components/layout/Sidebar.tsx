@@ -62,36 +62,50 @@ const FileSystemNode = ({
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
 
       
+      {/* Jag har helt omdesignat hierarkilinjerna för att säkerställa korrekt placering */}
+      <Box
+        sx={{
+          position: 'absolute',
+          left: level > 0 ? `${(level - 0.25) * 1.5}rem` : 0,
+          top: 0,
+          height: '100%',
+          width: '1rem',
+          pointerEvents: 'none',
+          zIndex: 0,
+          '&::before': level > 0 ? {
+            // Horisontell anslutningslinje
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            top: '50%',
+            width: '0.65rem',
+            height: '1px',
+            backgroundColor: '#B0B0B0'
+          } : {},
+          '&::after': level > 0 ? {
+            // Vertikal linje från föräldern
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            height: '50%',
+            width: '1px',
+            backgroundColor: '#B0B0B0'
+          } : {}
+        }}
+      />
+
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1.5 + 1.2, // Mer utrymme för att undvika överlappning
+          pl: level * 1.5 + 1.0, // Mer utrymme för att undvika överlappning
           pr: 1,
           position: 'relative',
           overflow: 'visible !important',
           display: 'block',
           minWidth: '100%',
           maxWidth: 'none !important', // Ta bort maxbredbegränsningen
-          width: 'auto !important', // Tillåt elementet att växa utanför containern vid behov
-          '&::before': level > 0 ? {
-            content: '""',
-            position: 'absolute',
-            left: (level - 0.3) * 1.5 + 'rem',
-            top: '50%',
-            width: '0.6rem',
-            height: '1px',
-            backgroundColor: '#B0B0B0'
-          } : {},
-          '&::after': level > 0 ? {
-            content: '""',
-            position: 'absolute',
-            left: (level - 0.3) * 1.5 + 'rem',
-            top: '-8px',
-            bottom: '50%',
-            width: '1px',
-            backgroundColor: '#B0B0B0',
-            display: 'block'
-          } : {}
+          width: 'auto !important' // Tillåt elementet att växa utanför containern vid behov
         }}
       >
         <ListItemButton
@@ -213,19 +227,23 @@ const FileSystemNode = ({
           minWidth: '200px', // Men säkerställ att vi har tillräckligt med utrymme
           position: 'relative',
           overflow: 'visible !important',
-          maxWidth: 'none !important',
-          
-          // Lägg till en vertikal linje som går nedåt från denna mapp till dess barn
-          '&::before': level > 0 && children.length > 0 ? {
-            content: '""',
-            position: 'absolute',
-            left: (level - 0.3) * 1.5 + 'rem',
-            top: 0,
-            bottom: 0,
-            width: '1px',
-            backgroundColor: '#B0B0B0'
-          } : {}
+          maxWidth: 'none !important'
         }}>
+          {/* Vertikal linje som ansluter barn */}
+          {level > 0 && children.length > 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                left: (level - 0.25) * 1.5 + 'rem',
+                top: 0,
+                // Viktigt: Begränsa linjens höjd till bara barnens höjd
+                height: 'calc(100% - 4px)', // Ta bort 4px för att inte fortsätta förbi sista barnet
+                width: '1px',
+                backgroundColor: '#B0B0B0',
+                zIndex: 0
+              }}
+            />
+          )}
           {children.map(child => (
             <FileSystemNode
               key={child.id}
