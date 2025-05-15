@@ -6,7 +6,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 
 const app = express();
-const port = 5000;
+const port = 5001;
 
 // Skapa uploads-mapp om den inte finns
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -196,4 +196,5 @@ app.get('/', (req, res) => {
 // Start server
 app.listen(port, '0.0.0.0', () => {
   console.log(`PDF Manager running at http://0.0.0.0:${port}`);
+  console.log(`Öppna PDF-hanteraren i din webbläsare: http://0.0.0.0:${port}/`);
 });
