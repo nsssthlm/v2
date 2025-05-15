@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from . import views
 from . import web_views
 from . import web_api
+from . import upload_api
 
 # API router för RESTful endpoints
 router = DefaultRouter()
@@ -12,6 +13,9 @@ router.register('files', views.FileViewSet)
 urlpatterns = [
     # API-routes
     path('', include(router.urls)),
+    
+    # API för filuppladdning
+    path('upload/', upload_api.upload_file, name='api_upload_file'),
     
     # Webb-routes för mappspecifika sidor
     path('web/', include([

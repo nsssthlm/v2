@@ -1,0 +1,67 @@
+{% extends "files/base.html" %}
+
+{% block title %}{{ directory.page_title|default:directory.name }} | ValvX{% endblock %}
+
+{% block content %}
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'directory_list' %}">Mappar</a></li>
+            {% if directory.parent %}
+                <li class="breadcrumb-item"><a href="{% url 'directory_page' slug=directory.parent.slug %}">{{ directory.parent.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ directory.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Page title & description -->
+    <h1 class="mb-3">{{ directory.page_title|default:directory.name }}</h1>
+    {% if directory.page_description %}
+        <div class="mb-4">{{ directory.page_description }}</div>
+    {% endif %}
+
+    <!-- Subdirectories -->
+    {% if subdirectories %}
+        <h2 class="mt-4 mb-3">Undermappar</h2>
+        <div class="list-group mb-4">
+            {% for subdir in subdirectories %}
+                <a href="{% url 'directory_page' slug=subdir.slug %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 align-items-center">
+                        <i class="bi bi-folder-fill folder-icon me-2"></i>
+                        <span>{{ subdir.name }}</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- PDF Files -->
+    <h2 class="mt-4 mb-3">PDF Dokument</h2>
+    {% if pdf_files %}
+        <div class="list-group mb-4">
+            {% for file in pdf_files %}
+                <a href="{{ file.file.url }}" class="list-group-item list-group-item-action" target="_blank">
+                    <div class="d-flex w-100 align-items-center">
+                        <i class="bi bi-file-pdf-fill file-icon me-2"></i>
+                        <div>
+                            <div>{{ file.name }}</div>
+                            <small class="text-muted">Uppladdad: {{ file.created_at|date:"Y-m-d" }}</small>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted fst-italic">Inga dokument finns i denna mapp.</p>
+    {% endif %}
+
+    <!-- Action buttons -->
+    <div class="mt-5 d-flex gap-2">
+        <a href="{% url 'edit_directory_page' slug=directory.slug %}" class="btn btn-outline-secondary">
+            Redigera sida
+        </a>
+        <a href="{% url 'upload_pdf' slug=directory.slug %}" class="btn btn-primary">
+            Ladda upp PDF
+        </a>
+    </div>
+{% endblock %}
