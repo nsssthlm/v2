@@ -75,7 +75,7 @@ const FileSystemNode = ({
           sx={{ 
             py: 0.3,
             pl: 0.5,
-            pr: 6, // Större utrymme för plustecknet
+            pr: 0,
             borderRadius: '4px',
             color: 'neutral.700',
             fontSize: '0.875rem',
@@ -83,8 +83,6 @@ const FileSystemNode = ({
             flexWrap: 'nowrap',
             alignItems: 'center',
             width: '100%',
-            minWidth: '100%', // Se till att knappen alltid tar upp full bredd
-            maxWidth: '100%',
             overflow: 'visible',
             position: 'relative'
           }}
@@ -110,14 +108,14 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Filnamn/mappnamn utan textavklippning */}
-          <ListItemContent sx={{ 
-            width: 'calc(100% - 30px)', // Fast bredd med plats för plusknappen
-            mr: 0,
-            flexGrow: 0,
-            flexShrink: 0,
-            overflow: 'visible'
+          {/* Ny struktur med fast avstånd mellan text och plusknapp */}
+          <Box sx={{ 
+            display: 'flex', 
+            width: '100%',
+            alignItems: 'center',
+            position: 'relative'
           }}>
+            {/* Mappnamn utan textavklippning */}
             <Typography 
               level="body-xs" 
               sx={{ 
@@ -125,46 +123,43 @@ const FileSystemNode = ({
                 whiteSpace: 'normal',
                 wordBreak: 'break-word',
                 display: 'inline',
-                textOverflow: 'clip'
+                textOverflow: 'clip',
+                maxWidth: '70%', // Begränsa bredden för att inte tryckas ihop med plusknappen
+                mr: 6 // Fast avstånd till plusknappen
               }}
             >
               {node.name}
             </Typography>
-          </ListItemContent>
           
-          {/* Fast positionerad plusknapp för mappar med exakt samma position för alla nivåer */}
-          {isFolder && (
-            <IconButton 
-              size="sm" 
-              variant="plain" 
-              color="neutral"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddNewFolder(node.id);
-              }}
-              sx={{ 
-                position: 'absolute',
-                right: '5px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: 0.7,
-                minWidth: '18px',
-                width: '18px',
-                height: '18px',
-                p: '2px',
-                '&:hover': {
-                  bgcolor: 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-              </svg>
-            </IconButton>
-          )}
+            {/* Fast positionerad plusknapp för mappar */}
+            {isFolder && (
+              <IconButton 
+                size="sm" 
+                variant="plain" 
+                color="neutral"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddNewFolder(node.id);
+                }}
+                sx={{ 
+                  position: 'absolute',
+                  right: 0,
+                  opacity: 0.7,
+                  minWidth: '18px',
+                  width: '18px',
+                  height: '18px',
+                  p: '2px',
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+              </IconButton>
+            )}
+          </Box>
         </ListItemButton>
       </ListItem>
       
