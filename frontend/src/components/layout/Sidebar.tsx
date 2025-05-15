@@ -122,15 +122,25 @@ const FileSystemNode = ({
         </div>
         
         {/* Namn - med flex-grow för att fylla ut utrymmet och bli klickbar */}
-        <div style={{
-          fontSize: '0.875rem',
-          whiteSpace: 'nowrap',
-          overflow: 'visible', // Visa alltid hela texten
-          textOverflow: 'clip',
-          minWidth: '50px',
-          flexGrow: 1, // Viktigt: expandera för att fylla tillgängligt utrymme
-          cursor: isFolder ? 'pointer' : 'default'
-        }}>
+        <div 
+          style={{
+            fontSize: '0.875rem',
+            whiteSpace: 'nowrap',
+            overflow: 'visible', // Visa alltid hela texten
+            textOverflow: 'clip',
+            minWidth: '70px', // Säkerställer tillräcklig plats för texten
+            width: 'auto', // Anpassas efter innehållet
+            flexGrow: 1, // Viktigt: expandera för att fylla tillgängligt utrymme
+            cursor: isFolder ? 'pointer' : 'default',
+            pointerEvents: 'auto', // Gör texten klickbar
+            position: 'relative', // För exakt positionering
+            zIndex: 1 // Placera över andra element
+          }}
+          onClick={(e) => { // Även texten själv har sin egen onClick
+            e.stopPropagation();
+            if (isFolder) toggleFolder(node.id);
+          }}
+        >
           {node.name}
         </div>
         
