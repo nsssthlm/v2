@@ -175,6 +175,91 @@ class PDFServiceAPI:
         response['Content-Disposition'] = f'inline; filename="{pdf_doc.title}.pdf"'
         return response
             
+# Lägg till fler API-metoder
+    @staticmethod
+    @login_required
+    def get_pdf_list(request, folder_id=None):
+        """
+        Hämta en lista över alla PDF-filer, optionellt filtrerat per mapp
+        
+        GET-parametrar:
+        - folder_id: (valfritt) ID för mappen att filtrera på
+        
+        Returnerar:
+        - JSON med lista över PDF-dokument
+        """
+        try:
+            # Base query - filtrera på användarens projekt
+            user_projects = request.user.projects.all()
+            query = PDFDocument.objects.filter(project__in=user_projects)
+            
+            # Om folder_id är specificerat, filtrera på den mappen
+            if folder_id is not None:
+                # Hitta alla FileNode-objekt i den specificerade mappen
+                if folder_id == 'root':
+                    # Specialfall: "root" betyder rotmappen (null parent)
+                    file_nodes = FileNode.objects.filter(
+                        project__in=user_projects,
+                        type='file',
+                        parent__isnull=True
+                    )
+                else:
+                    # Annars hitta alla filer i den specificerade mappen
+                    file_nodes = FileNode.objects.filter(
+                        project__in=user_projects,
+                        type='file',
+                        parent_id=folder_id
+                    )
+                
+                # Hämta PDF-dokument som är kopplade till dessa FileNode-objekt via FileVersion
+                file_versions = FileVersion.objects.filter(file_node__in=file_nodes)
+                pdf_ids = set()
+                
+                # Samla alla unika PDF-IDs
+                for version in file_versions:
+                    # Här måste vi göra en mappning mellan FileVersion och PDFDocument baserat på filväg
+                    pdf_document = PDFDocument.objects.filter(file=version.file).first()
+                    if pdf_document:
+                        pdf_ids.add(pdf_document.id)
+                
+                # Filtrera PDF-dokumenten baserat på de ID:n vi hittat
+                query = query.filter(id__in=pdf_ids)
+            
+            # Exekvera queryn och samla resultaten
+            pdf_documents = []
+            for doc in query:
+                pdf_documents.append({
+                    'id': doc.id,
+                    'title': doc.title,
+                    'description': doc.description,
+                    'version': doc.version,
+                    'size': doc.size,
+                    'created_at': doc.created_at.isoformat(),
+                    'updated_at': doc.updated_at.isoformat(),
+                    'uploaded_by': doc.uploaded_by.username if doc.uploaded_by else 'Unknown',
+                    'unique_id': str(doc.unique_id),
+                    'url': request.build_absolute_uri(f'/api/pdf/{doc.id}/content/')
+                })
+            
+            return JsonResponse({'pdf_documents': pdf_documents})
+            
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'error': str(e)}, status=500)
+            
+    @staticmethod
+    @login_required
+    def get_pdf_annotations(request, pdf_id):
+        """
+        Hämta alla annotationer för en PDF
+        
+        Returnerar:
+        - JSON med lista över annotationer
+        """
+        # Implementering kommer senare
+        return JsonResponse({'annotations': []})
+
 # Registrera API-rutter
 def register_pdf_api_routes(urlpatterns):
     """
@@ -185,4 +270,7 @@ def register_pdf_api_routes(urlpatterns):
     urlpatterns.extend([
         path('api/pdf/upload/', csrf_exempt(PDFServiceAPI.upload_pdf), name='pdf-upload'),
         path('api/pdf/<int:pdf_id>/content/', PDFServiceAPI.get_pdf_content, name='pdf-content'),
+        path('api/pdf/list/', PDFServiceAPI.get_pdf_list, name='pdf-list'),
+        path('api/pdf/list/<str:folder_id>/', PDFServiceAPI.get_pdf_list, name='pdf-list-folder'),
+        path('api/pdf/<int:pdf_id>/annotations/', PDFServiceAPI.get_pdf_annotations, name='pdf-annotations'),
     ])

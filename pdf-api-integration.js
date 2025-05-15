@@ -21,7 +21,7 @@ class PDFAPIService {
         title: metadata.title || 'Namnlös PDF',
         description: metadata.description || '',
         project_id: metadata.projectId || 1, // Default till projekt 1 om inget anges
-        folder_id: metadata.folderId || null,
+        folder_id: metadata.folderId || null, // Lägg till mappkoppling om sådan finns
       };
       
       // Om file_id finns, lägg till det (för versionshantering)
@@ -131,10 +131,42 @@ class PDFAPIService {
         throw new Error(`Server svarade med ${response.status}: ${response.statusText}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      return data.annotations || [];
     } catch (error) {
       console.error(`Fel vid hämtning av annotationer för PDF ${pdfId}:`, error);
-      throw error;
+      return []; // Returnera tom array vid fel
+    }
+  }
+  
+  /**
+   * Hämtar en lista över alla PDF-filer, med valfri mappfiltrering
+   * @param {string|number|null} folderId - ID för mappen att filtrera på (null = alla, 'root' = endast rotmappen)
+   * @returns {Promise<Array>} - Lista med PDF-dokument
+   */
+  static async getPDFList(folderId = null) {
+    try {
+      let url = '/api/pdf/list/';
+      
+      // Om folderId är specificerat, lägg till det i URL:en
+      if (folderId !== null) {
+        url = `/api/pdf/list/${folderId}/`;
+      }
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include' // Inkludera cookies för autentisering
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server svarade med ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.pdf_documents || [];
+    } catch (error) {
+      console.error(`Fel vid hämtning av PDF-lista:`, error);
+      return []; // Returnera tom array vid fel
     }
   }
 }
