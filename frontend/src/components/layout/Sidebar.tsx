@@ -60,32 +60,38 @@ const FileSystemNode = ({
   return (
     <>
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
-      {/* Enkel linje som kopplar till föräldern, bara för nivå > 0 */}
-      {level > 0 && (
-        <Box 
-          sx={{ 
-            position: 'absolute',
-            left: (level - 0.7) * 1.5 + 'rem', // Positionera till vänster om nuvarande indenteringsnivå
-            top: '50%',
-            height: '1px',
-            width: '0.5rem',
-            backgroundColor: 'rgba(160, 174, 192, 0.5)',
-            zIndex: 0
-          }}
-        />
-      )}
+
       
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1.5, // Indentering för hierarkin
+          pl: level * 1.5 + 0.5, // Indentering för hierarkin med lite extra utrymme
           pr: 1,
           position: 'relative',
           overflow: 'visible !important',
           display: 'block',
           minWidth: '100%',
           maxWidth: 'none !important', // Ta bort maxbredbegränsningen
-          width: 'auto !important' // Tillåt elementet att växa utanför containern vid behov
+          width: 'auto !important', // Tillåt elementet att växa utanför containern vid behov
+          '&::before': level > 0 ? {
+            content: '""',
+            position: 'absolute',
+            left: (level - 0.5) * 1.5 + 'rem',
+            top: '50%',
+            width: '0.9rem',
+            height: '1px',
+            backgroundColor: '#B0B0B0'
+          } : {},
+          '&::after': level > 0 ? {
+            content: '""',
+            position: 'absolute',
+            left: (level - 0.5) * 1.5 + 'rem',
+            top: '-8px',
+            bottom: '50%',
+            width: '1px',
+            backgroundColor: '#B0B0B0',
+            display: 'block'
+          } : {}
         }}
       >
         <ListItemButton
@@ -107,20 +113,7 @@ const FileSystemNode = ({
             position: 'relative'
           }}
         >
-          {/* Vertikal linje till vänster om mappen för att visa att den är en del av hierarkin */}
-          {level > 0 && (
-            <Box
-              sx={{
-                position: 'absolute',
-                left: (level - 0.7) * 1.5 + 'rem',
-                top: -10,
-                height: 40, // Tillräckligt för att synas utan att ta över
-                width: '1px',
-                bgcolor: 'rgba(160, 174, 192, 0.5)',
-                zIndex: 0
-              }}
-            />
-          )}
+          {/* Tar bort vertikal linje eftersom den nu hanteras med ::after i ListItem */}
           
           {/* Ikon för fil/mapp */}
           <Box
@@ -216,7 +209,17 @@ const FileSystemNode = ({
           position: 'relative',
           overflow: 'visible !important',
           maxWidth: 'none !important',
-          // Ta bort denna eftersom vi nu har kontinuerliga vertikala linjer genom hela containern
+          
+          // Lägg till en vertikal linje som går nedåt från denna mapp till dess barn
+          '&::before': level > 0 && children.length > 0 ? {
+            content: '""',
+            position: 'absolute',
+            left: (level - 0.5) * 1.5 + 'rem',
+            top: 0,
+            bottom: 0,
+            width: '1px',
+            backgroundColor: '#B0B0B0'
+          } : {}
         }}>
           {children.map(child => (
             <FileSystemNode
