@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, List, ListItem, ListItemContent, CircularProgress, Alert } from '@mui/joy';
-import { DIRECT_API_URL } from '../../config';
+import { API_BASE_URL } from '../../config';
 
 interface DirectoryData {
   id: number;
@@ -22,7 +22,7 @@ const FolderListPage = () => {
       setError(null);
       
       try {
-        const response = await axios.get(`${DIRECT_API_URL}/files/directories/`);
+        const response = await axios.get(`${API_BASE_URL}/files/directories/`);
         // Filtrera ut bara root-mappar (de utan förälder)
         const rootDirs = response.data.results.filter((dir: DirectoryData) => dir.parent === null);
         setDirectories(rootDirs);

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert } from '@mui/joy';
-import { DIRECT_API_URL } from '../../config';
+import { API_BASE_URL } from '../../config';
 
 interface FolderData {
   name: string;
@@ -34,7 +34,7 @@ const FolderPage = () => {
       setError(null);
       
       try {
-        const response = await axios.get(`${DIRECT_API_URL}/files/web/${slug}/data/`);
+        const response = await axios.get(`${API_BASE_URL}/files/web/${slug}/data/`);
         setFolderData(response.data);
       } catch (err: any) {
         console.error('Fel vid hämtning av mappdata:', err);

@@ -95,8 +95,10 @@ const FileSystemNode = ({
           e.stopPropagation();
           if (isFolder) {
             toggleFolder(node.id);
-            // Om det är en mapp med en slug, navigera till mappens sida
-            if (node.slug) {
+            
+            // Bara navigera till mappens sida om den inte har några barn (är lägst i hierarkin)
+            const hasChildren = filesystemNodes.some(n => n.parent_id === node.id);
+            if (node.slug && !hasChildren) {
               window.location.href = `/folders/${node.slug}`;
             }
           }
