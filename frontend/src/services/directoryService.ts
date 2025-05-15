@@ -28,8 +28,12 @@ const directoryService = {
   getSidebarDirectories: async (): Promise<ApiDirectory[]> => {
     try {
       const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
-        params: { is_sidebar: true }
+        params: { is_sidebar: 'true' }
       });
+      // API svarar med en results-array om pagination är aktiverad
+      if (response.data.results) {
+        return response.data.results;
+      }
       return response.data;
     } catch (error) {
       console.error('Error fetching sidebar directories:', error);

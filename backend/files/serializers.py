@@ -2,21 +2,15 @@ from rest_framework import serializers
 from .models import File, Directory
 
 class DirectorySerializer(serializers.ModelSerializer):
-    parent_id = serializers.PrimaryKeyRelatedField(
-        queryset=Directory.objects.all(),
-        source='parent',
-        required=False,
-        allow_null=True
-    )
-
     class Meta:
         model = Directory
-        fields = ['id', 'name', 'project', 'parent', 'parent_id', 'type', 
+        fields = ['id', 'name', 'project', 'parent', 'type', 
                   'is_sidebar_item', 'created_by', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
         extra_kwargs = {
             'project': {'required': False, 'allow_null': True},
-            'created_by': {'required': False, 'allow_null': True}
+            'created_by': {'required': False, 'allow_null': True},
+            'parent': {'required': False, 'allow_null': True}
         }
     
     def create(self, validated_data):

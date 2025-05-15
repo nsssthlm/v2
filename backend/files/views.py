@@ -15,11 +15,20 @@ class DirectoryViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Allow get requests for directories without authentication for sidebar items
+        Allow requests for sidebar items without authentication
         """
         is_sidebar_request = self.request.query_params.get('is_sidebar') == 'true'
+        sidebar_create = False
         
-        if self.request.method == 'GET' and is_sidebar_request:
+        # För POST-anrop, kontrollera om is_sidebar_item är true i request data
+        if self.request.method == 'POST':
+            try:
+                if self.request.data.get('is_sidebar_item') == True:
+                    sidebar_create = True
+            except:
+                pass
+        
+        if (self.request.method == 'GET' and is_sidebar_request) or sidebar_create:
             return []  # No permissions required for sidebar items
         
         # Default to authentication required
