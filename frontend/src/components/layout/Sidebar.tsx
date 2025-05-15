@@ -316,21 +316,9 @@ const Sidebar = () => {
   // Håll reda på öppna filer/mappar i filsystemet
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   
-  // Hämta sparade mappar från localStorage när sidan laddas
-  const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>(() => {
-    // Försök hämta sparade filer/mappar från localStorage
-    const savedNodes = localStorage.getItem('filesystemNodes');
-    if (savedNodes) {
-      try {
-        return JSON.parse(savedNodes);
-      } catch (error) {
-        console.error('Fel vid läsning av sparade filer:', error);
-        return [];
-      }
-    }
-    // Inga sparade mappar, börja med en tom lista
-    return [];
-  });
+  // State för filsystemets noder från API
+  const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // State för att hantera dialogrutan för att skapa nya mappar
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
@@ -385,42 +373,80 @@ const Sidebar = () => {
     setNewFolderDialogOpen(true);
   };
   
-  // Rensa filsystemet vid första laddning
+  // Ladda sidebarobjekt från API
   useEffect(() => {
-    // Rensa allt filsystem relaterat till localStorage för att börja med ett tomt system
-    localStorage.removeItem('filesystemNodes');
-    localStorage.removeItem('fileBrowserInitialized');
-    setFilesystemNodes([]);
-  }, []);
-  
-  // Spara ändringar i filsystemet till localStorage
-  useEffect(() => {
-    localStorage.setItem('filesystemNodes', JSON.stringify(filesystemNodes));
-  }, [filesystemNodes]);
-  
-  // Skapa ny mapp
-  const createNewFolder = () => {
-    if (newFolderName.trim() === '') return;
-    
-    const newFolderId = uuidv4();
-    const newFolder: SidebarFileNode = {
-      id: newFolderId,
-      name: newFolderName.trim(),
-      type: 'folder',
-      parent_id: currentParentId
+    const loadSidebarItems = async () => {
+      setIsLoading(true);
+      try {
+        const directoriesData = await directoryService.getSidebarDirectories();
+        
+        // Konvertera från API-format till SidebarFileNode-format
+        const sidebarNodes: SidebarFileNode[] = directoriesData.map(dir => ({
+          id: dir.id.toString(),  // Konvertera till string-format
+          name: dir.name,
+          type: dir.type as 'folder' | 'file',
+          parent_id: dir.parent ? dir.parent.toString() : null,
+          db_id: dir.id
+        }));
+        
+        setFilesystemNodes(sidebarNodes);
+      } catch (error) {
+        console.error('Fel vid hämtning av mappar:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    // Uppdatera state och spara automatiskt till localStorage via useEffect
-    setFilesystemNodes(prev => [...prev, newFolder]);
-    setNewFolderDialogOpen(false);
-    setNewFolderName('');
+    loadSidebarItems();
+  }, []);
+  
+  // Skapa ny mapp via API
+  const createNewFolder = async () => {
+    if (newFolderName.trim() === '') return;
     
-    // Automatiskt öppna den nya mappen och dess föräldrar
-    openFolder(newFolderId);
+    // Om parent_id finns, konvertera från string till number för API
+    const parentDbId = currentParentId 
+      ? filesystemNodes.find(n => n.id === currentParentId)?.db_id ?? null
+      : null;
     
-    // Automatiskt öppna föräldramappen också
-    if (currentParentId) {
-      openFolder(currentParentId);
+    try {
+      // Skapa objekt för API-anrop
+      const newDirData = {
+        name: newFolderName.trim(),
+        type: 'folder',
+        is_sidebar_item: true,
+        parent: parentDbId
+      };
+      
+      // Skicka till API
+      const createdDir = await directoryService.createDirectory(newDirData);
+      
+      if (createdDir) {
+        // Konvertera från API-format och lägg till i state
+        const newFolder: SidebarFileNode = {
+          id: createdDir.id.toString(),
+          name: createdDir.name,
+          type: 'folder',
+          parent_id: createdDir.parent ? createdDir.parent.toString() : null,
+          db_id: createdDir.id
+        };
+        
+        // Uppdatera state
+        setFilesystemNodes(prev => [...prev, newFolder]);
+        
+        // Automatiskt öppna den nya mappen och dess föräldrar
+        openFolder(newFolder.id);
+        
+        // Automatiskt öppna föräldramappen också
+        if (currentParentId) {
+          openFolder(currentParentId);
+        }
+      }
+    } catch (error) {
+      console.error('Fel vid skapande av mapp:', error);
+    } finally {
+      setNewFolderDialogOpen(false);
+      setNewFolderName('');
     }
   };
 
