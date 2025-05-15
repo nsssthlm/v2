@@ -40,8 +40,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ open, onClose, pdfUrl, fileName }
             style={{
               width: '100%',
               height: '100%',
-              border: 'none'
+              border: 'none',
+              backgroundColor: '#f5f5f5'
             }}
+            onError={() => console.error("Fel vid laddning av PDF:", pdfUrl)}
           />
         </div>
         

@@ -156,8 +156,8 @@ const FolderPage = () => {
           </Typography>
         ) : (
           <List>
-            {folderData.files.map((file) => (
-              <ListItem key={file.name}>
+            {folderData.files.map((file, index) => (
+              <ListItem key={`${file.name}-${index}`}>
                 <ListItemContent>
                   <Button
                     variant="plain"
