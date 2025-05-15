@@ -3,6 +3,38 @@
  * Denna modul hanterar kommunikation med servern för PDF-lagring och hämtning
  */
 
+/**
+ * Loggar in en användare i backend
+ * @param {string} username - Användarnamn
+ * @param {string} password - Lösenord
+ * @returns {Promise<Object>} - Användarinformation vid lyckad inloggning
+ */
+async function loginUser(username, password) {
+  try {
+    const response = await fetch('/api/token/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Inloggning misslyckades: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    // Spara token i localStorage för framtida användning
+    localStorage.setItem('auth_token', data.access);
+    localStorage.setItem('refresh_token', data.refresh);
+    return data;
+  } catch (error) {
+    console.error('Inloggningsfel:', error);
+    throw error;
+  }
+}
+
 class PDFAPIService {
   /**
    * Laddar upp en PDF-fil till servern
@@ -95,7 +127,7 @@ class PDFAPIService {
    */
   static async saveAnnotation(pdfId, annotation) {
     try {
-      const response = await fetch(`http://0.0.0.0:8001/api/pdf/${pdfId}/annotations/`, {
+      const response = await fetch(`/api/pdf/${pdfId}/annotations/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +154,7 @@ class PDFAPIService {
    */
   static async getAnnotations(pdfId) {
     try {
-      const response = await fetch(`http://0.0.0.0:8001/api/pdf/${pdfId}/annotations/`, {
+      const response = await fetch(`/api/pdf/${pdfId}/annotations/`, {
         method: 'GET',
         credentials: 'include'
       });
@@ -146,11 +178,11 @@ class PDFAPIService {
    */
   static async getPDFList(folderId = null) {
     try {
-      let url = 'http://0.0.0.0:8001/api/pdf/list/';
+      let url = '/api/pdf/list/';
       
       // Om folderId är specificerat, lägg till det i URL:en
       if (folderId !== null) {
-        url = `http://0.0.0.0:8001/api/pdf/list/${folderId}/`;
+        url = `/api/pdf/list/${folderId}/`;
       }
       
       const response = await fetch(url, {
@@ -173,3 +205,4 @@ class PDFAPIService {
 
 // Exportera så den kan användas från pdf-dialog-viewer.html
 window.PDFAPIService = PDFAPIService;
+window.loginUser = loginUser;
