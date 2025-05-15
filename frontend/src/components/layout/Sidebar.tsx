@@ -59,6 +59,20 @@ const FileSystemNode = ({
   
   return (
     <>
+      {/* Vertikala guidlinjer visas för varje indenteringsnivå utom nivå 0 */}
+      {level > 0 && (
+        <Box
+          sx={{
+            position: 'absolute',
+            left: (level - 0.3) * 1.5 + 'rem', // Justerad position för att matcha horisontell
+            top: -8, // Börja ovanför elementet för en mer sammanhängande linje
+            bottom: -8, // Fortsätt under elementet
+            width: '1px',
+            bgcolor: 'rgba(160, 174, 192, 0.3)', // Ljusgrå subtil linje, något mer synlig
+            zIndex: 1
+          }}
+        />
+      )}
       <ListItem 
         sx={{ 
           mb: 0.5,
@@ -91,6 +105,21 @@ const FileSystemNode = ({
             position: 'relative'
           }}
         >
+          {/* Horisontell linje som kopplar till den vertikala linjen (för nivå > 0) */}
+          {level > 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                left: (level - 0.4) * 1.5 + 'rem', // Samma position som vertikala linjen
+                width: '0.7rem', // Längd på horisontella linjen
+                height: '1px',
+                bgcolor: 'rgba(160, 174, 192, 0.2)', // Samma färg som vertikala
+                top: '50%',
+                zIndex: 1
+              }}
+            />
+          )}
+          
           {/* Ikon för fil/mapp */}
           <Box
             sx={{
@@ -184,7 +213,10 @@ const FileSystemNode = ({
           minWidth: '200px', // Men säkerställ att vi har tillräckligt med utrymme
           position: 'relative',
           overflow: 'visible !important',
-          maxWidth: 'none !important'
+          maxWidth: 'none !important',
+          '& > div': { position: 'relative' }, // Viktigt för att linjerna ska positioneras rätt
+          pb: 0.5, // Extra padding för att linjer ska fortsätta under
+          pt: 0.5 // Padding ovan så linjer fortsätter uppåt
         }}>
           {children.map(child => (
             <FileSystemNode
