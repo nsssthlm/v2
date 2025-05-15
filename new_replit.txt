@@ -2,19 +2,7 @@ modules = ["python-3.11", "nodejs-20", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
-packages = [
-  "freetype",
-  "lcms2",
-  "libimagequant",
-  "libjpeg",
-  "libtiff",
-  "libwebp",
-  "libxcrypt",
-  "openjpeg",
-  "tcl",
-  "tk",
-  "zlib",
-]
+packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib"]
 
 [workflows]
 runButton = "Project"
@@ -26,16 +14,14 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-
-args = "backend_workflow"
+args = "frontend_workflow"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "frontend_workflow"
-
+args = "backend_workflow"
 
 [[workflows.workflow]]
-name = "backend"
+name = "backend_workflow"
 author = "agent"
 
 [[workflows.workflow.tasks]]
@@ -53,11 +39,7 @@ args = "cd frontend && vite --port 5000 --host 0.0.0.0 --strictPort"
 waitForPort = 5000
 
 [deployment]
-run = [
-  "sh",
-  "-c",
-  "cd frontend && npm install @mui/joy @emotion/react @emotion/styled @mui/material react-router-dom axios && npm install -g vite && vite --port 5000 && cd ../backend && pip install django djangorestframework django-cors-headers djangorestframework-simplejwt dj-database-url pillow && python manage.py migrate && python manage.py runserver 0.0.0.0:8000",
-]
+run = ["sh", "-c", "cd frontend && npm install @mui/joy @emotion/react @emotion/styled @mui/material react-router-dom axios && npm install -g vite && vite --port 5000 && cd ../backend && pip install django djangorestframework django-cors-headers djangorestframework-simplejwt dj-database-url pillow && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
 
 [[ports]]
 localPort = 3000

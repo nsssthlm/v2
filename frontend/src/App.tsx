@@ -1,17 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { CssVarsProvider, extendTheme } from '@mui/joy/styles';
-import CssBaseline from '@mui/joy/CssBaseline';
-import Layout from './components/layout/Layout';
-import Dashboard from './pages/dashboard/Dashboard';
-import NotFoundPage from './pages/NotFoundPage';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { CssVarsProvider, extendTheme } from "@mui/joy/styles";
+import CssBaseline from "@mui/joy/CssBaseline";
+import Layout from "./components/layout/Layout";
+import Dashboard from "./pages/dashboard/Dashboard";
+import NotFoundPage from "./pages/NotFoundPage";
 
 // Vault pages
-import HomePage from './pages/vault/home/HomePage';
-import CommentsPage from './pages/vault/comments/CommentsPage';
-import ReviewPage from './pages/vault/review/ReviewPage';
-import FilesPage from './pages/vault/files/FilesPage';
-import VersionsPage from './pages/vault/versions/VersionsPage';
-import MeetingsPage from './pages/vault/meetings/MeetingsPage';
+import HomePage from "./pages/vault/home/HomePage";
+import CommentsPage from "./pages/vault/comments/CommentsPage";
+import ReviewPage from "./pages/vault/review/ReviewPage";
+import FilesPage from "./pages/vault/files/FilesPage";
+import VersionsPage from "./pages/vault/versions/VersionsPage";
+import MeetingsPage from "./pages/vault/meetings/MeetingsPage";
 
 // Anpassa temat för att matcha bilden
 const theme = extendTheme({
@@ -19,16 +19,16 @@ const theme = extendTheme({
     light: {
       palette: {
         primary: {
-          50: '#F0F4FF',
-          100: '#DDE7FF',
-          200: '#B3C7FF',
-          300: '#89A7FF',
-          400: '#6687FF', 
-          500: '#4361EE', // Huvudfärg som matchar ValvX logotypens lila
-          600: '#3A4CD8',
-          700: '#3038C3',
-          800: '#2A25A8',
-          900: '#24168E',
+          50: "#F0F4FF",
+          100: "#DDE7FF",
+          200: "#B3C7FF",
+          300: "#89A7FF",
+          400: "#6687FF",
+          500: "#4361EE", // Huvudfärg som matchar ValvX logotypens lila
+          600: "#3A4CD8",
+          700: "#3038C3",
+          800: "#2A25A8",
+          900: "#24168E",
         },
       },
     },
@@ -39,7 +39,36 @@ const theme = extendTheme({
   },
 });
 
-function App() {
+// Sidor
+import Dashboard from "./pages/Dashboard";
+import Calendar from "./pages/Calendar";
+import MessageBoard from "./pages/MessageBoard";
+import ProjectList from "./pages/ProjectList";
+import ProjectDetails from "./pages/ProjectDetails";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Files from "./pages/Files";
+import Wiki from "./pages/Wiki";
+import Tasks from "./pages/Tasks";
+import Profile from "./pages/Profile";
+
+// Protected route-komponent
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// App-huvudkomponent
+const AppContent = () => {
   return (
     <CssVarsProvider theme={theme} defaultMode="light">
       <CssBaseline />
@@ -47,16 +76,25 @@ function App() {
         <Routes>
           {/* Redirect root to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
+
           {/* Protected routes with layout */}
           <Route element={<Layout />}>
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="projects" element={<ComingSoonPage title="Projekt" />} />
-            <Route path="tasks" element={<ComingSoonPage title="Uppgifter" />} />
+            <Route
+              path="projects"
+              element={<ComingSoonPage title="Projekt" />}
+            />
+            <Route
+              path="tasks"
+              element={<ComingSoonPage title="Uppgifter" />}
+            />
             <Route path="files" element={<ComingSoonPage title="Dokument" />} />
             <Route path="team" element={<ComingSoonPage title="Team" />} />
-            <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
-            
+            <Route
+              path="settings"
+              element={<ComingSoonPage title="Inställningar" />}
+            />
+
             {/* Vault routes */}
             <Route path="vault">
               <Route path="home" element={<HomePage />} />
@@ -67,18 +105,18 @@ function App() {
               <Route path="meetings" element={<MeetingsPage />} />
             </Route>
           </Route>
-          
+
           {/* 404 route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </CssVarsProvider>
   );
-}
+};
 
 // Simple component to show for routes not yet implemented
 const ComingSoonPage = ({ title }: { title: string }) => (
-  <div style={{ padding: '20px' }}>
+  <div style={{ padding: "20px" }}>
     <h1>{title}</h1>
     <p>Denna sida är under utveckling och kommer snart.</p>
   </div>
