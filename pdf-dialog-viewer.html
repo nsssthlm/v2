@@ -993,6 +993,8 @@
         // Visa filnamnet som feedback
         const file = files[0];
         if (file.type === 'application/pdf') {
+          // Ladda upp filen direkt till servern
+          uploadPdfFile(file);
           // Sätt titeln baserat på filnamnet
           pdfTitleInput.value = file.name.replace('.pdf', '');
           

@@ -3,13 +3,47 @@ const path = require('path');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const port = 5000;
 
+// Skapa uploads-mapp om den inte finns
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Konfigurera filuppladdningshanterare
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function(req, file, cb) {
+    // Skapa unikt filnamn med tidsstämpel och originalnamn
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'pdf-' + uniqueSuffix + '-' + file.originalname.replace(/\s+/g, '_'));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function(req, file, cb) {
+    // Acceptera endast PDF-filer
+    if (file.mimetype !== 'application/pdf') {
+      return cb(new Error('Endast PDF-filer är tillåtna!'), false);
+    }
+    cb(null, true);
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10 MB
+  }
+});
+
 // Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '15mb' })); // Öka gränsen för JSON-payload
+app.use(bodyParser.urlencoded({ extended: true, limit: '15mb' }));
 app.use(session({
   secret: 'pdf-viewer-session-secret',
   resave: false,
@@ -19,6 +53,7 @@ app.use(session({
 
 // Serve static files
 app.use(express.static(__dirname));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Intern temporär databas för användare när backenden inte är tillgänglig
 const users = [
@@ -95,14 +130,50 @@ app.get('/api/pdf/list', (req, res) => {
   res.status(200).json(pdfFiles);
 });
 
-// Spara en ny PDF
+// Ladda upp en PDF-fil
+app.post('/api/pdf/upload', upload.single('file'), (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: 'Inte inloggad' });
+  }
+  
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Ingen fil uppladdad' });
+    }
+    
+    // Skapa en referens till den uppladdade filen
+    const fileInfo = {
+      id: 'pdf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+      originalFilename: req.file.originalname,
+      filename: req.file.filename,
+      path: req.file.path,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+      uploadedBy: req.session.user.username,
+      uploaded: new Date().toLocaleString('sv-SE'),
+      serverPath: '/uploads/' + req.file.filename
+    };
+    
+    console.log('PDF uppladdad:', fileInfo.filename);
+    
+    res.status(200).json({ 
+      success: true, 
+      file: fileInfo 
+    });
+  } catch (error) {
+    console.error('Fel vid filuppladdning:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Spara metadata för en PDF
 app.post('/api/pdf/save', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ message: 'Inte inloggad' });
   }
   
   const pdfData = req.body;
-  console.log('Sparar ny PDF:', pdfData.id);
+  console.log('Sparar PDF-metadata:', pdfData.id);
   
   // Generera nytt ID om det inte finns
   if (!pdfData.id) {
@@ -116,7 +187,7 @@ app.post('/api/pdf/save', (req, res) => {
   // Kontrollera om PDF:en redan finns - uppdatera i så fall
   const existingIndex = pdfFiles.findIndex(p => p.id === pdfData.id);
   if (existingIndex !== -1) {
-    pdfFiles[existingIndex] = pdfData;
+    pdfFiles[existingIndex] = { ...pdfFiles[existingIndex], ...pdfData };
   } else {
     pdfFiles.push(pdfData);
   }
