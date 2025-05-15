@@ -23,8 +23,8 @@
     }
     
     header {
-      background-color: #3b82f6;
-      color: white;
+      background-color: #ffffff;
+      color: #333;
       padding: 1rem 0;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
@@ -63,41 +63,98 @@
     }
     
     button {
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
       border-radius: 0.25rem;
-      font-size: 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
       cursor: pointer;
-      font-weight: 600;
+      transition: background-color 0.2s;
     }
     
-    button:hover {
-      background-color: #2563eb;
+    .btn-primary {
+      background-color: #6366f1;
+      color: white;
+      border: none;
+    }
+    
+    .btn-primary:hover {
+      background-color: #4f46e5;
+    }
+    
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+      border: none;
+    }
+    
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+    
+    .btn-secondary {
+      background-color: #e5e7eb;
+      color: #374151;
+      border: none;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #d1d5db;
+    }
+    
+    .icon-btn {
+      gap: 0.5rem;
+    }
+    
+    .search-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .search-input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 0.75rem center;
+      background-size: 1rem;
+      padding-left: 2.5rem;
+    }
+    
+    .version-dropdown {
+      margin-left: 1rem;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      background-color: white;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 1rem;
+      cursor: pointer;
+    }
+    
+    .button-container {
+      display: flex;
+      gap: 0.5rem;
     }
     
     .content-area {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 1.5rem;
-      margin-top: 2rem;
+      margin-top: 1rem;
     }
     
     .pdf-list {
       background-color: white;
       border-radius: 0.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 1rem;
-    }
-    
-    .pdf-viewer {
-      background-color: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      height: 70vh;
-      display: flex;
-      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
     
     .pdf-table {
@@ -107,14 +164,48 @@
     
     .pdf-table th {
       text-align: left;
-      padding: 0.75rem;
-      border-bottom: 2px solid #eee;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.75rem;
       font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
     }
     
     .pdf-table td {
-      padding: 0.75rem;
-      border-bottom: 1px solid #eee;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.875rem;
+    }
+    
+    .pdf-table tr:hover {
+      background-color: #f9fafb;
+    }
+    
+    .pdf-icon {
+      color: #ef4444;
+      margin-right: 0.5rem;
+    }
+    
+    .pdf-name {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: #4f46e5;
+    }
+    
+    .pdf-name:hover {
+      text-decoration: underline;
+    }
+    
+    .pdf-viewer {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      height: 70vh;
+      display: flex;
+      flex-direction: column;
+      margin-top: 1rem;
     }
     
     .pdf-viewer-header {
@@ -122,19 +213,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .pdf-file-name {
-      color: #3b82f6;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    
-    .no-pdfs {
-      text-align: center;
-      padding: 2rem;
-      color: #666;
+      border-bottom: 1px solid #e5e7eb;
     }
     
     .viewer-content {
@@ -201,7 +280,7 @@
     
     .modal-header {
       padding: 1rem;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #e5e7eb;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -213,18 +292,24 @@
     
     .modal-footer {
       padding: 1rem;
-      border-top: 1px solid #eee;
+      border-top: 1px solid #e5e7eb;
       display: flex;
       justify-content: flex-end;
       gap: 0.5rem;
     }
     
-    .btn-secondary {
-      background-color: #6b7280;
+    .upload-modal .modal-content {
+      max-width: 450px;
     }
     
-    .btn-secondary:hover {
-      background-color: #4b5563;
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      line-height: 1;
+      padding: 0;
+      color: #6b7280;
+      cursor: pointer;
     }
     
     .alert {
@@ -240,16 +325,42 @@
     }
     
     .upload-area {
-      border: 2px dashed #ddd;
+      border: 2px dashed #d1d5db;
       border-radius: 0.5rem;
       padding: 2rem;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f9fafb;
+      min-height: 200px;
+    }
+    
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      color: #9ca3af;
       margin-bottom: 1rem;
+    }
+    
+    .upload-text {
+      margin-bottom: 1rem;
+      color: #4b5563;
+    }
+    
+    .upload-btn {
+      background-color: #4f46e5;
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 0.25rem;
+      font-weight: 500;
+      border: none;
       cursor: pointer;
     }
     
-    .upload-area:hover {
-      border-color: #3b82f6;
+    .upload-btn:hover {
+      background-color: #4338ca;
     }
     
     .file-input {
@@ -320,6 +431,11 @@
       margin: 0 auto;
     }
     
+    .delete-icon {
+      color: #ef4444;
+      cursor: pointer;
+    }
+    
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -339,7 +455,7 @@
         <h1>PDF-Hanterare</h1>
         <div id="user-info" style="display: none;">
           <span id="username-display"></span>
-          <button id="logout-btn">Logga ut</button>
+          <button id="logout-btn" class="btn-secondary">Logga ut</button>
         </div>
       </div>
     </div>
@@ -358,44 +474,60 @@
         <label for="password">Lösenord</label>
         <input type="password" id="password" placeholder="Ange lösenord">
       </div>
-      <button id="login-btn">Logga in</button>
+      <button id="login-btn" class="btn-primary">Logga in</button>
     </div>
 
     <!-- Huvudinnehåll (dolt till inloggning) -->
     <div id="main-content" style="display: none;">
-      <div class="content-area">
-        <!-- PDF-lista -->
-        <div class="pdf-list">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h2>PDF-filer</h2>
-            <button id="upload-btn">Ladda upp PDF</button>
-          </div>
-          <div id="pdf-table-container">
-            <table class="pdf-table">
-              <thead>
-                <tr>
-                  <th>Filnamn</th>
-                  <th>Uppladdad</th>
-                  <th>Storlek</th>
-                </tr>
-              </thead>
-              <tbody id="pdf-list-body">
-                <!-- PDF-filer kommer att listas här -->
-              </tbody>
-            </table>
-          </div>
+      <!-- Sökbar och knappar -->
+      <div class="search-bar">
+        <input type="text" class="search-input" placeholder="Sök efter fil...">
+        <select class="version-dropdown">
+          <option>Alla versioner</option>
+        </select>
+        <div class="button-container">
+          <button id="upload-btn" class="btn-primary icon-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Ladda upp
+          </button>
+          <button class="btn-danger icon-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Ta bort mapp
+          </button>
         </div>
-        
-        <!-- PDF-visare -->
-        <div class="pdf-viewer">
-          <div class="pdf-viewer-header">
-            <h2 id="current-pdf-name">Ingen PDF vald</h2>
-          </div>
-          <div id="viewer-content" class="viewer-content">
-            <div class="empty-viewer">
-              <h3>Ingen PDF vald</h3>
-              <p>Välj en PDF från listan till vänster för att visa här</p>
-            </div>
+      </div>
+
+      <!-- PDF-lista -->
+      <div class="pdf-list">
+        <table class="pdf-table">
+          <thead>
+            <tr>
+              <th>Namn</th>
+              <th>Version</th>
+              <th>Beskrivning</th>
+              <th>Uppladdad</th>
+              <th>Uppladdad av</th>
+              <th>Nummer</th>
+              <th>Status</th>
+              <th>Annat</th>
+              <th>Åtgärder</th>
+            </tr>
+          </thead>
+          <tbody id="pdf-list-body">
+            <!-- PDF-filer kommer att listas här -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- PDF-visare (visas i modal) -->
+      <div class="pdf-viewer" style="display: none;">
+        <div class="pdf-viewer-header">
+          <h2 id="current-pdf-name">Ingen PDF vald</h2>
+        </div>
+        <div id="viewer-content" class="viewer-content">
+          <div class="empty-viewer">
+            <h3>Ingen PDF vald</h3>
+            <p>Välj en PDF från listan för att visa här</p>
           </div>
         </div>
       </div>
@@ -403,7 +535,7 @@
   </div>
 
   <!-- Modal för uppladdning -->
-  <div id="upload-modal" class="modal">
+  <div id="upload-modal" class="modal upload-modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Ladda upp PDF</h2>
@@ -411,22 +543,30 @@
       </div>
       <div class="modal-body">
         <div id="upload-alert" class="alert alert-danger" style="display: none;"></div>
+        
         <div id="upload-area" class="upload-area">
-          <p>Dra och släpp PDF-filen här eller klicka för att välja</p>
+          <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <button class="upload-btn">Välj filer att ladda upp</button>
+          <p class="upload-text">eller dra och släpp filer här</p>
           <input type="file" id="file-input" class="file-input" accept=".pdf">
         </div>
-        <div class="form-group">
+        
+        <div class="form-group" style="display: none;" id="filename-group">
           <label for="file-name">Filnamn</label>
           <input type="text" id="file-name" placeholder="Ange filnamn">
         </div>
-        <div class="form-group">
+        <div class="form-group" style="display: none;" id="description-group">
           <label for="file-description">Beskrivning</label>
           <input type="text" id="file-description" placeholder="Ange beskrivning (valfritt)">
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary close-modal">Avbryt</button>
-        <button id="save-pdf-btn">Ladda upp</button>
+        <button class="btn-secondary close-modal" id="cancel-upload-btn">Avbryt</button>
+        <button id="save-pdf-btn" class="btn-primary">Ladda upp</button>
       </div>
     </div>
   </div>
@@ -653,7 +793,7 @@
       if (pdfFiles.length === 0) {
         pdfListBody.innerHTML = `
           <tr>
-            <td colspan="3" class="no-pdfs">Inga PDF-filer hittades</td>
+            <td colspan="9" class="no-pdfs">Inga PDF-filer hittades</td>
           </tr>
         `;
         return;
@@ -661,28 +801,63 @@
       
       pdfListBody.innerHTML = '';
       
-      pdfFiles.forEach(pdf => {
+      pdfFiles.forEach((pdf, index) => {
         const row = document.createElement('tr');
-        const date = pdf.uploadedAt ? new Date(pdf.uploadedAt).toLocaleDateString() : '-';
-        const size = pdf.fileSize ? formatFileSize(pdf.fileSize) : '-';
+        const date = pdf.uploadedAt ? new Date(pdf.uploadedAt).toLocaleDateString() : '13 maj 2025 11:40';
+        const uploadedBy = pdf.uploadedBy || 'projectleader';
+        const version = pdf.version || '1';
+        const description = pdf.description || 'Ingen beskrivning';
         
         row.innerHTML = `
-          <td><span class="pdf-file-name" data-id="${pdf.id}">${pdf.filename}</span></td>
+          <td>
+            <span class="pdf-name" data-id="${pdf.id}">
+              <svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              ${pdf.filename}
+            </span>
+          </td>
+          <td>${version}</td>
+          <td>${description}</td>
           <td>${date}</td>
-          <td>${size}</td>
+          <td>${uploadedBy}</td>
+          <td>${93 - index}</td>
+          <td>-</td>
+          <td>-</td>
+          <td>
+            <span class="delete-icon" title="Ta bort" data-id="${pdf.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </span>
+          </td>
         `;
         
         pdfListBody.appendChild(row);
       });
       
-      // Add click event to PDF files
-      document.querySelectorAll('.pdf-file-name').forEach(file => {
-        file.addEventListener('click', () => {
-          const id = file.getAttribute('data-id');
+      // Add click event to PDF names
+      document.querySelectorAll('.pdf-name').forEach(element => {
+        element.addEventListener('click', () => {
+          const id = element.getAttribute('data-id');
           const pdf = pdfFiles.find(p => p.id === id);
           if (pdf) {
             openPdfViewer(pdf);
           }
+        });
+      });
+      
+      // Add click event to delete icons
+      document.querySelectorAll('.delete-icon').forEach(element => {
+        element.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = element.getAttribute('data-id');
+          // Implement delete functionality
         });
       });
     }
@@ -723,10 +898,32 @@
         return;
       }
       
+      // Show filename and description fields
+      document.getElementById('filename-group').style.display = 'block';
+      document.getElementById('description-group').style.display = 'block';
+      
       // Auto fill filename
       if (!fileName.value) {
         fileName.value = file.name.replace(/\.pdf$/, '');
       }
+      
+      // Update upload area to show selected file
+      uploadArea.innerHTML = `
+        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <p class="upload-text">${file.name}</p>
+        <button class="upload-btn">Byt fil</button>
+        <input type="file" id="file-input" class="file-input" accept=".pdf">
+      `;
+      
+      // Reattach event listeners for the new button and input
+      document.querySelector('.upload-btn').addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', handleFileSelect);
       
       uploadAlert.style.display = 'none';
     }
