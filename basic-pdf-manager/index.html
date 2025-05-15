@@ -16,6 +16,102 @@
       color: #333;
     }
     
+    /* Nya PDF-visare styles - baserad på ValvX-design */
+    .pdf-view-modal .modal-content {
+      width: 95%;
+      max-width: 1200px;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .pdf-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      background: white;
+    }
+    
+    .pdf-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .pdf-header-right {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .close-button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .close-button:hover {
+      background: #f7fafc;
+    }
+    
+    .action-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .action-button:hover {
+      background: #f7fafc;
+    }
+    
+    .pdf-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .pdf-content-wrapper {
+      display: flex;
+      flex: 1;
+      background: white;
+      overflow: hidden;
+    }
+    
+    .pdf-main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .current-version-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #6366f1;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      z-index: 10;
+    }
+    
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -383,13 +479,206 @@
     }
     
     .pdf-viewer-container {
-      width: 100%;
-      height: 100%;
+      flex: 1;
+      background-color: #525659;
       overflow: auto;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       padding: 1rem;
+    }
+    
+    .pdf-navigation {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-top: 1px solid #e2e8f0;
+      background: white;
+    }
+    
+    .nav-button {
+      background: transparent;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .nav-button:hover {
+      background: #f7fafc;
+    }
+    
+    .page-info {
+      margin: 0 12px;
+      color: #4b5563;
+      font-size: 14px;
+    }
+    
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      gap: 8px;
+    }
+    
+    .zoom-button {
+      background: transparent;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .zoom-button:hover {
+      background: #f7fafc;
+    }
+    
+    #zoom-level {
+      font-size: 14px;
+      color: #4b5563;
+    }
+    
+    .download-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      margin-left: 12px;
+      cursor: pointer;
+    }
+    
+    .download-button:hover {
+      background: #4f46e5;
+    }
+    
+    .pdf-sidebar {
+      width: 320px;
+      border-left: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      background: white;
+    }
+    
+    .tab-navigation {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .tab-button {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .tab-button.active {
+      border-bottom: 2px solid #6366f1;
+      color: #6366f1;
+    }
+    
+    .tab-content {
+      padding: 16px;
+      overflow-y: auto;
+    }
+    
+    .tab-content h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+    
+    .detail-section {
+      margin-bottom: 20px;
+    }
+    
+    .detail-section h4 {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+    
+    .user-avatar-small {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+    
+    .deadline-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .version-header {
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+    
+    .version-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+    
+    .version-info {
+      flex: 1;
+    }
+    
+    .version-number {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .version-author {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .view-version-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .view-version-btn:hover {
+      background: #f7fafc;
     }
     
     .pdf-modal-controls {
@@ -571,21 +860,152 @@
     </div>
   </div>
 
-  <!-- Modal för PDF-visning -->
+  <!-- Modal för PDF-visning (ny design baserad på ValvX) -->
   <div id="pdf-view-modal" class="modal pdf-view-modal">
     <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="pdf-modal-title">PDF-visare</h2>
-        <button class="close-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div id="pdf-viewer-container" class="pdf-viewer-container">
-          <!-- PDF visas här -->
+      <div class="pdf-modal-header">
+        <div class="pdf-header-left">
+          <button class="close-button" id="close-pdf-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Stäng
+          </button>
+          <h2 id="pdf-modal-title" class="pdf-title">PDF-visare</h2>
         </div>
-        <div class="pdf-modal-controls">
-          <button id="prev-page">Föregående</button>
-          <span id="page-info" class="page-info">Sida 1 av 1</span>
-          <button id="next-page">Nästa</button>
+        <div class="pdf-header-right">
+          <button class="action-button" id="versions-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Versioner
+          </button>
+          <button class="action-button" id="markup-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            Markera område
+          </button>
+          <button class="action-button" id="new-version-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Ny version
+          </button>
+        </div>
+      </div>
+      
+      <div class="pdf-content-wrapper">
+        <div class="pdf-main-content">
+          <div class="current-version-tag">Nuvarande version</div>
+          <div id="pdf-viewer-container" class="pdf-viewer-container">
+            <!-- PDF visas här -->
+          </div>
+          
+          <div class="pdf-navigation">
+            <button id="prev-page" class="nav-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <span id="page-info" class="page-info">Sida 1 av 1</span>
+            <button id="next-page" class="nav-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+            <span class="zoom-controls">
+              <button id="zoom-out" class="zoom-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+              </button>
+              <span id="zoom-level">100%</span>
+              <button id="zoom-in" class="zoom-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <line x1="11" y1="8" x2="11" y2="14"></line>
+                  <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+              </button>
+            </span>
+            <button id="download-pdf" class="download-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Ladda ner
+            </button>
+          </div>
+        </div>
+        
+        <div class="pdf-sidebar">
+          <div class="tab-navigation">
+            <button class="tab-button active" id="details-tab">Detaljer</button>
+            <button class="tab-button" id="history-tab">Historik</button>
+            <button class="tab-button" id="comments-tab">Kommentar</button>
+          </div>
+          
+          <div class="tab-content" id="details-content">
+            <h3>PDF Anteckning</h3>
+            
+            <div class="detail-section">
+              <h4>Skapad av</h4>
+              <div class="user-info">
+                <div class="user-avatar" style="background-color: #8B5CF6;">
+                </div>
+                <span id="pdf-created-by">användarnamn</span>, <span id="pdf-created-date">15 maj 2025</span>
+              </div>
+            </div>
+            
+            <div class="detail-section">
+              <h4>Deadline</h4>
+              <div class="deadline-info">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="pdf-deadline">22 maj 2025</span>
+              </div>
+            </div>
+            
+            <div class="detail-section">
+              <h4>Granskningspaket</h4>
+              <div id="pdf-review-package">K - Granskning BH Hus 3-4</div>
+            </div>
+            
+            <div class="detail-section">
+              <h4>Typ</h4>
+              <div class="review-type">Gransknings kommentar</div>
+            </div>
+            
+            <div class="detail-section">
+              <h4>Aktivitet</h4>
+              <div id="version-activity">
+                <div class="version-header">VERSIONER</div>
+                <div class="version-item">
+                  <div class="version-info">
+                    <div class="version-number">Version 1</div>
+                    <div class="version-author">
+                      <div class="user-avatar-small" style="background-color: #8B5CF6;"></div>
+                      <span id="version-author-name">användarnamn</span>
+                    </div>
+                  </div>
+                  <button class="view-version-btn">Visa version</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

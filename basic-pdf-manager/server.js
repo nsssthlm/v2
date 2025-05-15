@@ -61,7 +61,7 @@ const users = [
   { id: 1, username: 'user@example.com', password: 'password', name: 'Project Leader' }
 ];
 
-// Simulera mapp-struktur (ersätts senare med databas)
+// Mapp-struktur (ersätts senare med databas)
 let folders = [
   {
     id: 1,
@@ -90,73 +90,7 @@ let folders = [
 ];
 
 // In-memory PDF storage (ersätts senare med databas)
-let pdfFiles = [
-  {
-    id: 'pdf_example_1',           // Unikt ID för PDF:en
-    filename: 'AAAAExempel på ritningar.pdf',
-    originalFilename: 'example1.pdf',
-    storedFilename: 'example1.pdf',
-    fileUrl: '/uploads/example1.pdf',
-    size: 1500000,
-    uploadedAt: '2025-05-13T12:17:00Z',
-    uploadedBy: 'projectleader',
-    folderId: 2,                   // Koppling till specifik mapp (Projekt A)
-    description: 'Ingen beskrivning',
-    versionNumber: 1               // Versionsnummer för dokumentet
-  },
-  {
-    id: 'pdf_example_2',
-    filename: 'AAAAExempel på ritningar.pdf',
-    originalFilename: 'example2.pdf',
-    storedFilename: 'example2.pdf',
-    fileUrl: '/uploads/example2.pdf',
-    size: 1200000,
-    uploadedAt: '2025-05-13T11:50:00Z',
-    uploadedBy: 'projectleader',
-    folderId: 2,                   // Koppling till specifik mapp (Projekt A)
-    description: 'Ingen beskrivning',
-    versionNumber: 1
-  },
-  {
-    id: 'pdf_example_3',
-    filename: 'BEAst-PDF-Guidelines-2.0 (1).pdf',
-    originalFilename: 'example3.pdf',
-    storedFilename: 'example3.pdf',
-    fileUrl: '/uploads/example3.pdf',
-    size: 950000,
-    uploadedAt: '2025-05-13T11:50:00Z',
-    uploadedBy: 'projectleader',
-    folderId: 3,                   // Koppling till specifik mapp (Projekt B)
-    description: 'Ingen beskrivning',
-    versionNumber: 1
-  },
-  {
-    id: 'pdf_example_4',
-    filename: 'BEAst-PDF-Guidelines-2.0 (1).pdf',
-    originalFilename: 'example4.pdf',
-    storedFilename: 'example4.pdf',
-    fileUrl: '/uploads/example4.pdf',
-    size: 890000,
-    uploadedAt: '2025-05-13T11:42:00Z',
-    uploadedBy: 'projectleader',
-    folderId: 3,                   // Koppling till specifik mapp (Projekt B)
-    description: 'Ingen beskrivning',
-    versionNumber: 1
-  },
-  {
-    id: 'pdf_example_5',
-    filename: 'AAAAExempel på ritningar.pdf',
-    originalFilename: 'example5.pdf',
-    storedFilename: 'example5.pdf',
-    fileUrl: '/uploads/example5.pdf',
-    size: 1050000,
-    uploadedAt: '2025-05-13T11:40:00Z',
-    uploadedBy: 'projectleader',
-    folderId: 1,                   // Koppling till huvudmappen
-    description: 'Ingen beskrivning',
-    versionNumber: 1
-  }
-];
+let pdfFiles = [];
 
 // Login endpoint
 app.post('/api/login', (req, res) => {
