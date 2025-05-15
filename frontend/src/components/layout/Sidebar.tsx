@@ -43,7 +43,7 @@ interface FileSystemNodeProps {
 }
 
 // Komponent som representerar en fil eller mapp i sidomenyn
-// Helt ombyggd komponent för att garantera fullständig klickyta
+// Helt ombyggd komponent med individuell klickyta för varje mapp
 const FileSystemNode = ({
   node,
   level,
@@ -57,6 +57,17 @@ const FileSystemNode = ({
   
   // Hitta alla barn till denna nod
   const children = filesystemNodes.filter(n => n.parent_id === node.id);
+  
+  // Hantera klick för denna specifika mapp
+  const handleClick = (event: React.MouseEvent) => {
+    // Stoppa klickhändelsen från att nå andra element
+    event.stopPropagation();
+    
+    // Växla mappstatus bara om det är en mapp
+    if (isFolder) {
+      toggleFolder(node.id);
+    }
+  };
   
   return (
     <Box
@@ -83,9 +94,9 @@ const FileSystemNode = ({
         />
       )}
 
-      {/* Hela raden är klickbar - allt är inuti onClick */}
+      {/* Den klickbara raden */}
       <Box
-        onClick={() => isFolder && toggleFolder(node.id)}
+        onClick={handleClick}
         sx={{
           pl: `calc(${level * 1.5}rem + 0.7rem)`,
           pr: 1,
@@ -172,10 +183,13 @@ const FileSystemNode = ({
       
       {/* Rekursivt visa barnens innehåll om det är en öppen mapp */}
       {isFolder && isOpen && children.length > 0 && (
-        <Box sx={{ 
-          width: '100%',
-          position: 'relative'
-        }}>
+        <Box 
+          onClick={(e) => e.stopPropagation()} // Stoppa event propagation inom barn
+          sx={{ 
+            width: '100%',
+            position: 'relative'
+          }}
+        >
           {children.map(child => (
             <FileSystemNode
               key={child.id}
