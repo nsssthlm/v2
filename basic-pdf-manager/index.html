@@ -507,9 +507,9 @@
               <th>Beskrivning</th>
               <th>Uppladdad</th>
               <th>Uppladdad av</th>
-              <th>Nummer</th>
+              <th>Mapp</th>
               <th>Status</th>
-              <th>Annat</th>
+              <th>ID</th>
               <th>Åtgärder</th>
             </tr>
           </thead>
@@ -681,6 +681,10 @@
           currentUser = data.user;
           usernameDisplay.textContent = currentUser.name || currentUser.username;
           showMainContent();
+          
+          // Ladda mapplistan först, sedan PDF-filer
+          await loadFolders();
+          createFolderSelector();
           loadPdfFiles();
         } else {
           showLoginForm();
@@ -849,12 +853,20 @@
       }
     }
     
+    // Hämta mappnamn från ID
+    function getFolderName(folderId) {
+      if (!folderId) return 'Ingen mapp';
+      
+      const folder = folderStructure.find(f => f.id === folderId);
+      return folder ? folder.name : 'Okänd mapp';
+    }
+    
     // Render PDF list
     function renderPdfList() {
       if (pdfFiles.length === 0) {
         pdfListBody.innerHTML = `
           <tr>
-            <td colspan="9" class="no-pdfs">Inga PDF-filer hittades</td>
+            <td colspan="9" class="no-pdfs">Inga PDF-filer hittades${currentFolderId ? ' i vald mapp' : ''}</td>
           </tr>
         `;
         return;
@@ -866,8 +878,9 @@
         const row = document.createElement('tr');
         const date = pdf.uploadedAt ? new Date(pdf.uploadedAt).toLocaleDateString() : '13 maj 2025 11:40';
         const uploadedBy = pdf.uploadedBy || 'projectleader';
-        const version = pdf.version || '1';
+        const version = pdf.versionNumber || 1;
         const description = pdf.description || 'Ingen beskrivning';
+        const folderName = getFolderName(pdf.folderId);
         
         row.innerHTML = `
           <td>
@@ -886,9 +899,9 @@
           <td>${description}</td>
           <td>${date}</td>
           <td>${uploadedBy}</td>
-          <td>${93 - index}</td>
+          <td>${folderName}</td>
           <td>-</td>
-          <td>-</td>
+          <td>${pdf.id}</td>
           <td>
             <span class="delete-icon" title="Ta bort" data-id="${pdf.id}">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
