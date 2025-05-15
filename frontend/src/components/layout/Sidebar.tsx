@@ -62,12 +62,12 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1.5, // Låt indenteringen fortsätta för varje nivå
-          pr: 0,
+          pl: level * 1, // Minska indenteringen för att spara horisontellt utrymme
+          pr: 1,
           position: 'relative',
           overflow: 'visible',
           display: 'block',
-          paddingRight: '20px' // Extra utrymme till höger för att säkerställa plats åt plusknappen
+          width: 'auto' // Låt elementet växa horisontellt vid behov
         }}
       >
         <ListItemButton
@@ -120,7 +120,9 @@ const FileSystemNode = ({
           }}>
             {/* Namn utan textavklippning med förhindrad radbrytning men med scrollning vid behov */}
             <Box sx={{ 
-              maxWidth: '150px', // Maxbredd för långa namn
+              maxWidth: { xs: '120px', sm: '150px' }, // Dynamisk bredd beroende på skärmstorlek
+              minWidth: '60px', // Säkerställ att vi har minst 60px bredd
+              width: `calc(180px - ${level * 10}px)`, // Minska bredden baserat på indenteringsnivå
               overflow: 'auto', // Tillåt scrolling horisontellt om texten är för lång
               mr: 2, // Fast mellanrum mellan texten och plustecknet (16px)
               '&::-webkit-scrollbar': { display: 'none' } // Göm scrollbar för renare utseende
@@ -169,8 +171,9 @@ const FileSystemNode = ({
       {/* Rekursivt visa barnens innehåll om det är en öppen mapp */}
       {isFolder && isOpen && children.length > 0 && (
         <Box sx={{ 
-          ml: 1,
-          width: '100%',
+          ml: 0.5, // Minska marginalen för att ge mer horisontellt utrymme
+          width: 'auto', // Låt den växa med innehållet
+          minWidth: '200px', // Men säkerställ att vi har tillräckligt med utrymme
           position: 'relative'
         }}>
           {children.map(child => (
