@@ -1302,15 +1302,22 @@
         loadingElement.innerHTML = '<div style="background:white; padding:20px; border-radius:5px;"><h3>Laddar upp PDF...</h3><p>Vänligen vänta</p></div>';
         document.body.appendChild(loadingElement);
         
+        // Hämta mapp-ID om det finns (kan anges från en dropdown eller annan källa)
+        // För test kan vi använda URL-parametrar, t.ex. ?folder=5 för att koppla PDF till en specifik mapp
+        const urlParams = new URLSearchParams(window.location.search);
+        const folderIdFromUrl = urlParams.get('folder');
+        
         // Förbered metadata som ska skickas till servern
         const metadata = {
-          title: pdfTitleInput.value || 'Namnlös PDF',
+          title: pdfTitleInput.value || currentPdfFile.name || 'Namnlös PDF',
           description: pdfDescriptionInput.value || '',
-          projectId: 1, // Standard-projektid (bör hämtas från användarkontexten i en riktig implementation)
-          folderId: currentFolderId || null
+          projectId: urlParams.get('project') || 1, // Standard-projektid (bör hämtas från användarkontexten i en riktig implementation)
+          folderId: folderIdFromUrl || currentFolderId || null, // Använd mappId från URL om det finns
+          uniqueId: generateUniqueId() // Generera ett unikt ID som kan användas för att identifiera PDF:en
         };
         
         console.log("Laddar upp PDF-fil till servern:", currentPdfFile.name);
+        console.log("Metadata:", metadata);
         
         try {
           // Använd API Service för att ladda upp PDF-filen till servern
@@ -1320,16 +1327,22 @@
           // Ta bort laddningsindikator
           document.body.removeChild(loadingElement);
           
+          // Uppdatera PDF-tabellen
+          loadSavedPdfs();
+          
           // Skapa nytt PDF-objekt med data från servern
           const newPdf = {
-            id: uploadResult.id || currentPdfId || generateUniqueId(),
+            id: uploadResult.id || currentPdfId || metadata.uniqueId,
+            unique_id: uploadResult.unique_id || metadata.uniqueId,
             title: uploadResult.title,
             description: uploadResult.description,
             date: uploadResult.created_at || new Date().toISOString(),
-            folderId: currentFolderId || null,
+            folderId: metadata.folderId,
             filename: currentPdfFile.name,
             version: uploadResult.version || 1,
             url: uploadResult.url,
+            size: uploadResult.size || currentPdfFile.size,
+            uploaded_by: uploadResult.uploaded_by || 'Current User',
             originalSource: 'server', // Markera att denna PDF nu finns på servern
             serverStored: true
           };
