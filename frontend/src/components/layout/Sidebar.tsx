@@ -135,7 +135,7 @@ const FileSystemNode = ({
           {/* Webbsidelänk om den har en slug */}
           {isFolder && node.slug && (
             <a 
-              href={`/api/files/web/${node.slug}/`}
+              href={`http://localhost:8000/api/files/web/${node.slug}/`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
