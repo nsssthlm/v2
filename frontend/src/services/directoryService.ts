@@ -53,14 +53,10 @@ const directoryService = {
   },
 
   // Skapa ett nytt directory
-  createDirectory: async (directory: DirectoryInput): Promise<ApiDirectory | null> => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating directory:', error);
-      return null;
-    }
+  createDirectory: async (directory: DirectoryInput): Promise<ApiDirectory> => {
+    // Vidarebefordra eventuella fel till den anropande komponenten
+    const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
+    return response.data;
   },
 
   // Uppdatera ett directory

@@ -469,8 +469,21 @@ const Sidebar = () => {
           openFolder(currentParentId);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fel vid skapande av mapp:', error);
+      
+      // Visa API-felmeddelande om det finns
+      if (error.response && error.response.data) {
+        if (error.response.data.name) {
+          alert(`Fel: ${error.response.data.name}`);
+        } else if (typeof error.response.data === 'string') {
+          alert(`Fel: ${error.response.data}`);
+        } else {
+          alert('Det gick inte att skapa mappen. Försök igen med ett annat namn.');
+        }
+      } else {
+        alert('Det gick inte att skapa mappen. Vänligen försök igen.');
+      }
     } finally {
       setNewFolderDialogOpen(false);
       setNewFolderName('');
