@@ -138,16 +138,12 @@ const FileSystemNode = ({
               {node.name}
             </Typography>
             
-            {/* Linje med fast bredd mellan texten och plusknappen */}
+            {/* Inget mellanrum mellan text och plusknapp */}
             <Box sx={{ 
-              width: '10px', // Extremt kort linje, nästan obefintlig
-              height: '1px', 
-              mx: 0.2,
-              backgroundColor: 'rgba(0,0,0,0.1)',
-              flexShrink: 0, // Förhindra att linjen krymper
-              position: 'relative', // För absolut positionering
-              zIndex: 1, // Säkerställ att linjen syns ovanför andra element
-              whiteSpace: 'nowrap'
+              width: '3px', 
+              height: '1px',
+              flexShrink: 0,
+              visibility: 'hidden' // Göm linjen helt
             }} />
           
             {/* Plusknapp med exakt samma avstånd från texten */}
@@ -783,16 +779,12 @@ const Sidebar = () => {
                         Filer
                       </Typography>
                       
-                      {/* Linje med fast bredd mellan texten och plusknappen */}
+                      {/* Inget mellanrum mellan text och plusknapp */}
                       <Box sx={{ 
-                        width: '10px', // Extremt kort linje, nästan obefintlig
-                        height: '1px', 
-                        mx: 0.2,
-                        backgroundColor: 'rgba(0,0,0,0.1)',
-                        flexShrink: 0, // Förhindra att linjen krymper
-                        position: 'relative', // För absolut positionering
-                        zIndex: 1, // Högre z-index för att synas över allt
-                        whiteSpace: 'nowrap'
+                        width: '3px', 
+                        height: '1px',
+                        flexShrink: 0,
+                        visibility: 'hidden' // Göm linjen helt
                       }} />
                     </Box>
                   </ListItemContent>
