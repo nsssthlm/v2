@@ -149,7 +149,7 @@ app.get('/api/pdfs', (req, res) => {
     ? pdfFiles 
     : pdfFiles.filter(pdf => pdf.folder === folder);
 
-  res.status(200).json(filteredPdfs);
+  res.status(200).json({ success: true, pdfs: filteredPdfs });
 });
 
 // Get specific PDF endpoint
