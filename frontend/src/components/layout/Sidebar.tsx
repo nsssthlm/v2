@@ -65,7 +65,7 @@ const FileSystemNode = ({
       <ListItem 
         sx={{ 
           mb: 0.5,
-          pl: level * 1.5 + 0.5, // Indentering för hierarkin med lite extra utrymme
+          pl: level * 1.5 + 1.2, // Mer utrymme för att undvika överlappning
           pr: 1,
           position: 'relative',
           overflow: 'visible !important',
@@ -76,16 +76,16 @@ const FileSystemNode = ({
           '&::before': level > 0 ? {
             content: '""',
             position: 'absolute',
-            left: (level - 0.5) * 1.5 + 'rem',
+            left: (level - 0.3) * 1.5 + 'rem',
             top: '50%',
-            width: '0.9rem',
+            width: '0.6rem',
             height: '1px',
             backgroundColor: '#B0B0B0'
           } : {},
           '&::after': level > 0 ? {
             content: '""',
             position: 'absolute',
-            left: (level - 0.5) * 1.5 + 'rem',
+            left: (level - 0.3) * 1.5 + 'rem',
             top: '-8px',
             bottom: '50%',
             width: '1px',
@@ -103,6 +103,11 @@ const FileSystemNode = ({
             pr: 0,
             borderRadius: '4px',
             color: 'neutral.700',
+            // Se till att texten inte går in i linjerna
+            '& > *': {
+              position: 'relative',
+              zIndex: 1
+            },
             fontSize: '0.875rem',
             display: 'flex',
             flexWrap: 'nowrap',
@@ -214,7 +219,7 @@ const FileSystemNode = ({
           '&::before': level > 0 && children.length > 0 ? {
             content: '""',
             position: 'absolute',
-            left: (level - 0.5) * 1.5 + 'rem',
+            left: (level - 0.3) * 1.5 + 'rem',
             top: 0,
             bottom: 0,
             width: '1px',
