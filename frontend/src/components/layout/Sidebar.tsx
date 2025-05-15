@@ -109,27 +109,32 @@ const FileSystemNode = ({
             </svg>
           </Box>
           
-          {/* Ny struktur med fast mellanrum mellan texten och plusknappen */}
+          {/* Ny struktur som förhindrar radbrytning mellan text och plusknapp */}
           <Box sx={{ 
             display: 'flex', 
             width: '100%',
             alignItems: 'center',
-            position: 'relative'
+            position: 'relative',
+            flexWrap: 'nowrap',
+            overflow: 'visible'
           }}>
-            {/* Namn utan textavklippning */}
-            <Typography 
-              level="body-xs" 
-              sx={{ 
-                overflow: 'visible',
-                whiteSpace: 'normal',
-                wordBreak: 'break-word',
-                display: 'inline',
-                textOverflow: 'clip',
-                mr: 2 // Fast mellanrum mellan texten och plustecknet (16px)
-              }}
-            >
-              {node.name}
-            </Typography>
+            {/* Namn utan textavklippning med förhindrad radbrytning men med scrollning vid behov */}
+            <Box sx={{ 
+              maxWidth: '150px', // Maxbredd för långa namn
+              overflow: 'auto', // Tillåt scrolling horisontellt om texten är för lång
+              mr: 2, // Fast mellanrum mellan texten och plustecknet (16px)
+              '&::-webkit-scrollbar': { display: 'none' } // Göm scrollbar för renare utseende
+            }}>
+              <Typography 
+                level="body-xs" 
+                sx={{ 
+                  whiteSpace: 'nowrap', // Förhindra radbrytning
+                  display: 'inline',
+                }}
+              >
+                {node.name}
+              </Typography>
+            </Box>
           
             {/* Plusknapp med exakt samma avstånd från texten */}
             {isFolder && (
@@ -724,8 +729,22 @@ const Sidebar = () => {
                     </svg>
                   </Box>
                   <ListItemContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <Typography level="body-sm" fontWeight={500} sx={{ mr: 2 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      width: '100%',
+                      flexWrap: 'nowrap',
+                      overflow: 'visible'
+                    }}>
+                      <Typography 
+                        level="body-sm" 
+                        fontWeight={500} 
+                        sx={{ 
+                          mr: 2,
+                          whiteSpace: 'nowrap', // Förhindra radbrytning
+                          overflow: 'visible'
+                        }}
+                      >
                         Filer
                       </Typography>
                     </Box>
