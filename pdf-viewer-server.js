@@ -95,6 +95,51 @@ app.get('/api/pdf/list', (req, res) => {
   res.status(200).json(pdfFiles);
 });
 
+// Spara en ny PDF
+app.post('/api/pdf/save', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: 'Inte inloggad' });
+  }
+  
+  const pdfData = req.body;
+  console.log('Sparar ny PDF:', pdfData.id);
+  
+  // Generera nytt ID om det inte finns
+  if (!pdfData.id) {
+    pdfData.id = 'pdf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+  }
+  
+  // Lägg till uppladdarinformation
+  pdfData.uploadedBy = req.session.user.username;
+  pdfData.uploaded = new Date().toLocaleString('sv-SE');
+  
+  // Kontrollera om PDF:en redan finns - uppdatera i så fall
+  const existingIndex = pdfFiles.findIndex(p => p.id === pdfData.id);
+  if (existingIndex !== -1) {
+    pdfFiles[existingIndex] = pdfData;
+  } else {
+    pdfFiles.push(pdfData);
+  }
+  
+  res.status(200).json({ success: true, pdf: pdfData });
+});
+
+// Hämta en specifik PDF
+app.get('/api/pdf/:id', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: 'Inte inloggad' });
+  }
+  
+  const id = req.params.id;
+  const pdf = pdfFiles.find(p => p.id === id);
+  
+  if (!pdf) {
+    return res.status(404).json({ message: 'PDF hittades inte' });
+  }
+  
+  res.status(200).json(pdf);
+});
+
 // För att testa och se om proxyn fungerar - vi skickar fortfarande vissa anrop till backend
 app.use('/api/backend', createProxyMiddleware({
   target: 'http://0.0.0.0:8001',
