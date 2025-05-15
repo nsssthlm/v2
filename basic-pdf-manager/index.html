@@ -989,8 +989,13 @@
       
       // Ladda PDF:en
       openPdf(pdf).then(() => {
-        // Lägg till eventlyssnare för zoomning och panorering efter PDF har laddats
-        setupZoomAndPan(viewerContainer);
+        console.log('PDF har laddats, väntar på att canvas ska skapas...');
+        
+        // Vänta en kort stund för att säkerställa att canvas är skapad
+        setTimeout(() => {
+          console.log('Konfigurerar zoom och panorering efter timeout');
+          setupZoomAndPan(viewerContainer);
+        }, 500);
       });
       
       // Lägg till stängningsfunktion
