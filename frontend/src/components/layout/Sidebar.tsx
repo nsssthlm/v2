@@ -74,27 +74,22 @@ const FileSystemNode = ({
       )}
       
       {/* En HTML-button istället för div för bättre klickbarhet */}
-      <button
-        type="button"
+      <div
         style={{
           backgroundColor: 'transparent',
-          border: 'none',
-          outline: 'none',
           paddingLeft: `${level * 24 + 12}px`,
           paddingRight: '8px',
           paddingTop: '4px',
           paddingBottom: '4px',
           width: '100%',
-          minWidth: '100%',
-          maxWidth: '100%',
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           cursor: isFolder ? 'pointer' : 'default',
           borderRadius: '4px',
           textAlign: 'left',
           whiteSpace: 'nowrap',
-          transition: 'background-color 0.15s',
-          position: 'relative'
+          transition: 'background-color 0.15s'
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -108,13 +103,7 @@ const FileSystemNode = ({
         }}
         title={isFolder ? "Klicka för att expandera/kollapsa" : ""}
       >
-        {/* Mappikon och namn tillsammans i ett flöde */}
-        <span style={{
-          display: 'flex',
-          alignItems: 'center',
-          width: '100%',
-          minWidth: '100%'
-        }}>
+        {/* Mappikon direkt i parent div utan extra span */}
           {/* Ikon */}
           <span style={{
             display: 'inline-flex',
@@ -183,7 +172,7 @@ const FileSystemNode = ({
             </span>
           )}
         </span>
-      </button>
+      </div>
       
       {/* Barnmappar */}
       {isFolder && isOpen && children.length > 0 && (
