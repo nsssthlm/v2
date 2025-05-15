@@ -767,10 +767,71 @@
       loginAlert.style.display = 'none';
     }
     
+    // Definiera aktuell aktiv mapp (standardvärde: visa alla)
+    let currentFolderId = null;
+    
+    // Skapa en folder-selector ovanför PDF-tabellen
+    function createFolderSelector() {
+      // Ta bort befintlig selektor om den finns
+      const existingSelector = document.getElementById('folder-filter-container');
+      if (existingSelector) {
+        existingSelector.remove();
+      }
+      
+      // Skapa ny container
+      const container = document.createElement('div');
+      container.id = 'folder-filter-container';
+      container.className = 'mb-3 d-flex align-items-center';
+      
+      // Lägg till en etikett
+      const label = document.createElement('label');
+      label.textContent = 'Visa PDFer i mapp: ';
+      label.className = 'me-2';
+      container.appendChild(label);
+      
+      // Skapa val-dropdown
+      const select = document.createElement('select');
+      select.id = 'folder-filter';
+      select.className = 'form-select';
+      
+      // Lägg till "Alla" som första alternativ
+      const allOption = document.createElement('option');
+      allOption.value = '';
+      allOption.textContent = 'Alla mappar';
+      select.appendChild(allOption);
+      
+      // Lägg till alla tillgängliga mappar från folderStructure
+      folderStructure.forEach(folder => {
+        const option = document.createElement('option');
+        option.value = folder.id;
+        option.textContent = folder.name;
+        select.appendChild(option);
+      });
+      
+      // Lyssna på ändringar av val
+      select.addEventListener('change', (e) => {
+        const selectedValue = e.target.value;
+        currentFolderId = selectedValue ? parseInt(selectedValue) : null;
+        loadPdfFiles();
+      });
+      
+      container.appendChild(select);
+      
+      // Lägg till selektorn ovanför tabellen
+      const pdfList = document.querySelector('.pdf-list');
+      pdfList.parentNode.insertBefore(container, pdfList);
+    }
+    
     // Load PDF files
     async function loadPdfFiles() {
       try {
-        const response = await fetch('/api/pdfs');
+        // Bygg URL med query parametrar vid behov
+        let url = '/api/pdfs';
+        if (currentFolderId !== null) {
+          url += `?folderId=${currentFolderId}`;
+        }
+        
+        const response = await fetch(url);
         const data = await response.json();
         
         if (data.success) {
@@ -928,6 +989,53 @@
       uploadAlert.style.display = 'none';
     }
     
+    // Ladda in mappstruktur för att kunna välja destination
+    let folderStructure = [];
+    
+    async function loadFolders() {
+      try {
+        const response = await fetch('/api/folders');
+        const data = await response.json();
+        
+        if (data.success) {
+          folderStructure = data.folders || [];
+          // Skapa dropdown-lista för val av mapp
+          const folderSelect = document.createElement('select');
+          folderSelect.id = 'folder-select';
+          folderSelect.className = 'form-control';
+          
+          folderStructure.forEach(folder => {
+            const option = document.createElement('option');
+            option.value = folder.id;
+            option.textContent = folder.name;
+            folderSelect.appendChild(option);
+          });
+          
+          // Lägg till select i ett form-group
+          const folderGroup = document.createElement('div');
+          folderGroup.className = 'form-group';
+          folderGroup.id = 'folder-group';
+          
+          const label = document.createElement('label');
+          label.setAttribute('for', 'folder-select');
+          label.textContent = 'Mapp';
+          
+          folderGroup.appendChild(label);
+          folderGroup.appendChild(folderSelect);
+          
+          // Lägg till efter description-gruppen
+          const descriptionGroup = document.getElementById('description-group');
+          if (descriptionGroup.nextSibling) {
+            descriptionGroup.parentNode.insertBefore(folderGroup, descriptionGroup.nextSibling);
+          } else {
+            descriptionGroup.parentNode.appendChild(folderGroup);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading folders:', error);
+      }
+    }
+    
     // Upload PDF
     async function uploadPdf() {
       if (!fileInput.files || fileInput.files.length === 0) {
@@ -952,6 +1060,12 @@
         formData.append('file', file);
         formData.append('title', fileName.value);
         formData.append('description', fileDescription.value);
+        
+        // Lägg till mapp-ID om tillgängligt
+        const folderSelect = document.getElementById('folder-select');
+        if (folderSelect) {
+          formData.append('folderId', folderSelect.value);
+        }
         
         const response = await fetch('/api/upload', {
           method: 'POST',
