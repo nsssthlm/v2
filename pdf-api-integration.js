@@ -11,6 +11,8 @@
  */
 async function loginUser(username, password) {
   try {
+    console.log("Försöker logga in användaren:", username);
+    // Använda Django REST Framework's token-autentisering
     const response = await fetch('/api/token/', {
       method: 'POST',
       headers: {
