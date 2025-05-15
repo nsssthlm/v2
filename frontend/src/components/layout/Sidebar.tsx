@@ -62,18 +62,18 @@ const FileSystemNode = ({
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
 
       
-      {/* En enkel linje från undermappen till övermappen: bara ett enkelt L */}
+      {/* En enkel horisontell linje från undermappen till övermappen */}
       {level > 0 && (
         <Box
           sx={{
             position: 'absolute',
-            left: `${(level - 0.2) * 1.5}rem`,
-            top: '0.9rem',
-            width: '8px',
-            height: '8px',
-            borderLeft: '1px solid #B0B0B0',
-            borderBottom: '1px solid #B0B0B0',
-            pointerEvents: 'none'
+            left: `${(level - 0.3) * 1.5}rem`,
+            top: '1.1rem',
+            width: '12px',
+            height: '1px', 
+            backgroundColor: '#B0B0B0',
+            pointerEvents: 'none',
+            zIndex: 1
           }}
         />
       )}
