@@ -29,8 +29,8 @@ class PDFAPIService {
         requestData.file_id = metadata.fileId;
       }
       
-      // Skicka till API
-      const response = await fetch('/pdf/upload/', {
+      // Skicka till API via proxy
+      const response = await fetch('/api/pdf/upload/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ class PDFAPIService {
    */
   static async getPDFContent(pdfId) {
     try {
-      const response = await fetch(`/pdf/${pdfId}/content/`, {
+      const response = await fetch(`/api/pdf/${pdfId}/content/`, {
         method: 'GET',
         credentials: 'include' // Inkludera cookies för autentisering
       });
@@ -95,7 +95,7 @@ class PDFAPIService {
    */
   static async saveAnnotation(pdfId, annotation) {
     try {
-      const response = await fetch(`/pdf/${pdfId}/annotations/`, {
+      const response = await fetch(`http://0.0.0.0:8001/api/pdf/${pdfId}/annotations/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ class PDFAPIService {
    */
   static async getAnnotations(pdfId) {
     try {
-      const response = await fetch(`/pdf/${pdfId}/annotations/`, {
+      const response = await fetch(`http://0.0.0.0:8001/api/pdf/${pdfId}/annotations/`, {
         method: 'GET',
         credentials: 'include'
       });
@@ -146,11 +146,11 @@ class PDFAPIService {
    */
   static async getPDFList(folderId = null) {
     try {
-      let url = '/pdf/list/';
+      let url = 'http://0.0.0.0:8001/api/pdf/list/';
       
       // Om folderId är specificerat, lägg till det i URL:en
       if (folderId !== null) {
-        url = `/pdf/list/${folderId}/`;
+        url = `http://0.0.0.0:8001/api/pdf/list/${folderId}/`;
       }
       
       const response = await fetch(url, {
