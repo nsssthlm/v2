@@ -21,25 +21,23 @@ class DirectoryViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Allow requests for sidebar items without authentication
+        Allow GET requests without authentication for testing purposes
         """
-        is_sidebar_request = self.request.query_params.get('is_sidebar') == 'true'
-        sidebar_create = False
+        if self.request.method == 'GET':
+            return []  # Tillåt alla GET-förfrågningar utan autentisering
         
         # För POST-anrop, kontrollera om is_sidebar_item är true i request data
+        sidebar_create = False
         if self.request.method == 'POST':
             try:
                 if self.request.data.get('is_sidebar_item') == True:
                     sidebar_create = True
             except:
                 pass
-        
+                
         # Tillåt DELETE-anrop utan autentisering (för att rensa mappar)
-        if self.request.method == 'DELETE':
+        if self.request.method == 'DELETE' or sidebar_create:
             return []
-        
-        if (self.request.method == 'GET' and is_sidebar_request) or sidebar_create:
-            return []  # No permissions required for sidebar items
         
         # Default to authentication required
         return [permissions.IsAuthenticated()]
@@ -100,6 +98,16 @@ class FileViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name']
     ordering_fields = ['name', 'created_at', 'size']
+    
+    def get_permissions(self):
+        """
+        Allow GET requests without authentication for testing purposes
+        """
+        if self.request.method == 'GET':
+            return []  # Tillåt alla GET-förfrågningar utan autentisering
+        
+        # Default to authentication required
+        return [permissions.IsAuthenticated()]
     
     def get_queryset(self):
         """Filter files by project and directory"""
