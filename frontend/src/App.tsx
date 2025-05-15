@@ -13,6 +13,10 @@ import FilesPage from './pages/vault/files/FilesPage';
 import VersionsPage from './pages/vault/versions/VersionsPage';
 import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 
+// Folder pages
+import FolderPage from './pages/folders/FolderPage';
+import FolderListPage from './pages/folders/FolderListPage';
+
 // Anpassa temat för att matcha bilden
 const theme = extendTheme({
   colorSchemes: {
@@ -56,6 +60,10 @@ function App() {
             <Route path="files" element={<ComingSoonPage title="Dokument" />} />
             <Route path="team" element={<ComingSoonPage title="Team" />} />
             <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
+            
+            {/* Folder routes */}
+            <Route path="folders" element={<FolderListPage />} />
+            <Route path="folders/:slug" element={<FolderPage />} />
             
             {/* Vault routes */}
             <Route path="vault">

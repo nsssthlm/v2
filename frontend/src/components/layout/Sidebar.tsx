@@ -135,10 +135,13 @@ const FileSystemNode = ({
           {/* Webbsidelänk om den har en slug */}
           {isFolder && node.slug && (
             <a 
-              href={`http://localhost:8000/api/files/web/${node.slug}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              href={`/folders/${node.slug}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                // Här skulle vi navigera till den interna sidan
+                window.location.href = `/folders/${node.slug}`;
+              }}
               style={{
                 marginLeft: '8px',
                 fontSize: '0.75rem',
