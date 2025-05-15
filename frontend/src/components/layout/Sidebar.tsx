@@ -439,8 +439,10 @@ const Sidebar = () => {
         parent: parentDbId
       };
       
-      // Skicka till API
+      // Skicka till API (med extra loggning)
+      console.log('Försöker skapa ny mapp med data:', newDirData);
       const createdDir = await directoryService.createDirectory(newDirData);
+      console.log('Mapp skapad med data:', createdDir);
       
       if (createdDir) {
         // Konvertera från API-format och lägg till i state

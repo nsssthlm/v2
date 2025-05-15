@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, DIRECT_API_URL } from '../config';
 
 // Interface för Directory/Filsystemsobjekt
 export interface ApiDirectory {
@@ -27,14 +27,33 @@ const directoryService = {
   // Hämta alla directorys för sidebar
   getSidebarDirectories: async (): Promise<ApiDirectory[]> => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
-        params: { is_sidebar: 'true' }
-      });
-      // API svarar med en results-array om pagination är aktiverad
-      if (response.data.results) {
-        return response.data.results;
+      // Försök först med vanlig proxy-anslutning
+      try {
+        const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
+          params: { is_sidebar: 'true' }
+        });
+        // API svarar med en results-array om pagination är aktiverad
+        if (response.data.results) {
+          return response.data.results;
+        }
+        return response.data;
+      } catch (proxyError) {
+        console.warn('Kunde inte hämta mappar via proxy, försöker med direkt anslutning', proxyError);
+        
+        // Om det misslyckas, försök med direkt anslutning
+        const directResponse = await axios.get(`${DIRECT_API_URL}/files/directories/`, {
+          params: { is_sidebar: 'true' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (directResponse.data.results) {
+          return directResponse.data.results;
+        }
+        return directResponse.data;
       }
-      return response.data;
     } catch (error) {
       console.error('Error fetching sidebar directories:', error);
       return [];
@@ -55,9 +74,25 @@ const directoryService = {
   // Skapa ett nytt directory
   createDirectory: async (directory: DirectoryInput): Promise<ApiDirectory> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
-      return response.data;
-    } catch (error) {
+      // Försök först med vanlig proxy-anslutning
+      try {
+        const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
+        console.log('Mapp skapad via API_BASE_URL:', response.data);
+        return response.data;
+      } catch (proxyError: any) {
+        console.warn('Kunde inte skapa mapp via proxy, försöker med direkt anslutning', proxyError);
+        
+        // Om det misslyckas, försök med direkt anslutning
+        const directResponse = await axios.post(`${DIRECT_API_URL}/files/directories/`, directory, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        console.log('Mapp skapad via DIRECT_API_URL:', directResponse.data);
+        return directResponse.data;
+      }
+    } catch (error: any) {
       console.error('Fel vid skapande av mapp:', error);
       // För att underlätta debugging - visa mer detaljer i konsollen
       if (error.response) {
