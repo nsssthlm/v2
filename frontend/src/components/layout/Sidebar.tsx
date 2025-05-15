@@ -135,7 +135,7 @@ const FileSystemNode = ({
           {/* Webbsidelänk om den har en slug */}
           {isFolder && node.slug && (
             <a 
-              href={`http://0.0.0.0:8000/api/files/web/${node.slug}/`}
+              href={`/api/files/web/${node.slug}/`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
@@ -224,6 +224,7 @@ interface SidebarFileNode {
   parent_id: string | null;
   children?: SidebarFileNode[];
   db_id?: number;  // ID från databasen
+  slug?: string;   // Slug för webbadress
 }
 
 // Define top-level menu items
@@ -414,7 +415,8 @@ const Sidebar = () => {
           name: dir.name,
           type: dir.type as 'folder' | 'file',
           parent_id: dir.parent ? dir.parent.toString() : null,
-          db_id: dir.id
+          db_id: dir.id,
+          slug: dir.slug || undefined
         }));
         
         setFilesystemNodes(sidebarNodes);
@@ -470,7 +472,8 @@ const Sidebar = () => {
           name: createdDir.name,
           type: 'folder' as 'folder' | 'file',
           parent_id: createdDir.parent ? createdDir.parent.toString() : null,
-          db_id: createdDir.id
+          db_id: createdDir.id,
+          slug: createdDir.slug || undefined
         };
         
         // Uppdatera state
