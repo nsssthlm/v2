@@ -840,9 +840,7 @@
     // PDF viewer event listeners
     prevPageBtn.addEventListener('click', previousPage);
     nextPageBtn.addEventListener('click', nextPage);
-    pdfViewClose.addEventListener('click', function() {
-      pdfViewModal.classList.remove('active');
-    });
+    pdfViewClose.addEventListener('click', closePdfViewModal);
     
     // Logga in/ut
     async function checkLoginStatus() {
