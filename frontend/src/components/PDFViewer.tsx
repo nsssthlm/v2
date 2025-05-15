@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, ModalDialog, ModalClose, Typography } from '@mui/joy';
+import React, { useEffect } from 'react';
+import { Modal, ModalDialog, ModalClose, Typography, Button } from '@mui/joy';
 
 interface PDFViewerProps {
   open: boolean;
@@ -9,6 +9,18 @@ interface PDFViewerProps {
 }
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ open, onClose, pdfUrl, fileName }) => {
+  // När komponenten visas, logga URL:en
+  useEffect(() => {
+    if (open) {
+      console.log("Visar PDF:", pdfUrl);
+    }
+  }, [open, pdfUrl]);
+
+  // Öppna PDF i ny flik som reservalternativ
+  const openInNewTab = () => {
+    window.open(pdfUrl, '_blank');
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <ModalDialog
@@ -21,15 +33,26 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ open, onClose, pdfUrl, fileName }
           {fileName}
         </Typography>
         
-        <iframe
-          title={`${fileName} PDF`}
-          src={pdfUrl}
-          style={{
-            width: '100%',
-            height: 'calc(100% - 50px)',
-            border: 'none'
-          }}
-        />
+        <div style={{ position: 'relative', width: '100%', height: 'calc(100% - 80px)' }}>
+          <iframe
+            title={`${fileName} PDF`}
+            src={pdfUrl}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none'
+            }}
+          />
+        </div>
+        
+        <Button 
+          onClick={openInNewTab}
+          variant="outlined" 
+          color="neutral" 
+          sx={{ mt: 1 }}
+        >
+          Öppna i ny flik
+        </Button>
       </ModalDialog>
     </Modal>
   );

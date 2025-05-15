@@ -33,6 +33,12 @@ const FolderPage = () => {
   
   // PDF-visare
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
+  
+  // Hantera klick på PDF-filer
+  const handlePdfClick = (fileUrl: string, fileName: string) => {
+    console.log("Öppnar PDF:", fileUrl, fileName);
+    setSelectedPdf({ url: fileUrl, name: fileName });
+  };
 
   const fetchFolderData = async () => {
     setLoading(true);
@@ -156,7 +162,7 @@ const FolderPage = () => {
                   <Button
                     variant="plain"
                     color="neutral"
-                    onClick={() => setSelectedPdf({ url: file.file, name: file.name })}
+                    onClick={() => handlePdfClick(file.file, file.name)}
                     sx={{ 
                       justifyContent: 'flex-start', 
                       textAlign: 'left', 
