@@ -125,6 +125,8 @@ const FileSystemNode = ({
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                minWidth: '50px', // Minsta bredd för alla texter
+                maxWidth: '70px', // Maxbredd för att förhindra för långa namn
                 width: '60px', // Fast bredd för alla texter
                 flexShrink: 0
               }}
@@ -134,11 +136,12 @@ const FileSystemNode = ({
             
             {/* Linje med fast bredd mellan texten och plusknappen */}
             <Box sx={{ 
-              width: '100px', // Fast bredd för alla linjer
+              width: '220px', // Ännu längre fast bredd för alla linjer
               height: '1px', 
               mx: 1,
-              bgcolor: 'rgba(0,0,0,0.1)',
-              flexShrink: 0 // Förhindra att linjen krymper
+              backgroundColor: 'rgba(0,0,0,0.1)',
+              flexShrink: 0, // Förhindra att linjen krymper
+              position: 'relative' // För absolut positionering
             }} />
           
             {/* Plusknapp med exakt samma avstånd från texten */}
@@ -756,11 +759,12 @@ const Sidebar = () => {
                       
                       {/* Linje med fast bredd mellan texten och plusknappen */}
                       <Box sx={{ 
-                        width: '100px', // Fast bredd för alla linjer
+                        width: '220px', // Ännu längre fast bredd för alla linjer
                         height: '1px', 
                         mx: 1,
-                        bgcolor: 'rgba(0,0,0,0.1)',
-                        flexShrink: 0 // Förhindra att linjen krymper
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        flexShrink: 0, // Förhindra att linjen krymper
+                        position: 'relative' // För absolut positionering
                       }} />
                     </Box>
                   </ListItemContent>
