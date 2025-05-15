@@ -987,9 +987,9 @@
     // Öppna PDF
     async function openPdf(pdf) {
       currentPdf = pdf;
-      viewerTitle.textContent = pdf.filename;
       
       // Visa laddningsindikator
+      const viewerContainer = document.getElementById('viewer-container');
       viewerContainer.innerHTML = `
         <div class="spinner-container">
           <div class="spinner"></div>
@@ -998,8 +998,25 @@
       
       try {
         // Ladda PDF från server
-        const loadingTask = pdfjsLib.getDocument(pdf.fileUrl);
+        console.log('Laddar PDF från URL:', pdf.fileUrl);
+        
+        // Se till att vi har en full URL för PDF-filen
+        let pdfUrl = pdf.fileUrl;
+        if (!pdfUrl.startsWith('http')) {
+          // Om det är en relativ sökväg, se till att vi har full URL
+          pdfUrl = window.location.origin + pdfUrl;
+        }
+        
+        console.log('Full PDF URL:', pdfUrl);
+        
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        
+        loadingTask.onProgress = function(progress) {
+          console.log('Laddningsstatus:', progress.loaded, 'av', (progress.total || '?'));
+        };
+        
         pdfDoc = await loadingTask.promise;
+        console.log('PDF laddad, antal sidor:', pdfDoc.numPages);
         
         // Återställ sidnummer
         currentPage = 1;
@@ -1023,21 +1040,38 @@
     
     // Rendera en sida i PDF:en
     function renderPage(num) {
+      if (!pdfDoc) {
+        console.error('Inget PDF-dokument laddat');
+        return;
+      }
+      
       pageRendering = true;
       
+      // Hämta referens till viewer-container
+      const viewerContainer = document.getElementById('viewer-container');
+      
       // Visa laddningsindikator
-      const spinnerContainer = document.createElement('div');
-      spinnerContainer.className = 'spinner-container';
-      spinnerContainer.innerHTML = '<div class="spinner"></div>';
-      viewerContainer.appendChild(spinnerContainer);
+      let spinnerContainer = viewerContainer.querySelector('.spinner-container');
+      if (!spinnerContainer) {
+        spinnerContainer = document.createElement('div');
+        spinnerContainer.className = 'spinner-container';
+        spinnerContainer.innerHTML = '<div class="spinner"></div>';
+        viewerContainer.appendChild(spinnerContainer);
+      }
       
       // Hämta sidan
+      console.log('Hämtar sida', num, 'av', pdfDoc.numPages);
+      
       pdfDoc.getPage(num).then(function(page) {
+        console.log('Sida hämtad, skapar canvas...');
+        
         // Beräkna skala för att passa bredden
         const containerWidth = viewerContainer.clientWidth - 40; // Ta hänsyn till padding
         const viewport = page.getViewport({ scale: 1 });
         const scale = containerWidth / viewport.width;
         const scaledViewport = page.getViewport({ scale: scale });
+        
+        console.log('Beräknad skala:', scale, 'för containerWidth:', containerWidth);
         
         // Skapa canvas om det inte finns
         let canvas = document.getElementById('pdf-canvas');
@@ -1045,14 +1079,20 @@
           canvas = document.createElement('canvas');
           canvas.id = 'pdf-canvas';
           
-          // Ta bort befintligt innehåll
+          // Ta bort befintligt innehåll förutom spinner
+          const spinner = viewerContainer.querySelector('.spinner-container');
           viewerContainer.innerHTML = '';
           viewerContainer.appendChild(canvas);
+          if (spinner) {
+            viewerContainer.appendChild(spinner);
+          }
         }
         
         const context = canvas.getContext('2d');
         canvas.height = scaledViewport.height;
         canvas.width = scaledViewport.width;
+        
+        console.log('Canvas skapad, storlek:', canvas.width, 'x', canvas.height);
         
         // Rendera PDF-sidan
         const renderContext = {
@@ -1060,10 +1100,12 @@
           viewport: scaledViewport
         };
         
+        console.log('Renderar sida...');
         const renderTask = page.render(renderContext);
         
         // Vänta på att renderingen ska slutföras
         renderTask.promise.then(function() {
+          console.log('Rendering klar');
           pageRendering = false;
           
           // Ta bort laddningsindikator
@@ -1077,10 +1119,30 @@
             renderPage(pageNumPending);
             pageNumPending = null;
           }
+        }).catch(function(error) {
+          console.error('Fel vid rendering av sida:', error);
+          pageRendering = false;
         });
         
         // Uppdatera sidkontroller
         updatePageControls();
+      }).catch(function(error) {
+        console.error('Fel vid hämtning av sida:', error);
+        pageRendering = false;
+        
+        // Ta bort laddningsindikator
+        const spinner = viewerContainer.querySelector('.spinner-container');
+        if (spinner) {
+          spinner.remove();
+        }
+        
+        viewerContainer.innerHTML = `
+          <div class="viewer-placeholder">
+            <div class="icon-placeholder">❌</div>
+            <h3>Kunde inte ladda sidan</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
       });
     }
     
