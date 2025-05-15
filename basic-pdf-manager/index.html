@@ -756,6 +756,13 @@
     let scale = 1.0;
     let pdfDeleting = null;
     
+    // Variabler för zoomning och panorering
+    let isDragging = false;
+    let startX, startY;
+    let viewportPosition = { x: 0, y: 0 };
+    let minScale = 0.5;
+    let maxScale = 3.0;
+    
     // Kontrollera inloggningsstatus vid sidladdning
     document.addEventListener('DOMContentLoaded', checkLoginStatus);
     
@@ -967,9 +974,14 @@
     function openPdfModal(pdf) {
       const pdfViewModal = document.getElementById('pdf-view-modal');
       const pdfModalTitle = document.getElementById('pdf-modal-title');
+      const viewerContainer = document.getElementById('viewer-container');
       
       // Sätt titeln på modal-fönstret
       pdfModalTitle.textContent = pdf.filename;
+      
+      // Återställ zoomning och panorering
+      scale = 1.0;
+      viewportPosition = { x: 0, y: 0 };
       
       // Visa modal-fönstret
       pdfViewModal.classList.add('active');
@@ -982,6 +994,92 @@
       closeBtn.addEventListener('click', () => {
         pdfViewModal.classList.remove('active');
       });
+      
+      // Lägg till eventlyssnare för zoomning och panorering
+      setupZoomAndPan(viewerContainer);
+    }
+    
+    // Konfigurera zoom och panorering för PDF-visaren
+    function setupZoomAndPan(container) {
+      if (!container) return;
+      
+      // Ta bort eventuella tidigare lyssnare först
+      container.onwheel = null;
+      container.onmousedown = null;
+      container.onmousemove = null;
+      container.onmouseup = null;
+      container.onmouseleave = null;
+      
+      // Zooma med scrollhjulet när CTRL är nedtryckt
+      container.onwheel = function(e) {
+        // Endast zooma om CTRL är nedtryckt
+        if (e.ctrlKey) {
+          e.preventDefault();
+          
+          const oldScale = scale;
+          
+          // Ändra skalan baserat på scrollriktningen
+          if (e.deltaY < 0) {
+            scale = Math.min(maxScale, scale * 1.1); // Zooma in
+          } else {
+            scale = Math.max(minScale, scale / 1.1); // Zooma ut
+          }
+          
+          // Beräkna musposition relativt till containern
+          const rect = container.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          
+          // Justera viewportPosition så att musen förblir över samma punkt i dokumentet
+          const scaleFactor = scale / oldScale;
+          viewportPosition.x = mouseX - (mouseX - viewportPosition.x) * scaleFactor;
+          viewportPosition.y = mouseY - (mouseY - viewportPosition.y) * scaleFactor;
+          
+          // Rita om med ny skala
+          if (!pageRendering && pdfDoc) {
+            renderPage(currentPage);
+          }
+        }
+      };
+      
+      // Panorering med musklick och dra
+      container.onmousedown = function(e) {
+        // Kontrollera att vi klickar på canvas, inte på andra element
+        if (e.target.tagName.toLowerCase() === 'canvas') {
+          isDragging = true;
+          startX = e.clientX - viewportPosition.x;
+          startY = e.clientY - viewportPosition.y;
+          container.style.cursor = 'grabbing';
+          e.preventDefault();
+        }
+      };
+      
+      container.onmousemove = function(e) {
+        if (isDragging) {
+          viewportPosition.x = e.clientX - startX;
+          viewportPosition.y = e.clientY - startY;
+          
+          // Uppdatera canvas-position
+          const canvas = document.getElementById('pdf-canvas');
+          if (canvas) {
+            canvas.style.transform = `translate(${viewportPosition.x}px, ${viewportPosition.y}px)`;
+          }
+        }
+      };
+      
+      container.onmouseup = function(e) {
+        if (isDragging) {
+          isDragging = false;
+          container.style.cursor = 'default';
+        }
+      };
+      
+      container.onmouseleave = function(e) {
+        if (isDragging) {
+          isDragging = false;
+          container.style.cursor = 'default';
+        }
+      };
     }
     
     // Öppna PDF
@@ -1068,10 +1166,17 @@
         // Beräkna skala för att passa bredden
         const containerWidth = viewerContainer.clientWidth - 40; // Ta hänsyn till padding
         const viewport = page.getViewport({ scale: 1 });
-        const scale = containerWidth / viewport.width;
-        const scaledViewport = page.getViewport({ scale: scale });
         
-        console.log('Beräknad skala:', scale, 'för containerWidth:', containerWidth);
+        // Använd antingen den globala skalan (från zoomning) eller beräkna en som passar containern
+        let effectiveScale = scale;
+        if (scale === 1.0) {
+          // Om ingen användarinducerad zoom har skett, anpassa till containern
+          effectiveScale = containerWidth / viewport.width;
+        }
+        
+        const scaledViewport = page.getViewport({ scale: effectiveScale });
+        
+        console.log('Beräknad skala:', effectiveScale, 'för containerWidth:', containerWidth);
         
         // Skapa canvas om det inte finns
         let canvas = document.getElementById('pdf-canvas');
@@ -1088,9 +1193,30 @@
           }
         }
         
+        // Applicera den aktuella transformationen för panorering
+        canvas.style.transform = `translate(${viewportPosition.x}px, ${viewportPosition.y}px)`;
+        canvas.style.transformOrigin = '0 0';
+        
+        // Lägg till ett wrapper-element om det inte finns, för korrekt scrollning
+        let canvasWrapper = document.getElementById('canvas-wrapper');
+        if (!canvasWrapper) {
+          canvasWrapper = document.createElement('div');
+          canvasWrapper.id = 'canvas-wrapper';
+          canvasWrapper.style.position = 'relative';
+          canvasWrapper.style.width = '100%';
+          canvasWrapper.style.height = '100%';
+          canvasWrapper.style.overflow = 'auto';
+          canvas.parentNode.replaceChild(canvasWrapper, canvas);
+          canvasWrapper.appendChild(canvas);
+        }
+        
         const context = canvas.getContext('2d');
         canvas.height = scaledViewport.height;
         canvas.width = scaledViewport.width;
+        
+        // Ge canvas en lämplig stil för att stödja panorering
+        canvas.style.position = 'absolute';
+        canvas.style.cursor = 'grab';
         
         console.log('Canvas skapad, storlek:', canvas.width, 'x', canvas.height);
         
