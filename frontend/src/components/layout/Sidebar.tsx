@@ -818,6 +818,11 @@ const Sidebar = () => {
                   width: '100%',
                   overflowY: 'auto',
                   overflowX: 'visible',
+                  position: 'relative',
+                  '& > ul': { 
+                    overflow: 'visible !important',
+                    width: 'auto !important'
+                  },
                   scrollbarWidth: 'thin',
                   '&::-webkit-scrollbar': {
                     width: '4px',
