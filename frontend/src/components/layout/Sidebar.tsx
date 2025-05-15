@@ -131,6 +131,29 @@ const FileSystemNode = ({
           flexGrow: 1
         }}>
           {node.name}
+          
+          {/* Webbsidelänk om den har en slug */}
+          {isFolder && node.slug && (
+            <a 
+              href={`http://0.0.0.0:8000/api/files/web/${node.slug}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                marginLeft: '8px',
+                fontSize: '0.75rem',
+                color: '#3182ce',
+                textDecoration: 'none'
+              }}
+            >
+              <span style={{ fontSize: '10px', verticalAlign: 'middle', marginRight: '2px' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+                </svg>
+              </span>
+              Sida
+            </a>
+          )}
         </span>
       
         {/* Plusknapp - nu inom namnspannet men med stopPropagation för att undvika hoverproblem*/}

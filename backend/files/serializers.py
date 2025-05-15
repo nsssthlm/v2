@@ -4,13 +4,16 @@ from .models import File, Directory
 class DirectorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Directory
-        fields = ['id', 'name', 'project', 'parent', 'type', 
-                  'is_sidebar_item', 'created_by', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'slug', 'project', 'parent', 'type', 
+                  'is_sidebar_item', 'created_by', 'created_at', 'updated_at',
+                  'page_title', 'page_description', 'has_page']
+        read_only_fields = ['id', 'slug', 'created_at', 'updated_at']
         extra_kwargs = {
             'project': {'required': False, 'allow_null': True},
             'created_by': {'required': False, 'allow_null': True},
-            'parent': {'required': False, 'allow_null': True}
+            'parent': {'required': False, 'allow_null': True},
+            'page_title': {'required': False, 'allow_null': True},
+            'page_description': {'required': False, 'allow_null': True}
         }
     
     def validate(self, data):

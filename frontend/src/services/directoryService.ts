@@ -5,6 +5,7 @@ import { API_BASE_URL, DIRECT_API_URL } from '../config';
 export interface ApiDirectory {
   id: number;
   name: string;
+  slug: string | null;
   parent: number | null;
   project: number | null;
   type: string;
