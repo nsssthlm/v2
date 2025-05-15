@@ -169,14 +169,14 @@ const FolderPage = () => {
         <Button 
           variant="outlined" 
           color="neutral"
-          onClick={() => navigate(`/folders/${slug}/edit`)}
+          onClick={() => window.open(`/api/files/web/${slug}/edit/`, '_blank')}
         >
           Redigera sida
         </Button>
         <Button 
           variant="solid" 
           color="primary"
-          onClick={() => navigate(`/folders/${slug}/upload`)}
+          onClick={() => window.open(`/api/files/web/${slug}/upload/`, '_blank')}
         >
           Ladda upp PDF
         </Button>
