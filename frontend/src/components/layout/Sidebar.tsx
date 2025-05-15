@@ -62,38 +62,21 @@ const FileSystemNode = ({
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
 
       
-      {/* Jag har helt omdesignat hierarkilinjerna för att säkerställa korrekt placering */}
-      <Box
-        sx={{
-          position: 'absolute',
-          left: level > 0 ? `${(level - 0.25) * 1.5}rem` : 0,
-          top: 0,
-          height: '100%',
-          width: '1rem',
-          pointerEvents: 'none',
-          zIndex: 0,
-          '&::before': level > 0 ? {
-            // Horisontell anslutningslinje
-            content: '""',
+      {/* En enkel linje från undermappen till övermappen: bara ett enkelt L */}
+      {level > 0 && (
+        <Box
+          sx={{
             position: 'absolute',
-            left: 0,
-            top: '50%',
-            width: '0.65rem',
-            height: '1px',
-            backgroundColor: '#B0B0B0'
-          } : {},
-          '&::after': level > 0 ? {
-            // Vertikal linje från föräldern
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            height: '50%',
-            width: '1px',
-            backgroundColor: '#B0B0B0'
-          } : {}
-        }}
-      />
+            left: `${(level - 0.2) * 1.5}rem`,
+            top: '0.9rem',
+            width: '8px',
+            height: '8px',
+            borderLeft: '1px solid #B0B0B0',
+            borderBottom: '1px solid #B0B0B0',
+            pointerEvents: 'none'
+          }}
+        />
+      )}
 
       <ListItem 
         sx={{ 
@@ -229,21 +212,7 @@ const FileSystemNode = ({
           overflow: 'visible !important',
           maxWidth: 'none !important'
         }}>
-          {/* Vertikal linje som ansluter barn */}
-          {level > 0 && children.length > 0 && (
-            <Box
-              sx={{
-                position: 'absolute',
-                left: (level - 0.25) * 1.5 + 'rem',
-                top: 0,
-                // Viktigt: Begränsa linjens höjd till bara barnens höjd
-                height: 'calc(100% - 4px)', // Ta bort 4px för att inte fortsätta förbi sista barnet
-                width: '1px',
-                backgroundColor: '#B0B0B0',
-                zIndex: 0
-              }}
-            />
-          )}
+          {/* Ta bort vertikala linjer som ansluter barn */}
           {children.map(child => (
             <FileSystemNode
               key={child.id}
