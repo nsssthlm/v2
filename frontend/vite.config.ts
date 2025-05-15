@@ -1,35 +1,55 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0', // Aktiverar alla nätverksinterface
-    port: 5000,
-    strictPort: true,
-    hmr: {
-      clientPort: 443 // Use 443 for HTTPS or 80 for HTTP
+export default defineConfig(({ mode }) => {
+  // Load env file based on `mode` in the current directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+    plugins: [react()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        '@components': path.resolve(__dirname, './src/components'),
+        '@pages': path.resolve(__dirname, './src/pages'),
+        '@context': path.resolve(__dirname, './src/context'),
+        '@services': path.resolve(__dirname, './src/services'),
+        '@types': path.resolve(__dirname, './src/types'),
+        '@utils': path.resolve(__dirname, './src/utils'),
+        '@hooks': path.resolve(__dirname, './src/hooks')
+      },
     },
-    cors: true,
-    watch: {
-      usePolling: true,
+    server: {
+      host: '0.0.0.0',
+      port: 5000,
+      strictPort: true,
+      cors: true,
+      hmr: {
+        host: '0.0.0.0',
+      },
+      watch: {
+        usePolling: true,
+      },
+      // Add allowedHosts to fix the blocking issue with Replit domain
+      proxy: {},
+      fs: {
+        strict: true,
+        allow: ['.'],
+      },
+      // Add the Replit domain to allowed hosts
+      origin: '0.0.0.0:5000',
+      allowedHosts: ['all', '3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev'],
     },
-    // Tillåt alla domäner för enklare hantering i Replit
-    allowedHosts: ['all', '.replit.dev', '.repl.co', 'localhost', '3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev'],
-    proxy: {
-      // Ställ in proxy för API-anrop för att undvika CORS-problem
-      '/api': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
-        secure: false,
-        ws: true,
-      }
+    define: {
+      // Expose environment variables to your client-side code
+      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://localhost:8000/api'),
     },
-    fs: {
-      strict: true,
-      allow: ['.'],
-    },
-    origin: '0.0.0.0:5000'
-  }
+    preview: {
+      port: 5000,
+      strictPort: true,
+    }
+  };
 });
