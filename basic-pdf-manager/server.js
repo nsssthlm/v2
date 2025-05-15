@@ -61,10 +61,38 @@ const users = [
   { id: 1, username: 'user@example.com', password: 'password', name: 'Project Leader' }
 ];
 
+// Simulera mapp-struktur (ersätts senare med databas)
+let folders = [
+  {
+    id: 1,
+    name: "Huvudmapp",
+    description: "Standardmapp för PDF-dokument",
+    parentId: null,
+    createdAt: '2025-05-15T10:00:00Z',
+    updatedAt: '2025-05-15T10:00:00Z',
+  },
+  {
+    id: 2,
+    name: "Projekt A",
+    description: "PDF:er för Projekt A",
+    parentId: 1,
+    createdAt: '2025-05-15T10:05:00Z',
+    updatedAt: '2025-05-15T10:05:00Z',
+  },
+  {
+    id: 3,
+    name: "Projekt B",
+    description: "PDF:er för Projekt B",
+    parentId: 1,
+    createdAt: '2025-05-15T10:10:00Z',
+    updatedAt: '2025-05-15T10:10:00Z',
+  }
+];
+
 // In-memory PDF storage (ersätts senare med databas)
 let pdfFiles = [
   {
-    id: 'pdf_example_1',
+    id: 'pdf_example_1',           // Unikt ID för PDF:en
     filename: 'AAAAExempel på ritningar.pdf',
     originalFilename: 'example1.pdf',
     storedFilename: 'example1.pdf',
@@ -72,8 +100,9 @@ let pdfFiles = [
     size: 1500000,
     uploadedAt: '2025-05-13T12:17:00Z',
     uploadedBy: 'projectleader',
-    folder: 'root',
-    description: 'Ingen beskrivning'
+    folderId: 2,                   // Koppling till specifik mapp (Projekt A)
+    description: 'Ingen beskrivning',
+    versionNumber: 1               // Versionsnummer för dokumentet
   },
   {
     id: 'pdf_example_2',
@@ -84,8 +113,9 @@ let pdfFiles = [
     size: 1200000,
     uploadedAt: '2025-05-13T11:50:00Z',
     uploadedBy: 'projectleader',
-    folder: 'root',
-    description: 'Ingen beskrivning'
+    folderId: 2,                   // Koppling till specifik mapp (Projekt A)
+    description: 'Ingen beskrivning',
+    versionNumber: 1
   },
   {
     id: 'pdf_example_3',
@@ -96,8 +126,9 @@ let pdfFiles = [
     size: 950000,
     uploadedAt: '2025-05-13T11:50:00Z',
     uploadedBy: 'projectleader',
-    folder: 'root',
-    description: 'Ingen beskrivning'
+    folderId: 3,                   // Koppling till specifik mapp (Projekt B)
+    description: 'Ingen beskrivning',
+    versionNumber: 1
   },
   {
     id: 'pdf_example_4',
@@ -108,8 +139,9 @@ let pdfFiles = [
     size: 890000,
     uploadedAt: '2025-05-13T11:42:00Z',
     uploadedBy: 'projectleader',
-    folder: 'root',
-    description: 'Ingen beskrivning'
+    folderId: 3,                   // Koppling till specifik mapp (Projekt B)
+    description: 'Ingen beskrivning',
+    versionNumber: 1
   },
   {
     id: 'pdf_example_5',
@@ -120,8 +152,9 @@ let pdfFiles = [
     size: 1050000,
     uploadedAt: '2025-05-13T11:40:00Z',
     uploadedBy: 'projectleader',
-    folder: 'root',
-    description: 'Ingen beskrivning'
+    folderId: 1,                   // Koppling till huvudmappen
+    description: 'Ingen beskrivning',
+    versionNumber: 1
   }
 ];
 
@@ -175,18 +208,31 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       return res.status(400).json({ success: false, message: 'Ingen fil uppladdad' });
     }
 
-    // Skapa PDF-objekt
+    // Hämta folder ID från request
+    const folderId = req.body.folderId ? parseInt(req.body.folderId) : 1;  // Default till huvudmappen
+    
+    // Verifiera att mappen existerar
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) {
+      return res.status(400).json({ success: false, message: 'Angiven mapp existerar inte' });
+    }
+
+    // Generera unikt ID för PDF-dokumentet
+    const uniqueId = 'pdf_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+    // Skapa PDF-objekt med koppling till mapp via folderId
     const pdfFile = {
-      id: Date.now().toString(),
+      id: uniqueId,
       filename: req.body.title || req.file.originalname.replace('.pdf', ''),
-      description: req.body.description || '',
+      description: req.body.description || 'Ingen beskrivning',
       originalFilename: req.file.originalname,
       storedFilename: req.file.filename,
       fileUrl: '/uploads/' + req.file.filename,
       size: req.file.size,
       uploadedBy: req.session.user.username,
       uploadedAt: new Date().toISOString(),
-      folder: req.body.folder || 'root'
+      folderId: folderId,               // Koppla till specifik mapp
+      versionNumber: 1                  // Första versionen av dokumentet
     };
 
     // Spara PDF-objektet
@@ -199,18 +245,32 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   }
 });
 
+// Hämta mappstruktur
+app.get('/api/folders', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'Inte inloggad' });
+  }
+  
+  res.status(200).json({ success: true, folders: folders });
+});
+
 // Get PDF list endpoint
 app.get('/api/pdfs', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ success: false, message: 'Inte inloggad' });
   }
 
-  const folder = req.query.folder || 'root';
+  const folderId = req.query.folderId ? parseInt(req.query.folderId) : null;
   
   // Filtrera på mapp om angett
-  const filteredPdfs = folder === 'all' 
-    ? pdfFiles 
-    : pdfFiles.filter(pdf => pdf.folder === folder);
+  let filteredPdfs;
+  if (folderId) {
+    // Hämta PDFer i angiven mapp
+    filteredPdfs = pdfFiles.filter(pdf => pdf.folderId === folderId);
+  } else {
+    // Hämta alla PDFer om ingen mapp anges
+    filteredPdfs = pdfFiles;
+  }
 
   res.status(200).json({ success: true, pdfs: filteredPdfs });
 });
