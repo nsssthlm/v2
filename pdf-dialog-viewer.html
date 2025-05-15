@@ -1054,16 +1054,97 @@
       noPdfsMessage.style.display = hasPdfs ? 'none' : 'block';
     }
     
-    // Ladda sparade PDF-filer från localStorage vid sidladdning
-    function loadSavedPdfs() {
+    // Ladda sparade PDF-filer från server och fallback till localStorage
+    async function loadSavedPdfs() {
+      const pdfList = document.getElementById('pdf-list');
+      if (!pdfList) {
+        console.error('PDF-lista saknas i DOM');
+        return;
+      }
+      
       try {
-        const savedPdfs = localStorage.getItem('savedPdfs');
-        if (savedPdfs) {
-          const pdfs = JSON.parse(savedPdfs);
-          pdfs.forEach(pdf => addPdfToTable(pdf));
+        // Rensa eventuella befintliga rader i tabellen
+        const tbody = pdfList.querySelector('tbody');
+        if (tbody) {
+          tbody.innerHTML = '';
+        }
+        
+        // Visa laddningsmeddelande
+        const loadingRow = document.createElement('tr');
+        loadingRow.id = 'loading-row';
+        const loadingCell = document.createElement('td');
+        loadingCell.colSpan = 7;
+        loadingCell.style.textAlign = 'center';
+        loadingCell.style.padding = '20px';
+        loadingCell.innerHTML = '<div style="display: flex; justify-content: center; align-items: center;"><div style="border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div><span style="margin-left: 10px;">Laddar PDF-filer...</span></div>';
+        loadingRow.appendChild(loadingCell);
+        
+        if (tbody) {
+          tbody.appendChild(loadingRow);
+        }
+        
+        // Hämta mappID från URL om det finns
+        const urlParams = new URLSearchParams(window.location.search);
+        const folderIdFromUrl = urlParams.get('folder');
+        
+        // Använd API:et för att hämta PDF-filer från servern om det finns
+        if (window.PDFAPIService && window.PDFAPIService.getPDFList) {
+          try {
+            console.log("Hämtar PDF-filer från server");
+            // Använd folderIdFromUrl som filtreringsparameter om det finns
+            const folderId = folderIdFromUrl || null; 
+            const pdfFiles = await window.PDFAPIService.getPDFList(folderId);
+            console.log(`Hämtade ${pdfFiles.length} PDF-filer från servern`);
+            
+            // Rensa laddningsrad
+            const loadingRow = document.getElementById('loading-row');
+            if (loadingRow) {
+              loadingRow.remove();
+            }
+            
+            // Visa PDF-filerna i tabellen
+            if (pdfFiles && pdfFiles.length > 0) {
+              pdfFiles.forEach(pdf => addPdfToTable(pdf));
+            } else {
+              console.log("Inga PDF-filer hittades på servern, försöker med lokallagring");
+              // Fallback till lokallagring om inga filer hittades på servern
+              const savedPdfs = localStorage.getItem('savedPdfs');
+              if (savedPdfs) {
+                const pdfs = JSON.parse(savedPdfs);
+                pdfs.forEach(pdf => addPdfToTable(pdf));
+              }
+            }
+          } catch (apiError) {
+            console.error("Fel vid hämtning från API:", apiError);
+            // Fallback till lokallagring
+            const savedPdfs = localStorage.getItem('savedPdfs');
+            if (savedPdfs) {
+              const pdfs = JSON.parse(savedPdfs);
+              pdfs.forEach(pdf => addPdfToTable(pdf));
+            }
+          }
+        } else {
+          console.log("PDFAPIService saknas, använder lokallagring");
+          // Fallback om PDFAPIService inte finns (lokal utveckling utan API)
+          const savedPdfs = localStorage.getItem('savedPdfs');
+          if (savedPdfs) {
+            const pdfs = JSON.parse(savedPdfs);
+            pdfs.forEach(pdf => addPdfToTable(pdf));
+          }
+          
+          // Rensa laddningsrad
+          const loadingRow = document.getElementById('loading-row');
+          if (loadingRow) {
+            loadingRow.remove();
+          }
         }
       } catch (error) {
         console.error('Fel vid laddning av sparade PDF-filer:', error);
+        // Rensa laddningsrad
+        const loadingRow = document.getElementById('loading-row');
+        if (loadingRow) {
+          loadingRow.remove();
+        }
       }
       
       updatePdfListVisibility();
