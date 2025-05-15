@@ -3,6 +3,7 @@ URL configuration for valvx_project project.
 """
 from django.contrib import admin
 from django.urls import path, include
+from api.pdf import register_pdf_api_routes
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
@@ -27,8 +28,12 @@ urlpatterns = [
         path('files/', include('files.urls')),
         path('wiki/', include('wiki.urls')),
         path('notifications/', include('notifications.urls')),
+        path('workspace/', include('workspace.urls')),
     ])),
 ]
+
+# Registrera PDF API routes
+register_pdf_api_routes(urlpatterns)
 
 # Add static and media URLs in development
 if settings.DEBUG:

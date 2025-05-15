@@ -1,78 +1,84 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { CssVarsProvider, extendTheme } from '@mui/joy/styles';
-import CssBaseline from '@mui/joy/CssBaseline';
+
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout';
-import Dashboard from './pages/dashboard/Dashboard';
-import NotFoundPage from './pages/NotFoundPage';
+import Dashboard from './pages/Dashboard';
+import Calendar from './pages/Calendar';
+import NoticeBoardPage from './pages/NoticeBoard';
+import VaultPage from './pages/Vault';
+import Workspace from './pages/Workspace';
+import NotFoundPage from './pages/NotFound';
+import { ProtectedRoute, AuthLoginRoute } from './components/auth/ProtectedRoutes';
 
-// Vault pages
-import HomePage from './pages/vault/home/HomePage';
-import CommentsPage from './pages/vault/comments/CommentsPage';
-import ReviewPage from './pages/vault/review/ReviewPage';
-import FilesPage from './pages/vault/files/FilesPage';
-import VersionsPage from './pages/vault/versions/VersionsPage';
-import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 
-// Anpassa temat för att matcha bilden
-const theme = extendTheme({
-  colorSchemes: {
-    light: {
-      palette: {
-        primary: {
-          50: '#F0F4FF',
-          100: '#DDE7FF',
-          200: '#B3C7FF',
-          300: '#89A7FF',
-          400: '#6687FF', 
-          500: '#4361EE', // Huvudfärg som matchar ValvX logotypens lila
-          600: '#3A4CD8',
-          700: '#3038C3',
-          800: '#2A25A8',
-          900: '#24168E',
-        },
-      },
-    },
-  },
-  fontFamily: {
-    body: '"Inter", var(--joy-fontFamily-fallback)',
-    display: '"Inter", var(--joy-fontFamily-fallback)',
-  },
-});
-
+// The main App component doesn't access context directly
 function App() {
+  // Handle login success - can be empty now as AuthContext handles the state
+  const handleLoginSuccess = () => {
+    console.log('Login successful');
+  };
+
   return (
-    <CssVarsProvider theme={theme} defaultMode="light">
-      <CssBaseline />
+    <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Redirect root to dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={
+            <AuthLoginRoute onLoginSuccess={handleLoginSuccess} />
+          } />
           
-          {/* Protected routes with layout */}
-          <Route element={<Layout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="projects" element={<ComingSoonPage title="Projekt" />} />
-            <Route path="tasks" element={<ComingSoonPage title="Uppgifter" />} />
-            <Route path="files" element={<ComingSoonPage title="Dokument" />} />
-            <Route path="team" element={<ComingSoonPage title="Team" />} />
-            <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
-            
-            {/* Vault routes */}
-            <Route path="vault">
-              <Route path="home" element={<HomePage />} />
-              <Route path="comments" element={<CommentsPage />} />
-              <Route path="review" element={<ReviewPage />} />
-              <Route path="files" element={<FilesPage />} />
-              <Route path="versions" element={<VersionsPage />} />
-              <Route path="meetings" element={<MeetingsPage />} />
-            </Route>
-          </Route>
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          } />
           
-          {/* 404 route */}
+          <Route path="/calendar" element={
+            <ProtectedRoute>
+              <Layout>
+                <Calendar />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/notice-board" element={
+            <ProtectedRoute>
+              <Layout>
+                <NoticeBoardPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vault" element={
+            <ProtectedRoute>
+              <Layout>
+                <VaultPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/workspace" element={
+            <ProtectedRoute>
+              <Layout>
+                <Workspace />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/workspace/:projectId" element={
+            <ProtectedRoute>
+              <Layout>
+                <Workspace />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
-    </CssVarsProvider>
+    </AuthProvider>
+
   );
 }
 

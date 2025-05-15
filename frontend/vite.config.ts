@@ -1,42 +1,57 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+// For Replit, we need to determine the backend URL dynamically
+const getBackendUrl = () => {
+  if (process.env.REPL_SLUG) {
+    // We're in Replit - use hostname-based detection
+    // Replace 00- with 01- to target the backend service in the same Replit 
+    return process.env.REPL_SLUG 
+      ? `https://${process.env.REPL_ID.replace('00-', '01-')}.${process.env.REPL_OWNER}.repl.co` 
+      : 'http://localhost:8001';
+  }
+  
+  // Local development
+  return 'http://localhost:8001';
+};
+
+const backendUrl = getBackendUrl();
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@pages": path.resolve(__dirname, "./src/pages"),
-      "@context": path.resolve(__dirname, "./src/context"),
-      "@services": path.resolve(__dirname, "./src/services"),
-      "@types": path.resolve(__dirname, "./src/types"),
-      "@utils": path.resolve(__dirname, "./src/utils"),
-      "@hooks": path.resolve(__dirname, "./src/hooks"),
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@context': path.resolve(__dirname, './src/context'),
+      '@services': path.resolve(__dirname, './src/services'),
+      '@types': path.resolve(__dirname, './src/types'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@hooks': path.resolve(__dirname, './src/hooks')
     },
   },
   server: {
-    host: "0.0.0.0",
-    port: 3000,
+    host: true,
+    port: 5000,
     strictPort: true,
-    cors: {
-      origin: "*",
-    },
     hmr: {
       clientPort: 443,
+      host: 'localhost'
     },
     proxy: {
-      "/api": {
-        target: "http://0.0.0.0:8001",
+      '/api': {
+        target: backendUrl,
         changeOrigin: true,
-      },
-    },
-    allowedHosts: [
-      "c1887eca-4b64-4645-87a5-8b72c350b2cd-00-1tfkofdiqni22.kirk.replit.dev",
-      ".replit.dev",
-      ".repl.co"
-    ]
+        secure: false,
+      }
+    }
   },
+  define: {
+    'process.env.VITE_API_URL': JSON.stringify(`${backendUrl}/api`),
+  }
 });
