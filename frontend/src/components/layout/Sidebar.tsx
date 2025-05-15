@@ -62,20 +62,36 @@ const FileSystemNode = ({
       {/* Ta bort vertikala guidlinjer - vi tar en annan approach */}
 
       
-      {/* En enkel horisontell linje från undermappen till övermappen */}
+      {/* Ett korrekt placerat L-streck för varje undermapp */}
       {level > 0 && (
-        <Box
-          sx={{
-            position: 'absolute',
-            left: `${(level - 0.3) * 1.5}rem`,
-            top: '1.1rem',
-            width: '12px',
-            height: '1px', 
-            backgroundColor: '#B0B0B0',
-            pointerEvents: 'none',
-            zIndex: 1
-          }}
-        />
+        <>
+          {/* Vertikalt streck (första delen av L) */}
+          <Box
+            sx={{
+              position: 'absolute',
+              left: `${(level - 0.3) * 1.5}rem`,
+              top: '0', // Börja från toppen
+              height: '1.1rem', // Gå ner till mitten av elementet
+              width: '1px', 
+              backgroundColor: '#B0B0B0',
+              pointerEvents: 'none',
+              zIndex: 1
+            }}
+          />
+          {/* Horisontellt streck (andra delen av L) */}
+          <Box
+            sx={{
+              position: 'absolute',
+              left: `${(level - 0.3) * 1.5}rem`,
+              top: '1.1rem', // Mitten av elementet
+              width: '0.8rem',
+              height: '1px', 
+              backgroundColor: '#B0B0B0',
+              pointerEvents: 'none',
+              zIndex: 1
+            }}
+          />
+        </>
       )}
 
       <ListItem 
