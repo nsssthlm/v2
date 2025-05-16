@@ -144,7 +144,7 @@ const TopMenu: React.FC = () => {
         p: 1,
         px: 2,
         bgcolor: 'background.surface',
-        height: '48px'
+        height: '60px' // Ökad höjd för att matcha sidofältet med ValvX-loggan
       }}
     >
       {/* Vänster del - tom */}
