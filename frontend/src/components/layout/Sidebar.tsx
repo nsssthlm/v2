@@ -95,12 +95,26 @@ const FileSystemNode = ({
         onClick={(e) => {
           e.stopPropagation();
           if (isFolder) {
-            // Expandera/kollapsa mappen i sidofältet
-            toggleFolder(node.id);
-            
-            // OCH navigera till mappens sida (oavsett om den har undermappar eller ej)
+            // Expandera/kollapsa mappen i sidofältet och navigera till dess sida
             if (node.slug) {
-              window.location.href = `/folders/${node.slug}`;
+              // Spara befintligt öppet/stängt läge för att kunna växla rätt
+              const currentExpanded = openFolders[node.id] || false;
+              
+              // Om vi kommer från samma sida som vi klickar på, 
+              // bara expandera/kollapsa utan att navigera om
+              if (window.location.pathname === `/folders/${node.slug}`) {
+                toggleFolder(node.id);
+              } else {
+                // Först expandera om den är stängd
+                if (!currentExpanded) {
+                  toggleFolder(node.id);
+                }
+                // Sedan navigera till sidan
+                window.location.href = `/folders/${node.slug}`;
+              }
+            } else {
+              // Om den inte har någon länk, bara expandera/kollapsa
+              toggleFolder(node.id);
             }
           }
         }}
@@ -338,7 +352,16 @@ const Sidebar = () => {
   const { currentProject } = useProject();
   
   // Håll reda på öppna filer/mappar i filsystemet
-  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+  // Hämta öppna mappar från localStorage för att behålla dem mellan sidladdningar
+  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('openFolders');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      console.error('Kunde inte läsa sparade mapptillstånd:', e);
+      return {};
+    }
+  });
   
   // State för filsystemets noder från API
   const [filesystemNodes, setFilesystemNodes] = useState<SidebarFileNode[]>([]);
@@ -368,27 +391,60 @@ const Sidebar = () => {
   
   // Växla mellan öppen/stängd mapp i filsystemet
   const toggleFolder = (folderId: string) => {
-    setOpenFolders(prev => ({
-      ...prev,
-      [folderId]: !prev[folderId]
-    }));
+    setOpenFolders(prev => {
+      const newState = {
+        ...prev,
+        [folderId]: !prev[folderId]
+      };
+      
+      // Spara till localStorage för att behålla mellan sidladdningar
+      try {
+        localStorage.setItem('openFolders', JSON.stringify(newState));
+      } catch (e) {
+        console.error('Kunde inte spara mapptillstånd:', e);
+      }
+      
+      return newState;
+    });
   };
   
   // Öppna en specifik mapp
   const openFolder = (folderId: string) => {
-    setOpenFolders(prev => ({
-      ...prev,
-      [folderId]: true
-    }));
+    setOpenFolders(prev => {
+      const newState = {
+        ...prev,
+        [folderId]: true
+      };
+      
+      // Spara till localStorage för att behålla mellan sidladdningar
+      try {
+        localStorage.setItem('openFolders', JSON.stringify(newState));
+      } catch (e) {
+        console.error('Kunde inte spara mapptillstånd:', e);
+      }
+      
+      return newState;
+    });
     
     // Öppna också alla föräldramappar till denna mapp
     const openParentFolders = (nodeId: string) => {
       const node = filesystemNodes.find(n => n.id === nodeId);
       if (node && node.parent_id) {
-        setOpenFolders(prev => ({
-          ...prev,
-          [node.parent_id!]: true
-        }));
+        setOpenFolders(prev => {
+          const newState = {
+            ...prev,
+            [node.parent_id!]: true
+          };
+          
+          // Spara till localStorage för att behålla mellan sidladdningar
+          try {
+            localStorage.setItem('openFolders', JSON.stringify(newState));
+          } catch (e) {
+            console.error('Kunde inte spara mapptillstånd:', e);
+          }
+          
+          return newState;
+        });
         openParentFolders(node.parent_id);
       }
     };
