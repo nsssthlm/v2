@@ -25,13 +25,23 @@ export interface DirectoryInput {
 
 // Service för att hantera directories (mappar) via API
 const directoryService = {
-  // Hämta alla directorys för sidebar
-  getSidebarDirectories: async (): Promise<ApiDirectory[]> => {
+  // Hämta alla directorys för sidebar, filtrerade på projekt
+  getSidebarDirectories: async (projectId?: string): Promise<ApiDirectory[]> => {
     try {
+      // Skapa params objekt baserat på om vi har ett projektId eller inte
+      const params: Record<string, string> = { 
+        is_sidebar: 'true' 
+      };
+      
+      // Lägg till projektfiltrering om projektId är angivet
+      if (projectId) {
+        params.project = projectId;
+      }
+      
       // Försök med vanlig proxy-anslutning
       try {
         const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
-          params: { is_sidebar: 'true' }
+          params: params
         });
         // API svarar med en results-array om pagination är aktiverad
         if (response.data.results) {
@@ -43,7 +53,7 @@ const directoryService = {
         
         // Om det misslyckas, försök med direkt anslutning
         const directResponse = await axios.get(`${DIRECT_API_URL}/files/directories/`, {
-          params: { is_sidebar: 'true' },
+          params: params,
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -72,9 +82,17 @@ const directoryService = {
     }
   },
 
-  // Skapa ett nytt directory
-  createDirectory: async (directory: DirectoryInput): Promise<ApiDirectory> => {
+  // Skapa ett nytt directory med koppling till aktuellt projekt
+  createDirectory: async (directory: DirectoryInput, projectId?: string): Promise<ApiDirectory> => {
     try {
+      // Om projectId är angivet, se till att directory inkluderar detta
+      if (projectId && !directory.project) {
+        directory = {
+          ...directory,
+          project: parseInt(projectId, 10) // Konvertera string till number
+        };
+      }
+      
       // Försök först med vanlig proxy-anslutning
       try {
         const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);

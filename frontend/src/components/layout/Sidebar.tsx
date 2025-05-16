@@ -22,6 +22,7 @@ import {
 } from '@mui/joy';
 import { Link, useLocation } from 'react-router-dom';
 import directoryService, { DirectoryInput } from '../../services/directoryService';
+import { useProject } from '../../contexts/ProjectContext';
 
 // Interface för menyobjekt
 // Används för att typa submenu-items i sidebar-navigationen
@@ -342,6 +343,9 @@ const Sidebar = () => {
     '/vault': true
   });
   
+  // Använd projektkontext för att få det aktuella projektets ID
+  const { currentProject } = useProject();
+  
   // Håll reda på öppna filer/mappar i filsystemet
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   
@@ -402,12 +406,13 @@ const Sidebar = () => {
     setNewFolderDialogOpen(true);
   };
   
-  // Ladda sidebarobjekt från API
+  // Ladda sidebarobjekt från API baserat på aktuellt projekt
   useEffect(() => {
     const loadSidebarItems = async () => {
       setIsLoading(true);
       try {
-        const directoriesData = await directoryService.getSidebarDirectories();
+        // Använd projektets ID för att filtrera mappar
+        const directoriesData = await directoryService.getSidebarDirectories(currentProject.id);
         
         // Konvertera från API-format till SidebarFileNode-format
         const sidebarNodes: SidebarFileNode[] = directoriesData.map(dir => ({
@@ -427,10 +432,11 @@ const Sidebar = () => {
       }
     };
     
+    // Ladda om mapparna när projektet ändras
     loadSidebarItems();
-  }, []);
+  }, [currentProject.id]); // Beroende på projektets ID så att mapparna laddas om vid projektbyte
   
-  // Skapa ny mapp via API
+  // Skapa ny mapp via API kopplad till aktuellt projekt
   const createNewFolder = async () => {
     if (newFolderName.trim() === '') return;
     
@@ -452,17 +458,19 @@ const Sidebar = () => {
       : null;
     
     try {
-      // Skapa objekt för API-anrop
+      // Skapa objekt för API-anrop och inkludera projektets ID
       const newDirData: DirectoryInput = {
         name: newFolderName.trim(),
         type: 'folder',
         is_sidebar_item: true,
-        parent: parentDbId
+        parent: parentDbId,
+        // Koppling till det aktuella projektet
+        project: parseInt(currentProject.id, 10)
       };
       
       // Skicka till API (med extra loggning)
       console.log('Försöker skapa ny mapp med data:', newDirData);
-      const createdDir = await directoryService.createDirectory(newDirData);
+      const createdDir = await directoryService.createDirectory(newDirData, currentProject.id);
       console.log('Mapp skapad med data:', createdDir);
       
       if (createdDir) {
