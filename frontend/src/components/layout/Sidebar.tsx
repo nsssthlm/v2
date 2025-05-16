@@ -584,7 +584,7 @@ const Sidebar = () => {
                 sx={{ 
                   mb: 0.5,
                   ...(isActive(item.path) && {
-                    bgcolor: 'primary.50',
+                    bgcolor: '#e0f2e9', // Ljusare SEB grön för aktiva val
                   })
                 }}
               >
@@ -592,6 +592,11 @@ const Sidebar = () => {
                   selected={isActive(item.path)}
                   component={Link}
                   to={item.submenu && item.submenu.length > 0 && item.collapsible ? '#' : item.path}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+                    }
+                  }}
                   onClick={
                     (item.submenu && item.submenu.length > 0 && item.collapsible) 
                       ? (e) => {
@@ -650,6 +655,11 @@ const Sidebar = () => {
                         selected={isActive(subItem.path)}
                         component={Link}
                         to={subItem.path}
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+                          }
+                        }}
                       >
                         <ListItemContent>
                           <Typography level="body-sm">{subItem.name}</Typography>
