@@ -87,6 +87,7 @@ const FileSystemNode = ({
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'flex-start', /* Justera innehållet till vänster */
           cursor: isFolder ? 'pointer' : 'default',
           borderRadius: '4px',
           textAlign: 'left',
@@ -153,7 +154,6 @@ const FileSystemNode = ({
             display: 'inline-block',
             fontWeight: 'normal',
             whiteSpace: 'nowrap',
-            flexGrow: 1,
             color: isFolder && node.slug ? '#007934' : 'inherit', // SEB grön färg för klickbara mappar
             padding: '2px 4px',
             borderRadius: '3px'
@@ -162,7 +162,7 @@ const FileSystemNode = ({
           {node.name}
         </span>
       
-        {/* Plusknapp - nu inom namnspannet men med stopPropagation för att undvika hoverproblem*/}
+        {/* Plusknapp - direkt efter mappnamnet */}
         {isFolder && (
           <span 
             style={{
@@ -171,14 +171,13 @@ const FileSystemNode = ({
               width: '20px',
               height: '20px',
               padding: '2px',
-              marginLeft: '8px',
+              marginLeft: '4px',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               borderRadius: '4px',
               flexShrink: 0,
-              position: 'relative',
               zIndex: 1
             }}
             onClick={(e) => {
