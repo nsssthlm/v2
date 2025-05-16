@@ -25,13 +25,19 @@ export interface DirectoryInput {
 
 // Service för att hantera directories (mappar) via API
 const directoryService = {
-  // Hämta alla directorys för sidebar
-  getSidebarDirectories: async (): Promise<ApiDirectory[]> => {
+  // Hämta alla directorys för sidebar, filtrerat per projekt
+  getSidebarDirectories: async (projectId?: string): Promise<ApiDirectory[]> => {
     try {
+      // Skapa params objekt med is_sidebar och eventuellt project
+      const params: Record<string, string> = { is_sidebar: 'true' };
+      if (projectId) {
+        params.project = projectId;
+      }
+      
       // Försök med vanlig proxy-anslutning
       try {
         const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
-          params: { is_sidebar: 'true' }
+          params: params
         });
         // API svarar med en results-array om pagination är aktiverad
         if (response.data.results) {
@@ -43,7 +49,7 @@ const directoryService = {
         
         // Om det misslyckas, försök med direkt anslutning
         const directResponse = await axios.get(`${DIRECT_API_URL}/files/directories/`, {
-          params: { is_sidebar: 'true' },
+          params: params,
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -72,19 +78,28 @@ const directoryService = {
     }
   },
 
-  // Skapa ett nytt directory
-  createDirectory: async (directory: DirectoryInput): Promise<ApiDirectory> => {
+  // Skapa ett nytt directory, knutet till ett specifikt projekt
+  createDirectory: async (directory: DirectoryInput, projectId?: string): Promise<ApiDirectory> => {
     try {
+      // Om projektID skickas med, lägg till det i directory-objektet
+      const dirWithProject = { 
+        ...directory,
+        // Konvertera projektId till number eftersom API:et förväntar sig number
+        ...(projectId && { project: parseInt(projectId, 10) })
+      };
+      
+      console.log('Skapar mapp med data:', dirWithProject);
+      
       // Försök först med vanlig proxy-anslutning
       try {
-        const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
+        const response = await axios.post(`${API_BASE_URL}/files/directories/`, dirWithProject);
         console.log('Mapp skapad via API_BASE_URL:', response.data);
         return response.data;
       } catch (proxyError: any) {
         console.warn('Kunde inte skapa mapp via proxy, försöker med direkt anslutning', proxyError);
         
         // Om det misslyckas, försök med direkt anslutning
-        const directResponse = await axios.post(`${DIRECT_API_URL}/files/directories/`, directory, {
+        const directResponse = await axios.post(`${DIRECT_API_URL}/files/directories/`, dirWithProject, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'

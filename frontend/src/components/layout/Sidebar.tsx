@@ -8,7 +8,6 @@ import {
   Typography, 
   Box, 
   Input, 
-  IconButton, 
   Divider,
   Modal,
   ModalDialog,
@@ -22,6 +21,7 @@ import {
 } from '@mui/joy';
 import { Link, useLocation } from 'react-router-dom';
 import directoryService, { DirectoryInput } from '../../services/directoryService';
+import { useProject } from '../../contexts/ProjectContext';
 
 // Interface för menyobjekt
 // Används för att typa submenu-items i sidebar-navigationen
@@ -402,12 +402,16 @@ const Sidebar = () => {
     setNewFolderDialogOpen(true);
   };
   
-  // Ladda sidebarobjekt från API
+  // Använd projektkontext
+  const { currentProject } = useProject();
+
+  // Ladda sidebarobjekt från API baserat på aktuellt projekt
   useEffect(() => {
     const loadSidebarItems = async () => {
       setIsLoading(true);
       try {
-        const directoriesData = await directoryService.getSidebarDirectories();
+        // Hämta mappar filtrerade på det aktuella projektet
+        const directoriesData = await directoryService.getSidebarDirectories(currentProject.id);
         
         // Konvertera från API-format till SidebarFileNode-format
         const sidebarNodes: SidebarFileNode[] = directoriesData.map(dir => ({
@@ -428,7 +432,7 @@ const Sidebar = () => {
     };
     
     loadSidebarItems();
-  }, []);
+  }, [currentProject]); // Ladda om när aktuellt projekt ändras
   
   // Skapa ny mapp via API
   const createNewFolder = async () => {
@@ -460,9 +464,9 @@ const Sidebar = () => {
         parent: parentDbId
       };
       
-      // Skicka till API (med extra loggning)
-      console.log('Försöker skapa ny mapp med data:', newDirData);
-      const createdDir = await directoryService.createDirectory(newDirData);
+      // Skicka till API (med extra loggning) och inkludera aktuellt projekt-ID
+      console.log('Försöker skapa ny mapp med data:', newDirData, 'för projekt:', currentProject.id);
+      const createdDir = await directoryService.createDirectory(newDirData, currentProject.id);
       console.log('Mapp skapad med data:', createdDir);
       
       if (createdDir) {
