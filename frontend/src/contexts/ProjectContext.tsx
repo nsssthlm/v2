@@ -51,9 +51,23 @@ interface ProjectProviderProps {
 
 // ProjectProvider-komponenten som ger tillgång till kontexten
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
-  // Ladda projekt - alltid använd defaultProjects som är synkroniserade med backend
-  // Detta säkerställer att ID alltid matchar de i databasen
-  const [projects, setProjects] = useState<Project[]>(defaultProjects);
+  // Ladda projekt - använd sessionStorage om det finns sparade projekt
+  const [projects, setProjects] = useState<Project[]>(() => {
+    // Försök ladda projekt från sessionStorage
+    const savedProjects = sessionStorage.getItem('projects');
+    if (savedProjects) {
+      try {
+        const parsed = JSON.parse(savedProjects);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error('Kunde inte tolka sparade projekt', e);
+      }
+    }
+    // Fallback till defaultProjects om inget finns i sessionStorage
+    return defaultProjects;
+  });
 
   // Ladda aktuellt projekt från sessionStorage om det finns och är ett giltigt projekt
   const [currentProject, setCurrentProjectState] = useState<Project>(() => {
@@ -62,7 +76,14 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
       try {
         const parsed = JSON.parse(savedCurrentProject);
         // Kontrollera att det är ett giltigt projekt som finns i vår lista
-        const validProject = defaultProjects.find(p => p.id === parsed.id);
+        // men använd den laddade projektlistan (projects) istället för defaultProjects
+        // så att nya projekt också hittas
+        const currentProjects = JSON.parse(sessionStorage.getItem('projects') || '[]');
+        const allProjects = Array.isArray(currentProjects) && currentProjects.length > 0 
+          ? currentProjects 
+          : defaultProjects;
+          
+        const validProject = allProjects.find(p => p.id === parsed.id);
         if (validProject) {
           return validProject;
         }
@@ -70,7 +91,9 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         console.error('Kunde inte tolka sparat projekt', e);
       }
     }
-    return defaultProjects[0]; // Använd första projektet som standard
+    // Använd första projektet som standard
+    const firstProject = projects?.[0] || defaultProjects[0];
+    return firstProject;
   });
 
   // Flagga för att visa när inladdningen är klar
@@ -100,6 +123,9 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     // Lägg till projektet i listan
     const updatedProjects = [...projects, project];
     setProjects(updatedProjects);
+    
+    // Spara projekten i sessionStorage så de behålls vid siduppdatering
+    sessionStorage.setItem('projects', JSON.stringify(updatedProjects));
     
     // Byt automatiskt till det nya projektet
     setCurrentProject(project);
