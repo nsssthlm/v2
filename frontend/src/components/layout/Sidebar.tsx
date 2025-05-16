@@ -68,7 +68,7 @@ const FileSystemNode = ({
       <div
         style={{
           backgroundColor: 'transparent',
-          paddingLeft: `${level * 8 + 8}px`, /* Ytterligare minskad indentering för mappikonen (8px) */
+          paddingLeft: `${level * 16}px`, /* Konsekvent indentering per nivå */
           paddingRight: '8px',
           paddingTop: '4px', 
           paddingBottom: '4px',
