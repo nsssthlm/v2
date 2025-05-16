@@ -95,8 +95,13 @@ const FileSystemNode = ({
         onClick={(e) => {
           e.stopPropagation();
           if (isFolder) {
-            // Bara expandera/kollapsa mappen i sidofältet
+            // Expandera/kollapsa mappen i sidofältet
             toggleFolder(node.id);
+            
+            // OCH navigera till mappens sida (oavsett om den har undermappar eller ej)
+            if (node.slug) {
+              window.location.href = `/folders/${node.slug}`;
+            }
           }
         }}
         onMouseOver={(e) => {
@@ -126,7 +131,7 @@ const FileSystemNode = ({
           </svg>
         </span>
         
-        {/* Mappnamn - klickbart för att navigera till mappens innehåll */}
+        {/* Mappnamn visas bara, utan egen klickfunktion eftersom huvudområdet nu gör båda funktionerna */}
         <span 
           style={{
             fontSize: '0.875rem',
@@ -134,31 +139,10 @@ const FileSystemNode = ({
             fontWeight: 'normal',
             whiteSpace: 'nowrap',
             flexGrow: 1,
-            cursor: isFolder && node.slug ? 'pointer' : 'default',
             color: isFolder && node.slug ? '#007934' : 'inherit', // SEB grön färg för klickbara mappar
             padding: '2px 4px',
             borderRadius: '3px'
           }}
-          onClick={(e) => {
-            if (isFolder && node.slug) {
-              e.stopPropagation(); // Förhindra att hela raden får click-eventet
-              // Navigera direkt till mappens sida
-              window.location.href = `/folders/${node.slug}`;
-            }
-          }}
-          onMouseOver={(e) => {
-            if (isFolder && node.slug) {
-              e.stopPropagation();
-              e.currentTarget.style.backgroundColor = '#e0f2e9'; // Ljusare SEB grön vid hover
-            }
-          }}
-          onMouseOut={(e) => {
-            if (isFolder && node.slug) {
-              e.stopPropagation();
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }
-          }}
-          title={isFolder && node.slug ? "Klicka för att öppna mappen" : ""}
         >
           {node.name}
         </span>
