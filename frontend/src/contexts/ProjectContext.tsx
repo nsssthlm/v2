@@ -40,32 +40,35 @@ interface ProjectProviderProps {
 
 // ProjectProvider-komponenten som ger tillgång till kontexten
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
-  // Ladda projekt från localStorage eller använd standard
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const savedProjects = localStorage.getItem('projects');
-    if (savedProjects) {
-      return JSON.parse(savedProjects);
-    }
-    return defaultProjects;
-  });
+  // Ladda projekt - alltid använd defaultProjects som är synkroniserade med backend
+  // Detta säkerställer att ID alltid matchar de i databasen
+  const [projects, setProjects] = useState<Project[]>(defaultProjects);
 
-  // Ladda aktuellt projekt från sessionStorage
+  // Ladda aktuellt projekt från sessionStorage om det finns och är ett giltigt projekt
   const [currentProject, setCurrentProjectState] = useState<Project>(() => {
     const savedCurrentProject = sessionStorage.getItem('currentProject');
     if (savedCurrentProject) {
-      return JSON.parse(savedCurrentProject);
+      try {
+        const parsed = JSON.parse(savedCurrentProject);
+        // Kontrollera att det är ett giltigt projekt som finns i vår lista
+        const validProject = defaultProjects.find(p => p.id === parsed.id);
+        if (validProject) {
+          return validProject;
+        }
+      } catch (e) {
+        console.error('Kunde inte tolka sparat projekt', e);
+      }
     }
-    return projects[0]; // Använd första projektet som standard
+    return defaultProjects[0]; // Använd första projektet som standard
   });
 
   // Flagga för att visa när inladdningen är klar
   const [loading, setLoading] = useState(true);
 
-  // Spara projekt till localStorage när de ändras
+  // Sätt bara flaggan för när inladdningen är färdig
   useEffect(() => {
-    localStorage.setItem('projects', JSON.stringify(projects));
     setLoading(false);
-  }, [projects]);
+  }, []);
 
   // Spara aktuellt projekt till sessionStorage
   const setCurrentProject = (project: Project) => {
@@ -81,10 +84,14 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     }
   };
 
-  // Lägg till ett nytt projekt
+  // Lägg till ett nytt projekt - inaktiverat tills vi har en korrekt backend-integration
   const addProject = (project: Project) => {
-    setProjects([...projects, project]);
-    setCurrentProject(project); // Byt automatiskt till det nya projektet
+    // Vi tillåter inte längre att projekt läggs till direkt i frontenden
+    // eftersom de måste synkroniseras med backend
+    console.warn('Funktion för att lägga till projekt är inaktiverad.');
+    
+    // Ignorera tillägg och fortsätt använda standardprojekten
+    return;
   };
 
   // Kontextens värde
