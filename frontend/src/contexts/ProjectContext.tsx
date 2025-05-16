@@ -72,8 +72,13 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     setCurrentProjectState(project);
     sessionStorage.setItem('currentProject', JSON.stringify(project));
     
-    // Här kan vi uppdatera URL eller andra delar av appen baserat på projektet
-    // t.ex. window.history.pushState(null, '', `/projects/${project.id}`);
+    // När projektet byts, rensa tidigare innehåll och uppdatera URL:en
+    // Detta löser problemet med att innehåll från tidigare projekt visas
+    if (window.location.pathname.includes('/folders/')) {
+      // Om vi är inne på en folder-sida, gå tillbaka till startsidan 
+      // efter projektbyte för att undvika gammalt innehåll
+      window.location.href = '/';
+    }
   };
 
   // Lägg till ett nytt projekt

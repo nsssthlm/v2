@@ -59,6 +59,16 @@ const TopMenu: React.FC = () => {
   const handleProjectSelect = (project: Project) => {
     setCurrentProject(project);
     handleProjectMenuClose();
+    
+    // Ladda om sidan när man byter projekt för att säkerställa att rätt innehåll visas
+    // och för att förhindra att innehåll från föregående projekt visas
+    if (window.location.pathname.includes('/folders/')) {
+      // Om vi är på en mappsida, gå tillbaka till startsidan
+      window.location.href = '/';
+    } else {
+      // Ladda annars om hela sidan för att uppdatera mapparna i sidebaren
+      window.location.reload();
+    }
   };
   
   // Hantera nytt projekt
