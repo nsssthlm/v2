@@ -99,33 +99,44 @@ const FileSystemNode = ({
         }}
         title={isFolder ? "Klicka för att öppna mappen, klicka på pilen för att expandera/kollapsa" : ""}
       >
-        {/* Expandera/kollapsa pil för mappar - PLACERAD FÖRST (till vänster) */}
-        {isFolder && children.length > 0 ? (
-          <span 
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '16px',
-              height: '16px',
-              cursor: 'pointer',
-              marginRight: '4px',
-              transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.15s ease'
-            }}
-            onClick={(e) => {
-              e.stopPropagation(); // Förhindra att det navigerar
-              toggleFolder(node.id);
-            }}
-          >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-            </svg>
-          </span>
-        ) : (
-          // Tomt utrymme för mappar utan barn, för att hålla jämn indentering
-          <span style={{width: '16px', display: 'inline-block', marginRight: '4px'}}></span>
-        )}
+        {/* Expansionspil eller tomt utrymme - alltid exakt samma bredd och marginal */}
+        <span 
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '20px',
+            height: '20px',
+            marginRight: '4px',
+            flexShrink: 0
+          }}
+        >
+          {isFolder && children.length > 0 ? (
+            <span 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer',
+                transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.15s ease'
+              }}
+              onClick={(e) => {
+                e.stopPropagation(); // Förhindra att det navigerar
+                toggleFolder(node.id);
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+              </svg>
+            </span>
+          ) : (
+            // Helt tomt utrymme med samma dimensioner
+            <span></span>
+          )}
+        </span>
         
         {/* Mappikon placerad EFTER pilen */}
         <span style={{
