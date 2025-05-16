@@ -317,7 +317,8 @@ const mainMenuItems = [
       { name: 'Kommentarer', path: '/vault/comments' },
       { name: 'Review Package', path: '/vault/review' },
       { name: 'Versionsset', path: '/vault/versions' },
-      { name: 'Möten', path: '/vault/meetings' }
+      { name: 'Möten', path: '/vault/meetings' },
+      { name: 'Filer', path: '/folders', hasAddButton: true }
     ],
     collapsible: true
   }
@@ -360,10 +361,19 @@ const Sidebar = () => {
 
   // Toggle submenu
   const toggleSubmenu = (path: string) => {
-    setOpenSubmenus(prev => ({
-      ...prev,
-      [path]: !prev[path]
-    }));
+    // Om det är Filer i Vault menyn, se till att även öppna Vault-menyn
+    if (path === '/folders') {
+      setOpenSubmenus(prev => ({
+        ...prev,
+        [path]: !prev[path],
+        '/vault': true
+      }));
+    } else {
+      setOpenSubmenus(prev => ({
+        ...prev,
+        [path]: !prev[path]
+      }));
+    }
   };
   
   // Växla mellan öppen/stängd mapp i filsystemet
@@ -674,111 +684,66 @@ const Sidebar = () => {
 
           <Divider sx={{ my: 2 }} />
           
-          {/* Filer (filsystem) */}
-          <ListItem sx={{ mb: 0.5 }}>
-            <ListItemButton 
-              selected={location.pathname.startsWith('/folders')}
-              component={Link}
-              to="#"
-              onClick={(e) => {
-                e.preventDefault();
-                toggleSubmenu('Filer');
+          {/* Filsystem läggs nu under Vault-menyn istället för i huvudmenyn */}
+                    
+          {/* Användarinformation längst ner i sidofältet */}
+          <Box sx={{ 
+              mt: 'auto', 
+              px: 2, 
+              py: 1.5, 
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5
+            }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                bgcolor: 'primary.200',
+                color: 'primary.700',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold'
               }}
             >
-              <Box sx={{ mr: 1.5, color: location.pathname.startsWith('/folders') ? 'primary.500' : 'neutral.500' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-                </svg>
-              </Box>
-              <ListItemContent>
-                <Typography level="title-sm">Filer</Typography>
-              </ListItemContent>
-              
-              {/* Plus knapp för att lägga till huvudmapp, liknande de andra mapparna */}
-              <Box 
-                component="span" 
-                sx={{
-                  opacity: 0.7,
-                  minWidth: '20px',
-                  width: '20px',
-                  height: '20px',
-                  padding: '2px',
-                  marginRight: '4px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  borderRadius: '4px',
-                  zIndex: 10,
-                  '&:hover': {
-                    bgcolor: 'rgba(0,0,0,0.04)'
-                  }
-                }}
-                onClick={(e) => {
-                  e.preventDefault(); // Förhindra att det navigerar
-                  e.stopPropagation(); // Förhindra att föräldraelement fångar klicket
-                  setNewFolderName('');
-                  setCurrentParentId(null);
-                  setNewFolderDialogOpen(true);
-                }}
-                title="Lägg till ny huvudmapp"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                </svg>
-              </Box>
-              
-              <Box sx={{ 
-                transition: 'transform 0.2s', 
-                transform: openSubmenus['Filer'] ? 'rotate(-180deg)' : 'none',
-                p: 0.2
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                </svg>
-              </Box>
-            </ListItemButton>
-          </ListItem>
-          
-          {/* Filsystem för filträdet */}
-          {openSubmenus['Filer'] && (
-            <Box sx={{ pl: 1.5, pr: 0, mb: 1, position: 'relative' }}>
-              {isLoading ? (
-                <Box sx={{ py: 2, display: 'flex', justifyContent: 'center' }}>
-                  <CircularProgress size="sm" />
-                </Box>
-              ) : filesystemNodes.length > 0 ? (
-                <Box sx={{ mt: 1, width: '100%' }}>
-                  
-                  {/* Filsystemsträd - visa alla noder utan förälder först */}
-                  {filesystemNodes
-                    .filter(node => node.parent_id === null)
-                    .map(node => (
-                      <FileSystemNode
-                        key={node.id}
-                        node={node}
-                        level={0}
-                        filesystemNodes={filesystemNodes}
-                        openFolders={openFolders}
-                        toggleFolder={toggleFolder}
-                        handleAddNewFolder={handleAddNewFolder}
-                      />
-                    ))
-                  }
-                </Box>
-              ) : (
-                <Typography level="body-sm" sx={{ py: 2, pl: 1, fontStyle: 'italic' }}>
-                  Inga mappar hittades.
-                </Typography>
-              )}
+              TE
             </Box>
-          )}
-                    
-          {/* Logout at the bottom of sidebar */}
-          <ListItem sx={{ mt: 'auto' }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography level="body-sm" fontWeight="bold">testproject</Typography>
+              <Typography level="body-xs" sx={{ color: 'neutral.500' }}>project_leader</Typography>
+            </Box>
+            <IconButton
+              size="sm"
+              variant="plain"
+              color="neutral"
+              component={Link}
+              to="/settings"
+              sx={{
+                '&:hover': {
+                  backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+                }
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+              </svg>
+            </IconButton>
+          </Box>
+          
+          {/* Logout knapp under användarinformationen */}
+          <ListItem>
             <ListItemButton
               component={Link}
               to={logoutItem.path}
+              sx={{
+                '&:hover': {
+                  backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+                }
+              }}
             >
               <Box sx={{ mr: 1.5, color: 'neutral.500' }}>
                 {logoutItem.icon}
