@@ -160,11 +160,21 @@ const TopMenu: React.FC = () => {
         width: '34%'
       }}>
         <Button
-          variant="plain"
-          color="neutral"
+          variant="outlined"
+          color="success"
           endDecorator={<span>▼</span>}
           onClick={handleProjectMenuClick}
-          sx={{ fontWeight: 'bold' }}
+          sx={{ 
+            fontWeight: 'bold',
+            backgroundColor: '#007934', // SEB grön bakgrund
+            color: 'white',            // Vit text
+            border: '1px solid #007934', // Grön border
+            '&:hover': {
+              backgroundColor: '#e0f2e9',  // Ljusgrön vid hover
+              color: '#007934',           // Grön text vid hover
+              border: '1px solid #007934', // Behåll border vid hover
+            }
+          }}
         >
           {currentProject.name}
         </Button>
