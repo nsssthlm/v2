@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
 import PDFViewer from '../../components/PDFViewer';
+
+// Cache för mappdata för att minska inladdningstiden
+const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
+const CACHE_EXPIRY = 10000; // 10 sekunder
 
 interface FolderData {
   name: string;
@@ -45,7 +49,26 @@ const FolderPage = () => {
     setError(null);
     
     try {
+      // Kontrollera om vi har giltig data i cachen
+      const now = Date.now();
+      const cachedData = folderDataCache[slug];
+      
+      if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRY)) {
+        // Om data finns i cache och inte är för gammal, använd den
+        setFolderData(cachedData.data);
+        setLoading(false);
+        return;
+      }
+      
+      // Hämta data från API
       const response = await axios.get(`${API_BASE_URL}/files/web/${slug}/data/`);
+      
+      // Spara resultatet i cache
+      folderDataCache[slug] = {
+        data: response.data,
+        timestamp: now
+      };
+      
       setFolderData(response.data);
     } catch (err: any) {
       console.error('Fel vid hämtning av mappdata:', err);

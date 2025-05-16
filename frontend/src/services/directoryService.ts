@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { API_BASE_URL, DIRECT_API_URL } from '../config';
 
+// Cache för att spara hämtad data
+const directoryCache: Record<string, { data: any, timestamp: number }> = {};
+const CACHE_EXPIRY = 30000; // Cache-livslängd i millisekunder (30 sekunder)
+
 // Interface för Directory/Filsystemsobjekt
 export interface ApiDirectory {
   id: number;
@@ -48,16 +52,40 @@ const directoryService = {
         params.project = validProjectId;
       }
       
+      // Skapa cache-nyckel baserat på parametrarna
+      const cacheKey = `sidebar_directories_${JSON.stringify(params)}`;
+      
+      // Kontrollera om vi har aktuell data i cachen
+      const cachedData = directoryCache[cacheKey];
+      const now = Date.now();
+      
+      if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRY)) {
+        console.log('Hämtar mappdata från cache för projekt:', validProjectId);
+        return cachedData.data;
+      }
+      
       // Försök med vanlig proxy-anslutning
       try {
+        console.log('Hämtar mappdata från API för projekt:', validProjectId);
         const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
           params: params
         });
+        
+        let data;
         // API svarar med en results-array om pagination är aktiverad
         if (response.data.results) {
-          return response.data.results;
+          data = response.data.results;
+        } else {
+          data = response.data;
         }
-        return response.data;
+        
+        // Spara i cache
+        directoryCache[cacheKey] = {
+          data,
+          timestamp: now
+        };
+        
+        return data;
       } catch (proxyError) {
         console.warn('Kunde inte hämta mappar via proxy, försöker med direkt anslutning', proxyError);
         
@@ -70,10 +98,20 @@ const directoryService = {
           }
         });
         
+        let data;
         if (directResponse.data.results) {
-          return directResponse.data.results;
+          data = directResponse.data.results;
+        } else {
+          data = directResponse.data;
         }
-        return directResponse.data;
+        
+        // Spara i cache
+        directoryCache[cacheKey] = {
+          data,
+          timestamp: now
+        };
+        
+        return data;
       }
     } catch (error) {
       console.error('Error fetching sidebar directories:', error);
