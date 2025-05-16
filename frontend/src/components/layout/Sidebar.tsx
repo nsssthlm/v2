@@ -54,6 +54,8 @@ const FileSystemNode = ({
 }: FileSystemNodeProps) => {
   const isFolder = node.type === 'folder';
   const isOpen = openFolders[node.id] || false;
+  // För att hantera dubbelklick
+  const clickTimeoutRef = React.useRef<number | null>(null);
   
   // Hitta alla barn till denna nod
   const children = filesystemNodes.filter(n => n.parent_id === node.id);
@@ -97,26 +99,25 @@ const FileSystemNode = ({
         onClick={(e) => {
           e.stopPropagation();
           if (isFolder) {
-            // Expandera/kollapsa mappen i sidofältet och navigera till dess sida
-            if (node.slug) {
-              // Spara befintligt öppet/stängt läge för att kunna växla rätt
-              const currentExpanded = openFolders[node.id] || false;
+            // Hantera enkelklick och dubbelklick
+            if (clickTimeoutRef.current !== null) {
+              // Dubbelklick detekterad - expandera/kollapsa mappen
+              window.clearTimeout(clickTimeoutRef.current);
+              clickTimeoutRef.current = null;
               
-              // Om vi kommer från samma sida som vi klickar på, 
-              // bara expandera/kollapsa utan att navigera om
-              if (window.location.pathname === `/folders/${node.slug}`) {
-                toggleFolder(node.id);
-              } else {
-                // Först expandera om den är stängd
-                if (!currentExpanded) {
-                  toggleFolder(node.id);
-                }
-                // Sedan navigera till sidan
-                window.location.href = `/folders/${node.slug}`;
-              }
-            } else {
-              // Om den inte har någon länk, bara expandera/kollapsa
+              // Expandera/kollapsa endast vid dubbelklick
               toggleFolder(node.id);
+            } else {
+              // Enkelklick - navigera till mappens sida
+              clickTimeoutRef.current = window.setTimeout(() => {
+                // Nollställ timeouten
+                clickTimeoutRef.current = null;
+                
+                // Navigera till mappens sida om den har en slug
+                if (node.slug) {
+                  window.location.href = `/folders/${node.slug}`;
+                }
+              }, 300); // 300ms är en bra tid för att känna igen dubbelklick
             }
           }
         }}
@@ -126,7 +127,7 @@ const FileSystemNode = ({
         onMouseOut={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';
         }}
-        title={isFolder ? "Klicka för att expandera/kollapsa" : ""}
+        title={isFolder ? "Klicka för att öppna mappen, dubbelklicka för att expandera/kollapsa" : ""}
       >
         {/* Mappikon direkt i parent div utan extra span */}
         {/* Ikon */}
