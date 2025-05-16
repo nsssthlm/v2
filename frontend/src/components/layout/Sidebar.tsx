@@ -677,6 +677,37 @@ const Sidebar = () => {
               <ListItemContent>
                 <Typography level="title-sm">Filer</Typography>
               </ListItemContent>
+              
+              {/* Plus knapp för att lägga till huvudmapp, liknande de andra mapparna */}
+              <Box 
+                component="span" 
+                sx={{
+                  opacity: 0.7,
+                  minWidth: '20px',
+                  width: '20px',
+                  height: '20px',
+                  padding: '2px',
+                  marginRight: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  '&:hover': {
+                    bgcolor: 'rgba(0,0,0,0.04)'
+                  }
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddNewFolder(null);
+                }}
+                title="Lägg till ny huvudmapp"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+              </Box>
+              
               <Box sx={{ 
                 transition: 'transform 0.2s', 
                 transform: openSubmenus['Filer'] ? 'rotate(-180deg)' : 'none',
@@ -698,30 +729,6 @@ const Sidebar = () => {
                 </Box>
               ) : filesystemNodes.length > 0 ? (
                 <Box sx={{ mt: 1, width: '100%' }}>
-                  {/* Lägg till rotmapp knapp */}
-                  <Box
-                    sx={{
-                      pb: 1,
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'flex-start',
-                    }}
-                  >
-                    <Button
-                      size="sm"
-                      variant="plain"
-                      color="neutral"
-                      sx={{ px: 1, py: 0.5 }}
-                      onClick={() => handleAddNewFolder(null)}
-                      startDecorator={
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                        </svg>
-                      }
-                    >
-                      Ny huvudmapp
-                    </Button>
-                  </Box>
                   
                   {/* Filsystemsträd - visa alla noder utan förälder först */}
                   {filesystemNodes
