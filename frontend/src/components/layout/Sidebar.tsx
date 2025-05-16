@@ -54,30 +54,31 @@ const FileSystemNode = ({
 }: FileSystemNodeProps) => {
   const isFolder = node.type === 'folder';
   const isOpen = openFolders[node.id] || false;
-  // För att hantera dubbelklick
-  const clickTimeoutRef = React.useRef<number | null>(null);
   
   // Hitta alla barn till denna nod
   const children = filesystemNodes.filter(n => n.parent_id === node.id);
   
+  // Den exakta bredden för varje nivå av indentering
+  const indentWidth = 16;
+  
   return (
-    <div className="folder-node" style={{ position: 'relative', marginBottom: '4px', width: '100%', minWidth: 'max-content' }}>
-      {/* Ingen L-streck hierarki längre */}
-      
-      {/* En HTML-button istället för div för bättre klickbarhet */}
+    <div className="folder-node" style={{ 
+      position: 'relative', 
+      marginBottom: '4px', 
+      width: '100%', 
+      minWidth: 'max-content' 
+    }}>
       <div
         style={{
           backgroundColor: 'transparent',
-          paddingLeft: `${level * 16}px`, /* Konsekvent indentering per nivå */
-          paddingRight: '8px',
-          paddingTop: '4px', 
-          paddingBottom: '4px',
           width: '100%',
           minWidth: 'max-content',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-start', /* Justera innehållet till vänster */
+          paddingTop: '4px', 
+          paddingBottom: '4px',
+          paddingRight: '8px',
           cursor: isFolder ? 'pointer' : 'default',
           borderRadius: '4px',
           textAlign: 'left',
@@ -86,7 +87,6 @@ const FileSystemNode = ({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          // Klick på mappen öppnar mappens innehåll (navigerar till mappens sida)
           if (isFolder && node.slug) {
             window.location.href = `/folders/${node.slug}`;
           }
@@ -99,51 +99,51 @@ const FileSystemNode = ({
         }}
         title={isFolder ? "Klicka för att öppna mappen, klicka på pilen för att expandera/kollapsa" : ""}
       >
-        {/* Expansionspil eller tomt utrymme - alltid exakt samma bredd och marginal */}
-        <span 
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '20px',
-            height: '20px',
-            marginRight: '4px',
-            flexShrink: 0
-          }}
-        >
-          {isFolder && children.length > 0 ? (
-            <span 
+        {/* Indenteringen baserad på nivå */}
+        <div style={{ 
+          width: `${level * indentWidth}px`, 
+          flexShrink: 0, 
+          display: 'inline-block' 
+        }}></div>
+        
+        {/* Expansionsikon i fast position (eller tomt utrymme) */}
+        <div style={{ 
+          width: '20px', 
+          height: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          flexShrink: 0,
+          marginRight: '4px' 
+        }}>
+          {isFolder && children.length > 0 && (
+            <div 
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                height: '100%',
                 cursor: 'pointer',
                 transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                transition: 'transform 0.15s ease'
+                transition: 'transform 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
               onClick={(e) => {
-                e.stopPropagation(); // Förhindra att det navigerar
+                e.stopPropagation();
                 toggleFolder(node.id);
               }}
             >
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
               </svg>
-            </span>
-          ) : (
-            // Helt tomt utrymme med samma dimensioner
-            <span></span>
+            </div>
           )}
-        </span>
+        </div>
         
-        {/* Mappikon placerad EFTER pilen */}
-        <span style={{
-          display: 'inline-flex',
+        {/* Mappikon (alltid synlig) */}
+        <div style={{
+          display: 'flex',
           width: '16px',
           height: '16px',
-          marginRight: '10px',
+          marginRight: '8px',
           color: isFolder ? '#e3a008' : '#3182ce',
           flexShrink: 0
         }}>
@@ -154,40 +154,34 @@ const FileSystemNode = ({
               <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
             )}
           </svg>
-        </span>
+        </div>
         
         {/* Mappnamn */}
-        <span 
-          style={{
-            fontSize: '0.875rem',
-            display: 'inline-block',
-            fontWeight: 'normal',
-            whiteSpace: 'nowrap',
-            color: isFolder && node.slug ? '#007934' : 'inherit', // SEB grön färg för klickbara mappar
-            padding: '2px 4px',
-            borderRadius: '3px'
-          }}
-        >
+        <div style={{
+          fontSize: '0.875rem',
+          fontWeight: 'normal',
+          whiteSpace: 'nowrap',
+          color: isFolder && node.slug ? '#007934' : 'inherit',
+          padding: '2px 4px',
+          borderRadius: '3px',
+          flexGrow: 1
+        }}>
           {node.name}
-        </span>
+        </div>
       
-        {/* Plusknapp - direkt efter mappnamnet */}
+        {/* Plusknapp (bara för mappar) */}
         {isFolder && (
-          <span 
+          <div 
             style={{
               opacity: 0.7,
-              minWidth: '20px',
               width: '20px',
               height: '20px',
-              padding: '2px',
-              marginLeft: '4px',
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               borderRadius: '4px',
-              flexShrink: 0,
-              zIndex: 1
+              flexShrink: 0
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -195,24 +189,24 @@ const FileSystemNode = ({
             }}
             onMouseOver={(e) => {
               e.stopPropagation();
-              (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+              (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
             }}
             onMouseOut={(e) => {
               e.stopPropagation();
-              (e.currentTarget as HTMLSpanElement).style.backgroundColor = 'transparent';
+              (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent';
             }}
             title="Lägg till undermapp"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-          </span>
+          </div>
         )}
       </div>
       
       {/* Barnmappar */}
       {isFolder && isOpen && children.length > 0 && (
-        <div style={{ display: 'block', width: '100%' }}>
+        <div style={{ width: '100%' }}>
           {children.map(child => (
             <FileSystemNode
               key={child.id}
