@@ -1,0 +1,31 @@
+/* SEB färger och stilar */
+
+/* Grön hover-effekt för alla menyalternativ */
+.MuiListItemButton-root:hover {
+  background-color: #e0f2e9 !important;
+}
+
+/* Aktiva menyalternativ */
+.MuiListItemButton-root.Mui-selected {
+  background-color: #e0f2e9 !important;
+}
+
+/* Hover på valda alternativ */
+.MuiListItemButton-root.Mui-selected:hover {
+  background-color: #b3dcc8 !important;
+}
+
+/* Grön hover-effekt för menyalternativ i dropdown */
+.MuiMenuItem-root:hover {
+  background-color: #e0f2e9 !important;
+}
+
+/* Aktiva menyalternativ i dropdown */
+.MuiMenuItem-root.Mui-selected {
+  background-color: #e0f2e9 !important;
+}
+
+/* Hover på valda alternativ i dropdown */
+.MuiMenuItem-root.Mui-selected:hover {
+  background-color: #b3dcc8 !important;
+}
