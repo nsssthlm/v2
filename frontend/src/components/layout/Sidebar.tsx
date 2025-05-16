@@ -522,7 +522,7 @@ const Sidebar = () => {
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: '#fff',
+        bgcolor: 'var(--joy-palette-background-surface, #fff)',
         position: 'relative',
         overflowX: 'visible',
         '& ul': { overflowX: 'visible !important' }, // Använd !important för att override andra stilar
@@ -542,7 +542,7 @@ const Sidebar = () => {
             width: 28, 
             height: 28, 
             borderRadius: 6, 
-            bgcolor: 'primary.500',
+            bgcolor: '#007934', // SEB gröna
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

@@ -143,7 +143,7 @@ const TopMenu: React.FC = () => {
         borderColor: 'divider',
         p: 1,
         px: 2,
-        bgcolor: '#fff', // Exakt samma vita färg som i sidofältet
+        bgcolor: 'var(--joy-palette-background-surface, #fff)', // Använder tema-variabeln för konsekvent färgsättning
         height: '60px' // Ökad höjd för att matcha sidofältet med ValvX-loggan
       }}
     >

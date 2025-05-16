@@ -9,7 +9,7 @@ const sebColors = {
     200: '#80c5a3',
     300: '#4dae7e',
     400: '#269c63',
-    500: '#008a48', // SEB Green
+    500: '#007934', // SEB Green - exakt enligt designguiden
     600: '#007d41',
     700: '#006d38',
     800: '#005e30',
@@ -19,17 +19,20 @@ const sebColors = {
   sebBlue: {
     500: '#0092c5', // SEB Blue
   },
-  sebDarkBlue: {
-    500: '#41215e', // SEB Dark Blue
+  sebPurple: {
+    500: '#614c7f', // SEB Purple
   },
-  sebDarkBrown: {
-    500: '#654321', // SEB Dark Brown
+  sebLightGreen: {
+    500: '#52b878', // SEB Light Green
   },
-  sebBrightYellow: {
-    500: '#fbdfc9', // SEB Bright Yellow
+  sebYellow: {
+    500: '#ffe600', // SEB Yellow
   },
-  sebSand: {
-    500: '#fbd9c2', // SEB Sand
+  sebOrange: {
+    500: '#ff5f00', // SEB Orange
+  },
+  sebPink: {
+    500: '#ee3f7d', // SEB Pink
   },
   // Neutrala färger
   sebDarkGrey: {
