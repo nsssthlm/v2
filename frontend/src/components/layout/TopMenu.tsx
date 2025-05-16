@@ -67,7 +67,6 @@ const TopMenu: React.FC = () => {
         <rect width="24" height="24" rx="6" />
         <text x="6" y="17" fontFamily="Arial" fontSize="14" fontWeight="bold" fill="white">V</text>
       </svg>
-      <Typography level="title-lg" sx={{ ml: 1, fontWeight: 'bold' }}>ValvX</Typography>
     </Link>
   );
   const [projects, setProjects] = useState<Project[]>([
@@ -152,7 +151,7 @@ const TopMenu: React.FC = () => {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
         <LogoComponent />
-        <Typography level="title-lg">{pageTitle}</Typography>
+        <Typography level="title-lg">Mappar</Typography>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mx: 1 }}>
           <Button
