@@ -607,7 +607,7 @@ const Sidebar = () => {
   return (
     <Sheet
       sx={{
-        width: 250,
+        width: 275, // Ökad bredd med 10% (från 250px till 275px)
         height: '100vh',
         borderRight: '1px solid',
         borderColor: 'divider',
