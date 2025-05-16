@@ -531,53 +531,7 @@ const Sidebar = () => {
         '& li': { overflowX: 'visible !important' }, // Samma för list items
       }}
     >
-      {/* Header with Logo */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          p: 2,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          height: 56,
-        }}
-      >
-        <Box 
-          sx={{ 
-            width: 32, 
-            height: 32, 
-            borderRadius: 8, 
-            bgcolor: 'primary.500',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mr: 1.5,
-            color: 'white',
-            fontWeight: 'bold'
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M14.59 7.41L18.17 11H6v2h12.17l-3.59 3.59L16 18l6-6-6-6-1.41 1.41z"/>
-          </svg>
-        </Box>
-        <Typography level="title-lg" sx={{ fontWeight: 'bold' }}>
-          ValvX
-        </Typography>
-        
-        {/* Light/Dark mode toggle and collapse button */}
-        <Box sx={{ ml: 'auto', display: 'flex' }}>
-          <IconButton size="sm" variant="plain" color="neutral">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
-            </svg>
-          </IconButton>
-          <IconButton size="sm" variant="plain" color="neutral">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z"/>
-            </svg>
-          </IconButton>
-        </Box>
-      </Box>
+      {/* Sökrutan direkt överst i sidomenyn - ingen header behövs längre */}
 
       {/* Search input */}
       <Box sx={{ p: 2, pb: 1.5 }}>
