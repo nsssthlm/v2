@@ -151,7 +151,6 @@ const TopMenu: React.FC = () => {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
         <LogoComponent />
-        <Typography level="title-lg">Mappar</Typography>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mx: 1 }}>
           <Button
