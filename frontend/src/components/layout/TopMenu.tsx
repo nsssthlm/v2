@@ -179,6 +179,14 @@ const TopMenu: React.FC = () => {
             <MenuItem 
               key={project.id}
               selected={project.id === currentProject.id}
+              sx={{
+                '&.Mui-selected': {
+                  backgroundColor: '#e0f2e9', // Ljusare SEB grön för aktiva val
+                },
+                '&:hover': {
+                  backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+                }
+              }}
               onClick={() => handleProjectSelect(project)}
             >
               {project.name}
@@ -188,8 +196,13 @@ const TopMenu: React.FC = () => {
           <MenuItem onClick={() => {
             handleProjectMenuClose();
             setNewProjectModalOpen(true);
+          }}
+          sx={{
+            '&:hover': {
+              backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+            }
           }}>
-            <ListItemDecorator>+</ListItemDecorator>
+            <ListItemDecorator sx={{ color: '#007934' }}>+</ListItemDecorator>
             Skapa nytt projekt
           </MenuItem>
         </Menu>
