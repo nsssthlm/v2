@@ -669,14 +669,14 @@ const Sidebar = () => {
         />
       </Box>
       
-      {/* Main navigation menu */}
+      {/* Main navigation menu - endast vertikal scrollning för huvudmenyn */}
       <Box sx={{ 
         flexGrow: 1, 
         overflowY: 'auto', 
-        overflowX: 'auto', // Tillåt horisontell scrollning
+        overflowX: 'hidden', // Förhindra horisontell scrollning för hela huvudmenyn
         px: 1.5 
       }}>
-        <List size="sm" sx={{ '--ListItem-radius': '8px', minWidth: 'max-content' }}>
+        <List size="sm" sx={{ '--ListItem-radius': '8px' }}>
           {mainMenuItems.map((item) => (
             <Box key={item.path}>
               <ListItem
@@ -816,7 +816,7 @@ const Sidebar = () => {
                           </ListItemButton>
                         </ListItem>
                         
-                        {/* Filsystem för filträdet */}
+                        {/* Filsystem för filträdet - med horisontell scrollning */}
                         {openSubmenus['Filer'] && (
                           <Box sx={{ pl: 1.5, pr: 0, mb: 1, position: 'relative' }}>
                             {isLoading ? (
@@ -824,23 +824,35 @@ const Sidebar = () => {
                                 <CircularProgress size="sm" />
                               </Box>
                             ) : filesystemNodes.length > 0 ? (
-                              <Box sx={{ mt: 1, width: '100%' }}>
-                                
-                                {/* Filsystemsträd - visa alla noder utan förälder först */}
-                                {filesystemNodes
-                                  .filter(node => node.parent_id === null)
-                                  .map(node => (
-                                    <FileSystemNode
-                                      key={node.id}
-                                      node={node}
-                                      level={0}
-                                      filesystemNodes={filesystemNodes}
-                                      openFolders={openFolders}
-                                      toggleFolder={toggleFolder}
-                                      handleAddNewFolder={handleAddNewFolder}
-                                    />
-                                  ))
+                              <Box sx={{ 
+                                mt: 1, 
+                                width: '100%',
+                                overflowX: 'auto', // Lägg till horisontell scrollning bara för filsystemträdet
+                                '&::-webkit-scrollbar': {
+                                  height: '8px',
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                  backgroundColor: 'rgba(0,0,0,0.2)',
+                                  borderRadius: '4px',
                                 }
+                              }}>
+                                <Box sx={{ minWidth: 'max-content' }}>
+                                  {/* Filsystemsträd - visa alla noder utan förälder först */}
+                                  {filesystemNodes
+                                    .filter(node => node.parent_id === null)
+                                    .map(node => (
+                                      <FileSystemNode
+                                        key={node.id}
+                                        node={node}
+                                        level={0}
+                                        filesystemNodes={filesystemNodes}
+                                        openFolders={openFolders}
+                                        toggleFolder={toggleFolder}
+                                        handleAddNewFolder={handleAddNewFolder}
+                                      />
+                                    ))
+                                  }
+                                </Box>
                               </Box>
                             ) : (
                               <Typography level="body-sm" sx={{ py: 2, pl: 1, fontStyle: 'italic' }}>
