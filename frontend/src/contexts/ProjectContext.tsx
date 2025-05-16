@@ -13,16 +13,12 @@ export interface Project {
 const defaultProjects: Project[] = [
   {
     id: '1',
-    name: 'Globen',
-    description: 'Renoveringsprojekt för Globen arena',
+    name: 'Test projekt',
+    description: 'Ett testprojekt',
     endDate: '2026-12-31'
   },
-  {
-    id: '2',
-    name: 'Nya Slussen',
-    description: 'Ombyggnad av Slussen i Stockholm',
-    endDate: '2025-06-30'
-  }
+  // Ta bort projektet med ID 2 som inte finns i databasen
+  // Istället kommer vi att lägga till nya projekt via API-et i framtiden
 ];
 
 // Kontexttyp

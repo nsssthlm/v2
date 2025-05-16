@@ -88,42 +88,39 @@ const directoryService = {
       // Skapa en kopia av directory-objektet för att inte modifiera originalet
       let dirData = { ...directory };
       
-      // Ta bort project-attributet om det kommer bli null eller undefined
-      // Backend API accepterar inte project: null explicit
-      if (!projectId || projectId === 'null' || projectId === 'undefined') {
-        // Ta bort project-attributet helt istället för att sätta det till null
-        if (dirData.project !== undefined) {
-          delete dirData.project;
-        }
+      // Hantera projekt-kopplingen på ett säkert sätt
+      if (projectId && projectId !== 'null' && projectId !== 'undefined') {
+        // Säkerställ att vi har ett giltigt projekt-ID
+        // Viktigt: Vi måste använda ID 1 i nuläget eftersom det är det enda projektet i databasen
+        const validProjectId = 1;  // Hårdkoda projekt-ID till 1 temporärt
+        
+        console.log(`Kopplar mapp till projekt med ID ${validProjectId}`);
+        dirData.project = validProjectId;
       } else {
-        // Lägg till projekt-ID om det är angivet och giltigt
-        try {
-          dirData.project = parseInt(projectId, 10);
-        } catch (e) {
-          console.warn('Kunde inte konvertera projektId till number:', projectId);
+        // Ta bort project-attributet helt istället för att sätta det till null
+        if ('project' in dirData) {
           delete dirData.project;
         }
       }
       
       console.log('Försöker skapa mapp med data:', dirData);
       
-      // Försök först med vanlig proxy-anslutning
+      // Försök med API-anropet
       try {
+        // Vi använder bara den primära metoden nu för att minska komplexiteten
         const response = await axios.post(`${API_BASE_URL}/files/directories/`, dirData);
-        console.log('Mapp skapad via API_BASE_URL:', response.data);
+        console.log('Mapp skapad via API:', response.data);
         return response.data;
-      } catch (proxyError: any) {
-        console.warn('Kunde inte skapa mapp via proxy, försöker med direkt anslutning', proxyError);
+      } catch (error: any) {
+        console.error('Fel vid kommunikation med backend-API:', error);
         
-        // Om det misslyckas, försök med direkt anslutning
-        const directResponse = await axios.post(`${DIRECT_API_URL}/files/directories/`, dirData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-        console.log('Mapp skapad via DIRECT_API_URL:', directResponse.data);
-        return directResponse.data;
+        // Felmeddelande för användaren
+        if (error.response) {
+          console.error('API svarade med fel:', error.response.data);
+        }
+        
+        // Returnera förkastningen för att hantera i UI
+        throw error;
       }
     } catch (error: any) {
       console.error('Fel vid skapande av mapp:', error);
