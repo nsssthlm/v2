@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import projectService from '../services/projectService';
 
 // Projekttypen
 export interface Project {
