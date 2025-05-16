@@ -489,29 +489,21 @@ const Sidebar = () => {
       }
     } catch (error: any) {
       console.error('Fel vid skapande av mapp:', error);
-      
-      // Visa API-felmeddelande om det finns
-      if (error.response && error.response.data) {
-        if (error.response.data.name) {
-          alert(`Fel: ${error.response.data.name}`);
-        } else if (typeof error.response.data === 'string') {
-          alert(`Fel: ${error.response.data}`);
-        } else {
-          alert('Det gick inte att skapa mappen. Försök igen med ett annat namn.');
-        }
-      } else {
-        alert('Det gick inte att skapa mappen. Vänligen försök igen.');
-      }
-    } finally {
-      setNewFolderDialogOpen(false);
-      setNewFolderName('');
+      alert(`Kunde inte skapa mappen: ${error.message || 'Okänt fel'}`);
     }
+    
+    // Stäng dialogrutan
+    setNewFolderDialogOpen(false);
   };
-
-  // Check if a menu item is active
-  const isActive = (path: string) => {
-    return location.pathname === path || 
-           (path !== '/' && location.pathname.startsWith(path));
+  
+  // Helper: check if a path is active
+  const isActive = (path: string): boolean => {
+    // Handle exact match for home or dashboard
+    if (path === '/' || path === '/dashboard') {
+      return location.pathname === '/' || location.pathname === '/dashboard';
+    }
+    // For other routes, check if location starts with path (for submenu items)
+    return location.pathname.startsWith(path);
   };
 
   return (
@@ -531,12 +523,39 @@ const Sidebar = () => {
         '& li': { overflowX: 'visible !important' }, // Samma för list items
       }}
     >
-      {/* Sökrutan direkt överst i sidomenyn - ingen header behövs längre */}
+      {/* ValvX logo i vänstra hörnet */}
+      <Box sx={{ 
+        p: 2, 
+        display: 'flex', 
+        alignItems: 'center',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+      }}>
+        <Box 
+          sx={{ 
+            width: 28, 
+            height: 28, 
+            borderRadius: 6, 
+            bgcolor: 'primary.500',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mr: 1.5,
+            color: 'white',
+            fontWeight: 'bold'
+          }}
+        >
+          <Typography level="title-lg">V</Typography>
+        </Box>
+        <Typography level="title-lg" sx={{ fontWeight: 'bold' }}>
+          ValvX
+        </Typography>
+      </Box>
 
-      {/* Search input */}
-      <Box sx={{ p: 2, pb: 1.5 }}>
+      {/* Sökfält */}
+      <Box sx={{ px: 2, pt: 1, pb: 2 }}>
         <Input
-          size="md"
+          size="sm"
           placeholder="Search"
           startDecorator={
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" opacity={0.5}>
@@ -544,12 +563,12 @@ const Sidebar = () => {
             </svg>
           }
           sx={{ 
-            '--Input-radius': '6px',
+            '--Input-radius': '4px',
             bgcolor: 'background.level1'
           }}
         />
       </Box>
-
+      
       {/* Main navigation menu */}
       <Box sx={{ flexGrow: 1, overflowY: 'auto', px: 1.5 }}>
         <List size="sm" sx={{ '--ListItem-radius': '8px' }}>
@@ -563,431 +582,197 @@ const Sidebar = () => {
                   })
                 }}
               >
-                <ListItemButton 
-                  component={item.submenu.length > 0 ? 'div' : Link} 
-                  {...(item.submenu.length === 0 ? { to: item.path } : { onClick: () => toggleSubmenu(item.path) })}
-                  sx={{ 
-                    py: 1,
-                    color: isActive(item.path) ? 'primary.600' : 'neutral.600',
-                    fontWeight: isActive(item.path) ? 500 : 400,
-                  }}
+                <ListItemButton
+                  selected={isActive(item.path)}
+                  component={Link}
+                  to={item.submenu && item.submenu.length > 0 && item.collapsible ? '#' : item.path}
+                  onClick={
+                    (item.submenu && item.submenu.length > 0 && item.collapsible) 
+                      ? (e) => {
+                          e.preventDefault();
+                          toggleSubmenu(item.path);
+                        }
+                      : undefined
+                  }
                 >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: isActive(item.path) ? 'primary.500' : 'neutral.500',
-                      mr: 1.5,
-                    }}
-                  >
-                    {item.icon}
-                  </Box>
-                  <ListItemContent>
-                    <Typography level="body-sm">
-                      {item.name}
-                      {item.badge && (
-                        <Box
-                          component="span"
-                          sx={{
-                            ml: 1,
-                            px: 0.6,
-                            py: 0.1,
-                            fontSize: '10px',
-                            borderRadius: '4px',
-                            bgcolor: 'primary.50',
-                            color: 'primary.600',
-                            textTransform: 'uppercase',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {item.badge}
-                        </Box>
-                      )}
-                    </Typography>
-                  </ListItemContent>
-                  {item.submenu.length > 0 && (
-                    <svg 
-                      width="16" 
-                      height="16" 
-                      viewBox="0 0 24 24" 
-                      fill="currentColor"
-                      style={{ 
-                        transform: openSubmenus[item.path] ? 'rotate(0deg)' : 'rotate(-90deg)',
-                        transition: 'transform 0.2s ease-in-out',
-                        opacity: 0.5
-                      }}
-                    >
-                      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                    </svg>
-                  )}
-                </ListItemButton>
-              </ListItem>
-
-              {/* Render submenu if it exists and is open */}
-              {item.submenu.length > 0 && openSubmenus[item.path] && (
-                <List 
-                  size="sm" 
-                  sx={{ 
-                    '--ListItem-radius': '6px',
-                    pl: 3,
-                    mt: -0.5,
-                    mb: 0.5
-                  }}
-                >
-                  {item.submenu.map((subitem: SubmenuItem) => (
-                    <ListItem key={subitem.path} sx={{ mb: 0.5 }}>
-                      <ListItemButton 
-                        component={Link} 
-                        to={subitem.path}
-                        sx={{ 
-                          py: 0.75,
-                          pl: 1.5,
-                          color: isActive(subitem.path) ? 'primary.600' : 'neutral.600',
-                          ...(isActive(subitem.path) && {
-                            bgcolor: 'primary.50',
-                          })
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: 16,
-                            height: 16,
-                            mr: 1.5,
-                            fontSize: '0.8rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" opacity={0.5}>
-                            {subitem.name.includes('Kanban') && <path d="M4 11h6v8H4zm8-8h6v16h-6z"/>}
-                            {subitem.name.includes('Gantt') && <path d="M4 11h6v2H4zm0 4h6v2H4zm0-8h6v2H4zm8 0h8v2h-8zm0 4h8v2h-8zm0 4h8v2h-8z"/>}
-                            {subitem.name.includes('Ekonomi') && <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>}
-                            {subitem.name.includes('Meddelanden') && <path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"/>}
-                            {subitem.name.includes('Översikt') && <path d="M16 15h-2V5h2v10zm-8 0H6V5h2v10zm12-7h-2v4h2V8zM8 8H6v4h2V8z"/>}
-                            {subitem.name.includes('Design') && <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"/>}
-                            {subitem.name.includes('Byggarbetsplats') && <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>}
-                            {subitem.name.includes('Home') && <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>}
-                            {subitem.name.includes('Comments') && <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>}
-                            {subitem.name.includes('Review Package') && <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>}
-                            {subitem.name.includes('Files') && <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>}
-                            {subitem.name.includes('Versionsset') && <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>}
-                            {subitem.name.includes('Meetings') && <path d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 9h4V9h-4V6h-2v3H7v2h4v3h-4v2h4v3h2v-3h4v-2h-4v-3z"/>}
-                          </svg>
-                        </Box>
-                        <ListItemContent>
-                          <Typography level="body-sm">
-                            {subitem.name}
-                          </Typography>
-                        </ListItemContent>
-                        
-                        {/* Add plus button for Files */}
-                        {('hasAddButton' in subitem && Boolean(subitem.hasAddButton)) && (
-                          <IconButton 
-                            size="sm" 
-                            variant="plain" 
-                            color="neutral"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              // Öppna dialogen för att skapa en ny mapp
-                              handleAddNewFolder(null);
-                            }}
-                            sx={{ ml: 'auto', opacity: 0.6 }}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                            </svg>
-                          </IconButton>
-                        )}
-                      </ListItemButton>
-                      
-
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Box>
-          ))}
-          
-          {/* Visa Filer-menyraden med dropdown-funktion */}
-          {openSubmenus['/vault'] && (
-            <Box sx={{ 
-              ml: 2, 
-              mt: 0.5, 
-              mb: 1, 
-              overflow: 'visible',
-              position: 'relative'
-            }}>
-              <ListItem sx={{ 
-                mb: 0.5, 
-                overflow: 'visible',
-                width: 'auto',
-                minWidth: '100%'
-              }}>
-                <ListItemButton 
-                  onClick={() => setOpenFolders(prev => ({...prev, 'files_root': !prev['files_root']}))}
-                  component="div"
-                  sx={{ 
-                    py: 0.75,
-                    pl: 1.5,
-                    bgcolor: 'rgba(240, 245, 250, 0.7)',
-                    color: 'neutral.700',
-                    border: '1px solid rgba(240, 245, 250, 0.9)',
-                    borderRadius: '6px'
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 16,
-                      height: 16,
-                      mr: 1.5,
-                      fontSize: '0.8rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#64748b'
-                    }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" opacity={0.7}>
-                      <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
-                    </svg>
-                  </Box>
-                  <ListItemContent>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      width: 'auto !important',
-                      minWidth: '100%',
-                      flexWrap: 'nowrap',
-                      overflow: 'visible !important',
-                      maxWidth: 'none !important',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      <Typography 
-                        level="body-sm" 
-                        fontWeight={500} 
-                        sx={{ 
-                          whiteSpace: 'nowrap',
-                          width: '60px', // Samma bredd som för mappnamn
-                          flexShrink: 0
-                        }}
-                      >
-                        Filer
-                      </Typography>
-                      
-                      {/* Inget mellanrum mellan text och plusknapp */}
-                      <Box sx={{ 
-                        width: '3px', 
-                        height: '1px',
-                        flexShrink: 0,
-                        visibility: 'hidden' // Göm linjen helt
-                      }} />
+                  {item.icon && (
+                    <Box sx={{ mr: 1.5, color: isActive(item.path) ? 'primary.500' : 'neutral.500' }}>
+                      {item.icon}
                     </Box>
+                  )}
+                  <ListItemContent>
+                    <Typography level="title-sm">{item.name}</Typography>
                   </ListItemContent>
                   
-                  <IconButton 
-                    size="sm" 
-                    variant="plain" 
-                    color="neutral"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleAddNewFolder(null);
-                    }}
-                    sx={{ 
-                      opacity: 0.8,
-                      minWidth: '20px',
-                      width: '20px',
-                      height: '20px',
-                      p: '2px'
-                    }}
-                    title="Skapa ny mapp"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                    </svg>
-                  </IconButton>
+                  {item.badge && (
+                    <Typography level="body-xs" color="primary" sx={{ 
+                      ml: 1, 
+                      px: 0.8, 
+                      py: 0.1, 
+                      borderRadius: 8, 
+                      bgcolor: 'primary.100',
+                      fontWeight: 'bold'
+                    }}>
+                      {item.badge}
+                    </Typography>
+                  )}
+                  
+                  {item.submenu && item.submenu.length > 0 && item.collapsible && (
+                    <Box sx={{ transition: 'transform 0.2s', transform: openSubmenus[item.path] ? 'rotate(-180deg)' : 'none' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                      </svg>
+                    </Box>
+                  )}
                 </ListItemButton>
               </ListItem>
               
-              {/* Visa filsystemet om Filer är expanderad */}
-              {openFolders['files_root'] && (
-                <Box 
-                  className="file-system-container"
-                  sx={{
-                  maxHeight: '60vh',
-                  width: '100%',
-                  overflowY: 'auto',
-                  overflowX: 'visible',
-                  position: 'relative',
-                  zIndex: 0,
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    pointerEvents: 'none',
-                    zIndex: -1
-                  },
-                  '& > ul': { 
-                    overflow: 'visible !important',
-                    width: 'auto !important'
-                  },
-                  scrollbarWidth: 'thin',
-                  '&::-webkit-scrollbar': {
-                    width: '4px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: 'rgba(0,0,0,0.2)',
-                    borderRadius: '4px',
-                  }
-                }}>
-                  <List 
-                    size="sm" 
-                    sx={{ 
-                      '--ListItem-radius': '4px',
-                      pl: 1.5,
-                      mt: 0.5,
-                      mb: 0.5,
-                      position: 'relative',
-                      width: '100%',
-                      overflow: 'visible !important',
-                      '& > li': {
-                        overflow: 'visible !important',
-                        width: 'auto !important',
-                        maxWidth: 'none !important'
-                      }
-                    }}
-                >
-                  {/* Visa laddningsindikator */}
-                  {isLoading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                      <CircularProgress size="sm" />
-                    </Box>
-                  ) : (
-                    <>
-                      {/* Visa mappar på rotnivå */}
-                      {filesystemNodes
-                        .filter(node => node.parent_id === null)
-                        .map(node => (
-                          <FileSystemNode 
-                            key={node.id} 
-                            node={node} 
-                            level={0}
-                            filesystemNodes={filesystemNodes}
-                            openFolders={openFolders}
-                            toggleFolder={toggleFolder}
-                            handleAddNewFolder={handleAddNewFolder}
-                          />
-                        ))
-                      }
-                      
-                      {/* Om inga filer/mappar finns, visa en text */}
-                      {!isLoading && filesystemNodes.filter(node => node.parent_id === null).length === 0 && (
-                        <Typography 
-                          level="body-xs" 
-                          sx={{ 
-                            pl: 2, 
-                            py: 1, 
-                            color: 'neutral.500', 
-                            fontStyle: 'italic' 
-                          }}
-                        >
-                          Inga filer eller mappar
-                        </Typography>
-                      )}
-                    </>
-                  )}
-                </List>
+              {/* Submenu items */}
+              {item.submenu && item.submenu.length > 0 && item.collapsible && openSubmenus[item.path] && (
+                <Box sx={{ ml: 3.5 }}>
+                  {item.submenu.map((subItem) => (
+                    <ListItem
+                      key={subItem.path}
+                      sx={{
+                        mb: 0.5,
+                        ...(isActive(subItem.path) && {
+                          bgcolor: 'primary.50',
+                        })
+                      }}
+                    >
+                      <ListItemButton
+                        selected={isActive(subItem.path)}
+                        component={Link}
+                        to={subItem.path}
+                      >
+                        <ListItemContent>
+                          <Typography level="body-sm">{subItem.name}</Typography>
+                        </ListItemContent>
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          ))}
+
+          <Divider sx={{ my: 2 }} />
+          
+          {/* Filer (filsystem) */}
+          <ListItem sx={{ mb: 0.5 }}>
+            <ListItemButton 
+              selected={location.pathname.startsWith('/folders')}
+              component={Link}
+              to="#"
+              onClick={(e) => {
+                e.preventDefault();
+                toggleSubmenu('Filer');
+              }}
+            >
+              <Box sx={{ mr: 1.5, color: location.pathname.startsWith('/folders') ? 'primary.500' : 'neutral.500' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                </svg>
               </Box>
+              <ListItemContent>
+                <Typography level="title-sm">Filer</Typography>
+              </ListItemContent>
+              <Box sx={{ 
+                transition: 'transform 0.2s', 
+                transform: openSubmenus['Filer'] ? 'rotate(-180deg)' : 'none',
+                p: 0.2
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                </svg>
+              </Box>
+            </ListItemButton>
+          </ListItem>
+          
+          {/* Filsystem för filträdet */}
+          {openSubmenus['Filer'] && (
+            <Box sx={{ pl: 1.5, pr: 0, mb: 1, position: 'relative' }}>
+              {isLoading ? (
+                <Box sx={{ py: 2, display: 'flex', justifyContent: 'center' }}>
+                  <CircularProgress size="sm" />
+                </Box>
+              ) : filesystemNodes.length > 0 ? (
+                <Box sx={{ mt: 1, width: '100%' }}>
+                  {/* Lägg till rotmapp knapp */}
+                  <Box
+                    sx={{
+                      pb: 1,
+                      width: '100%',
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <Button
+                      size="sm"
+                      variant="plain"
+                      color="neutral"
+                      sx={{ px: 1, py: 0.5 }}
+                      onClick={() => handleAddNewFolder(null)}
+                      startDecorator={
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                      }
+                    >
+                      Ny huvudmapp
+                    </Button>
+                  </Box>
+                  
+                  {/* Filsystemsträd - visa alla noder utan förälder först */}
+                  {filesystemNodes
+                    .filter(node => node.parent_id === null)
+                    .map(node => (
+                      <FileSystemNode
+                        key={node.id}
+                        node={node}
+                        level={0}
+                        filesystemNodes={filesystemNodes}
+                        openFolders={openFolders}
+                        toggleFolder={toggleFolder}
+                        handleAddNewFolder={handleAddNewFolder}
+                      />
+                    ))
+                  }
+                </Box>
+              ) : (
+                <Typography level="body-sm" sx={{ py: 2, pl: 1, fontStyle: 'italic' }}>
+                  Inga mappar hittades.
+                </Typography>
               )}
             </Box>
           )}
-        </List>
-      </Box>
-
-      {/* Footer with logout and user info */}
-      <Box>
-        <Divider />
-        <List size="sm">
-          <ListItem>
-            <ListItemButton component={Link} to={logoutItem.path} sx={{ py: 1 }}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: 'neutral.500',
-                  mr: 1.5,
-                }}
-              >
+                    
+          {/* Logout at the bottom of sidebar */}
+          <ListItem sx={{ mt: 'auto' }}>
+            <ListItemButton
+              component={Link}
+              to={logoutItem.path}
+            >
+              <Box sx={{ mr: 1.5, color: 'neutral.500' }}>
                 {logoutItem.icon}
               </Box>
               <ListItemContent>
-                <Typography level="body-sm">{logoutItem.name}</Typography>
+                <Typography level="title-sm">{logoutItem.name}</Typography>
               </ListItemContent>
             </ListItemButton>
           </ListItem>
         </List>
-
-        {/* User information */}
-        <Box 
-          sx={{ 
-            p: 2, 
-            display: 'flex', 
-            alignItems: 'center',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              bgcolor: 'primary.100',
-              color: 'primary.700',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              mr: 1.5,
-            }}
-          >
-            TE
-          </Box>
-          <Box>
-            <Typography level="body-sm" fontWeight="bold">
-              testproject
-            </Typography>
-            <Typography level="body-xs" sx={{ color: 'neutral.500' }}>
-              project_leader
-            </Typography>
-          </Box>
-          <IconButton size="sm" variant="plain" color="neutral" sx={{ ml: 'auto' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.09-.16-.26-.25-.44-.25-.06 0-.12.01-.17.03l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.06-.02-.12-.03-.18-.03-.17 0-.34.09-.43.25l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.09.16.26.25.44.25.06 0 .12-.01.17-.03l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.06.02.12.03.18.03.17 0 .34-.09.43-.25l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-1.98-1.71c.04.31.05.52.05.73 0 .21-.02.43-.05.73l-.14 1.13.89.7 1.08.84-.7 1.21-1.27-.51-1.04-.42-.9.68c-.43.32-.84.56-1.25.73l-1.06.43-.16 1.13-.2 1.35h-1.4l-.19-1.35-.16-1.13-1.06-.43c-.43-.18-.83-.41-1.23-.71l-.91-.7-1.06.43-1.27.51-.7-1.21 1.08-.84.89-.7-.14-1.13c-.03-.31-.05-.54-.05-.74s.02-.43.05-.73l.14-1.13-.89-.7-1.08-.84.7-1.21 1.27.51 1.04.42.9-.68c.43-.32.84-.56 1.25-.73l1.06-.43.16-1.13.2-1.35h1.39l.19 1.35.16 1.13 1.06.43c.43.18.83.41 1.23.71l.91.7 1.06-.43 1.27-.51.7 1.21-1.07.85-.89.7.14 1.13zM12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-            </svg>
-          </IconButton>
-        </Box>
       </Box>
       
       {/* Modal för att skapa ny mapp */}
       <Modal open={newFolderDialogOpen} onClose={() => setNewFolderDialogOpen(false)}>
         <ModalDialog>
-          <DialogTitle>
-            {currentParentId 
-              ? `Skapa ny mapp i ${filesystemNodes.find(n => n.id === currentParentId)?.name || 'mapp'}`
-              : 'Skapa ny mapp på rotnivå'
-            }
-          </DialogTitle>
+          <DialogTitle>Skapa ny mapp</DialogTitle>
           <DialogContent>
-            <FormControl>
-              <FormLabel>Namn på mappen</FormLabel>
-              <Input 
-                autoFocus 
+            <FormControl sx={{ mt: 1 }}>
+              <FormLabel>Mappnamn</FormLabel>
+              <Input
+                autoFocus
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
                 onKeyDown={(e) => {
