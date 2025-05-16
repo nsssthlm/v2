@@ -120,31 +120,7 @@ const FolderPage = () => {
         )}
       </Box>
 
-      {/* Undermappar */}
-      {folderData.subfolders.length > 0 && (
-        <Box sx={{ mb: 4 }}>
-          <Typography level="h3" sx={{ mb: 2 }}>Undermappar</Typography>
-          <List>
-            {folderData.subfolders.map((subfolder) => (
-              <ListItem key={subfolder.slug}>
-                <ListItemContent>
-                  <Link 
-                    to={`/folders/${subfolder.slug}`} 
-                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
-                  >
-                    <span style={{ marginRight: '8px', color: '#e3a008' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-                      </svg>
-                    </span>
-                    {subfolder.name}
-                  </Link>
-                </ListItemContent>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      )}
+      {/* Undermappar visas inte längre här eftersom de finns i sidebaren */}
 
       {/* Filer */}
       <Box sx={{ mb: 4 }}>
@@ -186,13 +162,6 @@ const FolderPage = () => {
       {/* Hanteringsalternativ */}
       <Divider sx={{ mb: 2 }} />
       <Box sx={{ display: 'flex', gap: 2 }}>
-        <Button 
-          variant="outlined" 
-          color="neutral"
-          onClick={() => window.open(`/api/files/web/${slug}/edit/`, '_blank')}
-        >
-          Redigera sida
-        </Button>
         <Button 
           variant="solid" 
           color="primary"
