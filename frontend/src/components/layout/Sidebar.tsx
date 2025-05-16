@@ -66,9 +66,9 @@ const FileSystemNode = ({
       {level > 0 && (
         <div style={{
           position: 'absolute',
-          left: `${level * 12 - 6}px`,  /* Minskad indentering för hierarkin */
+          left: `${level * 8 - 4}px`,  /* Ytterligare minskad indentering för hierarkin (8px) */
           top: 0,
-          width: '8px',
+          width: '6px',
           height: '20px',
           borderLeft: '1px solid #A0A0A0',
           borderBottom: '1px solid #A0A0A0',
@@ -80,7 +80,7 @@ const FileSystemNode = ({
       <div
         style={{
           backgroundColor: 'transparent',
-          paddingLeft: `${level * 12 + 10}px`, /* Minskad indentering för mappikonen */
+          paddingLeft: `${level * 8 + 8}px`, /* Ytterligare minskad indentering för mappikonen (8px) */
           paddingRight: '8px',
           paddingTop: '4px', 
           paddingBottom: '4px',
