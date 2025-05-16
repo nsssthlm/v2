@@ -23,6 +23,12 @@ const defaultProjects: Project[] = [
     name: 'Nya Slussen',
     description: 'Ombyggnad av Slussen i Stockholm',
     endDate: '2025-06-30'
+  },
+  {
+    id: '3',
+    name: 'Karlatornet',
+    description: 'Byggnation av Karlatornet i Göteborg',
+    endDate: '2027-12-31'
   }
 ];
 
