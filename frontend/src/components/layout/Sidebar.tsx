@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sheet, 
   List, 
@@ -317,7 +317,8 @@ const mainMenuItems = [
       { name: 'Kommentarer', path: '/vault/comments' },
       { name: 'Review Package', path: '/vault/review' },
       { name: 'Versionsset', path: '/vault/versions' },
-      { name: 'Möten', path: '/vault/meetings' }
+      { name: 'Möten', path: '/vault/meetings' },
+      { name: 'Filer', path: '/folders' }
     ],
     collapsible: true
   }
@@ -361,7 +362,7 @@ const Sidebar = () => {
   // Toggle submenu
   const toggleSubmenu = (path: string) => {
     // Om det är Filer i Vault menyn, se till att även öppna Vault-menyn
-    if (path === '/folders') {
+    if (path === '/folders' || path === 'Filer') {
       setOpenSubmenus(prev => ({
         ...prev,
         [path]: !prev[path],
@@ -651,30 +652,142 @@ const Sidebar = () => {
               {item.submenu && item.submenu.length > 0 && item.collapsible && openSubmenus[item.path] && (
                 <Box sx={{ ml: 3.5 }}>
                   {item.submenu.map((subItem) => (
-                    <ListItem
-                      key={subItem.path}
-                      sx={{
-                        mb: 0.5,
-                        ...(isActive(subItem.path) && {
-                          bgcolor: '#e0f2e9', // Ljusare SEB grön
-                        })
-                      }}
-                    >
-                      <ListItemButton
-                        selected={isActive(subItem.path)}
-                        component={Link}
-                        to={subItem.path}
+                    subItem.path === '/folders' ? (
+                      // Specialhantering för Filer-menyn i Vault
+                      <React.Fragment key={subItem.path}>
+                        <ListItem
+                          sx={{
+                            mb: 0.5,
+                            ...(isActive(subItem.path) && {
+                              bgcolor: '#e0f2e9', // Ljusare SEB grön
+                            })
+                          }}
+                        >
+                          <ListItemButton
+                            selected={isActive(subItem.path)}
+                            component={Link}
+                            to="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleSubmenu('Filer');
+                            }}
+                            sx={{
+                              '&:hover': {
+                                backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+                              }
+                            }}
+                          >
+                            <ListItemContent>
+                              <Typography level="body-sm">{subItem.name}</Typography>
+                            </ListItemContent>
+                            
+                            {/* Plus knapp för att lägga till huvudmapp */}
+                            <Box 
+                              component="span" 
+                              sx={{
+                                opacity: 0.7,
+                                minWidth: '20px',
+                                width: '20px',
+                                height: '20px',
+                                padding: '2px',
+                                marginRight: '4px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                borderRadius: '4px',
+                                zIndex: 10,
+                                '&:hover': {
+                                  bgcolor: 'rgba(0,0,0,0.04)'
+                                }
+                              }}
+                              onClick={(e) => {
+                                e.preventDefault(); // Förhindra att det navigerar
+                                e.stopPropagation(); // Förhindra att föräldraelement fångar klicket
+                                setNewFolderName('');
+                                setCurrentParentId(null);
+                                setNewFolderDialogOpen(true);
+                              }}
+                              title="Lägg till ny huvudmapp"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                              </svg>
+                            </Box>
+                            
+                            <Box sx={{ 
+                              transition: 'transform 0.2s', 
+                              transform: openSubmenus['Filer'] ? 'rotate(-180deg)' : 'none',
+                              p: 0.2
+                            }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                              </svg>
+                            </Box>
+                          </ListItemButton>
+                        </ListItem>
+                        
+                        {/* Filsystem för filträdet */}
+                        {openSubmenus['Filer'] && (
+                          <Box sx={{ pl: 1.5, pr: 0, mb: 1, position: 'relative' }}>
+                            {isLoading ? (
+                              <Box sx={{ py: 2, display: 'flex', justifyContent: 'center' }}>
+                                <CircularProgress size="sm" />
+                              </Box>
+                            ) : filesystemNodes.length > 0 ? (
+                              <Box sx={{ mt: 1, width: '100%' }}>
+                                
+                                {/* Filsystemsträd - visa alla noder utan förälder först */}
+                                {filesystemNodes
+                                  .filter(node => node.parent_id === null)
+                                  .map(node => (
+                                    <FileSystemNode
+                                      key={node.id}
+                                      node={node}
+                                      level={0}
+                                      filesystemNodes={filesystemNodes}
+                                      openFolders={openFolders}
+                                      toggleFolder={toggleFolder}
+                                      handleAddNewFolder={handleAddNewFolder}
+                                    />
+                                  ))
+                                }
+                              </Box>
+                            ) : (
+                              <Typography level="body-sm" sx={{ py: 2, pl: 1, fontStyle: 'italic' }}>
+                                Inga mappar hittades.
+                              </Typography>
+                            )}
+                          </Box>
+                        )}
+                      </React.Fragment>
+                    ) : (
+                      // Normal rendering för alla andra menyalternativ
+                      <ListItem
+                        key={subItem.path}
                         sx={{
-                          '&:hover': {
-                            backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
-                          }
+                          mb: 0.5,
+                          ...(isActive(subItem.path) && {
+                            bgcolor: '#e0f2e9', // Ljusare SEB grön
+                          })
                         }}
                       >
-                        <ListItemContent>
-                          <Typography level="body-sm">{subItem.name}</Typography>
-                        </ListItemContent>
-                      </ListItemButton>
-                    </ListItem>
+                        <ListItemButton
+                          selected={isActive(subItem.path)}
+                          component={Link}
+                          to={subItem.path}
+                          sx={{
+                            '&:hover': {
+                              backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
+                            }
+                          }}
+                        >
+                          <ListItemContent>
+                            <Typography level="body-sm">{subItem.name}</Typography>
+                          </ListItemContent>
+                        </ListItemButton>
+                      </ListItem>
+                    )
                   ))}
                 </Box>
               )}
@@ -683,110 +796,7 @@ const Sidebar = () => {
 
           <Divider sx={{ my: 2 }} />
           
-          {/* Filer (filsystem) */}
-          <ListItem sx={{ mb: 0.5 }}>
-            <ListItemButton 
-              selected={location.pathname.startsWith('/folders')}
-              component={Link}
-              to="#"
-              onClick={(e) => {
-                e.preventDefault();
-                toggleSubmenu('Filer');
-              }}
-              sx={{
-                '&:hover': {
-                  backgroundColor: '#e0f2e9', // Ljusare SEB grön vid hover
-                }
-              }}
-            >
-              <Box sx={{ mr: 1.5, color: location.pathname.startsWith('/folders') ? 'primary.500' : 'neutral.500' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-                </svg>
-              </Box>
-              <ListItemContent>
-                <Typography level="title-sm">Filer</Typography>
-              </ListItemContent>
-              
-              {/* Plus knapp för att lägga till huvudmapp, liknande de andra mapparna */}
-              <Box 
-                component="span" 
-                sx={{
-                  opacity: 0.7,
-                  minWidth: '20px',
-                  width: '20px',
-                  height: '20px',
-                  padding: '2px',
-                  marginRight: '4px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  borderRadius: '4px',
-                  zIndex: 10,
-                  '&:hover': {
-                    bgcolor: 'rgba(0,0,0,0.04)'
-                  }
-                }}
-                onClick={(e) => {
-                  e.preventDefault(); // Förhindra att det navigerar
-                  e.stopPropagation(); // Förhindra att föräldraelement fångar klicket
-                  setNewFolderName('');
-                  setCurrentParentId(null);
-                  setNewFolderDialogOpen(true);
-                }}
-                title="Lägg till ny huvudmapp"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                </svg>
-              </Box>
-              
-              <Box sx={{ 
-                transition: 'transform 0.2s', 
-                transform: openSubmenus['Filer'] ? 'rotate(-180deg)' : 'none',
-                p: 0.2
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                </svg>
-              </Box>
-            </ListItemButton>
-          </ListItem>
-          
-          {/* Filsystem för filträdet */}
-          {openSubmenus['Filer'] && (
-            <Box sx={{ pl: 1.5, pr: 0, mb: 1, position: 'relative' }}>
-              {isLoading ? (
-                <Box sx={{ py: 2, display: 'flex', justifyContent: 'center' }}>
-                  <CircularProgress size="sm" />
-                </Box>
-              ) : filesystemNodes.length > 0 ? (
-                <Box sx={{ mt: 1, width: '100%' }}>
-                  
-                  {/* Filsystemsträd - visa alla noder utan förälder först */}
-                  {filesystemNodes
-                    .filter(node => node.parent_id === null)
-                    .map(node => (
-                      <FileSystemNode
-                        key={node.id}
-                        node={node}
-                        level={0}
-                        filesystemNodes={filesystemNodes}
-                        openFolders={openFolders}
-                        toggleFolder={toggleFolder}
-                        handleAddNewFolder={handleAddNewFolder}
-                      />
-                    ))
-                  }
-                </Box>
-              ) : (
-                <Typography level="body-sm" sx={{ py: 2, pl: 1, fontStyle: 'italic' }}>
-                  Inga mappar hittades.
-                </Typography>
-              )}
-            </Box>
-          )}
+          {/* Mapphantering har flyttats till Vault-sektionen */}
                     
           {/* Användarinformation längst ner i sidofältet */}
           <Box sx={{ 
