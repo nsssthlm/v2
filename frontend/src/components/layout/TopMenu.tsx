@@ -166,12 +166,12 @@ const TopMenu: React.FC = () => {
           onClick={handleProjectMenuClick}
           sx={{ 
             fontWeight: 'bold',
-            backgroundColor: '#007934', // SEB grön bakgrund
-            color: 'white',            // Vit text
+            backgroundColor: '#e0f2e9', // Ljusgrön bakgrund som matchar bilden
+            color: '#007934',           // Grön text
             border: '1px solid #007934', // Grön border
             '&:hover': {
-              backgroundColor: '#e0f2e9',  // Ljusgrön vid hover
-              color: '#007934',           // Grön text vid hover
+              backgroundColor: '#d0e9de',  // Lite mörkare ljusgrön vid hover
+              color: '#007934',           // Behåll grön text vid hover
               border: '1px solid #007934', // Behåll border vid hover
             }
           }}
