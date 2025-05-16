@@ -21,7 +21,7 @@ import {
   DialogContent,
   DialogActions
 } from '@mui/joy';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 // Typ för projektdata
 interface Project {
@@ -59,6 +59,17 @@ const TopMenu: React.FC = () => {
     description: 'Renoveringsprojekt för Globen arena',
     endDate: '2026-12-31'
   });
+  
+  // Logo komponent
+  const LogoComponent = () => (
+    <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#4361EE">
+        <rect width="24" height="24" rx="6" />
+        <text x="6" y="17" fontFamily="Arial" fontSize="14" fontWeight="bold" fill="white">V</text>
+      </svg>
+      <Typography level="title-lg" sx={{ ml: 1, fontWeight: 'bold' }}>ValvX</Typography>
+    </Link>
+  );
   const [projects, setProjects] = useState<Project[]>([
     {
       id: '1',
@@ -135,10 +146,12 @@ const TopMenu: React.FC = () => {
         borderColor: 'divider',
         p: 1,
         px: 2,
-        bgcolor: 'background.surface'
+        bgcolor: 'background.surface',
+        height: '48px'
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+        <LogoComponent />
         <Typography level="title-lg">{pageTitle}</Typography>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mx: 1 }}>
