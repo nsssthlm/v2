@@ -85,24 +85,38 @@ const directoryService = {
   // Skapa ett nytt directory med koppling till aktuellt projekt
   createDirectory: async (directory: DirectoryInput, projectId?: string): Promise<ApiDirectory> => {
     try {
-      // Om projectId är angivet, se till att directory inkluderar detta
-      if (projectId && !directory.project) {
-        directory = {
-          ...directory,
-          project: parseInt(projectId, 10) // Konvertera string till number
-        };
+      // Skapa en kopia av directory-objektet för att inte modifiera originalet
+      let dirData = { ...directory };
+      
+      // Ta bort project-attributet om det kommer bli null eller undefined
+      // Backend API accepterar inte project: null explicit
+      if (!projectId || projectId === 'null' || projectId === 'undefined') {
+        // Ta bort project-attributet helt istället för att sätta det till null
+        if (dirData.project !== undefined) {
+          delete dirData.project;
+        }
+      } else {
+        // Lägg till projekt-ID om det är angivet och giltigt
+        try {
+          dirData.project = parseInt(projectId, 10);
+        } catch (e) {
+          console.warn('Kunde inte konvertera projektId till number:', projectId);
+          delete dirData.project;
+        }
       }
+      
+      console.log('Försöker skapa mapp med data:', dirData);
       
       // Försök först med vanlig proxy-anslutning
       try {
-        const response = await axios.post(`${API_BASE_URL}/files/directories/`, directory);
+        const response = await axios.post(`${API_BASE_URL}/files/directories/`, dirData);
         console.log('Mapp skapad via API_BASE_URL:', response.data);
         return response.data;
       } catch (proxyError: any) {
         console.warn('Kunde inte skapa mapp via proxy, försöker med direkt anslutning', proxyError);
         
         // Om det misslyckas, försök med direkt anslutning
-        const directResponse = await axios.post(`${DIRECT_API_URL}/files/directories/`, directory, {
+        const directResponse = await axios.post(`${DIRECT_API_URL}/files/directories/`, dirData, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'

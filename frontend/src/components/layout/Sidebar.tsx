@@ -458,17 +458,15 @@ const Sidebar = () => {
       : null;
     
     try {
-      // Skapa objekt för API-anrop och inkludera projektets ID
+      // Skapa objekt för API-anrop - vi låter service-lagret hantera projektkopplingen
       const newDirData: DirectoryInput = {
         name: newFolderName.trim(),
         type: 'folder',
         is_sidebar_item: true,
-        parent: parentDbId,
-        // Koppling till det aktuella projektet
-        project: parseInt(currentProject.id, 10)
+        parent: parentDbId
       };
       
-      // Skicka till API (med extra loggning)
+      // Skicka till API (med extra loggning) - skicka projektets ID separat
       console.log('Försöker skapa ny mapp med data:', newDirData);
       const createdDir = await directoryService.createDirectory(newDirData, currentProject.id);
       console.log('Mapp skapad med data:', createdDir);
