@@ -341,11 +341,27 @@ const logoutItem = {
 
 const Sidebar = () => {
   const location = useLocation();
-  const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
-    '/planning': true,    // Öppna dessa undermenyer som standard
-    '/communication': true,
-    '/3dviewer': true,
-    '/vault': true
+  // Hämta sparade menyvärden från localStorage eller använd standardvärden
+  const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('openSubmenus');
+      return saved ? JSON.parse(saved) : {
+        '/planning': true,  // Öppna dessa undermenyer som standard
+        '/communication': true,
+        '/3dviewer': true,
+        '/vault': true,
+        'Filer': true       // Håll Filer-menyn öppen som standard
+      };
+    } catch (e) {
+      console.error('Kunde inte läsa sparade menyvärden:', e);
+      return {
+        '/planning': true,
+        '/communication': true,
+        '/3dviewer': true,
+        '/vault': true,
+        'Filer': true
+      };
+    }
   });
   
   // Använd projektkontext för att få det aktuella projektets ID
@@ -376,16 +392,38 @@ const Sidebar = () => {
   const toggleSubmenu = (path: string) => {
     // Om det är Filer i Vault menyn, se till att även öppna Vault-menyn
     if (path === '/folders' || path === 'Filer') {
-      setOpenSubmenus(prev => ({
-        ...prev,
-        [path]: !prev[path],
-        '/vault': true
-      }));
+      setOpenSubmenus(prev => {
+        const newState = {
+          ...prev,
+          [path]: !prev[path],
+          '/vault': true
+        };
+        
+        // Spara till localStorage för att behålla mellan sidladdningar
+        try {
+          localStorage.setItem('openSubmenus', JSON.stringify(newState));
+        } catch (e) {
+          console.error('Kunde inte spara menyernas tillstånd:', e);
+        }
+        
+        return newState;
+      });
     } else {
-      setOpenSubmenus(prev => ({
-        ...prev,
-        [path]: !prev[path]
-      }));
+      setOpenSubmenus(prev => {
+        const newState = {
+          ...prev,
+          [path]: !prev[path]
+        };
+        
+        // Spara till localStorage för att behålla mellan sidladdningar
+        try {
+          localStorage.setItem('openSubmenus', JSON.stringify(newState));
+        } catch (e) {
+          console.error('Kunde inte spara menyernas tillstånd:', e);
+        }
+        
+        return newState;
+      });
     }
   };
   
