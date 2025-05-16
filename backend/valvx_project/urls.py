@@ -10,6 +10,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from core import custom_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -21,6 +22,9 @@ urlpatterns = [
         
         # Status endpoint
         path('status/', lambda request: HttpResponse(b'{"status": "ok"}', content_type='application/json')),
+        
+        # Custom endpoints för projekthantering
+        path('custom/create-project', custom_views.create_project, name='create-project'),
         
         # App routes
         path('', include('core.urls')),

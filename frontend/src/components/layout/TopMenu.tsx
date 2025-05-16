@@ -82,7 +82,7 @@ const TopMenu: React.FC = () => {
       // Förbered data för backend-API
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
       
-      // Skapar projektet direkt i databasen med SQL-fråga
+      // Skapar projektet direkt i databasen
       const response = await fetch('/api/custom/create-project', {
         method: 'POST',
         headers: {

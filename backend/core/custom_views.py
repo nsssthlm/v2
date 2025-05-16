@@ -46,12 +46,21 @@ def create_project(request):
         project.save()
         
         # Returnera projektobjekt med ID
+        # Hantera start_date och end_date korrekt - de kan vara strängar eller datum
+        start_date = project.start_date
+        if not isinstance(start_date, str):
+            start_date = start_date.isoformat()
+            
+        end_date = project.end_date
+        if end_date and not isinstance(end_date, str):
+            end_date = end_date.isoformat()
+        
         return JsonResponse({
             "id": project.id,
             "name": project.name,
             "description": project.description,
-            "start_date": project.start_date.isoformat(),
-            "end_date": project.end_date.isoformat() if project.end_date else None,
+            "start_date": start_date,
+            "end_date": end_date,
             "is_active": project.is_active
         })
         
