@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charSet="utf-8"/><link rel="shortcut icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="theme-color" content="#333333"/><meta name="description" content="Design Library contains SEB:s digital design guidelines and components, to support you when designing and building great SEB experiences."/><link rel="apple-touch-icon" href="logo192.png"/><link rel="manifest" href="/manifest.json"/><title>Design Library</title><style nonce="/D6t5ydyCP8B3W8iu3H3mMQvZUqSf8cZxlRGbkF5d0k=">
+          #dl-browser-message {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            display: none;
+            background-color: #eee;
+            font-family: sans-serif;
+            margin: -.5rem 0 0 -.5rem;
+            z-index: 999;
+          }
+            #dl-browser-message > div {
+            display: flex;
+            margin: 0 auto;
+            width: 800px;
+            height: 80%;
+            align-items: center;
+            justify-content: center;
+          }</style><link href="/static/css/main.82f7339c.css" rel="stylesheet"/><style type="text/css" nonce="/D6t5ydyCP8B3W8iu3H3mMQvZUqSf8cZxlRGbkF5d0k=">:root, :host {
+  --fa-font-solid: normal 900 1em/1 &quot;Font Awesome 6 Solid&quot;;
+  --fa-font-regular: normal 400 1em/1 &quot;Font Awesome 6 Regular&quot;;
+  --fa-font-light: normal 300 1em/1 &quot;Font Awesome 6 Light&quot;;
+  --fa-font-thin: normal 100 1em/1 &quot;Font Awesome 6 Thin&quot;;
+  --fa-font-duotone: normal 900 1em/1 &quot;Font Awesome 6 Duotone&quot;;
+  --fa-font-sharp-solid: normal 900 1em/1 &quot;Font Awesome 6 Sharp&quot;;
+  --fa-font-sharp-regular: normal 400 1em/1 &quot;Font Awesome 6 Sharp&quot;;
+  --fa-font-sharp-light: normal 300 1em/1 &quot;Font Awesome 6 Sharp&quot;;
+  --fa-font-brands: normal 400 1em/1 &quot;Font Awesome 6 Brands&quot;;
+}
+
+svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
+  overflow: visible;
+  box-sizing: content-box;
+}
+
+.svg-inline--fa {
+  display: var(--fa-display, inline-block);
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}
+.svg-inline--fa.fa-2xs {
+  vertical-align: 0.1em;
+}
+.svg-inline--fa.fa-xs {
+  vertical-align: 0em;
+}
+.svg-inline--fa.fa-sm {
+  vertical-align: -0.0714285705em;
+}
+.svg-inline--fa.fa-lg {
+  vertical-align: -0.2em;
+}
+.svg-inline--fa.fa-xl {
+  vertical-align: -0.25em;
+}
+.svg-inline--fa.fa-2xl {
+  vertical-align: -0.3125em;
+}
+.svg-inline--fa.fa-pull-left {
+  margin-right: var(--fa-pull-margin, 0.3em);
+  width: auto;
+}
+.svg-inline--fa.fa-pull-right {
+  margin-left: var(--fa-pull-margin, 0.3em);
+  width: auto;
+}
+.svg-inline--fa.fa-li {
+  width: var(--fa-li-width, 2em);
+  top: 0.25em;
+}
+.svg-inline--fa.fa-fw {
+  width: var(--fa-fw-width, 1.25em);
+}
+
+.fa-layers svg.svg-inline--fa {
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.fa-layers-counter, .fa-layers-text {
+  display: inline-block;
+  position: absolute;
+  text-align: center;
+}
+
+.fa-layers {
+  display: inline-block;
+  height: 1em;
+  position: relative;
+  text-align: center;
+  vertical-align: -0.125em;
+  width: 1em;
+}
+.fa-layers svg.svg-inline--fa {
+  -webkit-transform-origin: center center;
+          transform-origin: center center;
+}
+
+.fa-layers-text {
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  -webkit-transform-origin: center center;
+          transform-origin: center center;
+}
+
+.fa-layers-counter {
+  background-color: var(--fa-counter-background-color, #ff253a);
+  border-radius: var(--fa-counter-border-radius, 1em);
+  box-sizing: border-box;
+  color: var(--fa-inverse, #fff);
+  line-height: var(--fa-counter-line-height, 1);
+  max-width: var(--fa-counter-max-width, 5em);
+  min-width: var(--fa-counter-min-width, 1.5em);
+  overflow: hidden;
+  padding: var(--fa-counter-padding, 0.25em 0.5em);
+  right: var(--fa-right, 0);
+  text-overflow: ellipsis;
+  top: var(--fa-top, 0);
+  -webkit-transform: scale(var(--fa-counter-scale, 0.25));
+          transform: scale(var(--fa-counter-scale, 0.25));
+  -webkit-transform-origin: top right;
+          transform-origin: top right;
+}
+
+.fa-layers-bottom-right {
+  bottom: var(--fa-bottom, 0);
+  right: var(--fa-right, 0);
+  top: auto;
+  -webkit-transform: scale(var(--fa-layers-scale, 0.25));
+          transform: scale(var(--fa-layers-scale, 0.25));
+  -webkit-transform-origin: bottom right;
+          transform-origin: bottom right;
+}
+
+.fa-layers-bottom-left {
+  bottom: var(--fa-bottom, 0);
+  left: var(--fa-left, 0);
+  right: auto;
+  top: auto;
+  -webkit-transform: scale(var(--fa-layers-scale, 0.25));
+          transform: scale(var(--fa-layers-scale, 0.25));
+  -webkit-transform-origin: bottom left;
+          transform-origin: bottom left;
+}
+
+.fa-layers-top-right {
+  top: var(--fa-top, 0);
+  right: var(--fa-right, 0);
+  -webkit-transform: scale(var(--fa-layers-scale, 0.25));
+          transform: scale(var(--fa-layers-scale, 0.25));
+  -webkit-transform-origin: top right;
+          transform-origin: top right;
+}
+
+.fa-layers-top-left {
+  left: var(--fa-left, 0);
+  right: auto;
+  top: var(--fa-top, 0);
+  -webkit-transform: scale(var(--fa-layers-scale, 0.25));
+          transform: scale(var(--fa-layers-scale, 0.25));
+  -webkit-transform-origin: top left;
+          transform-origin: top left;
+}
+
+.fa-1x {
+  font-size: 1em;
+}
+
+.fa-2x {
+  font-size: 2em;
+}
+
+.fa-3x {
+  font-size: 3em;
+}
+
+.fa-4x {
+  font-size: 4em;
+}
+
+.fa-5x {
+  font-size: 5em;
+}
+
+.fa-6x {
+  font-size: 6em;
+}
+
+.fa-7x {
+  font-size: 7em;
+}
+
+.fa-8x {
+  font-size: 8em;
+}
+
+.fa-9x {
+  font-size: 9em;
+}
+
+.fa-10x {
+  font-size: 10em;
+}
+
+.fa-2xs {
+  font-size: 0.625em;
+  line-height: 0.1em;
+  vertical-align: 0.225em;
+}
+
+.fa-xs {
+  font-size: 0.75em;
+  line-height: 0.0833333337em;
+  vertical-align: 0.125em;
+}
+
+.fa-sm {
+  font-size: 0.875em;
+  line-height: 0.0714285718em;
+  vertical-align: 0.0535714295em;
+}
+
+.fa-lg {
+  font-size: 1.25em;
+  line-height: 0.05em;
+  vertical-align: -0.075em;
+}
+
+.fa-xl {
+  font-size: 1.5em;
+  line-height: 0.0416666682em;
+  vertical-align: -0.125em;
+}
+
+.fa-2xl {
+  font-size: 2em;
+  line-height: 0.03125em;
+  vertical-align: -0.1875em;
+}
+
+.fa-fw {
+  text-align: center;
+  width: 1.25em;
+}
+
+.fa-ul {
+  list-style-type: none;
+  margin-left: var(--fa-li-margin, 2.5em);
+  padding-left: 0;
+}
+.fa-ul &gt; li {
+  position: relative;
+}
+
+.fa-li {
+  left: calc(var(--fa-li-width, 2em) * -1);
+  position: absolute;
+  text-align: center;
+  width: var(--fa-li-width, 2em);
+  line-height: inherit;
+}
+
+.fa-border {
+  border-color: var(--fa-border-color, #eee);
+  border-radius: var(--fa-border-radius, 0.1em);
+  border-style: var(--fa-border-style, solid);
+  border-width: var(--fa-border-width, 0.08em);
+  padding: var(--fa-border-padding, 0.2em 0.25em 0.15em);
+}
+
+.fa-pull-left {
+  float: left;
+  margin-right: var(--fa-pull-margin, 0.3em);
+}
+
+.fa-pull-right {
+  float: right;
+  margin-left: var(--fa-pull-margin, 0.3em);
+}
+
+.fa-beat {
+  -webkit-animation-name: fa-beat;
+          animation-name: fa-beat;
+  -webkit-animation-delay: var(--fa-animation-delay, 0s);
+          animation-delay: var(--fa-animation-delay, 0s);
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 1s);
+          animation-duration: var(--fa-animation-duration, 1s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, ease-in-out);
+          animation-timing-function: var(--fa-animation-timing, ease-in-out);
+}
+
+.fa-bounce {
+  -webkit-animation-name: fa-bounce;
+          animation-name: fa-bounce;
+  -webkit-animation-delay: var(--fa-animation-delay, 0s);
+          animation-delay: var(--fa-animation-delay, 0s);
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 1s);
+          animation-duration: var(--fa-animation-duration, 1s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.28, 0.84, 0.42, 1));
+          animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.28, 0.84, 0.42, 1));
+}
+
+.fa-fade {
+  -webkit-animation-name: fa-fade;
+          animation-name: fa-fade;
+  -webkit-animation-delay: var(--fa-animation-delay, 0s);
+          animation-delay: var(--fa-animation-delay, 0s);
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 1s);
+          animation-duration: var(--fa-animation-duration, 1s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.4, 0, 0.6, 1));
+          animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.4, 0, 0.6, 1));
+}
+
+.fa-beat-fade {
+  -webkit-animation-name: fa-beat-fade;
+          animation-name: fa-beat-fade;
+  -webkit-animation-delay: var(--fa-animation-delay, 0s);
+          animation-delay: var(--fa-animation-delay, 0s);
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 1s);
+          animation-duration: var(--fa-animation-duration, 1s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.4, 0, 0.6, 1));
+          animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.4, 0, 0.6, 1));
+}
+
+.fa-flip {
+  -webkit-animation-name: fa-flip;
+          animation-name: fa-flip;
+  -webkit-animation-delay: var(--fa-animation-delay, 0s);
+          animation-delay: var(--fa-animation-delay, 0s);
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 1s);
+          animation-duration: var(--fa-animation-duration, 1s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, ease-in-out);
+          animation-timing-function: var(--fa-animation-timing, ease-in-out);
+}
+
+.fa-shake {
+  -webkit-animation-name: fa-shake;
+          animation-name: fa-shake;
+  -webkit-animation-delay: var(--fa-animation-delay, 0s);
+          animation-delay: var(--fa-animation-delay, 0s);
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 1s);
+          animation-duration: var(--fa-animation-duration, 1s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, linear);
+          animation-timing-function: var(--fa-animation-timing, linear);
+}
+
+.fa-spin {
+  -webkit-animation-name: fa-spin;
+          animation-name: fa-spin;
+  -webkit-animation-delay: var(--fa-animation-delay, 0s);
+          animation-delay: var(--fa-animation-delay, 0s);
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 2s);
+          animation-duration: var(--fa-animation-duration, 2s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, linear);
+          animation-timing-function: var(--fa-animation-timing, linear);
+}
+
+.fa-spin-reverse {
+  --fa-animation-direction: reverse;
+}
+
+.fa-pulse,
+.fa-spin-pulse {
+  -webkit-animation-name: fa-spin;
+          animation-name: fa-spin;
+  -webkit-animation-direction: var(--fa-animation-direction, normal);
+          animation-direction: var(--fa-animation-direction, normal);
+  -webkit-animation-duration: var(--fa-animation-duration, 1s);
+          animation-duration: var(--fa-animation-duration, 1s);
+  -webkit-animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+          animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  -webkit-animation-timing-function: var(--fa-animation-timing, steps(8));
+          animation-timing-function: var(--fa-animation-timing, steps(8));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fa-beat,
+.fa-bounce,
+.fa-fade,
+.fa-beat-fade,
+.fa-flip,
+.fa-pulse,
+.fa-shake,
+.fa-spin,
+.fa-spin-pulse {
+    -webkit-animation-delay: -1ms;
+            animation-delay: -1ms;
+    -webkit-animation-duration: 1ms;
+            animation-duration: 1ms;
+    -webkit-animation-iteration-count: 1;
+            animation-iteration-count: 1;
+    -webkit-transition-delay: 0s;
+            transition-delay: 0s;
+    -webkit-transition-duration: 0s;
+            transition-duration: 0s;
+  }
+}
+@-webkit-keyframes fa-beat {
+  0%, 90% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  45% {
+    -webkit-transform: scale(var(--fa-beat-scale, 1.25));
+            transform: scale(var(--fa-beat-scale, 1.25));
+  }
+}
+@keyframes fa-beat {
+  0%, 90% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  45% {
+    -webkit-transform: scale(var(--fa-beat-scale, 1.25));
+            transform: scale(var(--fa-beat-scale, 1.25));
+  }
+}
+@-webkit-keyframes fa-bounce {
+  0% {
+    -webkit-transform: scale(1, 1) translateY(0);
+            transform: scale(1, 1) translateY(0);
+  }
+  10% {
+    -webkit-transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+  }
+  30% {
+    -webkit-transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+  }
+  50% {
+    -webkit-transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+  }
+  57% {
+    -webkit-transform: scale(1, 1) translateY(var(--fa-bounce-rebound, -0.125em));
+            transform: scale(1, 1) translateY(var(--fa-bounce-rebound, -0.125em));
+  }
+  64% {
+    -webkit-transform: scale(1, 1) translateY(0);
+            transform: scale(1, 1) translateY(0);
+  }
+  100% {
+    -webkit-transform: scale(1, 1) translateY(0);
+            transform: scale(1, 1) translateY(0);
+  }
+}
+@keyframes fa-bounce {
+  0% {
+    -webkit-transform: scale(1, 1) translateY(0);
+            transform: scale(1, 1) translateY(0);
+  }
+  10% {
+    -webkit-transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+            transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+  }
+  30% {
+    -webkit-transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+            transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+  }
+  50% {
+    -webkit-transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+            transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+  }
+  57% {
+    -webkit-transform: scale(1, 1) translateY(var(--fa-bounce-rebound, -0.125em));
+            transform: scale(1, 1) translateY(var(--fa-bounce-rebound, -0.125em));
+  }
+  64% {
+    -webkit-transform: scale(1, 1) translateY(0);
+            transform: scale(1, 1) translateY(0);
+  }
+  100% {
+    -webkit-transform: scale(1, 1) translateY(0);
+            transform: scale(1, 1) translateY(0);
+  }
+}
+@-webkit-keyframes fa-fade {
+  50% {
+    opacity: var(--fa-fade-opacity, 0.4);
+  }
+}
+@keyframes fa-fade {
+  50% {
+    opacity: var(--fa-fade-opacity, 0.4);
+  }
+}
+@-webkit-keyframes fa-beat-fade {
+  0%, 100% {
+    opacity: var(--fa-beat-fade-opacity, 0.4);
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    -webkit-transform: scale(var(--fa-beat-fade-scale, 1.125));
+            transform: scale(var(--fa-beat-fade-scale, 1.125));
+  }
+}
+@keyframes fa-beat-fade {
+  0%, 100% {
+    opacity: var(--fa-beat-fade-opacity, 0.4);
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    -webkit-transform: scale(var(--fa-beat-fade-scale, 1.125));
+            transform: scale(var(--fa-beat-fade-scale, 1.125));
+  }
+}
+@-webkit-keyframes fa-flip {
+  50% {
+    -webkit-transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+  }
+}
+@keyframes fa-flip {
+  50% {
+    -webkit-transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+            transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+  }
+}
+@-webkit-keyframes fa-shake {
+  0% {
+    -webkit-transform: rotate(-15deg);
+            transform: rotate(-15deg);
+  }
+  4% {
+    -webkit-transform: rotate(15deg);
+            transform: rotate(15deg);
+  }
+  8%, 24% {
+    -webkit-transform: rotate(-18deg);
+            transform: rotate(-18deg);
+  }
+  12%, 28% {
+    -webkit-transform: rotate(18deg);
+            transform: rotate(18deg);
+  }
+  16% {
+    -webkit-transform: rotate(-22deg);
+            transform: rotate(-22deg);
+  }
+  20% {
+    -webkit-transform: rotate(22deg);
+            transform: rotate(22deg);
+  }
+  32% {
+    -webkit-transform: rotate(-12deg);
+            transform: rotate(-12deg);
+  }
+  36% {
+    -webkit-transform: rotate(12deg);
+            transform: rotate(12deg);
+  }
+  40%, 100% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+}
+@keyframes fa-shake {
+  0% {
+    -webkit-transform: rotate(-15deg);
+            transform: rotate(-15deg);
+  }
+  4% {
+    -webkit-transform: rotate(15deg);
+            transform: rotate(15deg);
+  }
+  8%, 24% {
+    -webkit-transform: rotate(-18deg);
+            transform: rotate(-18deg);
+  }
+  12%, 28% {
+    -webkit-transform: rotate(18deg);
+            transform: rotate(18deg);
+  }
+  16% {
+    -webkit-transform: rotate(-22deg);
+            transform: rotate(-22deg);
+  }
+  20% {
+    -webkit-transform: rotate(22deg);
+            transform: rotate(22deg);
+  }
+  32% {
+    -webkit-transform: rotate(-12deg);
+            transform: rotate(-12deg);
+  }
+  36% {
+    -webkit-transform: rotate(12deg);
+            transform: rotate(12deg);
+  }
+  40%, 100% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+}
+@-webkit-keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+@keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+.fa-rotate-90 {
+  -webkit-transform: rotate(90deg);
+          transform: rotate(90deg);
+}
+
+.fa-rotate-180 {
+  -webkit-transform: rotate(180deg);
+          transform: rotate(180deg);
+}
+
+.fa-rotate-270 {
+  -webkit-transform: rotate(270deg);
+          transform: rotate(270deg);
+}
+
+.fa-flip-horizontal {
+  -webkit-transform: scale(-1, 1);
+          transform: scale(-1, 1);
+}
+
+.fa-flip-vertical {
+  -webkit-transform: scale(1, -1);
+          transform: scale(1, -1);
+}
+
+.fa-flip-both,
+.fa-flip-horizontal.fa-flip-vertical {
+  -webkit-transform: scale(-1, -1);
+          transform: scale(-1, -1);
+}
+
+.fa-rotate-by {
+  -webkit-transform: rotate(var(--fa-rotate-angle, none));
+          transform: rotate(var(--fa-rotate-angle, none));
+}
+
+.fa-stack {
+  display: inline-block;
+  vertical-align: middle;
+  height: 2em;
+  position: relative;
+  width: 2.5em;
+}
+
+.fa-stack-1x,
+.fa-stack-2x {
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: var(--fa-stack-z-index, auto);
+}
+
+.svg-inline--fa.fa-stack-1x {
+  height: 1em;
+  width: 1.25em;
+}
+.svg-inline--fa.fa-stack-2x {
+  height: 2em;
+  width: 2.5em;
+}
+
+.fa-inverse {
+  color: var(--fa-inverse, #fff);
+}
+
+.sr-only,
+.fa-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only-focusable:not(:focus),
+.fa-sr-only-focusable:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.svg-inline--fa .fa-primary {
+  fill: var(--fa-primary-color, currentColor);
+  opacity: var(--fa-primary-opacity, 1);
+}
+
+.svg-inline--fa .fa-secondary {
+  fill: var(--fa-secondary-color, currentColor);
+  opacity: var(--fa-secondary-opacity, 0.4);
+}
+
+.svg-inline--fa.fa-swap-opacity .fa-primary {
+  opacity: var(--fa-secondary-opacity, 0.4);
+}
+
+.svg-inline--fa.fa-swap-opacity .fa-secondary {
+  opacity: var(--fa-primary-opacity, 1);
+}
+
+.svg-inline--fa mask .fa-primary,
+.svg-inline--fa mask .fa-secondary {
+  fill: black;
+}
+
+.fad.fa-inverse,
+.fa-duotone.fa-inverse {
+  color: var(--fa-inverse, #fff);
+}</style><style data-styled="" data-styled-version="5.3.11">.dnvRV{font-size:1.5rem;line-height:2rem;font-weight:400;max-width:49.166666666666664rem;margin-bottom:4rem;}/*!sc*/
+@media (max-width:1023px){.dnvRV{font-size:1rem;line-height:1.5rem;margin-bottom:2rem;}}/*!sc*/
+data-styled.g2[id="BasicElements__Preamble-sc-1mtnp2g-1"]{content:"dnvRV,"}/*!sc*/
+.dxdPc{width:100%;max-width:calc(73.75rem + 2rem * 2);margin:0 auto;box-sizing:border-box;padding:0 2rem;}/*!sc*/
+.dxdPc *{box-sizing:border-box;}/*!sc*/
+@media (max-width:1023px){.dxdPc{padding-left:1rem;padding-right:1rem;}}/*!sc*/
+data-styled.g3[id="BasicElements__Container-sc-1mtnp2g-2"]{content:"dxdPc,"}/*!sc*/
+.gKdIhg{margin:0 auto;max-width:49.166666666666664rem;}/*!sc*/
+data-styled.g4[id="BasicElements__CenterContainer-sc-1mtnp2g-3"]{content:"gKdIhg,"}/*!sc*/
+.cFYZLe{margin-top:auto;background:var(--sdv-color-grey1);color:var(--sdv-color-grey7);padding:2rem 0;}/*!sc*/
+data-styled.g8[id="SiteFooter__Footer-sc-283y71-0"]{content:"cFYZLe,"}/*!sc*/
+.gVsvdL ul{list-style:none;margin:0;padding:0;}/*!sc*/
+.gVsvdL .treeNodeLabel{-webkit-text-decoration:none;text-decoration:none;color:var(--sdv-color-text);}/*!sc*/
+.gVsvdL .treeNodeLabel:hover{-webkit-text-decoration:underline;text-decoration:underline;}/*!sc*/
+@media (max-width:1023px){.gVsvdL > ul > li{border-bottom:1px solid var(--sdv-color-grey7);}.gVsvdL .treeNodeLabel{padding-left:1rem;}.gVsvdL li li li .treeNodeLabel{padding-left:1.5rem;}.gVsvdL li li li li .treeNodeLabel{padding-left:2rem;}}/*!sc*/
+@media (min-width:1024px){.gVsvdL > ul > li > div > .treeNodeLabel{font-weight:bold;}.gVsvdL ul{padding-left:0.5rem;}}/*!sc*/
+data-styled.g13[id="NavTree__StyledTree-sc-9il0me-0"]{content:"gVsvdL,"}/*!sc*/
+.hbjaCX{position:relative;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}/*!sc*/
+@media (min-width:1024px){.hbjaCX{-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;}}/*!sc*/
+.hbjaCX.-current > .treeNodeLabel{font-weight:bold;}/*!sc*/
+.hbjaCX .treeNodeLabel{box-sizing:border-box;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;min-height:2.75rem;padding-top:0.5rem;padding-bottom:0.5rem;font-weight:400;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;}/*!sc*/
+@media (min-width:1024px){.hbjaCX .treeNodeLabel{min-height:2rem;}}/*!sc*/
+data-styled.g14[id="NavTree__TreeNodeHeader-sc-9il0me-1"]{content:"hbjaCX,"}/*!sc*/
+.bklEGi{display:block;position:relative;padding:0;text-align:center;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;border-width:0;cursor:pointer;color:var(--sdv-color-text);outline:none;width:2.75rem;}/*!sc*/
+@media (min-width:1024px){.bklEGi{width:2rem;height:2rem;}.bklEGi:before{content:'';display:block;background-color:var(--sdv-color-grey7);height:60%;width:1px;position:absolute;left:0;top:20%;margin-left:-0.5rem;}}/*!sc*/
+.bklEGi:focus,.bklEGi:hover{background-color:var(--sdv-color-grey7);color:var(--sdv-color-text);}/*!sc*/
+.bklEGi.-expanded{background-color:var(--sdv-color-grey1);color:var(--sdv-color-grey7);}/*!sc*/
+data-styled.g15[id="NavTree__TreeCollapse-sc-9il0me-2"]{content:"bklEGi,"}/*!sc*/
+.kPgxIh{min-height:56px;}/*!sc*/
+data-styled.g28[id="StickyMobile__StickyHeaderContainer-sc-1rf3if1-0"]{content:"kPgxIh,"}/*!sc*/
+.ffeWAH{z-index:3;width:100%;max-width:100vw;position:-webkit-sticky;position:sticky;top:0;}/*!sc*/
+@media (max-width:1023px){.ffeWAH{z-index:7;position:fixed;-webkit-transition:top 250ms;transition:top 250ms;}.ffeWAH.-hide{top:-56px;}}/*!sc*/
+data-styled.g29[id="StickyMobile__StyledStickyHeader-sc-1rf3if1-1"]{content:"ffeWAH,"}/*!sc*/
+.jYDdni{height:0;background:var(--sdv-color-grey1);-webkit-transition:height 200ms;transition:height 200ms;}/*!sc*/
+@media (max-width:1023px){.jYDdni{margin-top:56px;}}/*!sc*/
+data-styled.g32[id="StickyMobile__VirtualHeroSpace-sc-1rf3if1-4"]{content:"jYDdni,"}/*!sc*/
+.iBcjAn{width:6.145833333333333rem;}/*!sc*/
+data-styled.g34[id="Logo__LogoContainer-sc-qdxs0o-0"]{content:"iBcjAn,"}/*!sc*/
+.iRFXqL{max-width:100%;height:auto;display:block;}/*!sc*/
+data-styled.g35[id="Logo__SvgLogo-sc-qdxs0o-1"]{content:"iRFXqL,"}/*!sc*/
+.gdmLSf{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;height:98.33333333333333px;background:var(--sdv-color-grey1);color:var(--sdv-color-white);}/*!sc*/
+@media (max-width:1023px){.gdmLSf{height:56px;}}/*!sc*/
+.gdmLSf > div{-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}/*!sc*/
+.gdmLSf button{margin-left:auto;border-width:0;}/*!sc*/
+.gdmLSf button + button:last-child{margin-left:0;}/*!sc*/
+data-styled.g36[id="SiteHeader__Header-sc-1i9fnba-0"]{content:"gdmLSf,"}/*!sc*/
+.kMoSxO{display:block;z-index:4;}/*!sc*/
+.kMoSxO:hover{-webkit-text-decoration:none;text-decoration:none;}/*!sc*/
+data-styled.g37[id="SiteHeader__Brand-sc-1i9fnba-1"]{content:"kMoSxO,"}/*!sc*/
+@media (min-width:1024px){.fba-DBs{margin-right:2rem;}}/*!sc*/
+data-styled.g38[id="SiteHeader__MenuItemWrap-sc-1i9fnba-2"]{content:"fba-DBs,"}/*!sc*/
+.gOhqfO{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;padding-left:2rem;padding-right:2rem;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:start;-webkit-justify-content:flex-start;-ms-flex-pack:start;justify-content:flex-start;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}/*!sc*/
+@media (min-width:1024px){.gOhqfO{font-size:1.5rem;}}/*!sc*/
+@media (max-width:1023px){.gOhqfO:not(.-show){display:none;}.gOhqfO.-show{display:block;overflow-y:auto;position:fixed;background:inherit;z-index:9;width:100%;max-width:100vw;height:100%;left:0;top:56px;box-sizing:border-box;padding:0 0 6rem 0;}}/*!sc*/
+.gOhqfO button{font-size:1rem;}/*!sc*/
+data-styled.g39[id="SiteHeader__NavList-sc-1i9fnba-3"]{content:"gOhqfO,"}/*!sc*/
+.gAliNW{font-family:inherit;font-weight:300;cursor:pointer;display:block;padding:0;border:0;background:transparent;-webkit-text-decoration:none;text-decoration:none;}/*!sc*/
+.gAliNW,.gAliNW:visited{color:inherit;}/*!sc*/
+@media (min-width:1250px){.gAliNW{line-height:6.020833333333333rem;border-bottom:4px solid transparent;}.gAliNW:hover,.gAliNW:focus,.gAliNW.active{outline:none;-webkit-text-decoration:none;text-decoration:none;border-bottom:4px solid #ccc;}}/*!sc*/
+@media (max-width:1024px){.gAliNW{line-height:3rem;}}/*!sc*/
+data-styled.g40[id="SiteHeader__NavListLink-sc-1i9fnba-4"]{content:"gAliNW,"}/*!sc*/
+@media (max-width:1023px){.ewZRsQ{padding-left:1rem;}}/*!sc*/
+.ewZRsQ a{font-weight:500;margin-right:2rem;display:block;position:relative;-webkit-text-decoration:none;text-decoration:none;}/*!sc*/
+@media (min-width:1024px){.ewZRsQ a::after{content:'';position:absolute;top:50%;right:-2rem;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%);height:40%;border-right:2px solid #ccc;}}/*!sc*/
+data-styled.g41[id="SiteHeader__SiteName-sc-1i9fnba-5"]{content:"ewZRsQ,"}/*!sc*/
+.bdrZDQ{margin-top:3rem;margin-bottom:3rem;min-height:100%;}/*!sc*/
+@media (max-width:1023px){.bdrZDQ{margin-top:0;margin-bottom:1rem;}}/*!sc*/
+data-styled.g46[id="PageCommon__InnerPage-sc-1lx5k9s-0"]{content:"bdrZDQ,"}/*!sc*/
+.jxHjUt{background-color:var(--dl-color-bg-grey);}/*!sc*/
+@media (min-width:1024px){.jxHjUt{display:grid;grid-template-columns:24.583333333333332rem 1fr;min-height:calc(100vh - 9.645833333333332rem);}}/*!sc*/
+data-styled.g54[id="SideNavLayout__LeftNavLayout-sc-114jw4g-0"]{content:"jxHjUt,"}/*!sc*/
+.jbzBwh{position:-webkit-sticky;position:sticky;top:0;height:calc(100vh - 6.145833333333333rem);overflow-y:auto;}/*!sc*/
+@media (max-width:1023px){.jbzBwh{display:none;}}/*!sc*/
+data-styled.g55[id="SideNavLayout__Left-sc-114jw4g-1"]{content:"jbzBwh,"}/*!sc*/
+.iSVenT{min-height:100%;background-color:#fff;}/*!sc*/
+@media (min-width:1024px){.iSVenT{border-left:1px solid #ccc;}}/*!sc*/
+data-styled.g56[id="SideNavLayout__Right-sc-114jw4g-2"]{content:"iSVenT,"}/*!sc*/
+.fldgxT{position:fixed;bottom:4rem;left:50%;-webkit-transform:translateX(-50%);-ms-transform:translateX(-50%);transform:translateX(-50%);-webkit-appearance:none;-moz-appearance:none;appearance:none;border:none;background:rgba(0,0,0,0.5);padding:1rem 2rem;color:#fff;cursor:pointer;font-size:1.2rem;font-weight:400;border-radius:5px;font-family:inherit;-webkit-transition:0.3s;transition:0.3s;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);z-index:8;width:-webkit-fit-content;width:-moz-fit-content;width:fit-content;}/*!sc*/
+@media (max-width:1024px){.fldgxT{font-size:1rem;padding:0.5rem 1rem;bottom:2rem;}}/*!sc*/
+.fldgxT svg{margin-left:1rem;-webkit-transition:0.3s;transition:0.3s;}/*!sc*/
+.fldgxT.-hidden{opacity:0;visibility:hidden;pointer-events:none;}/*!sc*/
+.fldgxT:hover svg{-webkit-transform:translateY(-0.25rem);-ms-transform:translateY(-0.25rem);transform:translateY(-0.25rem);}/*!sc*/
+data-styled.g57[id="ScrollButton__StyledScrollButton-sc-f16vpi-0"]{content:"fldgxT,"}/*!sc*/
+.dNRhhB{margin-top:3rem;margin-right:2rem;margin-left:2rem;}/*!sc*/
+data-styled.g58[id="SideNavMenu__Container-sc-1uwgfqw-0"]{content:"dNRhhB,"}/*!sc*/
+.jbLsru{-webkit-text-decoration:none;text-decoration:none;}/*!sc*/
+.jbLsru,.jbLsru:visited{color:var(--sdv-color-link);}/*!sc*/
+data-styled.g64[id="Breadcrumbs__BreadcrumbLink-sc-1dftle6-0"]{content:"jbLsru,"}/*!sc*/
+.dNMILx{padding:1rem 2rem;}/*!sc*/
+@media (max-width:1023px){.dNMILx{padding:1rem;}}/*!sc*/
+data-styled.g65[id="Breadcrumbs__BreadcrumbsNav-sc-1dftle6-1"]{content:"dNMILx,"}/*!sc*/
+.ghCKlk{padding-top:2rem;padding-bottom:2rem;}/*!sc*/
+.ghCKlk:not(:last-child) .dl-center-container::after{display:block;}/*!sc*/
+data-styled.g73[id="ComponentRow__RowContainer-sc-1p8bdig-0"]{content:"ghCKlk,"}/*!sc*/
+.lmMGaX::after{position:relative;top:2rem;content:'';width:100%;display:none;border-bottom:1px solid;}/*!sc*/
+data-styled.g74[id="ComponentRow__RowCenterContainer-sc-1p8bdig-1"]{content:"lmMGaX,"}/*!sc*/
+.cAfEsy{font-size:0.875rem;line-height:1.5;font-weight:500;margin-bottom:1em;}/*!sc*/
+data-styled.g75[id="ComponentRow__RowHeader-sc-1p8bdig-2"]{content:"cAfEsy,"}/*!sc*/
+.gvircM{margin-top:1rem;}/*!sc*/
+.gvircM > *{margin-right:1rem;margin-bottom:1rem;}/*!sc*/
+data-styled.g85[id="Feedback__ButtonContainer-sc-1ova0zc-1"]{content:"gvircM,"}/*!sc*/
+.cAHIXY{max-width:800px;}/*!sc*/
+.cAHIXY img:not(.lightbox){max-width:100%;height:auto;}/*!sc*/
+.cAHIXY .image-container{margin-bottom:1rem;}/*!sc*/
+.cAHIXY .image-container p{font-style:italic;max-width:-webkit-fit-content;max-width:-moz-fit-content;max-width:fit-content;margin:0;}/*!sc*/
+.cAHIXY .image-container img:not(.lightbox){max-width:100%;height:auto;}/*!sc*/
+.cAHIXY .image-group{margin-bottom:1rem;}/*!sc*/
+.cAHIXY .image-group .image-container{margin:0;}/*!sc*/
+.cAHIXY .image-group--grid{display:grid;grid-template-columns:repeat(auto-fill,200px);gap:1rem;}/*!sc*/
+.cAHIXY .image-group--flex{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;gap:1rem;}/*!sc*/
+.cAHIXY img[srl-slide_id]{cursor:pointer;}/*!sc*/
+.cAHIXY code{background-color:var(--dl-color-bg-grey);padding:1px 4px;border-radius:3px;border:1px solid #ccc;}/*!sc*/
+.cAHIXY blockquote{margin:0 0 1rem 0;background:var(--dl-color-bg-grey);padding:0.5rem;font-size:0.8rem;}/*!sc*/
+.cAHIXY blockquote p{margin:0;}/*!sc*/
+.cAHIXY ul{padding-inline-start:20px;}/*!sc*/
+.cAHIXY ul.dontlist::before,.cAHIXY ul.dolist::before{font-family:'Font Awesome 6 Pro';position:relative;left:-20px;top:-10px;font-size:2rem;line-height:1;}/*!sc*/
+.cAHIXY ul.dontlist::before{content:'\f00d';}/*!sc*/
+.cAHIXY ul.dolist::before{content:'\f00c';}/*!sc*/
+data-styled.g86[id="EditorialContent__StyledEditorialContent-sc-1bw5bvy-0"]{content:"cAHIXY,"}/*!sc*/
+.jSvmmb{box-sizing:border-box;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;margin-bottom:2rem;}/*!sc*/
+.jSvmmb:not(:first-child){border-top:1px solid;}/*!sc*/
+.jSvmmb h3{font-weight:500;}/*!sc*/
+@media (min-width:1025px){.jSvmmb h3{font-weight:400;}}/*!sc*/
+data-styled.g87[id="TextSectionLayout-sc-3dcbdl-0"]{content:"jSvmmb,"}/*!sc*/
+.leQPtF{font-weight:400;padding-bottom:1rem;}/*!sc*/
+data-styled.g88[id="TextSectionLayout__SectionHeader-sc-3dcbdl-1"]{content:"leQPtF,"}/*!sc*/
+.jxsHjL{background-color:#fff;}/*!sc*/
+data-styled.g118[id="GenericPage__PageContainer-sc-wo5urq-0"]{content:"jxsHjL,"}/*!sc*/
+.bTfHgw{padding:0;}/*!sc*/
+.bTfHgw .dl-center-container::after{top:0;}/*!sc*/
+data-styled.g119[id="GenericPage__ContentSectionRow-sc-wo5urq-1"]{content:"bTfHgw,"}/*!sc*/
+.quPhY{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;min-height:100vh;max-width:100vw;background-color:var(--dl-color-bg-grey);}/*!sc*/
+data-styled.g120[id="Site__SiteContainer-sc-58ndzy-0"]{content:"quPhY,"}/*!sc*/
+</style></head><body><div id="dl-browser-message"><div><div><h1>Internet Explorer is not supported by Design Library</h1><p>The last version of Internet Explorer, version 11, was released on October 17, 2013. This is a very long time ago when taking into account the rapid development of web technologies. These days it is often difficult and time consuming to get modern technologies to work well in this old browser. More and more frameworks are dropping support, and even Microsoft themselves has announced that they will fully drop support for IE in their own services in 2021.</p><p>Consequently, we have decided to not include support for IE in the Design Library website.</p><p>Luckily, there are modern options in active development. Please use <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>, <a href="https://www.microsoft.com/en-us/edge">Edge</a> or <a href="https://www.google.com/chrome/">Chrome</a> instead.</p></div></div></div><script nonce="/D6t5ydyCP8B3W8iu3H3mMQvZUqSf8cZxlRGbkF5d0k=">
+          if (/Trident\/[7]{1}/i.test(navigator.userAgent))
+          {
+            document.getElementById('dl-browser-message').style.display = 'block'
+          }</script><noscript>Design Library requires Javascript in order to run. Please make sure it is activated in your browser.</noscript><div id="root"><div class="Site__SiteContainer-sc-58ndzy-0 quPhY"><div class="StickyMobile__StickyHeaderContainer-sc-1rf3if1-0 kPgxIh"><div class="StickyMobile__StyledStickyHeader-sc-1rf3if1-1 ffeWAH"><header class="SiteHeader__Header-sc-1i9fnba-0 gdmLSf"><a class="SiteHeader__Brand-sc-1i9fnba-1 kMoSxO" href="/"><div class="Logo__LogoContainer-sc-qdxs0o-0 iBcjAn"><img src="/static/media/seb.c4f961dd.svg" alt="seb logo" class="Logo__SvgLogo-sc-qdxs0o-1 iRFXqL"/></div></a><nav class="SiteHeader__NavList-sc-1i9fnba-3 gOhqfO"><div class="SiteHeader__MenuItemWrap-sc-1i9fnba-2 fba-DBs"><div class="SiteHeader__SiteName-sc-1i9fnba-5 ewZRsQ"><a class="SiteHeader__NavListLink-sc-1i9fnba-4 gAliNW" href="/">Design Library</a></div></div><div class="SiteHeader__MenuItemWrap-sc-1i9fnba-2 fba-DBs"><a class="SiteHeader__NavListLink-sc-1i9fnba-4 gAliNW active" href="/foundation/">Foundation</a></div><div class="SiteHeader__MenuItemWrap-sc-1i9fnba-2 fba-DBs"><a class="SiteHeader__NavListLink-sc-1i9fnba-4 gAliNW" href="/components">Components</a></div><div class="SiteHeader__MenuItemWrap-sc-1i9fnba-2 fba-DBs"><a class="SiteHeader__NavListLink-sc-1i9fnba-4 gAliNW" href="/patterns/">Patterns</a></div><div class="SiteHeader__MenuItemWrap-sc-1i9fnba-2 fba-DBs"><a class="SiteHeader__NavListLink-sc-1i9fnba-4 gAliNW" href="/Channels/">Channels</a></div><div class="SiteHeader__MenuItemWrap-sc-1i9fnba-2 fba-DBs"><a class="SiteHeader__NavListLink-sc-1i9fnba-4 gAliNW" href="/about/">About</a></div><button class="sdv-button sdv-button-ghost-light" aria-label="Search" style="width:auto" type="GHOST"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="magnifying-glass" class="svg-inline--fa fa-magnifying-glass " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M504.1 471l-134-134C399.1 301.5 415.1 256.8 415.1 208c0-114.9-93.13-208-208-208S-.0002 93.13-.0002 208S93.12 416 207.1 416c48.79 0 93.55-16.91 129-45.04l134 134C475.7 509.7 481.9 512 488 512s12.28-2.344 16.97-7.031C514.3 495.6 514.3 480.4 504.1 471zM48 208c0-88.22 71.78-160 160-160s160 71.78 160 160s-71.78 160-160 160S48 296.2 48 208z"></path></svg></button></nav></header></div><div class="StickyMobile__VirtualHeroSpace-sc-1rf3if1-4 jYDdni dl-virtual-hero"></div></div><div><div style="opacity:0;transform:translateY(25px) translateZ(0)"><div class="SideNavLayout__LeftNavLayout-sc-114jw4g-0 jxHjUt"><div class="SideNavLayout__Left-sc-114jw4g-1 jbzBwh"><nav class="SideNavMenu__Container-sc-1uwgfqw-0 dNRhhB"><div class="NavTree__StyledTree-sc-9il0me-0 gVsvdL"><ul><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><span class="treeNodeLabel" id="green-design-system" style="cursor:pointer">Green design system</span><button class="NavTree__TreeCollapse-sc-9il0me-2 bklEGi" aria-expanded="false" aria-labelledby="green-design-system"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="chevron-down" class="svg-inline--fa fa-chevron-down " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M432.6 209.3l-191.1 183.1C235.1 397.8 229.1 400 224 400s-11.97-2.219-16.59-6.688L15.41 209.3C5.814 200.2 5.502 184.1 14.69 175.4c9.125-9.625 24.38-9.938 33.91-.7187L224 342.8l175.4-168c9.5-9.219 24.78-8.906 33.91 .7187C442.5 184.1 442.2 200.2 432.6 209.3z"></path></svg></button></div><div style="display:none"><ul><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="green-design-system-about-green" class="treeNodeLabel" href="/foundation/green-design-system/overview/">About Green</a></div></li></ul></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><span class="treeNodeLabel" id="mostly-for-designers" style="cursor:pointer">Mostly for designers</span><button class="NavTree__TreeCollapse-sc-9il0me-2 bklEGi" aria-expanded="false" aria-labelledby="mostly-for-designers"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="chevron-down" class="svg-inline--fa fa-chevron-down " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M432.6 209.3l-191.1 183.1C235.1 397.8 229.1 400 224 400s-11.97-2.219-16.59-6.688L15.41 209.3C5.814 200.2 5.502 184.1 14.69 175.4c9.125-9.625 24.38-9.938 33.91-.7187L224 342.8l175.4-168c9.5-9.219 24.78-8.906 33.91 .7187C442.5 184.1 442.2 200.2 432.6 209.3z"></path></svg></button></div><div style="display:none"><ul><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="mostly-for-designers-introduction-to-the-design-process" class="treeNodeLabel" href="/foundation/mostly-for-designers/design-process-introduction/">Introduction to the design process</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="mostly-for-designers-seb-s-design-process" class="treeNodeLabel" href="/foundation/mostly-for-designers/design-process/">SEB&#x27;s design process</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="mostly-for-designers-design-tools-and-libraries" class="treeNodeLabel" href="/foundation/mostly-for-designers/design-tools/">Design tools and libraries</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="mostly-for-designers-support-and-resources" class="treeNodeLabel" href="/foundation/mostly-for-designers/support-and-resources/">Support and resources</a></div></li></ul></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><span class="treeNodeLabel" id="mostly-for-developers" style="cursor:pointer">Mostly for developers</span><button class="NavTree__TreeCollapse-sc-9il0me-2 bklEGi" aria-expanded="false" aria-labelledby="mostly-for-developers"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="chevron-down" class="svg-inline--fa fa-chevron-down " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M432.6 209.3l-191.1 183.1C235.1 397.8 229.1 400 224 400s-11.97-2.219-16.59-6.688L15.41 209.3C5.814 200.2 5.502 184.1 14.69 175.4c9.125-9.625 24.38-9.938 33.91-.7187L224 342.8l175.4-168c9.5-9.219 24.78-8.906 33.91 .7187C442.5 184.1 442.2 200.2 432.6 209.3z"></path></svg></button></div><div style="display:none"><ul><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="mostly-for-developers-browser-strategy" class="treeNodeLabel" href="/foundation/mostly-for-developers/browser-strategy/">Browser strategy</a></div></li></ul></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design" class="treeNodeLabel" href="/foundation/digital-design/">Digital design</a><button class="NavTree__TreeCollapse-sc-9il0me-2 bklEGi" aria-expanded="false" aria-labelledby="digital-design"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="chevron-down" class="svg-inline--fa fa-chevron-down " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M432.6 209.3l-191.1 183.1C235.1 397.8 229.1 400 224 400s-11.97-2.219-16.59-6.688L15.41 209.3C5.814 200.2 5.502 184.1 14.69 175.4c9.125-9.625 24.38-9.938 33.91-.7187L224 342.8l175.4-168c9.5-9.219 24.78-8.906 33.91 .7187C442.5 184.1 442.2 200.2 432.6 209.3z"></path></svg></button></div><div style="display:none"><ul><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-visual-design" class="treeNodeLabel" href="/foundation/digital-design/visual-design/">Visual design</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><span class="treeNodeLabel" id="digital-design-five-design-principles" style="cursor:pointer">Five design principles</span><button class="NavTree__TreeCollapse-sc-9il0me-2 bklEGi" aria-expanded="false" aria-labelledby="digital-design-five-design-principles"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="chevron-down" class="svg-inline--fa fa-chevron-down " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M432.6 209.3l-191.1 183.1C235.1 397.8 229.1 400 224 400s-11.97-2.219-16.59-6.688L15.41 209.3C5.814 200.2 5.502 184.1 14.69 175.4c9.125-9.625 24.38-9.938 33.91-.7187L224 342.8l175.4-168c9.5-9.219 24.78-8.906 33.91 .7187C442.5 184.1 442.2 200.2 432.6 209.3z"></path></svg></button></div><div style="display:none"><ul><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-five-design-principles-1-it-s-for-you" class="treeNodeLabel" href="/foundation/digital-design/design-principles/its-for-you/">1. It&#x27;s for you</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-five-design-principles-2-everyday-first" class="treeNodeLabel" href="/foundation/digital-design/design-principles/everyday-first/">2. Everyday first</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-five-design-principles-3-trigger-insight" class="treeNodeLabel" href="/foundation/digital-design/design-principles/trigger-insight/">3. Trigger insight</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-five-design-principles-4-be-the-good-guy" class="treeNodeLabel" href="/foundation/digital-design/design-principles/be-the-good-guy/">4. Be the good guy</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-five-design-principles-5-frictionless" class="treeNodeLabel" href="/foundation/digital-design/design-principles/frictionless/">5. Frictionless</a></div></li></ul></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><span class="treeNodeLabel" id="digital-design-visual-identity" style="cursor:pointer">Visual identity</span><button class="NavTree__TreeCollapse-sc-9il0me-2 bklEGi" aria-expanded="false" aria-labelledby="digital-design-visual-identity"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="chevron-down" class="svg-inline--fa fa-chevron-down " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M432.6 209.3l-191.1 183.1C235.1 397.8 229.1 400 224 400s-11.97-2.219-16.59-6.688L15.41 209.3C5.814 200.2 5.502 184.1 14.69 175.4c9.125-9.625 24.38-9.938 33.91-.7187L224 342.8l175.4-168c9.5-9.219 24.78-8.906 33.91 .7187C442.5 184.1 442.2 200.2 432.6 209.3z"></path></svg></button></div><div style="display:none"><ul><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-visual-identity-logotype" class="treeNodeLabel" href="/foundation/digital-design/visual-identity/logotype/">Logotype</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-visual-identity-typography" class="treeNodeLabel" href="/foundation/digital-design/visual-identity/typography/">Typography</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX -current"><a id="digital-design-visual-identity-colours" class="treeNodeLabel" href="/foundation/digital-design/visual-identity/colours/">Colours</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-visual-identity-icons" class="treeNodeLabel" href="/foundation/digital-design/visual-identity/icons/">Icons</a></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-visual-identity-imagery" class="treeNodeLabel" href="/foundation/digital-design/visual-identity/imagery/">Imagery</a></div></li></ul></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="digital-design-component-specifications" class="treeNodeLabel" href="/foundation/digital-design/component-specifications/">Component specifications</a></div></li></ul></div></li><li class=""><div class="NavTree__TreeNodeHeader-sc-9il0me-1 hbjaCX"><a id="ux-text" class="treeNodeLabel" href="/foundation/ux-writing/">UX text</a></div></li></ul></div></nav></div><div class="SideNavLayout__Right-sc-114jw4g-2 iSVenT"><div class="GenericPage__PageContainer-sc-wo5urq-0 jxsHjL"><nav aria-label="Breadcrumbs" class="Breadcrumbs__BreadcrumbsNav-sc-1dftle6-1 dNMILx sdv-breadcrumbs"><ol><li><a class="Breadcrumbs__BreadcrumbLink-sc-1dftle6-0 jbLsru" href="/">Home</a></li><li aria-current="false"><a class="Breadcrumbs__BreadcrumbLink-sc-1dftle6-0 jbLsru" href="/foundation/">Foundation</a></li><li aria-current="false"><a class="Breadcrumbs__BreadcrumbLink-sc-1dftle6-0 jbLsru" href="/foundation/digital-design/">Digital design</a></li><li aria-current="false"><a class="Breadcrumbs__BreadcrumbLink-sc-1dftle6-0 jbLsru" href="/foundation/digital-design/visual-identity/">Visual identity</a></li><li aria-current="page">Colours</li></ol></nav><div class="BasicElements__Container-sc-1mtnp2g-2 PageCommon__InnerPage-sc-1lx5k9s-0 dxdPc bdrZDQ dl-container"><div class="BasicElements__CenterContainer-sc-1mtnp2g-3 gKdIhg dl-center-container"><h1>Colours</h1><p class="BasicElements__Preamble-sc-1mtnp2g-1 dnvRV dl-preamble">Colour can be used to express emotion and tone, as well as place emphasis and create associations. Use it in meaningful and intentional ways in order to create patterns and visual cues.</p></div></div><div class="BasicElements__Container-sc-1mtnp2g-2 dxdPc dl-container"><div class="BasicElements__Container-sc-1mtnp2g-2 ComponentRow__RowContainer-sc-1p8bdig-0 dxdPc ghCKlk dl-container"><div class="BasicElements__CenterContainer-sc-1mtnp2g-3 ComponentRow__RowCenterContainer-sc-1p8bdig-1 gKdIhg lmMGaX dl-center-container"><div></div></div></div></div><div class="BasicElements__Container-sc-1mtnp2g-2 dxdPc dl-container"><div class="BasicElements__Container-sc-1mtnp2g-2 ComponentRow__RowContainer-sc-1p8bdig-0 dxdPc ghCKlk dl-container"><div class="BasicElements__CenterContainer-sc-1mtnp2g-3 ComponentRow__RowCenterContainer-sc-1p8bdig-1 gKdIhg lmMGaX dl-center-container"><div id="cs_36"><div title="Guidelines" class="TextSectionLayout-sc-3dcbdl-0 jSvmmb"><h2 class="TextSectionLayout__SectionHeader-sc-3dcbdl-1 leQPtF">Guidelines</h2><div class="EditorialContent__StyledEditorialContent-sc-1bw5bvy-0 cAHIXY"><h3>Short description</h3>
+<p>At SEB we use colours more sparsely. This page covers the usage of colour for digital products. For general perspective on SEB colour usage in print and media, read the&nbsp;<a href="https://brand.seb.se/point/en/seb/component/default/201670" target="_blank" rel="noopener">SEB visual guidelines.</a></p>
+<p>&nbsp;</p>
+<h3>Specifically used colours</h3>
+<h4>Background</h4>
+<ul>
+<li><span data-dl-color="white">White</span></li>
+<li><span data-dl-color="background">Background</span></li>
+</ul>
+<p>Both white and grey can be used.</p>
+<h4>Text</h4>
+<ul>
+<li><span data-dl-color="grey-800">Base 800</span></li>
+</ul>
+<p>More about&nbsp;<a href="/foundation/digital-design/visual-identity/typography/">Typography</a></p>
+<h4>Link</h4>
+<ul>
+<li><span data-dl-color="link">Link</span></li>
+</ul>
+<p>More about <a title="Links" href="/components/component-link/">Links</a></p>
+<h4>Error</h4>
+<ul>
+<li><span data-dl-color="error">Error</span></li>
+</ul>
+<p>More about <a title="Error handling" href="/patterns/pattern-errorhandling/">Error handling</a></p>
+<h4>Dark mode</h4>
+<p>Our colours are used differently in darkmode. <a title="Dark mode" href="/patterns/pattern-darkmode/">Pattern: Dark mode</a></p>
+<p>&nbsp;</p>
+<h3>Do's and don'ts</h3>
+<h4>Colour contrast</h4>
+<h5>Do</h5>
+<ul>
+<li>Make sure to have good contrast between text colour and background.</li>
+<li>Use a tool to check the contrast. (Here is one:&nbsp;<a title="https://webaim.org/resources/contrastchecker/" href="https://webaim.org/resources/contrastchecker/" target="_blank" rel="noopener">https://webaim.org/resources/contrastchecker/</a>)</li>
+</ul>
+
+<div class="image-group image-group--grid">
+
+
+<div class="image-container">
+    <img class="lightbox" src="/imagevault/publishedmedia/ir0u4is11v320e41oebr/Colours-do_2025-04-22.png" alt="Good use of contrast" />
+        <p>Good contrast</p>
+</div>
+</div>
+
+<p>&nbsp;</p>
+<h5>Don't</h5>
+<ul>
+<li>Don’t use white text on a light background.</li>
+<li>Don’t make colours lighter except for in graphs. For graphs it’s possible to use several different colours.</li>
+</ul>
+
+<div class="image-group image-group--grid">
+
+
+<div class="image-container">
+    <img class="lightbox" src="/imagevault/publishedmedia/8t4484ddoqfb77yz3m53/Colours-dont_2025-04-22.png" alt="Bad contrast" />
+        <p>Bad contrast</p>
+</div>
+</div>
+
+<p>&nbsp;</p></div></div></div><div id="cs_84"><div title="Swatches" class="TextSectionLayout-sc-3dcbdl-0 jSvmmb"><h2 class="TextSectionLayout__SectionHeader-sc-3dcbdl-1 leQPtF">Swatches</h2><div class="EditorialContent__StyledEditorialContent-sc-1bw5bvy-0 cAHIXY"><h3>Colours</h3>
+<h5>Green</h5>
+<ul>
+<li><span data-dl-color="green">Green</span></li>
+<li><span data-dl-color="dark-green-1">Dark green 1</span></li>
+<li><span data-dl-color="dark-green-2">Dark green 2</span></li>
+</ul>
+<h5>Yellow</h5>
+<ul>
+<li><span data-dl-color="yellow">Yellow</span></li>
+<li><span data-dl-color="dark-yellow-1">Dark yellow 1</span></li>
+<li><span data-dl-color="dark-yellow-2">Dark yellow 2</span></li>
+</ul>
+<h5>Red</h5>
+<ul>
+<li><span data-dl-color="red">Red</span></li>
+<li><span data-dl-color="dark-red-1">Dark red 1</span></li>
+<li><span data-dl-color="dark-red-2">Dark red 2</span></li>
+</ul>
+<h5>Blue</h5>
+<ul>
+<li><span data-dl-color="blue">Blue</span></li>
+<li><span data-dl-color="dark-blue-1">Dark blue 1</span></li>
+<li><span data-dl-color="dark-blue-2">Dark blue 2</span></li>
+</ul>
+<p>&nbsp;</p>
+<h3>Greyscale</h3>
+<p>Use any shade of grey to support our primary colours.&nbsp;</p>
+<ul>
+<li><span data-dl-color="grey-900">Base 900</span></li>
+<li><span data-dl-color="grey-800">Base 800</span></li>
+<li><span data-dl-color="grey-700">Base 700</span></li>
+<li><span data-dl-color="grey-600">Base 600</span></li>
+<li><span data-dl-color="grey-500">Base 500</span></li>
+<li><span data-dl-color="grey-400">Base 400</span></li>
+<li><span data-dl-color="grey-300">Base 300</span></li>
+<li><span data-dl-color="grey-200">Base 200</span></li>
+<li><span data-dl-color="grey-100">Base 100</span></li>
+</ul>
+<p>&nbsp;</p>
+<h3>SEB Senior, don’t use yet!</h3>
+<p>In 2025 a new primary colour was introduced in our brand guidelines. It’s called SEB Senior and will be incorporated into the next version of our digital design.</p>
+<p>It’s&nbsp;<strong>not to be used</strong> in the current design system (2016).</p>
+
+<div class="image-group image-group--grid">
+
+
+<div class="image-container">
+    <img class="lightbox" src="/imagevault/publishedmedia/fddfzasg4bpocc885q1e/senior-colour_2025-04-22.png" alt="SEB Senior" />
+        <p>SEB Senior</p>
+</div>
+</div>
+
+<p>&nbsp;</p></div></div></div></div></div><div class="BasicElements__Container-sc-1mtnp2g-2 ComponentRow__RowContainer-sc-1p8bdig-0 dxdPc ghCKlk dl-container"><div class="BasicElements__CenterContainer-sc-1mtnp2g-3 ComponentRow__RowCenterContainer-sc-1p8bdig-1 gKdIhg lmMGaX dl-center-container"><h2 class="ComponentRow__RowHeader-sc-1p8bdig-2 cAfEsy">Page last updated</h2><time dateTime="2025-04-22">April 22nd, 2025</time></div></div><div class="BasicElements__Container-sc-1mtnp2g-2 ComponentRow__RowContainer-sc-1p8bdig-0 dxdPc ghCKlk dl-container"><div class="BasicElements__CenterContainer-sc-1mtnp2g-3 ComponentRow__RowCenterContainer-sc-1p8bdig-1 gKdIhg lmMGaX dl-center-container"><h2 class="ComponentRow__RowHeader-sc-1p8bdig-2 cAfEsy">Feedback</h2><div><h3>Was this helpful?</h3><div class="Feedback__ButtonContainer-sc-1ova0zc-1 gvircM"><button class="sdv-button sdv-button-ghost-dark" type="GHOST_LIGHT">Yes</button><button class="sdv-button sdv-button-ghost-dark" type="GHOST_LIGHT">No</button></div></div></div></div></div><button class="ScrollButton__StyledScrollButton-sc-f16vpi-0 fldgxT -hidden">Back to top<!-- --> <svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="arrow-up" class="svg-inline--fa fa-arrow-up " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M6.625 215.5l168-176C179.2 34.7 185.4 32.02 192 32.02s12.84 2.688 17.38 7.438l168 176c9.125 9.594 8.781 24.78-.8125 33.94c-9.5 9.156-24.75 8.812-33.94-.8125L216 115.9V456c0 13.25-10.75 23.1-23.1 23.1S168 469.3 168 456V115.9l-126.6 132.7C32.22 258.2 16.97 258.5 7.438 249.4C-2.156 240.2-2.5 225 6.625 215.5z"></path></svg></button></div></div></div></div></div><footer class="SiteFooter__Footer-sc-283y71-0 cFYZLe"><div class="BasicElements__Container-sc-1mtnp2g-2 dxdPc dl-container"><span>© Skandinaviska Enskilda Banken AB (publ)</span></div></footer></div></div><div id="dl-modal-portal"></div><script nonce="/D6t5ydyCP8B3W8iu3H3mMQvZUqSf8cZxlRGbkF5d0k=">window.__APOLLO_STATE__={"Page:25":{"__typename":"Page","id":"25","pageType":"page","customProperties":null,"commonContent":{"__typename":"CommonContent","title":"Colours","headline":null,"preamble":"Colour can be used to express emotion and tone, as well as place emphasis and create associations. Use it in meaningful and intentional ways in order to create patterns and visual cues.","body":"","modified":"2025-04-22"},"contentSections":[{"__typename":"ContentSection","title":"Guidelines","sectionKey":"36","body":"\u003ch3>Short description\u003c/h3>\n\u003cp>At SEB we use colours more sparsely. This page covers the usage of colour for digital products. For general perspective on SEB colour usage in print and media, read the&nbsp;\u003ca href=\"https://brand.seb.se/point/en/seb/component/default/201670\" target=\"_blank\" rel=\"noopener\">SEB visual guidelines.\u003c/a>\u003c/p>\n\u003cp>&nbsp;\u003c/p>\n\u003ch3>Specifically used colours\u003c/h3>\n\u003ch4>Background\u003c/h4>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"white\">White\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"background\">Background\u003c/span>\u003c/li>\n\u003c/ul>\n\u003cp>Both white and grey can be used.\u003c/p>\n\u003ch4>Text\u003c/h4>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"grey-800\">Base 800\u003c/span>\u003c/li>\n\u003c/ul>\n\u003cp>More about&nbsp;\u003ca href=\"/foundation/digital-design/visual-identity/typography/\">Typography\u003c/a>\u003c/p>\n\u003ch4>Link\u003c/h4>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"link\">Link\u003c/span>\u003c/li>\n\u003c/ul>\n\u003cp>More about \u003ca title=\"Links\" href=\"/components/component-link/\">Links\u003c/a>\u003c/p>\n\u003ch4>Error\u003c/h4>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"error\">Error\u003c/span>\u003c/li>\n\u003c/ul>\n\u003cp>More about \u003ca title=\"Error handling\" href=\"/patterns/pattern-errorhandling/\">Error handling\u003c/a>\u003c/p>\n\u003ch4>Dark mode\u003c/h4>\n\u003cp>Our colours are used differently in darkmode. \u003ca title=\"Dark mode\" href=\"/patterns/pattern-darkmode/\">Pattern: Dark mode\u003c/a>\u003c/p>\n\u003cp>&nbsp;\u003c/p>\n\u003ch3>Do's and don'ts\u003c/h3>\n\u003ch4>Colour contrast\u003c/h4>\n\u003ch5>Do\u003c/h5>\n\u003cul>\n\u003cli>Make sure to have good contrast between text colour and background.\u003c/li>\n\u003cli>Use a tool to check the contrast. (Here is one:&nbsp;\u003ca title=\"https://webaim.org/resources/contrastchecker/\" href=\"https://webaim.org/resources/contrastchecker/\" target=\"_blank\" rel=\"noopener\">https://webaim.org/resources/contrastchecker/\u003c/a>)\u003c/li>\n\u003c/ul>\n\r\n\u003cdiv class=\"image-group image-group--grid\">\r\n\r\n\r\n\u003cdiv class=\"image-container\">\r\n    \u003cimg class=\"lightbox\" src=\"/imagevault/publishedmedia/ir0u4is11v320e41oebr/Colours-do_2025-04-22.png\" alt=\"Good use of contrast\" />\r\n        \u003cp>Good contrast\u003c/p>\r\n\u003c/div>\r\n\u003c/div>\r\n\n\u003cp>&nbsp;\u003c/p>\n\u003ch5>Don't\u003c/h5>\n\u003cul>\n\u003cli>Don’t use white text on a light background.\u003c/li>\n\u003cli>Don’t make colours lighter except for in graphs. For graphs it’s possible to use several different colours.\u003c/li>\n\u003c/ul>\n\r\n\u003cdiv class=\"image-group image-group--grid\">\r\n\r\n\r\n\u003cdiv class=\"image-container\">\r\n    \u003cimg class=\"lightbox\" src=\"/imagevault/publishedmedia/8t4484ddoqfb77yz3m53/Colours-dont_2025-04-22.png\" alt=\"Bad contrast\" />\r\n        \u003cp>Bad contrast\u003c/p>\r\n\u003c/div>\r\n\u003c/div>\r\n\n\u003cp>&nbsp;\u003c/p>"},{"__typename":"ContentSection","title":"Swatches","sectionKey":"84","body":"\u003ch3>Colours\u003c/h3>\n\u003ch5>Green\u003c/h5>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"green\">Green\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-green-1\">Dark green 1\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-green-2\">Dark green 2\u003c/span>\u003c/li>\n\u003c/ul>\n\u003ch5>Yellow\u003c/h5>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"yellow\">Yellow\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-yellow-1\">Dark yellow 1\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-yellow-2\">Dark yellow 2\u003c/span>\u003c/li>\n\u003c/ul>\n\u003ch5>Red\u003c/h5>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"red\">Red\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-red-1\">Dark red 1\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-red-2\">Dark red 2\u003c/span>\u003c/li>\n\u003c/ul>\n\u003ch5>Blue\u003c/h5>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"blue\">Blue\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-blue-1\">Dark blue 1\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"dark-blue-2\">Dark blue 2\u003c/span>\u003c/li>\n\u003c/ul>\n\u003cp>&nbsp;\u003c/p>\n\u003ch3>Greyscale\u003c/h3>\n\u003cp>Use any shade of grey to support our primary colours.&nbsp;\u003c/p>\n\u003cul>\n\u003cli>\u003cspan data-dl-color=\"grey-900\">Base 900\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-800\">Base 800\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-700\">Base 700\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-600\">Base 600\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-500\">Base 500\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-400\">Base 400\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-300\">Base 300\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-200\">Base 200\u003c/span>\u003c/li>\n\u003cli>\u003cspan data-dl-color=\"grey-100\">Base 100\u003c/span>\u003c/li>\n\u003c/ul>\n\u003cp>&nbsp;\u003c/p>\n\u003ch3>SEB Senior, don’t use yet!\u003c/h3>\n\u003cp>In 2025 a new primary colour was introduced in our brand guidelines. It’s called SEB Senior and will be incorporated into the next version of our digital design.\u003c/p>\n\u003cp>It’s&nbsp;\u003cstrong>not to be used\u003c/strong> in the current design system (2016).\u003c/p>\n\r\n\u003cdiv class=\"image-group image-group--grid\">\r\n\r\n\r\n\u003cdiv class=\"image-container\">\r\n    \u003cimg class=\"lightbox\" src=\"/imagevault/publishedmedia/fddfzasg4bpocc885q1e/senior-colour_2025-04-22.png\" alt=\"SEB Senior\" />\r\n        \u003cp>SEB Senior\u003c/p>\r\n\u003c/div>\r\n\u003c/div>\r\n\n\u003cp>&nbsp;\u003c/p>"}],"navTree":{"__typename":"NavTree","nodes":[]},"designVersion":null,"tags":[],"relatedTo":[],"designPrinciples":[]},"ROOT_QUERY":{"__typename":"Query","page({\"route\":\"foundation/digital-design/visual-identity/colours\"})":{"__ref":"Page:25"},"navTree({})":{"__typename":"NavTree","nodes":[{"__typename":"NavNode","itemId":"5","name":"Design Library","preamble":"As part of the Green design system, this is where we keep our digital design guidelines, components and patterns, to support you when designing and building great SEB experiences.","route":"/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"1201","name":"Foundation","preamble":"Find what you need to create great, uniformed experiences, for both designers and developers, so you can apply it to SEB experiences.","route":"/foundation/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[{"__typename":"NavNode","itemId":"2085","name":"Green design system","preamble":null,"route":"/foundation/green-design-system/","collapsedOnLoad":false,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"1969","name":"About Green","preamble":"Green is SEB's design system for building products and digital experiences for SEB. ","route":"/foundation/green-design-system/overview/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"1205","name":"Mostly for designers","preamble":"The quick ticket to find out how to work with our digital design.","route":"/foundation/mostly-for-designers/","collapsedOnLoad":true,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"2517","name":"Introduction to the design process","preamble":"Every type of design exists to solve problems. Design at SEB is all about seeing the problem and find a solution using the right data and to always strive to simplify what's complex.","route":"/foundation/mostly-for-designers/design-process-introduction/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"1553","name":"SEB's design process","preamble":"We strive to simplify what's complex.","route":"/foundation/mostly-for-designers/design-process/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"2019","name":"Design tools and libraries","preamble":"How we we work with component libraries.","route":"/foundation/mostly-for-designers/design-tools/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"994","name":"Support and resources","preamble":"Are the guidelines in Design Library not enough? Here is an overview of what type of support there are when it comes to customer experience (CX) design.","route":"/foundation/mostly-for-designers/support-and-resources/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"881","name":"Mostly for developers","preamble":"The one-stop-shop for how to use components and contribute to Design Library, and other things you need to build an SEB-experience.","route":"/foundation/mostly-for-developers/","collapsedOnLoad":true,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"882","name":"Browser strategy","preamble":null,"route":"/foundation/mostly-for-developers/browser-strategy/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"996","name":"Digital design","preamble":"The current design came into our life in 2017. Would you like to know more about the brand design, go to SEB Brand Manual. If you want to know about our digital design system, this is the section for you!","route":"/foundation/digital-design/","collapsedOnLoad":true,"navigationalOnly":false,"nodes":[{"__typename":"NavNode","itemId":"3220","name":"Visual design","preamble":"When we create and explore, it's easy to get lost in the details. But don’t let uncertainty hold you back. Take bold steps and trust the process – that's how progress is made.\nRemember this: 'Good enough for now, safe enough to try.'","route":"/foundation/digital-design/visual-design/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"21","name":"Five design principles","preamble":"The digital design principles are meant to work as the guiding star in all our digital developments for all business segments and internal systems.","route":"/foundation/digital-design/design-principles/","collapsedOnLoad":false,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"22","name":"1. It's for you","preamble":"We aim to adapt to each individual's unique situation, thus making us relevant and trustworthy.\n \nThis applies to both our customers and employees.","route":"/foundation/digital-design/design-principles/its-for-you/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"23","name":"2. Everyday first","preamble":"We do the hard work for our clients and employees to solve their everyday needs, problems and tasks in a delightful manner.","route":"/foundation/digital-design/design-principles/everyday-first/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"57","name":"3. Trigger insight","preamble":"We enlighten our clients and employees with insightful presentations of information and actionable suggestions. In ways our users find magical.","route":"/foundation/digital-design/design-principles/trigger-insight/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"58","name":"4. Be the good guy","preamble":"Our aim is to help our clients, employees and users to intuitively understand, navigate and use our products and services.\n\nWe achieve this by being clear, empathic and approachable.\n","route":"/foundation/digital-design/design-principles/be-the-good-guy/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"59","name":"5. Frictionless","preamble":"Trying a new function, exploring new content or taking a difficult decision. Whatever the step, we aim to universally reduce barriers and lower thresholds.","route":"/foundation/digital-design/design-principles/frictionless/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"24","name":"Visual identity","preamble":"The brand cornerstones are SEB-global and apply to all user groups, customer journeys and systems. These pages address the digital design guidelines - go to Brand Manual for all things Brand.","route":"/foundation/digital-design/visual-identity/","collapsedOnLoad":false,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"60","name":"Logotype","preamble":"The logotype is our most important identity asset. It is our signature and distinguishes us from others. It’s our primary identification marker and the very manifestation of our brand.","route":"/foundation/digital-design/visual-identity/logotype/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"555","name":"Typography","preamble":"Typography is a big part of our identity. When used correctly it helps to create a consistent and coherent look and feel. Our typeface is almost always present in everything that we do and is therefore, an extremely important ingredient in our brand.","route":"/foundation/digital-design/visual-identity/typography/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"25","name":"Colours","preamble":"Colour can be used to express emotion and tone, as well as place emphasis and create associations. Use it in meaningful and intentional ways in order to create patterns and visual cues.","route":"/foundation/digital-design/visual-identity/colours/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"365","name":"Icons","preamble":"How to use icons in our applications.","route":"/foundation/digital-design/visual-identity/icons/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"61","name":"Imagery","preamble":"The general tone of the images is calm and elegant. Beautiful ingredients such as natural materials, unfeigned people, classic furniture and architecture create simple and tasteful situations and environments.\n","route":"/foundation/digital-design/visual-identity/imagery/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"2165","name":"Component specifications","preamble":"How to find component specifications in Figma.","route":"/foundation/digital-design/component-specifications/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"1471","name":"UX text","preamble":"UX text in SEB's digital services is meant to work as a guiding star for the mindset and tone of voice in the interface communication.\n","route":"/foundation/ux-writing/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"29","name":"Components","preamble":"These components have been designed and agreed upon from an SEB global perspective. Can we do better? Please contact us! designlibrary@seb.se","route":"/components","collapsedOnLoad":true,"navigationalOnly":false,"nodes":[{"__typename":"NavNode","itemId":"1221","name":"Data entry","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"67","name":"Button","preamble":"","route":"/components/component-button","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"30","name":"Checkbox","preamble":"","route":"/components/component-checkbox","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"442","name":"Date picker","preamble":"","route":"/components/component-datepicker","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"48","name":"Dropdown","preamble":"","route":"/components/component-dropdown","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2825","name":"Error summary","preamble":"","route":"/components/component-errorsummary","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2237","name":"Filter chip","preamble":"","route":"/components/component-filterchip","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"70","name":"Input field","preamble":"","route":"/components/component-input","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"73","name":"Radio button","preamble":"","route":"/components/component-radiobutton","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1412","name":"Search","preamble":"","route":"/components/component-search","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"437","name":"Segmented control","preamble":"","route":"/components/component-segmented-control","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2643","name":"Select","preamble":"","route":"/components/component-select","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"75","name":"Slide toggle","preamble":"","route":"/components/component-slidetoggle","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"411","name":"Slider","preamble":"","route":"/components/component-slider","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"308","name":"Stepper","preamble":"","route":"/components/component-stepper","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1219","name":"Data representation","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"973","name":"Badge","preamble":"","route":"/components/component-badge","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"69","name":"Charts & graphs","preamble":"","route":"/components/component-chart","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"423","name":"List","preamble":"","route":"/components/component-list","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"74","name":"Table","preamble":"","route":"/components/component-table","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1217","name":"Editorial","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"66","name":"Accordion","preamble":"","route":"/components/component-accordion","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"897","name":"Alert ribbon","preamble":"","route":"/components/component-alertribbon","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1465","name":"Bullet point","preamble":"","route":"/components/component-bulletpoint","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3086","name":"Feedback card","preamble":"","route":"/components/component-feedbackcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"230","name":"Footnote","preamble":"","route":"/components/pw-footnote","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"71","name":"Link","preamble":"","route":"/components/component-link","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"423","name":"List","preamble":"","route":"/components/component-list","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"205","name":"Section expander","preamble":"","route":"/components/component-section-expander","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1216","name":"Feedback","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"897","name":"Alert ribbon","preamble":"","route":"/components/component-alertribbon","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"973","name":"Badge","preamble":"","route":"/components/component-badge","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2825","name":"Error summary","preamble":"","route":"/components/component-errorsummary","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1326","name":"Progress bar","preamble":"","route":"/components/component-progressbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"775","name":"Progress indicator","preamble":"","route":"/components/component-progressindicator","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"490","name":"Skeleton loader","preamble":"","route":"/components/component-skeleton-loader","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"826","name":"Spinner","preamble":"","route":"/components/component-spinners","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"538","name":"Toast notification","preamble":"","route":"/components/component-toast-notifications","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"165","name":"Tooltip","preamble":"","route":"/components/component-tooltip","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1220","name":"Layout","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"799","name":"Card","preamble":"","route":"/components/component-card","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1420","name":"Column customiser","preamble":"","route":"/components/component-columncustomiser","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"757","name":"Sticky button bar","preamble":"","route":"/components/component-stickybuttonbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"570","name":"Sticky summary bar","preamble":"","route":"/components/component-stickysummarybar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1472","name":"Toolbar","preamble":"","route":"/components/component-toolbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"72","name":"Widget","preamble":"","route":"/components/component-widget","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1339","name":"Loaders & spinners","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"1326","name":"Progress bar","preamble":"","route":"/components/component-progressbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"490","name":"Skeleton loader","preamble":"","route":"/components/component-skeleton-loader","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"826","name":"Spinner","preamble":"","route":"/components/component-spinners","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1277","name":"Modals","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"2834","name":"Centered modal","preamble":"","route":"/components/component-centeredmodal","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2526","name":"Coach mark","preamble":"","route":"/components/component-coachmark","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"64","name":"Dialogue modal","preamble":"","route":"/components/component-dialogue","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"200","name":"Slide-out modal","preamble":"","route":"/components/component-slideout","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1591","name":"Slide-up","preamble":"","route":"/components/component-slideup","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"196","name":"Take-over modal","preamble":"","route":"/components/component-takeover","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3039","name":"Walkthrough modal","preamble":"","route":"/components/component-walkthrough","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"3225","name":"Native app","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"3226","name":"Native app - Button","preamble":"","route":"/components/native-button","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3244","name":"Native app - Dialogue modal (custom)","preamble":"","route":"/components/native-dialogue","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3237","name":"Native app - Error card","preamble":"","route":"/components/native-errorcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3241","name":"Native app - Information card","preamble":"","route":"/components/native-informationcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1218","name":"Navigational","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"580","name":"Breadcrumb","preamble":"","route":"/components/component-breadcrumbs","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1864","name":"Cluster navigation","preamble":"","route":"/components/component-clusternavigation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1968","name":"Context menu","preamble":"","route":"/components/component-contextmenu","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"71","name":"Link","preamble":"","route":"/components/component-link","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2918","name":"Mega menu","preamble":"","route":"/components/component-megamenu","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2948","name":"Notifications dropdown","preamble":"","route":"/components/component-notificationsdropdown","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"585","name":"Pagination","preamble":"","route":"/components/component-pagination","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2809","name":"Profile navigation","preamble":"","route":"/components/component-profile","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1412","name":"Search","preamble":"","route":"/components/component-search","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2776","name":"Side navigation","preamble":"","route":"/components/component_sidenavigation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"76","name":"Tab","preamble":"","route":"/components/component-tab","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2801","name":"Top bar","preamble":"","route":"/components/component-topbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1448","name":"Patterns","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"2609","name":"BankID logotype","preamble":"","route":"/patterns/pattern-bankid","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2480","name":"Browser scroll bars","preamble":"","route":"/patterns/pattern-scrollbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1151","name":"Buy and sell-pattern","preamble":"","route":"/patterns/pattern-buysell","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"889","name":"CRUD-pattern","preamble":"","route":"/patterns/pattern-crud","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1377","name":"Confirmation","preamble":"","route":"/patterns/pattern-confirmation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2281","name":"Contextual help","preamble":"","route":"/patterns/pattern-contextualhelp","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1058","name":"Dark mode","preamble":"","route":"/patterns/pattern-darkmode","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1885","name":"Delete-pattern","preamble":"","route":"/patterns/pattern-delete","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3207","name":"Disabled states","preamble":"","route":"/patterns/pattern-disabledstates","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1023","name":"Drag and drop","preamble":"","route":"/patterns/pattern-draganddrop","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1123","name":"Empty states","preamble":"","route":"/patterns/pattern-emptystates","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1429","name":"Error handling","preamble":"","route":"/patterns/pattern-errorhandling","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1224","name":"Feedback","preamble":"","route":"/patterns/pattern-feedback","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3080","name":"Feedback forms","preamble":"","route":"/patterns/pattern-feedbackform","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1272","name":"Filtering","preamble":"","route":"/patterns/pattern-filtering","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1616","name":"Flags","preamble":"","route":"/patterns/pattern-flags","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2555","name":"Focus state","preamble":"","route":"/patterns/pattern-focusstate","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"336","name":"Form design","preamble":"","route":"/patterns/pattern-formdesign","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1027","name":"Formatting  guidelines","preamble":"","route":"/patterns/pattern-formatting","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"176","name":"Grid & spacing","preamble":"","route":"/patterns/pattern-gridandspacing","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2773","name":"Headings","preamble":"","route":"/patterns/pattern-headings","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1861","name":"Help","preamble":"","route":"/patterns/pattern-help","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1376","name":"Icons and actions","preamble":"","route":"/patterns/pattern-iconsandactions","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1335","name":"In-context information","preamble":"","route":"/patterns/pattern-incontextinfo","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1368","name":"Loaders","preamble":"","route":"/patterns/pattern-loaders","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"44","name":"Motion","preamble":"","route":"/patterns/pattern-motion","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2677","name":"Navigation overview","preamble":"","route":"/patterns/pattern-navigation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1382","name":"Onboarding","preamble":"","route":"/patterns/pattern-onboarding","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1381","name":"PDF-documents","preamble":"","route":"/patterns/pattern-pdf","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2569","name":"Session time out","preamble":"","route":"/patterns/pattern-sessiontimeout","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2634","name":"Settings","preamble":"","route":"/patterns/pattern-settings","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1004","name":"Static site template","preamble":"","route":"/patterns/pattern-staticsite","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1037","name":"Units","preamble":"","route":"/patterns/pattern-units","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3111","name":"Widget areas","preamble":"","route":"/patterns/pattern-widgetareas","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2130","name":"Wizard - in-page","preamble":"","route":"/patterns/pattern-inpagewizard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2157","name":"Wizard - light","preamble":"","route":"/patterns/pattern-lightwizard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"450","name":"Wizard - take over","preamble":"","route":"/patterns/pattern-wizardtakeover","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2196","name":"Wizard overview","preamble":"","route":"/patterns/pattern-wizards","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1230","name":"Content blocks","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"224","name":"Contact me","preamble":"","route":"/components/pw-contact-me","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"223","name":"Contact us","preamble":"","route":"/components/pw-contact-us","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"228","name":"Eye catcher","preamble":"","route":"/components/pw-eye-catcher","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3086","name":"Feedback card","preamble":"","route":"/components/component-feedbackcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"230","name":"Footnote","preamble":"","route":"/components/pw-footnote","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2362","name":"Information block","preamble":"","route":"/components/component-informationblock","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2379","name":"Nudge block","preamble":"","route":"/components/component-nudgeblock","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"611","name":"Page header","preamble":"","route":"/components/pages-type","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"723","name":"Rating","preamble":"","route":"/components/pw-rating","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1134","name":"Related Large","preamble":"","route":"/components/component-related-large","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1139","name":"Related Medium","preamble":"","route":"/components/component-related-medium","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2904","name":"Related Mini","preamble":"","route":"/components/component-related-mini","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1144","name":"Related Small","preamble":"","route":"/components/component-related-small","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"205","name":"Section expander","preamble":"","route":"/components/component-section-expander","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2395","name":"Teaser block with image","preamble":"","route":"/components/component-teaserblock-image","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"598","name":"USP list","preamble":"","route":"/components/pw-usp","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"615","name":"Video block","preamble":"","route":"/components/pw-video","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"749","name":"Welcome block","preamble":"","route":"/components/pw-welcome","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]}]},{"__typename":"NavNode","itemId":"27","name":"Patterns","preamble":"Patterns are our best practices and general solutions to commonly occurring problems.","route":"/patterns/","collapsedOnLoad":true,"navigationalOnly":false,"nodes":[{"__typename":"NavNode","itemId":"1221","name":"Data entry","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"67","name":"Button","preamble":"","route":"/components/component-button","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"30","name":"Checkbox","preamble":"","route":"/components/component-checkbox","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"442","name":"Date picker","preamble":"","route":"/components/component-datepicker","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"48","name":"Dropdown","preamble":"","route":"/components/component-dropdown","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2825","name":"Error summary","preamble":"","route":"/components/component-errorsummary","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2237","name":"Filter chip","preamble":"","route":"/components/component-filterchip","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"70","name":"Input field","preamble":"","route":"/components/component-input","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"73","name":"Radio button","preamble":"","route":"/components/component-radiobutton","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1412","name":"Search","preamble":"","route":"/components/component-search","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"437","name":"Segmented control","preamble":"","route":"/components/component-segmented-control","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2643","name":"Select","preamble":"","route":"/components/component-select","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"75","name":"Slide toggle","preamble":"","route":"/components/component-slidetoggle","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"411","name":"Slider","preamble":"","route":"/components/component-slider","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"308","name":"Stepper","preamble":"","route":"/components/component-stepper","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1219","name":"Data representation","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"973","name":"Badge","preamble":"","route":"/components/component-badge","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"69","name":"Charts & graphs","preamble":"","route":"/components/component-chart","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"423","name":"List","preamble":"","route":"/components/component-list","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"74","name":"Table","preamble":"","route":"/components/component-table","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1217","name":"Editorial","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"66","name":"Accordion","preamble":"","route":"/components/component-accordion","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"897","name":"Alert ribbon","preamble":"","route":"/components/component-alertribbon","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1465","name":"Bullet point","preamble":"","route":"/components/component-bulletpoint","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3086","name":"Feedback card","preamble":"","route":"/components/component-feedbackcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"230","name":"Footnote","preamble":"","route":"/components/pw-footnote","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"71","name":"Link","preamble":"","route":"/components/component-link","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"423","name":"List","preamble":"","route":"/components/component-list","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"205","name":"Section expander","preamble":"","route":"/components/component-section-expander","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1216","name":"Feedback","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"897","name":"Alert ribbon","preamble":"","route":"/components/component-alertribbon","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"973","name":"Badge","preamble":"","route":"/components/component-badge","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2825","name":"Error summary","preamble":"","route":"/components/component-errorsummary","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1326","name":"Progress bar","preamble":"","route":"/components/component-progressbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"775","name":"Progress indicator","preamble":"","route":"/components/component-progressindicator","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"490","name":"Skeleton loader","preamble":"","route":"/components/component-skeleton-loader","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"826","name":"Spinner","preamble":"","route":"/components/component-spinners","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"538","name":"Toast notification","preamble":"","route":"/components/component-toast-notifications","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"165","name":"Tooltip","preamble":"","route":"/components/component-tooltip","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1220","name":"Layout","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"799","name":"Card","preamble":"","route":"/components/component-card","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1420","name":"Column customiser","preamble":"","route":"/components/component-columncustomiser","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"757","name":"Sticky button bar","preamble":"","route":"/components/component-stickybuttonbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"570","name":"Sticky summary bar","preamble":"","route":"/components/component-stickysummarybar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1472","name":"Toolbar","preamble":"","route":"/components/component-toolbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"72","name":"Widget","preamble":"","route":"/components/component-widget","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1339","name":"Loaders & spinners","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"1326","name":"Progress bar","preamble":"","route":"/components/component-progressbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"490","name":"Skeleton loader","preamble":"","route":"/components/component-skeleton-loader","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"826","name":"Spinner","preamble":"","route":"/components/component-spinners","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1277","name":"Modals","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"2834","name":"Centered modal","preamble":"","route":"/components/component-centeredmodal","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2526","name":"Coach mark","preamble":"","route":"/components/component-coachmark","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"64","name":"Dialogue modal","preamble":"","route":"/components/component-dialogue","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"200","name":"Slide-out modal","preamble":"","route":"/components/component-slideout","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1591","name":"Slide-up","preamble":"","route":"/components/component-slideup","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"196","name":"Take-over modal","preamble":"","route":"/components/component-takeover","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3039","name":"Walkthrough modal","preamble":"","route":"/components/component-walkthrough","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"3225","name":"Native app","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"3226","name":"Native app - Button","preamble":"","route":"/components/native-button","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3244","name":"Native app - Dialogue modal (custom)","preamble":"","route":"/components/native-dialogue","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3237","name":"Native app - Error card","preamble":"","route":"/components/native-errorcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3241","name":"Native app - Information card","preamble":"","route":"/components/native-informationcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1218","name":"Navigational","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"580","name":"Breadcrumb","preamble":"","route":"/components/component-breadcrumbs","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1864","name":"Cluster navigation","preamble":"","route":"/components/component-clusternavigation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1968","name":"Context menu","preamble":"","route":"/components/component-contextmenu","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"71","name":"Link","preamble":"","route":"/components/component-link","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2918","name":"Mega menu","preamble":"","route":"/components/component-megamenu","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2948","name":"Notifications dropdown","preamble":"","route":"/components/component-notificationsdropdown","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"585","name":"Pagination","preamble":"","route":"/components/component-pagination","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2809","name":"Profile navigation","preamble":"","route":"/components/component-profile","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1412","name":"Search","preamble":"","route":"/components/component-search","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2776","name":"Side navigation","preamble":"","route":"/components/component_sidenavigation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"76","name":"Tab","preamble":"","route":"/components/component-tab","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2801","name":"Top bar","preamble":"","route":"/components/component-topbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1448","name":"Patterns","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"2609","name":"BankID logotype","preamble":"","route":"/patterns/pattern-bankid","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2480","name":"Browser scroll bars","preamble":"","route":"/patterns/pattern-scrollbar","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1151","name":"Buy and sell-pattern","preamble":"","route":"/patterns/pattern-buysell","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"889","name":"CRUD-pattern","preamble":"","route":"/patterns/pattern-crud","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1377","name":"Confirmation","preamble":"","route":"/patterns/pattern-confirmation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2281","name":"Contextual help","preamble":"","route":"/patterns/pattern-contextualhelp","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1058","name":"Dark mode","preamble":"","route":"/patterns/pattern-darkmode","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1885","name":"Delete-pattern","preamble":"","route":"/patterns/pattern-delete","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3207","name":"Disabled states","preamble":"","route":"/patterns/pattern-disabledstates","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1023","name":"Drag and drop","preamble":"","route":"/patterns/pattern-draganddrop","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1123","name":"Empty states","preamble":"","route":"/patterns/pattern-emptystates","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1429","name":"Error handling","preamble":"","route":"/patterns/pattern-errorhandling","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1224","name":"Feedback","preamble":"","route":"/patterns/pattern-feedback","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3080","name":"Feedback forms","preamble":"","route":"/patterns/pattern-feedbackform","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1272","name":"Filtering","preamble":"","route":"/patterns/pattern-filtering","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1616","name":"Flags","preamble":"","route":"/patterns/pattern-flags","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2555","name":"Focus state","preamble":"","route":"/patterns/pattern-focusstate","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"336","name":"Form design","preamble":"","route":"/patterns/pattern-formdesign","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1027","name":"Formatting  guidelines","preamble":"","route":"/patterns/pattern-formatting","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"176","name":"Grid & spacing","preamble":"","route":"/patterns/pattern-gridandspacing","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2773","name":"Headings","preamble":"","route":"/patterns/pattern-headings","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1861","name":"Help","preamble":"","route":"/patterns/pattern-help","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1376","name":"Icons and actions","preamble":"","route":"/patterns/pattern-iconsandactions","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1335","name":"In-context information","preamble":"","route":"/patterns/pattern-incontextinfo","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1368","name":"Loaders","preamble":"","route":"/patterns/pattern-loaders","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"44","name":"Motion","preamble":"","route":"/patterns/pattern-motion","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2677","name":"Navigation overview","preamble":"","route":"/patterns/pattern-navigation","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1382","name":"Onboarding","preamble":"","route":"/patterns/pattern-onboarding","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1381","name":"PDF-documents","preamble":"","route":"/patterns/pattern-pdf","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2569","name":"Session time out","preamble":"","route":"/patterns/pattern-sessiontimeout","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2634","name":"Settings","preamble":"","route":"/patterns/pattern-settings","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1004","name":"Static site template","preamble":"","route":"/patterns/pattern-staticsite","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1037","name":"Units","preamble":"","route":"/patterns/pattern-units","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3111","name":"Widget areas","preamble":"","route":"/patterns/pattern-widgetareas","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2130","name":"Wizard - in-page","preamble":"","route":"/patterns/pattern-inpagewizard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2157","name":"Wizard - light","preamble":"","route":"/patterns/pattern-lightwizard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"450","name":"Wizard - take over","preamble":"","route":"/patterns/pattern-wizardtakeover","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2196","name":"Wizard overview","preamble":"","route":"/patterns/pattern-wizards","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]},{"__typename":"NavNode","itemId":"1230","name":"Content blocks","preamble":"","route":null,"collapsedOnLoad":false,"navigationalOnly":null,"nodes":[{"__typename":"NavNode","itemId":"224","name":"Contact me","preamble":"","route":"/components/pw-contact-me","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"223","name":"Contact us","preamble":"","route":"/components/pw-contact-us","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"228","name":"Eye catcher","preamble":"","route":"/components/pw-eye-catcher","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"3086","name":"Feedback card","preamble":"","route":"/components/component-feedbackcard","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"230","name":"Footnote","preamble":"","route":"/components/pw-footnote","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2362","name":"Information block","preamble":"","route":"/components/component-informationblock","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2379","name":"Nudge block","preamble":"","route":"/components/component-nudgeblock","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"611","name":"Page header","preamble":"","route":"/components/pages-type","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"723","name":"Rating","preamble":"","route":"/components/pw-rating","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1134","name":"Related Large","preamble":"","route":"/components/component-related-large","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1139","name":"Related Medium","preamble":"","route":"/components/component-related-medium","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2904","name":"Related Mini","preamble":"","route":"/components/component-related-mini","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"1144","name":"Related Small","preamble":"","route":"/components/component-related-small","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"205","name":"Section expander","preamble":"","route":"/components/component-section-expander","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"2395","name":"Teaser block with image","preamble":"","route":"/components/component-teaserblock-image","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"598","name":"USP list","preamble":"","route":"/components/pw-usp","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"615","name":"Video block","preamble":"","route":"/components/pw-video","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]},{"__typename":"NavNode","itemId":"749","name":"Welcome block","preamble":"","route":"/components/pw-welcome","collapsedOnLoad":false,"navigationalOnly":null,"nodes":[]}]}]},{"__typename":"NavNode","itemId":"930","name":"Channels","preamble":"Introductions to channel-specific design and channel strategies. This section has moved to CX Central which is accessible from the SEB internal network or connected via VPN.","route":"/Channels/","collapsedOnLoad":true,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"1204","name":"About","preamble":null,"route":"/about/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[{"__typename":"NavNode","itemId":"1190","name":"About Design Library","preamble":"The idea is that by being consistent and by re-using SEB-common components, it also saves us valuable time that we can use to boost innovation.","route":"/about/about-design-library/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]}]},"page({\"route\":\"foundation\"})":{"__ref":"Page:1201"}},"Page:1201":{"__typename":"Page","id":"1201","commonContent":{"__typename":"CommonContent","title":"Foundation"},"navTree":{"__typename":"NavTree","nodes":[{"__typename":"NavNode","itemId":"2085","name":"Green design system","preamble":null,"route":"/foundation/green-design-system/","collapsedOnLoad":false,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"1969","name":"About Green","preamble":"Green is SEB's design system for building products and digital experiences for SEB. ","route":"/foundation/green-design-system/overview/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"1205","name":"Mostly for designers","preamble":"The quick ticket to find out how to work with our digital design.","route":"/foundation/mostly-for-designers/","collapsedOnLoad":true,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"2517","name":"Introduction to the design process","preamble":"Every type of design exists to solve problems. Design at SEB is all about seeing the problem and find a solution using the right data and to always strive to simplify what's complex.","route":"/foundation/mostly-for-designers/design-process-introduction/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"1553","name":"SEB's design process","preamble":"We strive to simplify what's complex.","route":"/foundation/mostly-for-designers/design-process/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"2019","name":"Design tools and libraries","preamble":"How we we work with component libraries.","route":"/foundation/mostly-for-designers/design-tools/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"994","name":"Support and resources","preamble":"Are the guidelines in Design Library not enough? Here is an overview of what type of support there are when it comes to customer experience (CX) design.","route":"/foundation/mostly-for-designers/support-and-resources/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"881","name":"Mostly for developers","preamble":"The one-stop-shop for how to use components and contribute to Design Library, and other things you need to build an SEB-experience.","route":"/foundation/mostly-for-developers/","collapsedOnLoad":true,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"882","name":"Browser strategy","preamble":null,"route":"/foundation/mostly-for-developers/browser-strategy/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"996","name":"Digital design","preamble":"The current design came into our life in 2017. Would you like to know more about the brand design, go to SEB Brand Manual. If you want to know about our digital design system, this is the section for you!","route":"/foundation/digital-design/","collapsedOnLoad":true,"navigationalOnly":false,"nodes":[{"__typename":"NavNode","itemId":"3220","name":"Visual design","preamble":"When we create and explore, it's easy to get lost in the details. But don’t let uncertainty hold you back. Take bold steps and trust the process – that's how progress is made.\nRemember this: 'Good enough for now, safe enough to try.'","route":"/foundation/digital-design/visual-design/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"21","name":"Five design principles","preamble":"The digital design principles are meant to work as the guiding star in all our digital developments for all business segments and internal systems.","route":"/foundation/digital-design/design-principles/","collapsedOnLoad":false,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"22","name":"1. It's for you","preamble":"We aim to adapt to each individual's unique situation, thus making us relevant and trustworthy.\n \nThis applies to both our customers and employees.","route":"/foundation/digital-design/design-principles/its-for-you/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"23","name":"2. Everyday first","preamble":"We do the hard work for our clients and employees to solve their everyday needs, problems and tasks in a delightful manner.","route":"/foundation/digital-design/design-principles/everyday-first/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"57","name":"3. Trigger insight","preamble":"We enlighten our clients and employees with insightful presentations of information and actionable suggestions. In ways our users find magical.","route":"/foundation/digital-design/design-principles/trigger-insight/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"58","name":"4. Be the good guy","preamble":"Our aim is to help our clients, employees and users to intuitively understand, navigate and use our products and services.\n\nWe achieve this by being clear, empathic and approachable.\n","route":"/foundation/digital-design/design-principles/be-the-good-guy/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"59","name":"5. Frictionless","preamble":"Trying a new function, exploring new content or taking a difficult decision. Whatever the step, we aim to universally reduce barriers and lower thresholds.","route":"/foundation/digital-design/design-principles/frictionless/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"24","name":"Visual identity","preamble":"The brand cornerstones are SEB-global and apply to all user groups, customer journeys and systems. These pages address the digital design guidelines - go to Brand Manual for all things Brand.","route":"/foundation/digital-design/visual-identity/","collapsedOnLoad":false,"navigationalOnly":true,"nodes":[{"__typename":"NavNode","itemId":"60","name":"Logotype","preamble":"The logotype is our most important identity asset. It is our signature and distinguishes us from others. It’s our primary identification marker and the very manifestation of our brand.","route":"/foundation/digital-design/visual-identity/logotype/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"555","name":"Typography","preamble":"Typography is a big part of our identity. When used correctly it helps to create a consistent and coherent look and feel. Our typeface is almost always present in everything that we do and is therefore, an extremely important ingredient in our brand.","route":"/foundation/digital-design/visual-identity/typography/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"25","name":"Colours","preamble":"Colour can be used to express emotion and tone, as well as place emphasis and create associations. Use it in meaningful and intentional ways in order to create patterns and visual cues.","route":"/foundation/digital-design/visual-identity/colours/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"365","name":"Icons","preamble":"How to use icons in our applications.","route":"/foundation/digital-design/visual-identity/icons/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]},{"__typename":"NavNode","itemId":"61","name":"Imagery","preamble":"The general tone of the images is calm and elegant. Beautiful ingredients such as natural materials, unfeigned people, classic furniture and architecture create simple and tasteful situations and environments.\n","route":"/foundation/digital-design/visual-identity/imagery/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"2165","name":"Component specifications","preamble":"How to find component specifications in Figma.","route":"/foundation/digital-design/component-specifications/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]},{"__typename":"NavNode","itemId":"1471","name":"UX text","preamble":"UX text in SEB's digital services is meant to work as a guiding star for the mindset and tone of voice in the interface communication.\n","route":"/foundation/ux-writing/","collapsedOnLoad":false,"navigationalOnly":false,"nodes":[]}]}}};</script><script nonce="/D6t5ydyCP8B3W8iu3H3mMQvZUqSf8cZxlRGbkF5d0k=" src="/static/js/main.434f7e7f.js"></script></body></html>

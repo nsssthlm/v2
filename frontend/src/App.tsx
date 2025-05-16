@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { CssVarsProvider, extendTheme } from '@mui/joy/styles';
+import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
 import NotFoundPage from './pages/NotFoundPage';
 import { ProjectProvider } from './contexts/ProjectContext';
+import theme from './theme'; // Importera vårt anpassade SEB-tema
 
 // Vault pages
 import HomePage from './pages/vault/home/HomePage';
@@ -18,31 +19,7 @@ import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 import FolderPage from './pages/folders/FolderPage';
 import FolderListPage from './pages/folders/FolderListPage';
 
-// Anpassa temat för att matcha bilden
-const theme = extendTheme({
-  colorSchemes: {
-    light: {
-      palette: {
-        primary: {
-          50: '#F0F4FF',
-          100: '#DDE7FF',
-          200: '#B3C7FF',
-          300: '#89A7FF',
-          400: '#6687FF', 
-          500: '#4361EE', // Huvudfärg som matchar ValvX logotypens lila
-          600: '#3A4CD8',
-          700: '#3038C3',
-          800: '#2A25A8',
-          900: '#24168E',
-        },
-      },
-    },
-  },
-  fontFamily: {
-    body: '"Inter", var(--joy-fontFamily-fallback)',
-    display: '"Inter", var(--joy-fontFamily-fallback)',
-  },
-});
+// Nu använder vi det importerade SEB-temat istället för detta
 
 function App() {
   return (
