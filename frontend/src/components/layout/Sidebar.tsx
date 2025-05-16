@@ -701,13 +701,17 @@ const Sidebar = () => {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   borderRadius: '4px',
+                  zIndex: 10,
                   '&:hover': {
                     bgcolor: 'rgba(0,0,0,0.04)'
                   }
                 }}
                 onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddNewFolder(null);
+                  e.preventDefault(); // Förhindra att det navigerar
+                  e.stopPropagation(); // Förhindra att föräldraelement fångar klicket
+                  setNewFolderName('');
+                  setCurrentParentId(null);
+                  setNewFolderDialogOpen(true);
                 }}
                 title="Lägg till ny huvudmapp"
               >
