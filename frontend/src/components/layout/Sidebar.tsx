@@ -62,19 +62,7 @@ const FileSystemNode = ({
   
   return (
     <div className="folder-node" style={{ position: 'relative', marginBottom: '4px', width: '100%', minWidth: 'max-content' }}>
-      {/* L-streck för hierarkin */}
-      {level > 0 && (
-        <div style={{
-          position: 'absolute',
-          left: `${level * 8 - 4}px`,  /* Ytterligare minskad indentering för hierarkin (8px) */
-          top: 0,
-          width: '6px',
-          height: '20px',
-          borderLeft: '1px solid #A0A0A0',
-          borderBottom: '1px solid #A0A0A0',
-          pointerEvents: 'none'
-        }} />
-      )}
+      {/* Ingen L-streck hierarki längre */}
       
       {/* En HTML-button istället för div för bättre klickbarhet */}
       <div
@@ -98,27 +86,9 @@ const FileSystemNode = ({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          if (isFolder) {
-            // Hantera enkelklick och dubbelklick
-            if (clickTimeoutRef.current !== null) {
-              // Dubbelklick detekterad - expandera/kollapsa mappen
-              window.clearTimeout(clickTimeoutRef.current);
-              clickTimeoutRef.current = null;
-              
-              // Expandera/kollapsa endast vid dubbelklick
-              toggleFolder(node.id);
-            } else {
-              // Enkelklick - navigera till mappens sida
-              clickTimeoutRef.current = window.setTimeout(() => {
-                // Nollställ timeouten
-                clickTimeoutRef.current = null;
-                
-                // Navigera till mappens sida om den har en slug
-                if (node.slug) {
-                  window.location.href = `/folders/${node.slug}`;
-                }
-              }, 300); // 300ms är en bra tid för att känna igen dubbelklick
-            }
+          // Klick på mappen öppnar mappens innehåll (navigerar till mappens sida)
+          if (isFolder && node.slug) {
+            window.location.href = `/folders/${node.slug}`;
           }
         }}
         onMouseOver={(e) => {
@@ -148,7 +118,32 @@ const FileSystemNode = ({
           </svg>
         </span>
         
-        {/* Mappnamn visas bara, utan egen klickfunktion eftersom huvudområdet nu gör båda funktionerna */}
+        {/* Expandera/kollapsa pil för mappar */}
+        {isFolder && children.length > 0 && (
+          <span 
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '16px',
+              height: '16px',
+              cursor: 'pointer',
+              marginRight: '2px',
+              transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.15s ease'
+            }}
+            onClick={(e) => {
+              e.stopPropagation(); // Förhindra att det navigerar
+              toggleFolder(node.id);
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+          </span>
+        )}
+        
+        {/* Mappnamn */}
         <span 
           style={{
             fontSize: '0.875rem',
