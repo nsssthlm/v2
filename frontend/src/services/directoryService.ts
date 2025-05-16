@@ -88,14 +88,26 @@ const directoryService = {
       // Skapa en kopia av directory-objektet för att inte modifiera originalet
       let dirData = { ...directory };
       
-      // Hantera projekt-kopplingen på ett säkert sätt
+      // Hantera projekt-kopplingen dynamiskt baserat på vilket projekt som är aktivt
       if (projectId && projectId !== 'null' && projectId !== 'undefined') {
-        // Säkerställ att vi har ett giltigt projekt-ID
-        // Viktigt: Vi måste använda ID 1 i nuläget eftersom det är det enda projektet i databasen
-        const validProjectId = 1;  // Hårdkoda projekt-ID till 1 temporärt
-        
-        console.log(`Kopplar mapp till projekt med ID ${validProjectId}`);
-        dirData.project = validProjectId;
+        try {
+          // Konvertera projektet-ID till ett nummer och använd det direkt
+          const currentProjectId = parseInt(projectId, 10);
+          
+          // Validera att vi har ett giltigt projekt-ID som är större än 0
+          if (!isNaN(currentProjectId) && currentProjectId > 0) {
+            console.log(`Kopplar mapp till aktuellt projekt med ID ${currentProjectId}`);
+            dirData.project = currentProjectId;
+          } else {
+            // Fallback om projekt-ID är ogiltigt
+            console.warn('Ogiltigt projekt-ID:', projectId);
+            dirData.project = 1; // Använd projekt 1 som fallback
+          }
+        } catch (error) {
+          console.error('Kunde inte tolka projekt-ID:', projectId);
+          // Fallback till projekt 1 om vi inte kan tolka ID:et
+          dirData.project = 1;
+        }
       } else {
         // Ta bort project-attributet helt istället för att sätta det till null
         if ('project' in dirData) {
