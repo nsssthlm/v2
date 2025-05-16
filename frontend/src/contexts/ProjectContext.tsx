@@ -9,7 +9,7 @@ export interface Project {
   // Här kan vi lägga till fler fält som är relevanta för projekt i framtiden
 }
 
-// Standardprojekt för nya användare
+// Standardprojekt som är synkroniserade med databasen
 const defaultProjects: Project[] = [
   {
     id: '1',
@@ -17,8 +17,12 @@ const defaultProjects: Project[] = [
     description: 'Ett testprojekt',
     endDate: '2026-12-31'
   },
-  // Ta bort projektet med ID 2 som inte finns i databasen
-  // Istället kommer vi att lägga till nya projekt via API-et i framtiden
+  {
+    id: '2',
+    name: 'Nya Slussen',
+    description: 'Ombyggnad av Slussen i Stockholm',
+    endDate: '2025-06-30'
+  }
 ];
 
 // Kontexttyp
