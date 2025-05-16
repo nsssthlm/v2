@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Box, 
-  Typography, 
   IconButton, 
   Button, 
   Input, 
@@ -21,61 +20,16 @@ import {
   DialogContent,
   DialogActions
 } from '@mui/joy';
-import { useLocation, Link } from 'react-router-dom';
-
-// Typ för projektdata
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  endDate: string;
-}
-
-// Hjälpfunktion för att hämta sidtitel från URL
-const getPageTitle = (pathname: string): string => {
-  const path = pathname.split('/')[1] || 'dashboard';
-  
-  const titles: { [key: string]: string } = {
-    '': 'Dashboard',
-    'dashboard': 'Dashboard',
-    'planning': 'Planering',
-    'communication': 'Kommunikation',
-    '3dviewer': '3D Viewer',
-    'vault': 'Vault',
-    'folders': 'Mappar'
-  };
-  
-  return titles[path] || 'Sida';
-};
+import { useProject, Project } from '../../contexts/ProjectContext';
 
 const TopMenu: React.FC = () => {
-  const location = useLocation();
   const [searchText, setSearchText] = useState('');
   
-  // Projektrelaterade states
-  const [currentProject, setCurrentProject] = useState<Project>({
-    id: '1',
-    name: 'Globen',
-    description: 'Renoveringsprojekt för Globen arena',
-    endDate: '2026-12-31'
-  });
+  // Använd projektkontext istället för lokala states
+  const { currentProject, setCurrentProject, projects, addProject } = useProject();
   
   // Tom logokomponent (borttagen enligt design)
   const LogoComponent = () => null;
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: '1',
-      name: 'Globen',
-      description: 'Renoveringsprojekt för Globen arena',
-      endDate: '2026-12-31'
-    },
-    {
-      id: '2',
-      name: 'Nya Slussen',
-      description: 'Ombyggnad av Slussen i Stockholm',
-      endDate: '2025-06-30'
-    }
-  ]);
 
   // Meny för projektval
   const [projectMenuAnchor, setProjectMenuAnchor] = useState<HTMLElement | null>(null);
@@ -92,9 +46,6 @@ const TopMenu: React.FC = () => {
   // Modal för att bjuda in användare
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  
-  // Hämta sidtitel från URL
-  const pageTitle = getPageTitle(location.pathname);
   
   // Hantera projektmeny
   const handleProjectMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -115,8 +66,7 @@ const TopMenu: React.FC = () => {
     const id = `project-${Date.now()}`;
     const createdProject = { id, ...newProject };
     
-    setProjects([...projects, createdProject]);
-    setCurrentProject(createdProject);
+    addProject(createdProject);
     setNewProjectModalOpen(false);
     setNewProject({ name: '', description: '', endDate: '' });
   };
@@ -142,57 +92,65 @@ const TopMenu: React.FC = () => {
         height: '48px'
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+      {/* Vänster del - tom */}
+      <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
         <LogoComponent />
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mx: 1 }}>
-          <Button
-            variant="plain"
-            color="neutral"
-            endDecorator={<span>▼</span>}
-            onClick={handleProjectMenuClick}
-            sx={{ fontWeight: 'bold' }}
-          >
-            {currentProject.name}
-          </Button>
-          
-          <Menu
-            anchorEl={projectMenuAnchor}
-            open={openProjectMenu}
-            onClose={handleProjectMenuClose}
-            placement="bottom-start"
-          >
-            {projects.map((project) => (
-              <MenuItem 
-                key={project.id}
-                selected={project.id === currentProject.id}
-                onClick={() => handleProjectSelect(project)}
-              >
-                {project.name}
-              </MenuItem>
-            ))}
-            <Divider />
-            <MenuItem onClick={() => {
-              handleProjectMenuClose();
-              setNewProjectModalOpen(true);
-            }}>
-              <ListItemDecorator>+</ListItemDecorator>
-              Skapa nytt projekt
-            </MenuItem>
-          </Menu>
-          
-          <IconButton 
-            size="sm" 
-            variant="plain" 
-            color="neutral"
-            onClick={() => setNewProjectModalOpen(true)}
-          >
-            <span>+</span>
-          </IconButton>
-        </Box>
       </Box>
       
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      {/* Mitten - projektväljare */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '34%'
+      }}>
+        <Button
+          variant="plain"
+          color="neutral"
+          endDecorator={<span>▼</span>}
+          onClick={handleProjectMenuClick}
+          sx={{ fontWeight: 'bold' }}
+        >
+          {currentProject.name}
+        </Button>
+        
+        <Menu
+          anchorEl={projectMenuAnchor}
+          open={openProjectMenu}
+          onClose={handleProjectMenuClose}
+          placement="bottom-start"
+        >
+          {projects.map((project) => (
+            <MenuItem 
+              key={project.id}
+              selected={project.id === currentProject.id}
+              onClick={() => handleProjectSelect(project)}
+            >
+              {project.name}
+            </MenuItem>
+          ))}
+          <Divider />
+          <MenuItem onClick={() => {
+            handleProjectMenuClose();
+            setNewProjectModalOpen(true);
+          }}>
+            <ListItemDecorator>+</ListItemDecorator>
+            Skapa nytt projekt
+          </MenuItem>
+        </Menu>
+        
+        <IconButton 
+          size="sm" 
+          variant="plain" 
+          color="neutral"
+          onClick={() => setNewProjectModalOpen(true)}
+        >
+          <span>+</span>
+        </IconButton>
+      </Box>
+      
+      {/* Höger del - sök och ikoner */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '33%', justifyContent: 'flex-end' }}>
         <Input
           size="sm"
           placeholder="Sök..."

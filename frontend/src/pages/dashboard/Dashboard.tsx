@@ -1,11 +1,33 @@
-import { Box, Typography, Grid, Card } from '@mui/joy';
+import { Box, Typography, Grid, Card, Divider } from '@mui/joy';
+import { useProject } from '../../contexts/ProjectContext';
 
 const Dashboard = () => {
+  const { currentProject } = useProject();
+  
   return (
     <Box>
-      <Typography level="h1" component="h1" sx={{ mb: 4 }}>
+      <Typography level="h1" component="h1" sx={{ mb: 2 }}>
         Dashboard
       </Typography>
+      
+      {/* Aktuellt projekt-information */}
+      <Card variant="outlined" sx={{ mb: 4, p: 2 }}>
+        <Typography level="h2" component="h2">
+          {currentProject.name}
+        </Typography>
+        <Typography level="body-md" sx={{ mb: 2 }}>
+          {currentProject.description}
+        </Typography>
+        <Divider />
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+          <Typography level="body-sm">
+            Projektslut: {new Date(currentProject.endDate).toLocaleDateString()}
+          </Typography>
+          <Typography level="body-sm" color="primary">
+            Projekt-ID: {currentProject.id}
+          </Typography>
+        </Box>
+      </Card>
 
       <Grid container spacing={3}>
         {/* Project Summary */}
