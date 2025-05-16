@@ -95,13 +95,8 @@ const FileSystemNode = ({
         onClick={(e) => {
           e.stopPropagation();
           if (isFolder) {
+            // Bara expandera/kollapsa mappen i sidofältet
             toggleFolder(node.id);
-            
-            // Bara navigera till mappens sida om den inte har några barn (är lägst i hierarkin)
-            const hasChildren = filesystemNodes.some(n => n.parent_id === node.id);
-            if (node.slug && !hasChildren) {
-              window.location.href = `/folders/${node.slug}`;
-            }
           }
         }}
         onMouseOver={(e) => {
@@ -131,30 +126,41 @@ const FileSystemNode = ({
           </svg>
         </span>
         
-        {/* Mappnamn */}
-        <span style={{
-          fontSize: '0.875rem',
-          display: 'inline-block',
-          fontWeight: 'normal',
-          whiteSpace: 'nowrap',
-          flexGrow: 1
-        }}>
+        {/* Mappnamn - klickbart för att navigera till mappens innehåll */}
+        <span 
+          style={{
+            fontSize: '0.875rem',
+            display: 'inline-block',
+            fontWeight: 'normal',
+            whiteSpace: 'nowrap',
+            flexGrow: 1,
+            cursor: isFolder && node.slug ? 'pointer' : 'default',
+            color: isFolder && node.slug ? '#007934' : 'inherit', // SEB grön färg för klickbara mappar
+            padding: '2px 4px',
+            borderRadius: '3px'
+          }}
+          onClick={(e) => {
+            if (isFolder && node.slug) {
+              e.stopPropagation(); // Förhindra att hela raden får click-eventet
+              // Navigera direkt till mappens sida
+              window.location.href = `/folders/${node.slug}`;
+            }
+          }}
+          onMouseOver={(e) => {
+            if (isFolder && node.slug) {
+              e.stopPropagation();
+              e.currentTarget.style.backgroundColor = '#e0f2e9'; // Ljusare SEB grön vid hover
+            }
+          }}
+          onMouseOut={(e) => {
+            if (isFolder && node.slug) {
+              e.stopPropagation();
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
+          }}
+          title={isFolder && node.slug ? "Klicka för att öppna mappen" : ""}
+        >
           {node.name}
-          
-          {/* Dold knapp för att navigera till mappen */}
-          {isFolder && node.slug && (
-            <div style={{ display: 'none' }}>
-              <a 
-                href={`/folders/${node.slug}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  // Navigera till den interna sidan
-                  window.location.href = `/folders/${node.slug}`;
-                }}
-              />
-            </div>
-          )}
         </span>
       
         {/* Plusknapp - nu inom namnspannet men med stopPropagation för att undvika hoverproblem*/}
