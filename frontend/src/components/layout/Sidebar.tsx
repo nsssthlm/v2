@@ -59,7 +59,7 @@ const FileSystemNode = ({
   const children = filesystemNodes.filter(n => n.parent_id === node.id);
   
   return (
-    <div className="folder-node" style={{ position: 'relative', marginBottom: '4px', width: '100%' }}>
+    <div className="folder-node" style={{ position: 'relative', marginBottom: '4px', width: '100%', minWidth: 'max-content' }}>
       {/* L-streck för hierarkin */}
       {level > 0 && (
         <div style={{
@@ -83,6 +83,7 @@ const FileSystemNode = ({
           paddingTop: '4px',
           paddingBottom: '4px',
           width: '100%',
+          minWidth: 'max-content',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
@@ -670,8 +671,13 @@ const Sidebar = () => {
       </Box>
       
       {/* Main navigation menu */}
-      <Box sx={{ flexGrow: 1, overflowY: 'auto', px: 1.5 }}>
-        <List size="sm" sx={{ '--ListItem-radius': '8px' }}>
+      <Box sx={{ 
+        flexGrow: 1, 
+        overflowY: 'auto', 
+        overflowX: 'auto', // Tillåt horisontell scrollning
+        px: 1.5 
+      }}>
+        <List size="sm" sx={{ '--ListItem-radius': '8px', minWidth: 'max-content' }}>
           {mainMenuItems.map((item) => (
             <Box key={item.path}>
               <ListItem
