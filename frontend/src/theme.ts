@@ -89,6 +89,9 @@ const theme = extendTheme({
         root: {
           borderRadius: '4px',
           fontWeight: 600,
+          '&:hover': {
+            backgroundColor: '#00672d', // Mörkare SEB-grön vid hover
+          },
         },
       },
     },
@@ -96,6 +99,21 @@ const theme = extendTheme({
       styleOverrides: {
         root: {
           borderRadius: '4px',
+        },
+      },
+    },
+    JoyListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#e0f2e9', // Ljusare SEB-grön vid hover
+          },
+          '&.Mui-selected': {
+            backgroundColor: '#e0f2e9', // Ljusare SEB-grön för valda alternativ
+            '&:hover': {
+              backgroundColor: '#b3dcc8', // Något mörkare SEB-grön vid hover på valda alternativ
+            },
+          },
         },
       },
     },

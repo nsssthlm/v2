@@ -602,7 +602,7 @@ const Sidebar = () => {
                   }
                 >
                   {item.icon && (
-                    <Box sx={{ mr: 1.5, color: isActive(item.path) ? 'primary.500' : 'neutral.500' }}>
+                    <Box sx={{ mr: 1.5, color: isActive(item.path) ? '#007934' : 'neutral.500' }}>
                       {item.icon}
                     </Box>
                   )}
@@ -616,7 +616,7 @@ const Sidebar = () => {
                       px: 0.8, 
                       py: 0.1, 
                       borderRadius: 8, 
-                      bgcolor: 'primary.100',
+                      bgcolor: '#e0f2e9', // Ljusare SEB grön
                       fontWeight: 'bold'
                     }}>
                       {item.badge}
@@ -642,7 +642,7 @@ const Sidebar = () => {
                       sx={{
                         mb: 0.5,
                         ...(isActive(subItem.path) && {
-                          bgcolor: 'primary.50',
+                          bgcolor: '#e0f2e9', // Ljusare SEB grön
                         })
                       }}
                     >
