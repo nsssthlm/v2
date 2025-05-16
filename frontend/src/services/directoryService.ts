@@ -28,14 +28,24 @@ const directoryService = {
   // Hämta alla directorys för sidebar, filtrerade på projekt
   getSidebarDirectories: async (projectId?: string): Promise<ApiDirectory[]> => {
     try {
+      // Validera projekt-ID först - bara numeriska värden fungerar med backend
+      let validProjectId = projectId;
+      
+      // Om det är ett icke-numeriskt ID, konvertera det till ett giltigt ID
+      if (projectId && isNaN(parseInt(projectId, 10))) {
+        console.warn('Ogiltigt projekt-ID format i getSidebarDirectories:', projectId);
+        // Använd fallback till projekt 1 (första projektet) - detta är viktigt för kompatibilitet med backend
+        validProjectId = '1';
+      }
+      
       // Skapa params objekt baserat på om vi har ett projektId eller inte
       const params: Record<string, string> = { 
         is_sidebar: 'true' 
       };
       
-      // Lägg till projektfiltrering om projektId är angivet
-      if (projectId) {
-        params.project = projectId;
+      // Lägg till projektfiltrering om projektId är angivet och giltigt
+      if (validProjectId) {
+        params.project = validProjectId;
       }
       
       // Försök med vanlig proxy-anslutning

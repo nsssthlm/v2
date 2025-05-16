@@ -71,14 +71,20 @@ const TopMenu: React.FC = () => {
     }
   };
   
-  // Hantera nytt projekt
-  const handleNewProjectSubmit = () => {
-    const id = `project-${Date.now()}`;
-    const createdProject = { id, ...newProject };
-    
-    addProject(createdProject);
-    setNewProjectModalOpen(false);
-    setNewProject({ name: '', description: '', endDate: '' });
+  // Hantera nytt projekt - skapa med format som backend förväntar sig
+  const handleNewProjectSubmit = async () => {
+    try {
+      // Skapa bara projekt med numeriska ID som fungerar med backend
+      // Detta är en temporär lösning - i framtiden bör vi använda API för att skapa projekt
+      alert('Funktionen att skapa nya projekt är inte helt implementerad ännu. Endast de befintliga projekten är tillgängliga.');
+      
+      // Stäng formuläret
+      setNewProjectModalOpen(false);
+      setNewProject({ name: '', description: '', endDate: '' });
+    } catch (error) {
+      console.error('Kunde inte skapa nytt projekt:', error);
+      alert('Kunde inte skapa nytt projekt. Försök igen senare.');
+    }
   };
   
   // Hantera inbjudan
