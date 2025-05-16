@@ -95,14 +95,16 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     }
   };
 
-  // Lägg till ett nytt projekt - inaktiverat tills vi har en korrekt backend-integration
+  // Lägg till ett nytt projekt till projektkontexten
   const addProject = (project: Project) => {
-    // Vi tillåter inte längre att projekt läggs till direkt i frontenden
-    // eftersom de måste synkroniseras med backend
-    console.warn('Funktion för att lägga till projekt är inaktiverad.');
+    // Lägg till projektet i listan
+    const updatedProjects = [...projects, project];
+    setProjects(updatedProjects);
     
-    // Ignorera tillägg och fortsätt använda standardprojekten
-    return;
+    // Byt automatiskt till det nya projektet
+    setCurrentProject(project);
+    
+    console.log('Nytt projekt tillagt:', project);
   };
 
   // Kontextens värde

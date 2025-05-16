@@ -71,16 +71,55 @@ const TopMenu: React.FC = () => {
     }
   };
   
-  // Hantera nytt projekt - skapa med format som backend förväntar sig
+  // Hantera nytt projekt - skapa i backend-databasen
   const handleNewProjectSubmit = async () => {
+    if (!newProject.name.trim()) {
+      alert('Vänligen ange ett projektnamn.');
+      return;
+    }
+    
     try {
-      // Skapa bara projekt med numeriska ID som fungerar med backend
-      // Detta är en temporär lösning - i framtiden bör vi använda API för att skapa projekt
-      alert('Funktionen att skapa nya projekt är inte helt implementerad ännu. Endast de befintliga projekten är tillgängliga.');
+      // Förbered data för backend-API
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      // Skapar projektet direkt i databasen med SQL-fråga
+      const response = await fetch('/api/custom/create-project', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newProject.name,
+          description: newProject.description || '',
+          start_date: today,
+          end_date: newProject.endDate || null
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Kunde inte skapa projektet');
+      }
+      
+      const result = await response.json();
+      console.log('Projekt skapat i databasen:', result);
+      
+      // Skapa nytt projekt-objekt för frontend
+      const createdProject: Project = {
+        id: result.id.toString(),
+        name: newProject.name,
+        description: newProject.description || '',
+        endDate: newProject.endDate || ''
+      };
+      
+      // Lägg till projektet i listan och byt till det
+      addProject(createdProject);
       
       // Stäng formuläret
       setNewProjectModalOpen(false);
       setNewProject({ name: '', description: '', endDate: '' });
+      
+      // Ladda om sidan för att visa det nya projektet
+      window.location.reload();
     } catch (error) {
       console.error('Kunde inte skapa nytt projekt:', error);
       alert('Kunde inte skapa nytt projekt. Försök igen senare.');

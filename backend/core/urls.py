@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
+from . import custom_views
 
 router = DefaultRouter()
 router.register('users', views.UserViewSet)
@@ -11,4 +12,6 @@ router.register('time-reports', views.TimeReportViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    # Anpassad vy för att skapa projekt utan autentisering (för utveckling)
+    path('custom/create-project', custom_views.create_project, name='create-project'),
 ]
