@@ -123,6 +123,7 @@ const FolderPage = () => {
       {/* Undermappar */}
       {folderData.subfolders.length > 0 && (
         <Box sx={{ mb: 4 }}>
+          <Typography level="h3" sx={{ mb: 2 }}>Undermappar</Typography>
           <List>
             {folderData.subfolders.map((subfolder) => (
               <ListItem key={subfolder.slug}>
