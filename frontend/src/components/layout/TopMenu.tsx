@@ -60,15 +60,8 @@ const TopMenu: React.FC = () => {
     endDate: '2026-12-31'
   });
   
-  // Logo komponent
-  const LogoComponent = () => (
-    <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#4361EE">
-        <rect width="24" height="24" rx="6" />
-        <text x="6" y="17" fontFamily="Arial" fontSize="14" fontWeight="bold" fill="white">V</text>
-      </svg>
-    </Link>
-  );
+  // Tom logokomponent (borttagen enligt design)
+  const LogoComponent = () => null;
   const [projects, setProjects] = useState<Project[]>([
     {
       id: '1',
