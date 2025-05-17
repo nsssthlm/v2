@@ -23,6 +23,9 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import directoryService, { DirectoryInput } from '../../services/directoryService';
 import { useProject } from '../../contexts/ProjectContext';
+// Importera MUI ikoner för menyn 
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import MessageIcon from '@mui/icons-material/Message';
 
 // Menu items for the sidebar
 const menuItems = [
