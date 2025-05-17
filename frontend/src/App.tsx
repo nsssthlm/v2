@@ -21,8 +21,16 @@ import FolderListPage from './pages/folders/FolderListPage';
 
 // Nu använder vi det importerade SEB-temat istället för detta
 
+
+// The main App component doesn't access context directly
 function App() {
+  // Handle login success - can be empty now as AuthContext handles the state
+  const handleLoginSuccess = () => {
+    console.log('Login successful');
+  };
+
   return (
+
     <CssVarsProvider theme={theme} defaultMode="light">
       <CssBaseline />
       <ProjectProvider>
@@ -61,6 +69,7 @@ function App() {
         </BrowserRouter>
       </ProjectProvider>
     </CssVarsProvider>
+
   );
 }
 

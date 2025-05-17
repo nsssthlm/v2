@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF-Hanterare</title>
+  <!-- PDF.js bibliotek -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --primary-light: #93c5fd;
+      --secondary: #9ca3af;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #06b6d4;
+      --white: #ffffff;
+      --background: #f3f4f6;
+      --text: #111827;
+      --text-light: #6b7280;
+      --border: #d1d5db;
+      --border-dark: #9ca3af;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 0.375rem;
+      --max-width: 1280px;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: var(--font-family);
+      color: var(--text);
+      background-color: var(--background);
+      line-height: 1.5;
+    }
+    
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    
+    header {
+      background-color: var(--white);
+      box-shadow: var(--shadow);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    
+    .login-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    .user-info {
+      margin-right: 1rem;
+      font-weight: 500;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      background-color: var(--primary);
+      color: var(--white);
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      text-decoration: none;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--primary-light);
+    }
+    
+    .btn-secondary {
+      background-color: var(--white);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--background);
+      border-color: var(--border-dark);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger);
+    }
+    
+    .btn-danger:hover {
+      background-color: #b91c1c;
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    main {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1rem;
+      padding: 1.5rem 0;
+    }
+    
+    .pdf-list {
+      background-color: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      width: 100%;
+    }
+    
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .list-header h2 {
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .actions-container {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .pdf-list-items {
+      width: 100%;
+      overflow-x: auto;
+    }
+    
+    /* PDF Table Style */
+    .pdf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    
+    .pdf-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background-color: var(--background);
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+    
+    .pdf-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    
+    .pdf-table tbody tr:hover {
+      background-color: var(--background);
+    }
+    
+    .pdf-file-icon {
+      color: #e74c3c;
+      margin-right: 0.25rem;
+    }
+    
+    .pdf-filename {
+      font-weight: 500;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    
+    .pdf-filename:hover {
+      text-decoration: underline;
+    }
+    
+    .pdf-actions {
+      display: flex;
+      gap: 0.25rem;
+      justify-content: flex-end;
+    }
+    
+    .action-icon {
+      border: none;
+      background: none;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: var(--radius);
+      transition: background-color 0.2s;
+    }
+    
+    .action-icon:hover {
+      background-color: var(--border);
+      color: var(--text);
+    }
+    
+    .delete-icon {
+      color: var(--danger);
+    }
+    
+    .empty-list {
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--text-light);
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+    
+    .search-box {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background-color: var(--white);
+    }
+    
+    .search-icon {
+      padding: 0.5rem 0.75rem;
+      color: var(--text-light);
+    }
+    
+    .search-input {
+      flex: 1;
+      border: none;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .search-input:focus {
+      outline: none;
+    }
+    
+    .filter-select {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: var(--white);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    
+    .pdf-viewer {
+      background-color: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 150px);
+      min-height: 600px;
+    }
+    
+    .viewer-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .pdf-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .page-info {
+      margin: 0 0.5rem;
+    }
+    
+    .viewer-container {
+      flex: 1;
+      overflow: auto;
+      background-color: #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 1rem;
+    }
+    
+    #pdf-canvas {
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .viewer-placeholder {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: var(--text-light);
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .icon-placeholder {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    
+    /* Modals */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s linear 0.2s, opacity 0.2s;
+    }
+    
+    .modal.active {
+      visibility: visible;
+      opacity: 1;
+      transition-delay: 0s;
+    }
+    
+    .modal-content {
+      background-color: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+    
+    .modal-body {
+      padding: 1rem;
+    }
+    
+    .modal-footer {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-family);
+      font-size: 1rem;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    
+    .form-error {
+      color: var(--danger);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    
+    /* File Upload */
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+    
+    .upload-area:hover,
+    .upload-area.highlight {
+      border-color: var(--primary);
+    }
+    
+    .upload-area.has-file {
+      border-color: var(--success);
+      background-color: #f0fdf4;
+    }
+    
+    .upload-icon {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    /* Alerts */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+    
+    .alert-success {
+      background-color: #ecfdf5;
+      border: 1px solid #10b981;
+      color: #047857;
+    }
+    
+    .alert-danger {
+      background-color: #fef2f2;
+      border: 1px solid #ef4444;
+      color: #b91c1c;
+    }
+    
+    .alert-info {
+      background-color: #f0f9ff;
+      border: 1px solid #0ea5e9;
+      color: #0369a1;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      vertical-align: text-bottom;
+      border: 0.25rem solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spinner 0.75s linear infinite;
+    }
+    
+    @keyframes spinner {
+      to { transform: rotate(360deg); }
+    }
+    
+    .spinner-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      
+      .pdf-viewer {
+        margin-top: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal active">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Logga in</h3>
+      </div>
+      <div class="modal-body">
+        <div id="login-alert" class="alert alert-danger" style="display: none;"></div>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="username">E-post:</label>
+            <input type="email" id="username" class="form-control" value="user@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Lösenord:</label>
+            <input type="password" id="password" class="form-control" value="password" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="login-btn" class="btn">Logga in</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Upload Modal -->
+  <div id="upload-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Ladda upp PDF</h3>
+        <button type="button" class="modal-close" id="upload-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="upload-alert" class="alert alert-danger" style="display: none;"></div>
+        <form id="upload-form">
+          <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📄</div>
+            <p>Dra och släpp en PDF-fil här eller klicka för att välja</p>
+            <input type="file" id="file-input" class="file-input" accept="application/pdf">
+          </div>
+          <div class="form-group">
+            <label for="title">Titel:</label>
+            <input type="text" id="title" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="description">Beskrivning:</label>
+            <textarea id="description" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="folder">Mapp:</label>
+            <select id="folder" class="form-control">
+              <option value="root">Huvudmapp</option>
+              <option value="documents">Dokument</option>
+              <option value="reports">Rapporter</option>
+              <option value="contracts">Kontrakt</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="upload-cancel" class="btn btn-secondary">Avbryt</button>
+        <button type="button" id="upload-submit" class="btn">Ladda upp</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Bekräfta borttagning</h3>
+        <button type="button" class="modal-close" id="delete-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Är du säker på att du vill ta bort denna PDF-fil? Detta kan inte ångras.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="delete-cancel" class="btn btn-secondary">Avbryt</button>
+        <button type="button" id="delete-confirm" class="btn btn-danger">Ta bort</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">PDF-Hanterare</div>
+        <div class="login-info" style="display: none;">
+          <div class="user-info">Inloggad som: <span id="user-display"></span></div>
+          <button type="button" id="logout-btn" class="btn btn-secondary">Logga ut</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <div class="container">
+    <main id="main-content" style="display: none;">
+      <div class="search-container">
+        <div class="search-box">
+          <div class="search-icon">🔍</div>
+          <input type="text" id="search-input" class="search-input" placeholder="Sök efter fil...">
+        </div>
+        <select id="version-filter" class="filter-select">
+          <option value="all">Alla versioner</option>
+          <option value="latest">Senaste versioner</option>
+        </select>
+        <div class="actions-container">
+          <button type="button" id="new-pdf-btn" class="btn">Ladda upp</button>
+          <button type="button" id="delete-folder-btn" class="btn btn-danger">Ta bort mapp</button>
+        </div>
+      </div>
+
+      <section class="pdf-list">
+        <div class="pdf-list-items" id="pdf-list-items">
+          <table class="pdf-table">
+            <thead>
+              <tr>
+                <th>Namn</th>
+                <th>Version</th>
+                <th>Beskrivning</th>
+                <th>Uppladdad</th>
+                <th>Uppladdad av</th>
+                <th>Nummer</th>
+                <th>Status</th>
+                <th>Annat</th>
+                <th>Åtgärder</th>
+              </tr>
+            </thead>
+            <tbody id="pdf-table-body">
+              <!-- PDF-filer kommer att läggas till här dynamiskt -->
+              <tr>
+                <td colspan="9" class="empty-list">
+                  <p>Inga PDF-filer hittades.</p>
+                  <p>Klicka på "Ladda upp" för att ladda upp din första fil.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <!-- PDF Viewer Dialog -->
+  <div id="pdf-view-modal" class="modal">
+    <div class="modal-content" style="width: 90%; max-width: 900px; height: 90vh; max-height: 800px; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="pdf-modal-title">PDF Visare</h3>
+        <button type="button" class="modal-close" id="pdf-view-close">&times;</button>
+      </div>
+      <div class="viewer-header" style="padding: 0.5rem 1rem;">
+        <div class="pdf-controls">
+          <button type="button" id="prev-page" class="btn btn-secondary btn-sm" disabled>Föregående</button>
+          <span id="page-info" class="page-info">Sida 0 av 0</span>
+          <button type="button" id="next-page" class="btn btn-secondary btn-sm" disabled>Nästa</button>
+        </div>
+      </div>
+      <div class="viewer-container" id="viewer-container" style="flex: 1; overflow: auto; background-color: #ddd; padding: 1rem;">
+        <div class="viewer-placeholder">
+          <div class="icon-placeholder">📄</div>
+          <h3>Laddar PDF...</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // PDF.js konfiguration
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    
+    // DOM-element
+    const loginModal = document.getElementById('login-modal');
+    const loginForm = document.getElementById('login-form');
+    const loginBtn = document.getElementById('login-btn');
+    const loginAlert = document.getElementById('login-alert');
+    const logoutBtn = document.getElementById('logout-btn');
+    const loginInfo = document.querySelector('.login-info');
+    const userDisplay = document.getElementById('user-display');
+    const mainContent = document.getElementById('main-content');
+    
+    const uploadModal = document.getElementById('upload-modal');
+    const uploadForm = document.getElementById('upload-form');
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const folderInput = document.getElementById('folder');
+    const uploadSubmit = document.getElementById('upload-submit');
+    const uploadCancel = document.getElementById('upload-cancel');
+    const uploadClose = document.getElementById('upload-close');
+    const uploadAlert = document.getElementById('upload-alert');
+    
+    const deleteModal = document.getElementById('delete-modal');
+    const deleteClose = document.getElementById('delete-close');
+    const deleteCancel = document.getElementById('delete-cancel');
+    const deleteConfirm = document.getElementById('delete-confirm');
+    
+    const newPdfBtn = document.getElementById('new-pdf-btn');
+    const pdfListItems = document.getElementById('pdf-list-items');
+    
+    const viewerTitle = document.getElementById('viewer-title');
+    const viewerContainer = document.getElementById('viewer-container');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageInfo = document.getElementById('page-info');
+    
+    // Globala variabler
+    let currentUser = null;
+    let currentPdfFile = null;
+    let currentPdf = null;
+    let currentPage = 1;
+    let pdfFiles = [];
+    let pdfDoc = null;
+    let pageRendering = false;
+    let pageNumPending = null;
+    let scale = 1.0;
+    let pdfDeleting = null;
+    
+    // Variabler för zoomning och panorering
+    let isDragging = false;
+    let startX, startY;
+    let viewportPosition = { x: 0, y: 0 };
+    let minScale = 0.5;
+    let maxScale = 3.0;
+    let pdfRenderScale = 1.0; // Den initiala skalan som används vid rendering
+    
+    // Kontrollera inloggningsstatus vid sidladdning
+    document.addEventListener('DOMContentLoaded', checkLoginStatus);
+    
+    // Event Listeners
+    loginBtn.addEventListener('click', login);
+    logoutBtn.addEventListener('click', logout);
+    newPdfBtn.addEventListener('click', openUploadModal);
+    uploadCancel.addEventListener('click', closeUploadModal);
+    uploadClose.addEventListener('click', closeUploadModal);
+    uploadSubmit.addEventListener('click', uploadPdf);
+    deleteClose.addEventListener('click', closeDeleteModal);
+    deleteCancel.addEventListener('click', closeDeleteModal);
+    deleteConfirm.addEventListener('click', confirmDelete);
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderPage(currentPage);
+      }
+    });
+    nextPageBtn.addEventListener('click', () => {
+      if (pdfDoc && currentPage < pdfDoc.numPages) {
+        currentPage++;
+        renderPage(currentPage);
+      }
+    });
+    
+    // Kontrollera inloggningsstatus
+    async function checkLoginStatus() {
+      try {
+        const response = await fetch('/api/user');
+        
+        if (response.ok) {
+          // Användaren är inloggad
+          const user = await response.json();
+          loginSuccess(user);
+        } else {
+          // Användaren är inte inloggad
+          showLoginModal();
+        }
+      } catch (error) {
+        console.error('Fel vid kontroll av inloggningsstatus:', error);
+        showLoginModal();
+      }
+    }
+    
+    // Visa login-modal
+    function showLoginModal() {
+      loginModal.classList.add('active');
+      mainContent.style.display = 'none';
+      loginInfo.style.display = 'none';
+    }
+    
+    // Logga in
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        showLoginError('Ange både e-post och lösenord');
+        return;
+      }
+      
+      try {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="spinner"></span> Loggar in...';
+        loginAlert.style.display = 'none';
+        
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          loginSuccess(data.user);
+        } else {
+          showLoginError(data.message || 'Inloggning misslyckades');
+        }
+      } catch (error) {
+        console.error('Fel vid inloggning:', error);
+        showLoginError('Ett fel uppstod, försök igen');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Logga in';
+      }
+    }
+    
+    // Visa inloggningsfel
+    function showLoginError(message) {
+      loginAlert.textContent = message;
+      loginAlert.style.display = 'block';
+    }
+    
+    // Vid lyckad inloggning
+    function loginSuccess(user) {
+      currentUser = user;
+      userDisplay.textContent = user.username;
+      loginModal.classList.remove('active');
+      mainContent.style.display = 'grid';
+      loginInfo.style.display = 'flex';
+      
+      // Hämta PDF-filer
+      loadPdfFiles();
+    }
+    
+    // Logga ut
+    async function logout() {
+      try {
+        await fetch('/api/logout', {
+          method: 'POST'
+        });
+        
+        currentUser = null;
+        showLoginModal();
+      } catch (error) {
+        console.error('Fel vid utloggning:', error);
+      }
+    }
+    
+    // Hämta PDF-filer
+    async function loadPdfFiles() {
+      try {
+        const response = await fetch('/api/pdfs');
+        
+        if (response.ok) {
+          const files = await response.json();
+          pdfFiles = files;
+          renderPdfList();
+        } else {
+          console.error('Fel vid hämtning av PDF-filer');
+        }
+      } catch (error) {
+        console.error('Fel vid hämtning av PDF-filer:', error);
+      }
+    }
+    
+    // Rendera PDF-listan
+    function renderPdfList() {
+      const tableBody = document.getElementById('pdf-table-body');
+      
+      if (pdfFiles.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty-list">
+              <p>Inga PDF-filer hittades.</p>
+              <p>Klicka på "Ladda upp" för att ladda upp din första fil.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tableBody.innerHTML = '';
+      
+      pdfFiles.forEach((pdf, index) => {
+        const uploadDate = new Date(pdf.uploadedAt).toLocaleDateString('sv-SE', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const row = document.createElement('tr');
+        row.setAttribute('data-id', pdf.id);
+        
+        row.innerHTML = `
+          <td>
+            <a href="#" class="pdf-filename" data-id="${pdf.id}">
+              <span class="pdf-file-icon">📄</span> ${pdf.filename}
+            </a>
+          </td>
+          <td>1</td>
+          <td>${pdf.description || 'Ingen beskrivning'}</td>
+          <td>${uploadDate}</td>
+          <td>${pdf.uploadedBy}</td>
+          <td>${90 - index}</td>
+          <td>-</td>
+          <td>-</td>
+          <td>
+            <div class="pdf-actions">
+              <button type="button" class="action-icon delete-icon" data-id="${pdf.id}" title="Ta bort">🗑️</button>
+            </div>
+          </td>
+        `;
+        
+        // Lägg till event listeners
+        const deleteBtn = row.querySelector('.delete-icon');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openDeleteModal(pdf.id);
+        });
+        
+        const pdfLink = row.querySelector('.pdf-filename');
+        pdfLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          openPdfModal(pdf);
+        });
+        
+        tableBody.appendChild(row);
+      });
+    }
+    
+    // Öppna PDF i ett modal-fönster
+    function openPdfModal(pdf) {
+      const pdfViewModal = document.getElementById('pdf-view-modal');
+      const pdfModalTitle = document.getElementById('pdf-modal-title');
+      const viewerContainer = document.getElementById('viewer-container');
+      
+      // Sätt titeln på modal-fönstret
+      pdfModalTitle.textContent = pdf.filename;
+      
+      // Återställ zoomning och panorering
+      scale = 1.0;
+      viewportPosition = { x: 0, y: 0 };
+      
+      // Visa modal-fönstret
+      pdfViewModal.classList.add('active');
+      
+      // Ladda PDF:en
+      openPdf(pdf).then(() => {
+        // Lägg till eventlyssnare för zoomning och panorering efter PDF har laddats
+        setupZoomAndPan(viewerContainer);
+      });
+      
+      // Lägg till stängningsfunktion
+      const closeBtn = document.getElementById('pdf-view-close');
+      closeBtn.onclick = () => {
+        pdfViewModal.classList.remove('active');
+        // Ta bort evenemangslyssnarna vid stängning
+        if (viewerContainer) {
+          viewerContainer.onwheel = null;
+          viewerContainer.onmousedown = null;
+          viewerContainer.onmousemove = null;
+          viewerContainer.onmouseup = null;
+          viewerContainer.onmouseleave = null;
+        }
+      };
+    }
+    
+    // Konfigurera zoom och panorering för PDF-visaren
+    function setupZoomAndPan(container) {
+      if (!container) {
+        console.error('Ingen container för zoomning hittades');
+        return;
+      }
+      
+      console.log('Konfigurerar zoom och panorering...');
+      
+      // Ta bort eventuella tidigare lyssnare först
+      container.onwheel = null;
+      container.onmousedown = null;
+      container.onmousemove = null;
+      container.onmouseup = null;
+      container.onmouseleave = null;
+      
+      // Hitta canvas-elementet
+      const canvas = document.getElementById('pdf-canvas');
+      if (!canvas) {
+        console.error('Inget canvas-element hittades för zoomning');
+        return;
+      }
+      
+      console.log('Canvas hittad, konfigurerar zoom-händelser');
+      
+      // CSS-baserad zoomning istället för renderPlot för bättre prestanda
+      canvas.style.transition = 'transform 0.1s ease-out'; // Smooth transition för zoom
+      
+      // Uppdatera canvas initialt
+      updateCanvasTransform(canvas);
+      
+      // Zooma med scrollhjulet när CTRL är nedtryckt - använd addEventListener istället för onwheel
+      container.addEventListener('wheel', function(e) {
+        console.log('Wheel event, ctrlKey:', e.ctrlKey);
+        
+        // Endast zooma om CTRL är nedtryckt
+        if (e.ctrlKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const oldScale = scale;
+          
+          // Ändra skalan baserat på scrollriktningen
+          if (e.deltaY < 0) {
+            scale = Math.min(maxScale, scale * 1.1); // Zooma in
+          } else {
+            scale = Math.max(minScale, scale / 1.1); // Zooma ut
+          }
+          
+          console.log('Ny skala:', scale);
+          
+          // Beräkna musposition relativt till containern
+          const rect = container.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          
+          // Justera viewportPosition så att musen förblir över samma punkt i dokumentet
+          const scaleFactor = scale / oldScale;
+          viewportPosition.x = mouseX - (mouseX - viewportPosition.x) * scaleFactor;
+          viewportPosition.y = mouseY - (mouseY - viewportPosition.y) * scaleFactor;
+          
+          // Uppdatera endast CSS transform istället för att rendera om PDF
+          updateCanvasTransform(canvas);
+          
+          // Uppdatera sidkontroller för att visa aktuell zoom-nivå
+          const pageInfo = document.getElementById('page-info');
+          if (pageInfo) {
+            pageInfo.textContent = `Sida ${currentPage} av ${pdfDoc ? pdfDoc.numPages : 0} (Zoom: ${Math.round(scale * 100)}%)`;
+          }
+        }
+      }, { passive: false });
+      
+      // Panorering med musklick och dra - använd addEventListener
+      container.addEventListener('mousedown', function(e) {
+        // Kontrollera att vi klickar på canvas eller dess förälder, inte på andra element
+        if (e.target === canvas || e.target === container || e.target.id === 'canvas-wrapper') {
+          console.log('Påbörjar dragning');
+          isDragging = true;
+          startX = e.clientX - viewportPosition.x;
+          startY = e.clientY - viewportPosition.y;
+          
+          // Ta bort övergångseffekten under dragning för bättre responsivitet
+          canvas.style.transition = 'none';
+          
+          container.style.cursor = 'grabbing';
+          e.preventDefault();
+        }
+      });
+      
+      container.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+          viewportPosition.x = e.clientX - startX;
+          viewportPosition.y = e.clientY - startY;
+          
+          // Uppdatera canvas-position
+          updateCanvasTransform(canvas);
+        }
+      });
+      
+      container.addEventListener('mouseup', function(e) {
+        if (isDragging) {
+          console.log('Avslutar dragning');
+          isDragging = false;
+          container.style.cursor = 'default';
+          
+          // Återställ övergångseffekten efter dragning
+          canvas.style.transition = 'transform 0.1s ease-out';
+        }
+      });
+      
+      container.addEventListener('mouseleave', function(e) {
+        if (isDragging) {
+          console.log('Musen lämnade området, avslutar dragning');
+          isDragging = false;
+          container.style.cursor = 'default';
+          
+          // Återställ övergångseffekten efter dragning
+          canvas.style.transition = 'transform 0.1s ease-out';
+        }
+      });
+    }
+    
+    // Uppdatera canvas-transformationen baserat på aktuell skala och position
+    function updateCanvasTransform(canvas) {
+      if (!canvas) return;
+      
+      // Apllicera både skalning och förflyttning i en transform
+      canvas.style.transform = `translate(${viewportPosition.x}px, ${viewportPosition.y}px) scale(${scale / pdfRenderScale})`;
+      canvas.style.transformOrigin = '0 0';
+    }
+    
+    // Öppna PDF
+    async function openPdf(pdf) {
+      currentPdf = pdf;
+      
+      // Visa laddningsindikator
+      const viewerContainer = document.getElementById('viewer-container');
+      viewerContainer.innerHTML = `
+        <div class="spinner-container">
+          <div class="spinner"></div>
+        </div>
+      `;
+      
+      try {
+        // Ladda PDF från server
+        console.log('Laddar PDF från URL:', pdf.fileUrl);
+        
+        // Se till att vi har en full URL för PDF-filen
+        let pdfUrl = pdf.fileUrl;
+        if (!pdfUrl.startsWith('http')) {
+          // Om det är en relativ sökväg, se till att vi har full URL
+          pdfUrl = window.location.origin + pdfUrl;
+        }
+        
+        console.log('Full PDF URL:', pdfUrl);
+        
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        
+        loadingTask.onProgress = function(progress) {
+          console.log('Laddningsstatus:', progress.loaded, 'av', (progress.total || '?'));
+        };
+        
+        pdfDoc = await loadingTask.promise;
+        console.log('PDF laddad, antal sidor:', pdfDoc.numPages);
+        
+        // Återställ sidnummer
+        currentPage = 1;
+        
+        // Uppdatera sidkontroller
+        updatePageControls();
+        
+        // Rendera första sidan
+        renderPage(currentPage);
+      } catch (error) {
+        console.error('Fel vid öppning av PDF:', error);
+        viewerContainer.innerHTML = `
+          <div class="viewer-placeholder">
+            <div class="icon-placeholder">❌</div>
+            <h3>Kunde inte ladda PDF</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+    
+    // Rendera en sida i PDF:en
+    function renderPage(num) {
+      if (!pdfDoc) {
+        console.error('Inget PDF-dokument laddat');
+        return;
+      }
+      
+      pageRendering = true;
+      
+      // Hämta referens till viewer-container
+      const viewerContainer = document.getElementById('viewer-container');
+      
+      // Visa laddningsindikator
+      let spinnerContainer = viewerContainer.querySelector('.spinner-container');
+      if (!spinnerContainer) {
+        spinnerContainer = document.createElement('div');
+        spinnerContainer.className = 'spinner-container';
+        spinnerContainer.innerHTML = '<div class="spinner"></div>';
+        viewerContainer.appendChild(spinnerContainer);
+      }
+      
+      // Hämta sidan
+      console.log('Hämtar sida', num, 'av', pdfDoc.numPages);
+      
+      pdfDoc.getPage(num).then(function(page) {
+        console.log('Sida hämtad, skapar canvas...');
+        
+        // Beräkna skala för att passa bredden
+        const containerWidth = viewerContainer.clientWidth - 40; // Ta hänsyn till padding
+        const viewport = page.getViewport({ scale: 1 });
+        
+        // Beräkna grundskalan för att passa containern - denna används endast för initial rendering
+        pdfRenderScale = containerWidth / viewport.width;
+        
+        // Vi använder alltid pdfRenderScale för renderingen, och hanterar zoom separerat
+        const scaledViewport = page.getViewport({ scale: pdfRenderScale });
+        
+        console.log('Beräknad skala:', pdfRenderScale, 'för containerWidth:', containerWidth);
+        
+        // Skapa canvas om det inte finns
+        let canvas = document.getElementById('pdf-canvas');
+        if (!canvas) {
+          canvas = document.createElement('canvas');
+          canvas.id = 'pdf-canvas';
+          
+          // Ta bort befintligt innehåll förutom spinner
+          const spinner = viewerContainer.querySelector('.spinner-container');
+          viewerContainer.innerHTML = '';
+          viewerContainer.appendChild(canvas);
+          if (spinner) {
+            viewerContainer.appendChild(spinner);
+          }
+        }
+        
+        // Applicera den aktuella transformationen för panorering
+        canvas.style.transform = `translate(${viewportPosition.x}px, ${viewportPosition.y}px)`;
+        canvas.style.transformOrigin = '0 0';
+        
+        // Lägg till ett wrapper-element om det inte finns, för korrekt scrollning
+        let canvasWrapper = document.getElementById('canvas-wrapper');
+        if (!canvasWrapper) {
+          canvasWrapper = document.createElement('div');
+          canvasWrapper.id = 'canvas-wrapper';
+          canvasWrapper.style.position = 'relative';
+          canvasWrapper.style.width = '100%';
+          canvasWrapper.style.height = '100%';
+          canvasWrapper.style.overflow = 'auto';
+          canvas.parentNode.replaceChild(canvasWrapper, canvas);
+          canvasWrapper.appendChild(canvas);
+        }
+        
+        const context = canvas.getContext('2d');
+        canvas.height = scaledViewport.height;
+        canvas.width = scaledViewport.width;
+        
+        // Ge canvas en lämplig stil för att stödja panorering
+        canvas.style.position = 'absolute';
+        canvas.style.cursor = 'grab';
+        
+        console.log('Canvas skapad, storlek:', canvas.width, 'x', canvas.height);
+        
+        // Rendera PDF-sidan
+        const renderContext = {
+          canvasContext: context,
+          viewport: scaledViewport
+        };
+        
+        console.log('Renderar sida...');
+        const renderTask = page.render(renderContext);
+        
+        // Vänta på att renderingen ska slutföras
+        renderTask.promise.then(function() {
+          console.log('Rendering klar');
+          pageRendering = false;
+          
+          // Ta bort laddningsindikator
+          const spinner = viewerContainer.querySelector('.spinner-container');
+          if (spinner) {
+            spinner.remove();
+          }
+          
+          // Om en sida är i kö, rendera den
+          if (pageNumPending !== null) {
+            renderPage(pageNumPending);
+            pageNumPending = null;
+          }
+        }).catch(function(error) {
+          console.error('Fel vid rendering av sida:', error);
+          pageRendering = false;
+        });
+        
+        // Uppdatera sidkontroller
+        updatePageControls();
+      }).catch(function(error) {
+        console.error('Fel vid hämtning av sida:', error);
+        pageRendering = false;
+        
+        // Ta bort laddningsindikator
+        const spinner = viewerContainer.querySelector('.spinner-container');
+        if (spinner) {
+          spinner.remove();
+        }
+        
+        viewerContainer.innerHTML = `
+          <div class="viewer-placeholder">
+            <div class="icon-placeholder">❌</div>
+            <h3>Kunde inte ladda sidan</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      });
+    }
+    
+    // Uppdatera sidkontroller
+    function updatePageControls() {
+      if (!pdfDoc) {
+        pageInfo.textContent = 'Sida 0 av 0';
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        return;
+      }
+      
+      pageInfo.textContent = `Sida ${currentPage} av ${pdfDoc.numPages}`;
+      prevPageBtn.disabled = currentPage <= 1;
+      nextPageBtn.disabled = currentPage >= pdfDoc.numPages;
+    }
+    
+    // Öppna uppladdningsmodal
+    function openUploadModal() {
+      // Återställ formuläret
+      uploadForm.reset();
+      uploadArea.classList.remove('has-file');
+      uploadArea.innerHTML = `
+        <div class="upload-icon">📄</div>
+        <p>Dra och släpp en PDF-fil här eller klicka för att välja</p>
+        <input type="file" id="file-input" class="file-input" accept="application/pdf">
+      `;
+      currentPdfFile = null;
+      
+      // Visa modalen
+      uploadModal.classList.add('active');
+      
+      // Lägg till event listeners
+      setupFileUpload();
+    }
+    
+    // Stäng uppladdningsmodal
+    function closeUploadModal() {
+      uploadModal.classList.remove('active');
+    }
+    
+    // Konfigurera filuppladdning
+    function setupFileUpload() {
+      const dropArea = document.getElementById('upload-area');
+      const fileInput = document.getElementById('file-input');
+      
+      // Förhindra standardbeteende för drag-och-släpp
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      // Markera drop area
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      // Avmarkera drop area
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      // Hantera drop
+      dropArea.addEventListener('drop', handleDrop, false);
+      
+      // Hantera klick
+      dropArea.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+      // Hantera fil-val
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+          handleFiles(fileInput.files);
+        }
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      function highlight() {
+        dropArea.classList.add('highlight');
+      }
+      
+      function unhighlight() {
+        dropArea.classList.remove('highlight');
+      }
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        handleFiles(files);
+      }
+      
+      function handleFiles(files) {
+        if (files.length) {
+          const file = files[0];
+          
+          if (file.type === 'application/pdf') {
+            currentPdfFile = file;
+            
+            // Uppdatera UI
+            dropArea.classList.add('has-file');
+            dropArea.innerHTML = `
+              <div class="upload-icon">✓</div>
+              <p><strong>${file.name}</strong></p>
+              <p>${formatFileSize(file.size)}</p>
+            `;
+            
+            // Sätt föreslagen titel baserat på filnamnet
+            titleInput.value = file.name.replace('.pdf', '');
+          } else {
+            uploadAlert.textContent = 'Endast PDF-filer tillåts';
+            uploadAlert.style.display = 'block';
+          }
+        }
+      }
+    }
+    
+    // Ladda upp PDF
+    async function uploadPdf() {
+      if (!currentPdfFile) {
+        uploadAlert.textContent = 'Välj en PDF-fil först';
+        uploadAlert.style.display = 'block';
+        return;
+      }
+      
+      const title = titleInput.value.trim();
+      if (!title) {
+        uploadAlert.textContent = 'Ange en titel för filen';
+        uploadAlert.style.display = 'block';
+        return;
+      }
+      
+      try {
+        uploadSubmit.disabled = true;
+        uploadSubmit.innerHTML = '<span class="spinner"></span> Laddar upp...';
+        uploadAlert.style.display = 'none';
+        
+        const formData = new FormData();
+        formData.append('file', currentPdfFile);
+        formData.append('title', title);
+        formData.append('description', descriptionInput.value.trim());
+        formData.append('folder', folderInput.value);
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          closeUploadModal();
+          await loadPdfFiles();
+          
+          // Öppna den nyss uppladdade PDF:en
+          const newPdf = pdfFiles.find(p => p.id === data.file.id);
+          if (newPdf) {
+            // Markera den nya PDF:en i listan
+            document.querySelectorAll('.pdf-item').forEach(item => {
+              if (item.getAttribute('data-id') === newPdf.id) {
+                item.classList.add('active');
+                item.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                item.classList.remove('active');
+              }
+            });
+            
+            openPdf(newPdf);
+          }
+        } else {
+          uploadAlert.textContent = data.message || 'Ett fel uppstod vid uppladdning';
+          uploadAlert.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Fel vid uppladdning:', error);
+        uploadAlert.textContent = 'Ett fel uppstod, försök igen';
+        uploadAlert.style.display = 'block';
+      } finally {
+        uploadSubmit.disabled = false;
+        uploadSubmit.textContent = 'Ladda upp';
+      }
+    }
+    
+    // Öppna borttagningsmodal
+    function openDeleteModal(pdfId) {
+      pdfDeleting = pdfId;
+      deleteModal.classList.add('active');
+    }
+    
+    // Stäng borttagningsmodal
+    function closeDeleteModal() {
+      deleteModal.classList.remove('active');
+      pdfDeleting = null;
+    }
+    
+    // Bekräfta borttagning
+    async function confirmDelete() {
+      if (!pdfDeleting) return;
+      
+      try {
+        deleteConfirm.disabled = true;
+        deleteConfirm.innerHTML = '<span class="spinner"></span> Tar bort...';
+        
+        const response = await fetch(`/api/pdfs/${pdfDeleting}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          closeDeleteModal();
+          
+          // Om den borttagna PDF:en är den som visas, rensa visaren
+          if (currentPdf && currentPdf.id === pdfDeleting) {
+            currentPdf = null;
+            pdfDoc = null;
+            viewerTitle.textContent = 'Ingen fil vald';
+            viewerContainer.innerHTML = `
+              <div class="viewer-placeholder">
+                <div class="icon-placeholder">📄</div>
+                <h3>Ingen PDF vald</h3>
+                <p>Välj en PDF från listan till vänster för att visa den här.</p>
+              </div>
+            `;
+            updatePageControls();
+          }
+          
+          // Uppdatera PDF-listan
+          await loadPdfFiles();
+        } else {
+          console.error('Fel vid borttagning av PDF');
+        }
+      } catch (error) {
+        console.error('Fel vid borttagning av PDF:', error);
+      } finally {
+        deleteConfirm.disabled = false;
+        deleteConfirm.textContent = 'Ta bort';
+      }
+    }
+    
+    // Formatera filstorlek
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+  </script>
+</body>
+</html>

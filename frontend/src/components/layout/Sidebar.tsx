@@ -24,14 +24,19 @@ import { Link, useLocation } from 'react-router-dom';
 import directoryService, { DirectoryInput } from '../../services/directoryService';
 import { useProject } from '../../contexts/ProjectContext';
 
-// Interface för menyobjekt
-// Används för att typa submenu-items i sidebar-navigationen
-interface SubmenuItem {
-  name: string;
-  path: string;
-  icon?: React.ReactNode;
-  hasAddButton?: boolean;
-}
+// Menu items for the sidebar
+const menuItems = [
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+  { text: 'Anslagstavla', icon: <MessageIcon />, path: '/notice-board' },
+  { text: 'Kalender', icon: <CalendarIcon />, path: '/calendar' },
+  { text: 'Workspace', icon: <WorkspaceIcon />, path: '/workspace' },
+  { text: 'Projektplanering', icon: <AssignmentIcon />, path: '/project-planning' },
+  { text: 'Tidsrapportering', icon: <AssignmentIcon />, path: '/time-reporting' },
+  { text: 'Vault', icon: <FolderIcon />, path: '/vault' },
+  { text: 'Wiki', icon: <WikiIcon />, path: '/wiki' },
+  { text: 'Meddelanden', icon: <MessageIcon />, path: '/messages' },
+  { text: '3D Viewer', icon: <ViewInArIcon />, path: '/3d-viewer' },
+];
 
 // Komponent för varje nod (fil/mapp) i filsystemet
 interface FileSystemNodeProps {

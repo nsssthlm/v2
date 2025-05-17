@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Dialog Viewer</title>
+  <!-- API integration script -->
+  <script src="pdf-api-integration.js"></script>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-light: #60a5fa;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f3f4f6;
+      --bg-tertiary: #e5e7eb;
+      --border: #d1d5db;
+      --radius: 0.375rem;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: var(--text-primary);
+      line-height: 1.5;
+      background-color: var(--bg-secondary);
+      overflow-x: hidden;
+    }
+
+    button {
+      cursor: pointer;
+      outline: none;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .primary-btn {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .primary-btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    /* Stilar för nya UI-komponenter som matchar skärmbilden */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    
+    .header-navigation {
+      margin-bottom: 20px;
+    }
+    
+    .breadcrumb {
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    
+    .breadcrumb-link {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .breadcrumb-current {
+      color: var(--text-secondary);
+    }
+    
+    .file-actions-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .search-container {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 8px 12px;
+      padding-left: 30px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+    
+    .version-dropdown select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: white;
+    }
+    
+    .upload-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    
+    .delete-folder-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    
+    .file-list-container {
+      margin-top: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    
+    .file-list {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .file-list th, .file-list td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px;
+      text-align: left;
+    }
+    
+    .file-list th {
+      background-color: #f9fafb;
+      font-weight: 500;
+    }
+    
+    .file-list tr:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .upload-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+    }
+
+    .secondary-btn {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .secondary-btn:hover {
+      background-color: #d1d5db;
+    }
+    
+    /* Styles for our table and PDF file list */
+    .pdf-icon-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .file-icon {
+      flex-shrink: 0;
+    }
+    
+    .comment-count {
+      background-color: var(--primary);
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 12px;
+      display: inline-block;
+    }
+    
+    .clickable-row {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .clickable-row:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .clickable-row td.filename-cell {
+      font-weight: 500;
+      color: var(--primary);
+    }
+
+    .icon-btn {
+      padding: 0.5rem;
+      background-color: transparent;
+      color: var(--text-primary);
+    }
+
+    .icon-btn:hover {
+      background-color: var(--bg-tertiary);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: var(--bg-primary);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .file-selection {
+      margin-bottom: 2rem;
+      background-color: var(--bg-primary);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      z-index: 1000;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.625rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    /* PDF Dialog Styles */
+    .pdf-dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.75);
+      display: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .pdf-dialog {
+      position: relative;
+      background-color: var(--bg-primary);
+      border-radius: var(--radius);
+      margin: 2rem auto;
+      width: 90%;
+      height: 90vh;
+      max-width: 1200px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .pdf-dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--bg-primary);
+    }
+
+    .pdf-dialog-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .pdf-dialog-close {
+      background: transparent;
+      padding: 0.25rem;
+      font-size: 1.5rem;
+      line-height: 0.75;
+    }
+
+    .pdf-dialog-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .pdf-viewer {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      background-color: var(--bg-secondary);
+      display: flex;
+      justify-content: center;
+    }
+
+    .pdf-sidebar {
+      width: 300px;
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdf-toolbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--bg-primary);
+      flex-wrap: wrap;
+    }
+
+    .pdf-canvas-container {
+      position: relative;
+      display: inline-block;
+      margin: 1rem;
+      box-shadow: var(--shadow);
+      background-color: white;
+    }
+
+    #pdf-canvas {
+      display: block;
+    }
+
+    .loading-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    .pdf-annotation-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .pdf-annotation {
+      position: absolute;
+      background-color: rgba(255, 255, 0, 0.3);
+      border: 2px solid rgba(255, 200, 0, 0.7);
+      cursor: pointer;
+      pointer-events: all;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .pdf-annotation:hover {
+      background-color: rgba(255, 255, 0, 0.5);
+    }
+
+    .pdf-annotation.active {
+      background-color: rgba(255, 165, 0, 0.5);
+      border: 2px solid orange;
+    }
+
+    .annotation-draw {
+      position: absolute;
+      background-color: rgba(255, 255, 0, 0.3);
+      border: 2px solid rgba(255, 200, 0, 0.7);
+      pointer-events: none;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .sidebar-tab.active {
+      border-bottom: 2px solid var(--primary);
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .sidebar-content {
+      padding: 1rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .annotation-details {
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+
+    .annotation-details h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .annotation-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .annotation-comment {
+      margin-top: 0.75rem;
+    }
+
+    .comment-form {
+      margin-top: 1rem;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      padding: 0.625rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.5rem;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .status-select {
+      margin-bottom: 0.5rem;
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: var(--bg-primary);
+    }
+
+    .version-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .version-item:hover {
+      background-color: var(--bg-secondary);
+    }
+
+    .version-item.active {
+      background-color: var(--bg-tertiary);
+    }
+
+    .version-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+    }
+
+    .version-meta {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    /* Icons (simplified for this example) */
+    .icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* Hide file input visually but keep it accessible */
+    .file-input {
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+    }
+
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      background-color: var(--primary);
+      color: white;
+      border-radius: var(--radius);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .file-input-label:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    /* Drag and drop styles */
+    .drop-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background-color: #f9f9f9;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    
+    .drop-area.highlight {
+      border-color: var(--primary);
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+    
+    .pdf-icon {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 15px;
+    }
+    
+    .file-label {
+      background-color: var(--primary);
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .file-label:hover {
+      background-color: var(--primary-dark);
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .pdf-dialog {
+        width: 95%;
+        margin: 1rem auto;
+        height: 95vh;
+      }
+
+      .pdf-dialog-content {
+        flex-direction: column;
+      }
+
+      .pdf-sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        max-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-navigation">
+      <div class="breadcrumb">
+        <a href="#" class="breadcrumb-link"><i class="fa fa-vault"></i> Vault</a> &gt; 
+        <a href="#" class="breadcrumb-link">Files</a> &gt;
+        <span class="breadcrumb-current">Test2</span>
+      </div>
+    </div>
+
+    <div class="file-actions-bar">
+      <div class="search-container">
+        <input type="text" id="search-input" placeholder="Sök efter fil..." class="search-input" />
+        <i class="fa fa-search search-icon"></i>
+      </div>
+      
+      <div class="version-dropdown">
+        <select id="version-filter">
+          <option value="all">Alla versioner</option>
+          <option value="latest">Senaste versioner</option>
+        </select>
+      </div>
+      
+      <button id="upload-btn" class="upload-btn">
+        <i class="fa fa-upload"></i> Ladda upp
+      </button>
+      
+      <button id="delete-folder-btn" class="delete-folder-btn">
+        <i class="fa fa-trash"></i> Ta bort mapp
+      </button>
+    </div>
+
+    <!-- Dolt uppladdningsområde som visas när man klickar på "Ladda upp" -->
+    <div class="file-selection" id="upload-panel" style="display: none;">
+      <div class="form-group" id="drop-container">
+        <div class="drop-area" id="drop-area">
+          <img src="https://img.icons8.com/office/80/000000/pdf.png" alt="PDF Icon" class="pdf-icon">
+          <p>Dra och släpp PDF-filer här<br>eller</p>
+          <label for="pdf-file" class="file-label">Välj PDF-fil</label>
+          <input type="file" id="pdf-file" accept=".pdf" style="display: none;" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="pdf-title">Titel (valfritt)</label>
+        <input type="text" id="pdf-title" placeholder="Ange en titel för PDF-filen" />
+      </div>
+      <div class="form-group">
+        <label for="pdf-description">Beskrivning (valfritt)</label>
+        <textarea id="pdf-description" placeholder="Ange en beskrivning" style="width: 100%; height: 80px; padding: 0.625rem; border: 1px solid var(--border); border-radius: var(--radius);"></textarea>
+      </div>
+      <div class="upload-actions">
+        <button id="cancel-upload-btn" class="secondary-btn">Avbryt</button>
+        <button id="save-pdf-btn" class="primary-btn" style="margin-left: 10px; background-color: #10b981;">Spara PDF</button>
+      </div>
+    </div>
+
+    <div class="file-list-container">
+      <table id="pdf-list" class="file-list">
+        <thead>
+          <tr>
+            <th>Namn</th>
+            <th>Version</th>
+            <th>Beskrivning</th>
+            <th>Uppladdad</th>
+            <th>Uppladdad av</th>
+            <th>Noteringar</th>
+          </tr>
+        </thead>
+        <tbody id="pdf-list-body">
+          <!-- PDF-filer kommer läggas till här -->
+        </tbody>
+      </table>
+      <p id="no-pdfs-message" style="text-align: center; padding: 1rem; color: var(--text-secondary);">Inga PDF-filer har sparats än.</p>
+    </div>
+  </div>
+
+  <!-- PDF Dialog/Modal -->
+  <div id="pdf-dialog-overlay" class="pdf-dialog-overlay">
+    <div class="pdf-dialog">
+      <div class="pdf-dialog-header">
+        <div class="pdf-dialog-title" id="pdf-filename">PDF Dokument</div>
+        <button class="pdf-dialog-close" id="pdf-dialog-close">&times;</button>
+      </div>
+
+      <div class="pdf-toolbar">
+        <button id="prev-page" class="secondary-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+          </svg>
+          Föregående
+        </button>
+        <span id="page-info">Sida: 1 / 1</span>
+        <button id="next-page" class="secondary-btn">
+          Nästa
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+          </svg>
+        </button>
+        <button id="zoom-out" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5 1.5-1.5-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z"></path>
+          </svg>
+        </button>
+        <button id="zoom-in" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5 1.5-1.5-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-5H9v2H7v1h2v2h1v-2h2V9h-2z"></path>
+          </svg>
+        </button>
+        <button id="rotate-btn" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M18.5 12c0 .83-.67 1.5-1.5 1.5-1.75 0-3 1.57-3 3.5s1.25 3.5 3 3.5c2.76 0 5-2.24 5-5h2c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-1.93.78-3.68 2.05-4.95l1.41 1.41C13.12 12.89 12.5 14.37 12.5 16c0 1.93 1.57 3.5 3.5 3.5s3.5-1.57 3.5-3.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5H14c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.76-2.24 5-5 5-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5c.83 0 1.5-.67 1.5-1.5h-2z"></path>
+          </svg>
+        </button>
+        <button id="download-btn" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
+          </svg>
+        </button>
+        <button id="annotation-btn" class="secondary-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"></path>
+          </svg>
+          Markera/Kommentera
+        </button>
+      </div>
+
+      <div class="pdf-dialog-content">
+        <div id="pdf-viewer" class="pdf-viewer">
+          <div id="loading-spinner" class="loading-spinner"></div>
+          <div id="pdf-canvas-container" class="pdf-canvas-container" style="display: none;">
+            <canvas id="pdf-canvas"></canvas>
+            <div id="pdf-annotation-layer" class="pdf-annotation-layer"></div>
+            <div id="annotation-draw" class="annotation-draw" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div id="pdf-sidebar" class="pdf-sidebar">
+          <div class="sidebar-tabs">
+            <div id="annotations-tab" class="sidebar-tab active">Kommentarer</div>
+            <div id="versions-tab" class="sidebar-tab">Versioner</div>
+            <div id="details-tab" class="sidebar-tab">Detaljer</div>
+          </div>
+
+          <div id="annotations-content" class="sidebar-content">
+            <div id="no-annotation-selected" style="text-align: center; color: var(--text-secondary); padding: 2rem 0;">
+              <p>Markera en del av dokumentet för att lägga till en kommentar, eller klicka på en befintlig markering.</p>
+            </div>
+
+            <div id="annotation-details" style="display: none;">
+              <div class="annotation-details">
+                <h3>Kommentar</h3>
+                <div class="annotation-meta">
+                  <span id="annotation-author">Användare</span>
+                  <span id="annotation-date">2025-05-14</span>
+                </div>
+                <div id="annotation-status" style="font-weight: 500; margin-bottom: 0.5rem;">Status: Ny</div>
+                <div id="annotation-comment" class="annotation-comment">
+                  Kommentartext visas här.
+                </div>
+              </div>
+
+              <div class="comment-form">
+                <h3>Svara eller uppdatera</h3>
+                <textarea id="comment-input" placeholder="Skriv din kommentar här..."></textarea>
+                <select id="status-select" class="status-select">
+                  <option value="new_comment">Ny kommentar</option>
+                  <option value="action_required">Åtgärd krävs</option>
+                  <option value="rejected">Avvisad</option>
+                  <option value="new_review">Ny granskning</option>
+                  <option value="resolved">Löst</option>
+                </select>
+                <button id="save-comment-btn" class="primary-btn">Spara kommentar</button>
+                <button id="cancel-comment-btn" class="secondary-btn">Avbryt</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="versions-content" class="sidebar-content" style="display: none;">
+            <button id="upload-version-btn" class="primary-btn" style="width: 100%; margin-bottom: 1rem;">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"></path>
+              </svg>
+              Ladda upp ny version
+            </button>
+
+            <div id="version-list">
+              <!-- Version items will be added here dynamically -->
+              <div class="version-item active">
+                <div class="version-header">
+                  <span>Version 1.0</span>
+                  <span>14 maj 2025</span>
+                </div>
+                <div class="version-meta">
+                  <div>Uppladdad av: Användare</div>
+                  <div>Initial version</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="details-content" class="sidebar-content" style="display: none;">
+            <h3 style="margin-bottom: 1rem;">Dokumentinformation</h3>
+            <div id="pdf-info" style="margin-bottom: 1rem;">
+              <p><strong>Filnamn:</strong> <span id="info-filename">dokument.pdf</span></p>
+              <p><strong>Storlek:</strong> <span id="info-size">--</span></p>
+              <p><strong>Antal sidor:</strong> <span id="info-pages">--</span></p>
+              <p><strong>Skapad:</strong> <span id="info-created">--</span></p>
+              <p><strong>Senast ändrad:</strong> <span id="info-modified">--</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load PDF.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.min.js"></script>
+
+  <script>
+    // Set PDF.js worker path
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.worker.min.js';
+
+    // DOM Elements
+    const pdfFileInput = document.getElementById('pdf-file');
+    // URL-input är borttagen, så vi behöver inte denna variabel längre
+    // const pdfUrlInput = document.getElementById('pdf-url');
+    const pdfTitleInput = document.getElementById('pdf-title');
+    const pdfDescriptionInput = document.getElementById('pdf-description');
+    const showPdfBtn = document.getElementById('show-pdf-btn');
+    const savePdfBtn = document.getElementById('save-pdf-btn');
+    const pdfListBody = document.getElementById('pdf-list-body');
+    const noPdfsMessage = document.getElementById('no-pdfs-message');
+    const pdfDialogOverlay = document.getElementById('pdf-dialog-overlay');
+    const pdfDialogClose = document.getElementById('pdf-dialog-close');
+    const dropArea = document.getElementById('drop-area');
+    
+    // Implementera drag and drop funktionalitet
+    if (dropArea) {
+      // Förhindra standardbeteendet för dessa händelser
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      // Lägg till/ta bort highlight klass
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      // Hantera släppta filer
+      dropArea.addEventListener('drop', handleDrop, false);
+      
+      // Klick på drop-area för att öppna filväljaren
+      dropArea.addEventListener('click', function(e) {
+        if (e.target !== pdfFileInput) {
+          pdfFileInput.click();
+        }
+      });
+      
+      // Hantera vald fil via filinmatningsfältet
+      pdfFileInput.addEventListener('change', function(e) {
+        if (this.files.length > 0) {
+          const file = this.files[0];
+          if (file.type === 'application/pdf') {
+            // Sätt titeln baserat på filnamnet
+            pdfTitleInput.value = file.name.replace('.pdf', '');
+            
+            // Uppdatera gränssnittet
+            filenameDisplay.textContent = file.name;
+            infoFilename.textContent = file.name;
+            infoSize.textContent = formatFileSize(file.size);
+            
+            // Uppdatera drop-rutan för att visa att fil är vald
+            dropArea.classList.add('has-file');
+            dropArea.innerHTML = '<div class="drop-message"><strong>✓ Fil vald:</strong> ' + file.name + '</div>';
+            
+            // Skapa en blob URL för visning
+            currentPdfFile = file;
+            currentPdfUrl = URL.createObjectURL(file);
+            
+            // Konvertera till data-URL för lagring om filen inte är för stor
+            if (file.size < 5*1024*1024) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                currentPdfDataUrl = e.target.result;
+                console.log("Filen har konverterats till data-URL");
+              };
+              reader.readAsDataURL(file);
+            } else {
+              console.log("Filen är för stor för att konverteras till data-URL:", formatFileSize(file.size));
+              currentPdfDataUrl = null;
+            }
+            
+            currentPdfId = generateUniqueId();
+          } else {
+            alert('Endast PDF-filer är tillåtna.');
+          }
+        }
+      });
+    }
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    function highlight() {
+      dropArea.classList.add('highlight');
+    }
+    
+    function unhighlight() {
+      dropArea.classList.remove('highlight');
+    }
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length) {
+        pdfFileInput.files = files;
+        // Visa filnamnet som feedback
+        const file = files[0];
+        if (file.type === 'application/pdf') {
+          // Sätt titeln baserat på filnamnet
+          pdfTitleInput.value = file.name.replace('.pdf', '');
+          
+          // Uppdatera gränssnittet så användaren ser att en fil har valts
+          filenameDisplay.textContent = file.name;
+          infoFilename.textContent = file.name;
+          infoSize.textContent = formatFileSize(file.size);
+          
+          // Uppdatera drop-rutan för att visa att fil är vald
+          dropArea.classList.add('has-file');
+          dropArea.innerHTML = '<div class="drop-message"><strong>✓ Fil vald:</strong> ' + file.name + '</div>';
+          
+          // Skapa en blob URL för visning
+          currentPdfFile = file;
+          currentPdfUrl = URL.createObjectURL(file);
+          
+          // För att senare kunna spara som data-URL, skapa också en FileReader om filen är lämplig storlek
+          if (file.size < 5*1024*1024) { // Begränsa till 5 MB för localStorage
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              // Spara base64-encoded data för att kunna återskapa senare
+              // Detta används inte direkt nu, men kommer att sparas när användaren klickar på Spara
+              currentPdfDataUrl = e.target.result;
+              console.log("Filen har konverterats till data-URL för lagring");
+            };
+            reader.readAsDataURL(file);
+          } else {
+            console.log("Filen är för stor för att lagras som data-URL:", formatFileSize(file.size));
+            currentPdfDataUrl = null;
+          }
+          currentPdfId = generateUniqueId();
+        } else {
+          alert('Endast PDF-filer är tillåtna.');
+        }
+      }
+    }
+    const pdfCanvas = document.getElementById('pdf-canvas');
+    const canvasContainer = document.getElementById('pdf-canvas-container');
+    const annotationLayer = document.getElementById('pdf-annotation-layer');
+    const annotationDraw = document.getElementById('annotation-draw');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const pageInfo = document.getElementById('page-info');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const zoomInBtn = document.getElementById('zoom-in');
+    const zoomOutBtn = document.getElementById('zoom-out');
+    const rotateBtn = document.getElementById('rotate-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const annotationBtn = document.getElementById('annotation-btn');
+    const filenameDisplay = document.getElementById('pdf-filename');
+    const infoFilename = document.getElementById('info-filename');
+    const infoSize = document.getElementById('info-size');
+    const infoPages = document.getElementById('info-pages');
+    const infoCreated = document.getElementById('info-created');
+    const infoModified = document.getElementById('info-modified');
+
+    // Sidebar tabs
+    const annotationsTab = document.getElementById('annotations-tab');
+    const versionsTab = document.getElementById('versions-tab');
+    const detailsTab = document.getElementById('details-tab');
+    const annotationsContent = document.getElementById('annotations-content');
+    const versionsContent = document.getElementById('versions-content');
+    const detailsContent = document.getElementById('details-content');
+
+    // Annotation related elements
+    const noAnnotationSelected = document.getElementById('no-annotation-selected');
+    const annotationDetails = document.getElementById('annotation-details');
+    const annotationAuthor = document.getElementById('annotation-author');
+    const annotationDate = document.getElementById('annotation-date');
+    const annotationStatus = document.getElementById('annotation-status');
+    const annotationComment = document.getElementById('annotation-comment');
+    const commentInput = document.getElementById('comment-input');
+    const statusSelect = document.getElementById('status-select');
+    const saveCommentBtn = document.getElementById('save-comment-btn');
+    const cancelCommentBtn = document.getElementById('cancel-comment-btn');
+
+    // Version related elements
+    const uploadVersionBtn = document.getElementById('upload-version-btn');
+    const versionList = document.getElementById('version-list');
+
+    // PDF.js variables
+    let pdfDoc = null;
+    let pageNum = 1;
+    let pageRendering = false;
+    let pageNumPending = null;
+    let scale = 1.0;
+    let rotation = 0;
+    let ctx = pdfCanvas.getContext('2d');
+    let currentPdfUrl = null;
+    let currentPdfFile = null;
+    let currentPdfData = null;
+    let currentPdfDataUrl = null; // Base64-encoded PDF data för persistent lagring
+    let currentPdfId = null;
+    let currentFolderId = null; // För att hålla reda på vilken mapp PDF:en tillhör
+    
+    // För att visa/dölja "Inga PDF-filer" meddelandet
+    function updatePdfListVisibility() {
+      const hasPdfs = pdfListBody.children.length > 0;
+      noPdfsMessage.style.display = hasPdfs ? 'none' : 'block';
+    }
+    
+    // Ladda sparade PDF-filer från localStorage vid sidladdning
+    function loadSavedPdfs() {
+      try {
+        const savedPdfs = localStorage.getItem('savedPdfs');
+        if (savedPdfs) {
+          const pdfs = JSON.parse(savedPdfs);
+          pdfs.forEach(pdf => addPdfToTable(pdf));
+        }
+      } catch (error) {
+        console.error('Fel vid laddning av sparade PDF-filer:', error);
+      }
+      
+      updatePdfListVisibility();
+    }
+    
+    // Generera ett unikt ID för PDF-filen
+    function generateUniqueId() {
+      return 'pdf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    }
+    
+    // Lägg till PDF i tabellen
+    function addPdfToTable(pdfData) {
+      const row = document.createElement('tr');
+      row.setAttribute('data-id', pdfData.id);
+      row.setAttribute('data-folder-id', pdfData.folderId || 'null'); // 'null' som sträng för rotmappen
+      row.setAttribute('data-search', (pdfData.title + ' ' + pdfData.description).toLowerCase());
+      row.classList.add('clickable-row'); // Markera raden som klickbar
+      
+      // Skapa datum-strängar 
+      const uploadedDate = pdfData.date ? formatDate(new Date(pdfData.date)) : formatDate(new Date());
+      
+      // Skapa version-nummer
+      const versionNumber = pdfData.version || 1;
+      
+      // Skapa kommentarsräknare
+      const commentCount = pdfData.commentCount || 0;
+      
+      row.innerHTML = `
+        <td class="filename-cell">
+          <div class="pdf-icon-name">
+            <img src="https://img.icons8.com/office/25/000000/pdf.png" alt="PDF" class="file-icon">
+            <span>${pdfData.title || 'Namnlös PDF'}</span>
+          </div>
+        </td>
+        <td>v${versionNumber}</td>
+        <td>${pdfData.description || '--'}</td>
+        <td>${uploadedDate}</td>
+        <td>Du</td>
+        <td>${commentCount > 0 ? `<span class="comment-count">${commentCount}</span>` : '--'}</td>
+      `;
+      
+      // Lägg till händelsehanterare för hela raden så man kan klicka var som helst på raden
+      row.addEventListener('click', function() {
+        openSavedPdf(pdfData);
+      });
+      
+      pdfListBody.appendChild(row);
+      updatePdfListVisibility();
+    }
+    
+    // Öppna en sparad PDF
+    function openSavedPdf(pdfData) {
+      currentPdfId = pdfData.id;
+      currentFolderId = pdfData.folderId;
+      
+      console.log("Öppnar sparad PDF med ID:", currentPdfId, "källtyp:", pdfData.originalSource);
+      
+      // Uppdatera UI-element med PDF-metadata
+      filenameDisplay.textContent = pdfData.title || pdfData.filename || 'PDF Dokument';
+      infoFilename.textContent = pdfData.filename || 'dokument.pdf';
+      
+      // Visa dialogrutan
+      pdfDialogOverlay.style.display = 'block';
+      
+      // Steg 1: Kontrollera om det finns en URL och prioritera olika typer av källor
+      let urlToLoad = null;
+      
+      // Prioritering 1: Använd extern URL om den finns och ser bra ut
+      if (pdfData.url && pdfData.url.startsWith('http')) {
+        console.log("Laddar PDF med extern HTTP URL:", pdfData.url);
+        urlToLoad = pdfData.url;
+        currentPdfUrl = pdfData.url;
+        
+        // URL-fältet är borttaget, behöver inte uppdateras längre
+      }
+      // Prioritering 2: Kolla om vi har sparat PDF-fil som data-URL (base64)
+      else if (pdfData.fileData && pdfData.fileData.startsWith('data:application/pdf')) {
+        console.log("Använder sparad PDF-data från localStorage (base64)");
+        urlToLoad = pdfData.fileData;
+        currentPdfUrl = urlToLoad;
+        
+        // Informera om att vi använder lokalt sparad data
+        console.log("Laddar PDF från sparad base64-data");
+      }
+      // Prioritering 3: För stora filer som sparats utan innehåll
+      else if (pdfData.originalSource === 'file_too_large' || pdfData.filesizeTooLarge || pdfData.fileDataRemoved) {
+        console.warn("PDF-filen var för stor för att spara i localStorage:", pdfData.id);
+        
+        // Visa meddelande om varför den ursprungliga filen inte kunde visas
+        setTimeout(() => {
+          alert("Denna PDF-fil var för stor för att sparas i webbläsarens lokallagring. Du behöver ladda upp den igen för att visa den.\n\nDina metadata (filnamn, beskrivning, etc.) finns fortfarande kvar.");
+        }, 500);
+        
+        // Avbryt laddningen eftersom vi inte har en giltig PDF
+        urlToLoad = null;
+      }
+      // Prioritering 4: För blob-URL:er, be användaren välja filen igen
+      else if (pdfData.url && pdfData.url.startsWith('blob:') || pdfData.originalSource === 'blob') {
+        console.log("PDF hade blob-URL (tillfällig), kan inte återskapa");
+        
+        // Visa meddelande om varför den ursprungliga filen inte kunde visas
+        setTimeout(() => {
+          alert("Originaldokumentet kunde inte laddas eftersom det endast var tillfälligt sparat.\n\nFör att visa PDF:en igen, vänligen välj samma fil på nytt genom att dra och släppa den i rutan.");
+        }, 500);
+        
+        // Avbryt laddningen eftersom vi inte har en giltig PDF
+        urlToLoad = null;
+      }
+      // Prioritering 5: För alla andra fall, informera användaren om att PDF-filen saknas
+      else {
+        console.log("Ingen valid PDF-data hittades");
+        
+        // Visa meddelande om varför den ursprungliga filen inte kunde visas
+        setTimeout(() => {
+          alert("Kunde inte hitta eller ladda PDF-dokumentet.\n\nVänligen välj filen igen genom att dra och släppa den i rutan.");
+        }, 500);
+        
+        // Avbryt laddningen eftersom vi inte har en giltig PDF
+        urlToLoad = null;
+      }
+      
+      // Ladda PDF:en
+      try {
+        if (urlToLoad) {
+          // Här använder vi den globala funktionen för att ladda PDF-dokument
+          if (typeof loadPdf === 'function') {
+            loadPdf(urlToLoad);
+            
+            // Ladda in kommentarer för denna PDF
+            // Kontrollera om loadAnnotations finns, annars använd loadAnnotationsForCurrentPdf
+            if (typeof loadAnnotations === 'function') {
+              loadAnnotations(currentPdfId);
+            } else if (typeof loadAnnotationsForCurrentPdf === 'function') {
+              loadAnnotationsForCurrentPdf();
+            } else {
+              console.warn("Varken loadAnnotations eller loadAnnotationsForCurrentPdf är tillgänglig");
+            }
+          } else {
+            console.error("loadPdf-funktionen är inte definierad, använder inbyggd laddningsmetod");
+            // Använd inbyggd funktion för att ladda PDF
+            // Reset page number
+            pageNum = 1;
+            
+            // Show loading spinner
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
+            if (canvasContainer) canvasContainer.style.display = 'none';
+            
+            // Load PDF document
+            pdfjsLib.getDocument(urlToLoad).promise.then(function(pdf) {
+              pdfDoc = pdf;
+              if (infoPages) infoPages.textContent = pdf.numPages;
+              if (pageInfo) pageInfo.textContent = `Sida: ${pageNum} / ${pdf.numPages}`;
+              
+              // Render first page
+              if (typeof renderPage === 'function') {
+                renderPage(pageNum);
+              } else {
+                console.error("renderPage funktionen är inte definierad!");
+                // Fallback rendering
+                pdf.getPage(pageNum).then(function(page) {
+                  const viewport = page.getViewport({ scale: currentScale });
+                  
+                  const canvas = document.getElementById('pdf-canvas');
+                  const context = canvas.getContext('2d');
+                  canvas.height = viewport.height;
+                  canvas.width = viewport.width;
+                  
+                  const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                  };
+                  
+                  page.render(renderContext);
+                });
+              }
+              
+              // Load annotations for this PDF
+              if (typeof loadAnnotationsForCurrentPdf === 'function') {
+                loadAnnotationsForCurrentPdf();
+              } else {
+                console.warn("loadAnnotationsForCurrentPdf är inte tillgänglig");
+              }
+              
+              // Enable/disable navigation buttons
+              if (typeof updateUIState === 'function') {
+                updateUIState();
+              }
+              
+              // Hide loading spinner
+              if (loadingSpinner) loadingSpinner.style.display = 'none';
+              if (canvasContainer) canvasContainer.style.display = 'block';
+            }).catch(function(error) {
+              console.error("Fel vid laddning av PDF:", error);
+              alert("Det uppstod ett fel när PDF:en skulle visas. Vänligen försök igen med en annan fil eller URL.");
+            });
+          }
+        } else {
+          throw new Error("Ingen giltig URL hittades för att ladda PDF:en");
+        }
+      } catch (error) {
+        console.error("Fel vid öppning av PDF:", error);
+        alert("Det uppstod ett fel när PDF:en skulle visas. Vänligen försök igen med en annan fil eller URL.");
+      }
+    }
+    
+    // Ta bort en PDF från lagringen
+    function deletePdf(id) {
+      try {
+        const savedPdfs = localStorage.getItem('savedPdfs');
+        if (savedPdfs) {
+          let pdfs = JSON.parse(savedPdfs);
+          pdfs = pdfs.filter(pdf => pdf.id !== id);
+          localStorage.setItem('savedPdfs', JSON.stringify(pdfs));
+          
+          // Ta även bort eventuella annotationer för denna PDF
+          localStorage.removeItem(`pdf_annotations_${id}`);
+        }
+      } catch (error) {
+        console.error('Fel vid borttagning av PDF:', error);
+      }
+    }
+    
+    // Spara PDF till server eller localStorage
+    async function savePdf() {
+      // Kontrollera att vi har en PDF att spara
+      if (!currentPdfFile) {
+        alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
+        return;
+      }
+      
+      try {
+        // Visa laddningsindikator
+        const loadingElement = document.createElement('div');
+        loadingElement.id = 'loading-indicator';
+        loadingElement.style.cssText = 'display:flex; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;';
+        loadingElement.innerHTML = '<div style="background:white; padding:20px; border-radius:5px;"><h3>Laddar upp PDF...</h3><p>Vänligen vänta</p></div>';
+        document.body.appendChild(loadingElement);
+        
+        // Förbered metadata som ska skickas till servern
+        const metadata = {
+          title: pdfTitleInput.value || 'Namnlös PDF',
+          description: pdfDescriptionInput.value || '',
+          projectId: 1, // Standard-projektid (bör hämtas från användarkontexten i en riktig implementation)
+          folderId: currentFolderId || null
+        };
+        
+        console.log("Laddar upp PDF-fil till servern:", currentPdfFile.name);
+        
+        try {
+          // Använd API Service för att ladda upp PDF-filen till servern
+          const uploadResult = await window.PDFAPIService.uploadPDF(currentPdfFile, metadata);
+          console.log("PDF uppladdad till servern:", uploadResult);
+          
+          // Ta bort laddningsindikator
+          document.body.removeChild(loadingElement);
+          
+          // Skapa nytt PDF-objekt med data från servern
+          const newPdf = {
+            id: uploadResult.id || currentPdfId || generateUniqueId(),
+            title: uploadResult.title,
+            description: uploadResult.description,
+            date: uploadResult.created_at || new Date().toISOString(),
+            folderId: currentFolderId || null,
+            filename: currentPdfFile.name,
+            version: uploadResult.version || 1,
+            url: uploadResult.url,
+            originalSource: 'server', // Markera att denna PDF nu finns på servern
+            serverStored: true
+          };
+          
+          // Slutför sparandet
+          finalizeSave(newPdf);
+          
+          // Visa meddelande
+          alert('PDF-filen har laddats upp och sparats på servern!');
+          return;
+        } catch (apiError) {
+          console.error("Fel vid uppladdning till API:", apiError);
+          // Ta bort laddningsindikator
+          document.body.removeChild(loadingElement);
+          // Fortsätt till fallback nedan...
+        }
+        
+        // Om API-uppladdning misslyckades, fallback till lokallagring
+        console.log("Använder lokallagring som fallback...");
+        
+        // Skapa ett nytt objekt för PDF-data
+        const newPdf = {
+          id: currentPdfId || generateUniqueId(),
+          title: pdfTitleInput.value || 'Namnlös PDF',
+          description: pdfDescriptionInput.value || '',
+          date: new Date().toISOString(),
+          folderId: currentFolderId || null, // null representerar rotmappen
+          filename: currentPdfFile ? currentPdfFile.name : (filenameDisplay.textContent || 'dokument.pdf')
+        };
+        
+        // Alltid spara originalkällan oavsett vad (för felsökning)
+        newPdf.originalUrl = currentPdfUrl;
+        
+        // Prioritera filhantering
+        if (currentPdfFile) {
+          // Spara metadata om filen
+          newPdf.fileInfo = {
+            name: currentPdfFile.name,
+            size: currentPdfFile.size,
+            type: currentPdfFile.type,
+            lastModified: currentPdfFile.lastModified
+          };
+          
+          // Spara filen direkt i base64-format för att kunna återskapa den senare
+          if (currentPdfFile.size < 5*1024*1024) { // Begränsa till 5MB för lokallagring
+            if (currentPdfDataUrl) {
+              // Använd redan konverterad data om tillgänglig
+              console.log("Använder redan konverterad data-URL");
+              newPdf.fileData = currentPdfDataUrl;
+              finalizeSave(newPdf);
+            } else {
+              // Konvertera filen till data-URL om det inte redan gjorts
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                // Spara base64-encoded data direkt
+                currentPdfDataUrl = e.target.result;
+                newPdf.fileData = currentPdfDataUrl;
+                
+                // Slutför sparandet med korrekt data
+                finalizeSave(newPdf);
+              };
+              reader.readAsDataURL(currentPdfFile);
+            }
+            
+            // För denna session, spara blob URL
+            newPdf.url = currentPdfUrl;
+            newPdf.originalSource = 'file';
+            console.log("1. Sparar PDF från lokal fil (med fileData):", currentPdfFile.name);
+            
+            // Återvänd här så vi väntar på FileReader
+            return;
+          } else {
+            // För stora filer informera användaren
+            alert('Filen är större än 5MB och kan inte sparas i lokallagring. Metadata har sparats men filen måste laddas upp igen nästa gång.');
+            newPdf.url = currentPdfUrl;
+            newPdf.originalSource = 'file_too_large';
+            console.log("1b. Sparar metadata för stor fil:", currentPdfFile.name);
+          }
+        }
+        // Fallback till URL om det finns
+        else if (currentPdfUrl) {
+          newPdf.url = currentPdfUrl;
+          newPdf.originalSource = 'url';
+          console.log("2. Sparar PDF med URL:", currentPdfUrl);
+        }
+        // Näst bästa är lokal fil som vi kan serialisera (endast för små filer)
+        else if (pdfFileInput.files && pdfFileInput.files[0]) {
+          const file = pdfFileInput.files[0];
+          newPdf.filename = file.name;
+          newPdf.fileAvailable = true;
+          newPdf.originalSource = 'file';
+          
+          // För små filer, spara temporär URL
+          if (file.size < 5*1024*1024) { // Mindre än 5MB
+            newPdf.url = currentPdfUrl;
+          } else {
+            // För stora filer sparar vi bara metadata, inte innehållet
+            newPdf.url = null;
+          }
+          
+          console.log("3. Sparar PDF från lokal fil:", file.name);
+        } 
+        // Sista alternativet - vi har en blob URL men ingen extern källa
+        else if (currentPdfUrl && currentPdfUrl.startsWith('blob:')) {
+          // Spara blob-URL för denna session
+          newPdf.url = currentPdfUrl;
+          newPdf.originalSource = 'blob';
+          newPdf.usableUrl = false; // Blob-URL:er fungerar inte efter omladdning
+          console.log("4. Sparar PDF med blob-URL:", currentPdfUrl);
+        } 
+        // Om allt annat misslyckas, använd vad vi än har
+        else {
+          newPdf.url = currentPdfUrl;
+          newPdf.originalSource = 'unknown';
+          console.log("5. Sparar PDF med sista möjliga URL:", newPdf.url);
+        }
+        
+        // Skapa hjälpfunktion för att spara och använda finalizeSave
+        finalizeSave(newPdf);
+      } catch (error) {
+        console.error('Fel vid sparande av PDF:', error);
+        alert('Det uppstod ett problem vid sparande av PDF-filen.');
+      }
+    }
+    
+    // Slutför sparandet av PDF
+    function finalizeSave(newPdf) {
+      try {
+        // Om PDF:en är lagrad på servern, hantera annorlunda
+        if (newPdf.serverStored) {
+          console.log("PDF sparad på servern, sparar endast referens i localStorage");
+          
+          // Skapa en nedbantatad version utan binärdata för lokallagring
+          const localReference = {
+            ...newPdf,
+            serverStored: true
+          };
+          
+          // Ta bort ev. fileData för att spara utrymme
+          if (localReference.fileData) {
+            delete localReference.fileData;
+            localReference.fileDataRemoved = true;
+          }
+          
+          // Hämta nuvarande sparade PDF:er
+          let savedPdfs = [];
+          const existingSaved = localStorage.getItem('savedPdfs');
+          if (existingSaved) {
+            savedPdfs = JSON.parse(existingSaved);
+          }
+          
+          // Kontrollera om denna PDF redan finns (baserat på ID)
+          const existingIndex = savedPdfs.findIndex(pdf => pdf.id === newPdf.id);
+          if (existingIndex >= 0) {
+            // Uppdatera existerande PDF men behåll server-URL
+            const existingPdf = savedPdfs[existingIndex];
+            savedPdfs[existingIndex] = { 
+              ...existingPdf, 
+              ...localReference,
+              // Om vi inte har en ny URL, behåll den gamla
+              url: localReference.url || existingPdf.url
+            };
+          } else {
+            // Lägg till ny PDF
+            savedPdfs.push(localReference);
+          }
+          
+          // Spara den uppdaterade listan
+          localStorage.setItem('savedPdfs', JSON.stringify(savedPdfs));
+          
+          // Uppdatera UI
+          updatePdfSelectorDropdown();
+          updatePdfList();
+          
+          // Avmarkera "Osparad" indikering
+          document.getElementById('unsaved-indicator').style.display = 'none';
+          
+          // Uppdatera currentPdfId
+          currentPdfId = newPdf.id;
+          
+          console.log('PDF-referens sparad i localStorage, originalet finns på servern');
+          return;
+        }
+        
+        // Hantera standard lokallagring om serverlösning inte används
+        // Om fileData är större än 2MB, spara utan fileData för att undvika localStorage-begränsningar
+        let tempFileData;
+        if (newPdf.fileData && newPdf.fileData.length > 2000000) {
+          console.log("Filen är för stor för localStorage, sparar endast metadata");
+          tempFileData = newPdf.fileData;
+          delete newPdf.fileData; // Ta bort fileData tillfälligt för att spara utrymme
+          
+          // Lägg till en markering att fileData har tagits bort
+          newPdf.fileDataRemoved = true;
+          newPdf.filesizeTooLarge = true;
+        }
+          
+        // Hämta nuvarande sparade PDF:er
+        let savedPdfs = [];
+        const existingSaved = localStorage.getItem('savedPdfs');
+        if (existingSaved) {
+          savedPdfs = JSON.parse(existingSaved);
+        }
+        
+        // Kontrollera om denna PDF redan finns (baserat på ID)
+        const existingIndex = savedPdfs.findIndex(pdf => pdf.id === newPdf.id);
+        if (existingIndex >= 0) {
+          // Uppdatera existerande PDF men behåll vissa viktiga attribut
+          const existingPdf = savedPdfs[existingIndex];
+          savedPdfs[existingIndex] = { 
+            ...existingPdf, 
+            ...newPdf,
+            // Om vi inte har en ny URL, behåll den gamla
+            url: newPdf.url || existingPdf.url
+          };
+        } else {
+          // Lägg till ny PDF
+          savedPdfs.push(newPdf);
+        }
+        
+        try {
+          // Spara till localStorage
+          localStorage.setItem('savedPdfs', JSON.stringify(savedPdfs));
+        } catch (storageError) {
+          console.error('localStorage är full, försöker med alternativ metod:', storageError);
+          
+          // Om det är för mycket att spara, ta bort fileData från alla PDF:er och försök igen
+          savedPdfs = savedPdfs.map(pdf => {
+            const pdfCopy = {...pdf};
+            if (pdfCopy.fileData) {
+              delete pdfCopy.fileData;
+              pdfCopy.fileDataRemoved = true;
+            }
+            return pdfCopy;
+          });
+          
+          // Försök spara igen med nedbantad data
+          try {
+            localStorage.setItem('savedPdfs', JSON.stringify(savedPdfs));
+            console.log('Sparade PDF:er utan fileData på grund av storleksbegränsningar');
+          } catch (finalError) {
+            console.error('Kunde inte spara ens med nedbantad data:', finalError);
+            throw new Error('Kunde inte spara PDF-data även efter optimering. Lokallagringen kan vara full.');
+          }
+        }
+        
+        // Uppdatera tabellen
+        if (existingIndex >= 0) {
+          // Ta bort befintlig rad och lägg till den uppdaterade
+          const existingRow = pdfListBody.querySelector(`tr[data-id="${newPdf.id}"]`);
+          if (existingRow) {
+            existingRow.remove();
+          }
+        }
+      } catch (error) {
+        console.error('Fel vid sparande av PDF i localStorage:', error);
+        alert('Ett fel uppstod när PDF-filen skulle sparas: ' + error.message + '\n\nPDF-filen är förmodligen för stor för lokallagringen. Endast metadata har sparats.');
+        
+        // Lägg till i tabellen ändå så metadata visas
+        addPdfToTable(newPdf);
+        
+        return;
+      }
+      
+      // Lägg till i tabellen
+      addPdfToTable(newPdf);
+      
+      alert('PDF sparad!');
+      
+      // Rensa formulär
+      pdfTitleInput.value = '';
+      pdfDescriptionInput.value = '';
+    }
+
+    // Status colors
+    const statusColors = {
+      new_comment: '#FF69B4',      // HotPink (Rosa)
+      action_required: '#FF0000',  // Röd
+      rejected: '#808080',         // Grå
+      new_review: '#FFA500',       // Orange
+      other_forum: '#4169E1',      // RoyalBlue (Blå)
+      resolved: '#ADFF2F',         // GreenYellow (Grön)
+    };
+
+    // Annotation variables
+    let annotations = [];
+    let isAnnotationMode = false;
+    let isMarking = false;
+    let markingStart = null;
+    let markingEnd = null;
+    let activeAnnotation = null;
+
+    // Format file size
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Format date
+    function formatDate(date) {
+      if (!date) return '--';
+      const d = new Date(date);
+      return d.toLocaleDateString('sv-SE', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Generate a unique ID
+    function generateId() {
+      return 'anno_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Ladda sparade PDF-filer vid sidladdning 
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSavedPdfs();
+      
+      // Implementera sökfunktionen
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          const searchTerm = this.value.trim().toLowerCase();
+          filterPdfsBySearch(searchTerm);
+        });
+      }
+      
+      // Initiera eventlyssnare för uppladdningsknappen och andra knappar
+      initializeButtons();
+    });
+    
+    // Funktion för att filtrera PDF-filer baserat på sökterm
+    function filterPdfsBySearch(searchTerm) {
+      const rows = pdfListBody.querySelectorAll('tr');
+      
+      if (!searchTerm) {
+        // Om söktermen är tom, visa alla rader
+        rows.forEach(row => { row.style.display = ''; });
+        return;
+      }
+      
+      // Gå igenom alla rader och kontrollera om de matchar sökningen
+      rows.forEach(row => {
+        const searchData = row.getAttribute('data-search') || '';
+        if (searchData.includes(searchTerm)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Uppdatera meddelandet om inga resultat hittades
+      const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+      if (visibleRows.length === 0) {
+        noPdfsMessage.textContent = 'Inga PDF-filer hittades som matchar din sökning.';
+        noPdfsMessage.style.display = 'block';
+      } else {
+        noPdfsMessage.style.display = 'none';
+      }
+    }
+    
+    // Spara PDF-knapp hanterare
+    // *** Nya eventlisteners för den uppdaterade designen ***
+    
+    // Funktion för att initiera alla knappar och event handlers
+    function initializeButtons() {
+      console.log('Initierar knappar och event handlers');
+      
+      // 1. Ladda upp-knapp visar uppladdningspanelen
+      const uploadBtn = document.getElementById('upload-btn');
+      const uploadPanel = document.getElementById('upload-panel');
+      const cancelUploadBtn = document.getElementById('cancel-upload-btn');
+      const savePdfBtn = document.getElementById('save-pdf-btn');
+      
+      if (uploadBtn) {
+        console.log('Hittade upload-btn element');
+        uploadBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Ladda upp-knapp klickad');
+          
+          // Skapa overlay för modal-effekt
+          const overlay = document.createElement('div');
+          overlay.className = 'overlay';
+          overlay.id = 'upload-overlay';
+          document.body.appendChild(overlay);
+          
+          if (uploadPanel) {
+            uploadPanel.style.display = 'block';
+          } else {
+            console.error('Kunde inte hitta uploadPanel element');
+          }
+        });
+      } else {
+        console.error('Kunde inte hitta uploadBtn element');
+      }
+      
+      // 2. Avbryt-knappen döljer uppladdningspanelen och återställer
+      if (cancelUploadBtn) {
+        console.log('Hittade cancel-upload-btn element');
+        cancelUploadBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Avbryt uppladdning klickad');
+          if (uploadPanel) {
+            uploadPanel.style.display = 'none';
+          }
+          
+          // Ta bort overlay
+          const overlay = document.getElementById('upload-overlay');
+          if (overlay) {
+            overlay.remove();
+          }
+          // Återställ uppladdningsområdet
+          if (dropArea && dropArea.classList.contains('has-file')) {
+            dropArea.classList.remove('has-file');
+            dropArea.innerHTML = `
+              <img src="https://img.icons8.com/office/80/000000/pdf.png" alt="PDF Icon" class="pdf-icon">
+              <p>Dra och släpp PDF-filer här<br>eller</p>
+              <label for="pdf-file" class="file-label">Välj PDF-fil</label>
+              <input type="file" id="pdf-file" accept=".pdf" style="display: none;" />
+            `;
+          
+            // Återaktivera eventlisteners för nya input-elementet
+            const newPdfFileInput = document.getElementById('pdf-file');
+            if (newPdfFileInput) {
+              newPdfFileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                  handleFileSelection(this.files[0]);
+                }
+              });
+            }
+          }
+          
+          // Återställ variabler
+          currentPdfFile = null;
+          currentPdfUrl = null;
+          currentPdfDataUrl = null;
+          pdfTitleInput.value = '';
+          pdfDescriptionInput.value = '';
+        });
+      }
+    
+    // 3. Spara PDF-knappen
+    if (savePdfBtn) {
+      console.log('Hittade save-pdf-btn element');
+      savePdfBtn.addEventListener('click', function() {
+        console.log('Spara PDF-knapp klickad');
+        if (currentPdfFile) {
+          savePdf();
+          // Dölj uppladdningspanelen efter att ha sparat
+          if (uploadPanel) {
+            uploadPanel.style.display = 'none';
+          }
+          
+          // Ta bort overlay
+          const overlay = document.getElementById('upload-overlay');
+          if (overlay) {
+            overlay.remove();
+          }
+        } else {
+          alert('Välj en PDF-fil först genom att klicka eller dra och släppa en fil i rutan');
+        }
+      });
+    } else {
+      console.error('Kunde inte hitta savePdfBtn element');
+    }
+    
+    // Hjälpfunktion för att hantera filer som valts (från både drag-drop och filväljare)
+    function handleFileSelection(file) {
+      if (file.type === 'application/pdf') {
+        // Uppdatera currentPdfFile och URL
+        currentPdfFile = file;
+        currentPdfUrl = URL.createObjectURL(file);
+        currentPdfId = generateUniqueId();
+        
+        // Sätt titeln baserat på filnamnet om det inte redan finns
+        if (!pdfTitleInput.value) {
+          pdfTitleInput.value = file.name.replace('.pdf', '');
+        }
+        
+        // Uppdatera UI
+        if (dropArea) {
+          dropArea.classList.add('has-file');
+          dropArea.innerHTML = '<div class="drop-message"><strong>✓ Fil vald:</strong> ' + file.name + '</div>';
+        }
+        
+        // För PDF-metadata och visning
+        filenameDisplay.textContent = file.name;
+        infoFilename.textContent = file.name;
+        infoSize.textContent = formatFileSize(file.size);
+        infoCreated.textContent = formatDate(new Date());
+        infoModified.textContent = formatDate(new Date());
+        
+        // Konvertera till dataURL för lagring om filen inte är för stor
+        if (file.size < 5*1024*1024) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            currentPdfDataUrl = e.target.result;
+            console.log("Filen har konverterats till data-URL");
+          };
+          reader.readAsDataURL(file);
+        } else {
+          console.log("Filen är för stor för att konverteras till data-URL:", formatFileSize(file.size));
+          currentPdfDataUrl = null;
+        }
+      } else {
+        alert('Endast PDF-filer är tillåtna.');
+      }
+    }
+
+    // Close dialog
+    pdfDialogClose.addEventListener('click', function() {
+      pdfDialogOverlay.style.display = 'none';
+    });
+
+    // Close dialog when clicking outside
+    pdfDialogOverlay.addEventListener('click', function(e) {
+      if (e.target === pdfDialogOverlay) {
+        pdfDialogOverlay.style.display = 'none';
+      }
+    });
+
+    // Tab switching
+    annotationsTab.addEventListener('click', function() {
+      annotationsTab.classList.add('active');
+      versionsTab.classList.remove('active');
+      detailsTab.classList.remove('active');
+      annotationsContent.style.display = 'block';
+      versionsContent.style.display = 'none';
+      detailsContent.style.display = 'none';
+    });
+
+    versionsTab.addEventListener('click', function() {
+      annotationsTab.classList.remove('active');
+      versionsTab.classList.add('active');
+      detailsTab.classList.remove('active');
+      annotationsContent.style.display = 'none';
+      versionsContent.style.display = 'block';
+      detailsContent.style.display = 'none';
+    });
+
+    detailsTab.addEventListener('click', function() {
+      annotationsTab.classList.remove('active');
+      versionsTab.classList.remove('active');
+      detailsTab.classList.add('active');
+      annotationsContent.style.display = 'none';
+      versionsContent.style.display = 'none';
+      detailsContent.style.display = 'block';
+    });
+
+    // Format date
+    function formatDate(date) {
+      if (!date) return '--';
+      const d = new Date(date);
+      return d.toLocaleDateString('sv-SE', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    
+    // Save annotations to localStorage based on PDF ID
+    function saveAnnotationsToStorage() {
+      if (!currentPdfId) return;
+      
+      try {
+        // Use PDF ID as part of the key to save annotations
+        const annotationsKey = `pdf_annotations_${currentPdfId}`;
+        localStorage.setItem(annotationsKey, JSON.stringify(annotations));
+        
+        console.log(`Sparade ${annotations.length} annotationer för PDF ${currentPdfId} med nyckel ${annotationsKey}`);
+        
+        // Keep track of all annotation keys
+        const keyList = JSON.parse(localStorage.getItem('pdf_annotation_keys') || '[]');
+        if (!keyList.includes(annotationsKey)) {
+          keyList.push(annotationsKey);
+          localStorage.setItem('pdf_annotation_keys', JSON.stringify(keyList));
+        }
+      } catch (error) {
+        console.error('Error saving annotations:', error);
+      }
+    }
+    
+    // Load annotations for current PDF
+    function loadAnnotationsForCurrentPdf() {
+      if (!currentPdfId) return;
+      
+      try {
+        const annotationsKey = `pdf_annotations_${currentPdfId}`;
+        const savedAnnotations = localStorage.getItem(annotationsKey);
+        
+        console.log(`Försöker ladda annotationer för PDF ${currentPdfId} med nyckel ${annotationsKey}`);
+        
+        if (savedAnnotations) {
+          const parsedAnnotations = JSON.parse(savedAnnotations);
+          if (Array.isArray(parsedAnnotations)) {
+            annotations = parsedAnnotations;
+            console.log(`Laddade ${annotations.length} annotationer för PDF ${currentPdfId}`);
+            renderAnnotations();
+          }
+        } else {
+          console.log(`Hittade inga annotationer för PDF ${currentPdfId}`);
+          annotations = [];
+        }
+      } catch (error) {
+        console.error('Error loading annotations for current PDF:', error);
+      }
+    }
+
+    // Load PDF
+    function loadPdf(url) {
+      // Reset page number
+      pageNum = 1;
+      
+      // Show loading spinner
+      loadingSpinner.style.display = 'block';
+      canvasContainer.style.display = 'none';
+      
+      // Load PDF document
+      pdfjsLib.getDocument(url).promise.then(function(pdf) {
+        pdfDoc = pdf;
+        infoPages.textContent = pdf.numPages;
+        pageInfo.textContent = `Sida: ${pageNum} / ${pdf.numPages}`;
+        
+        // Render first page
+        renderPage(pageNum);
+        
+        // Load annotations for this PDF
+        loadAnnotationsForCurrentPdf();
+        
+        // Enable/disable navigation buttons
+        updateUIState();
+      }).catch(function(error) {
+        console.error('Error loading PDF:', error);
+        loadingSpinner.style.display = 'none';
+        alert('Kunde inte ladda PDF: ' + error.message);
+      });
+    }
+
+    // Render PDF page
+    function renderPage(num) {
+      pageRendering = true;
+      
+      // Show loading spinner
+      loadingSpinner.style.display = 'block';
+      
+      // Get page
+      pdfDoc.getPage(num).then(function(page) {
+        // Get viewport
+        const viewport = page.getViewport({ scale: scale, rotation: rotation });
+        
+        // Set canvas dimensions
+        pdfCanvas.width = viewport.width;
+        pdfCanvas.height = viewport.height;
+        
+        // Render PDF page
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        
+        const renderTask = page.render(renderContext);
+        
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+          pageRendering = false;
+          loadingSpinner.style.display = 'none';
+          canvasContainer.style.display = 'block';
+          
+          // Render annotations
+          renderAnnotations();
+          
+          if (pageNumPending !== null) {
+            // New page rendering is pending
+            renderPage(pageNumPending);
+            pageNumPending = null;
+          }
+        });
+      });
+      
+      // Update page info
+      pageInfo.textContent = `Sida: ${num} / ${pdfDoc.numPages}`;
+      
+      // Enable/disable navigation buttons
+      updateUIState();
+    }
+
+    // Queue rendering of the page
+    function queueRenderPage(num) {
+      if (pageRendering) {
+        pageNumPending = num;
+      } else {
+        renderPage(num);
+      }
+    }
+
+    // Update UI state based on current settings
+    function updateUIState() {
+      prevPageBtn.disabled = pageNum <= 1;
+      nextPageBtn.disabled = pageNum >= pdfDoc.numPages;
+      
+      // Visual indication for disabled buttons
+      if (prevPageBtn.disabled) {
+        prevPageBtn.style.opacity = 0.5;
+      } else {
+        prevPageBtn.style.opacity = 1;
+      }
+      
+      if (nextPageBtn.disabled) {
+        nextPageBtn.style.opacity = 0.5;
+      } else {
+        nextPageBtn.style.opacity = 1;
+      }
+    }
+
+    // Previous page
+    prevPageBtn.addEventListener('click', function() {
+      if (pageNum <= 1) return;
+      pageNum--;
+      queueRenderPage(pageNum);
+    });
+
+    // Next page
+    nextPageBtn.addEventListener('click', function() {
+      if (pageNum >= pdfDoc.numPages) return;
+      pageNum++;
+      queueRenderPage(pageNum);
+    });
+
+    // Zoom in
+    zoomInBtn.addEventListener('click', function() {
+      scale += 0.25;
+      queueRenderPage(pageNum);
+    });
+
+    // Zoom out
+    zoomOutBtn.addEventListener('click', function() {
+      if (scale <= 0.25) return;
+      scale -= 0.25;
+      queueRenderPage(pageNum);
+    });
+
+    // Rotate
+    rotateBtn.addEventListener('click', function() {
+      rotation = (rotation + 90) % 360;
+      queueRenderPage(pageNum);
+    });
+
+    // Download
+    downloadBtn.addEventListener('click', function() {
+      if (currentPdfUrl) {
+        const link = document.createElement('a');
+        link.href = currentPdfUrl;
+        link.download = filenameDisplay.textContent || 'document.pdf';
+        link.click();
+      }
+    });
+
+    // Toggle annotation mode
+    annotationBtn.addEventListener('click', function() {
+      isAnnotationMode = !isAnnotationMode;
+      
+      if (isAnnotationMode) {
+        annotationBtn.style.backgroundColor = '#e5e7eb';
+        annotationBtn.textContent = 'Avsluta markering';
+        pdfCanvas.style.cursor = 'crosshair';
+      } else {
+        annotationBtn.style.backgroundColor = '';
+        annotationBtn.textContent = 'Markera/Kommentera';
+        pdfCanvas.style.cursor = 'default';
+        
+        // Cancel any ongoing marking
+        if (isMarking) {
+          isMarking = false;
+          annotationDraw.style.display = 'none';
+        }
+      }
+    });
+
+    // Handle keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (pdfDialogOverlay.style.display !== 'block') return;
+      
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        // Next page with right arrow or space
+        if (pageNum < pdfDoc.numPages) {
+          pageNum++;
+          queueRenderPage(pageNum);
+        }
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft') {
+        // Previous page with left arrow
+        if (pageNum > 1) {
+          pageNum--;
+          queueRenderPage(pageNum);
+        }
+        e.preventDefault();
+      } else if (e.key === 'Escape') {
+        // Close dialog with escape
+        pdfDialogOverlay.style.display = 'none';
+        e.preventDefault();
+      }
+    });
+
+    // --- Annotation functionality ---
+
+    // Start marking
+    canvasContainer.addEventListener('mousedown', function(e) {
+      if (!isAnnotationMode) return;
+      
+      const rect = canvasContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      isMarking = true;
+      markingStart = { x, y };
+      
+      // Show annotation drawing
+      annotationDraw.style.display = 'block';
+      annotationDraw.style.left = x + 'px';
+      annotationDraw.style.top = y + 'px';
+      annotationDraw.style.width = '0px';
+      annotationDraw.style.height = '0px';
+    });
+
+    // Update marking
+    canvasContainer.addEventListener('mousemove', function(e) {
+      if (!isMarking) return;
+      
+      const rect = canvasContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      markingEnd = { x, y };
+      
+      // Calculate position and dimensions
+      const left = Math.min(markingStart.x, markingEnd.x);
+      const top = Math.min(markingStart.y, markingEnd.y);
+      const width = Math.abs(markingEnd.x - markingStart.x);
+      const height = Math.abs(markingEnd.y - markingStart.y);
+      
+      // Update annotation drawing
+      annotationDraw.style.left = left + 'px';
+      annotationDraw.style.top = top + 'px';
+      annotationDraw.style.width = width + 'px';
+      annotationDraw.style.height = height + 'px';
+    });
+
+    // End marking
+    canvasContainer.addEventListener('mouseup', function(e) {
+      if (!isMarking) return;
+      
+      const rect = canvasContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      markingEnd = { x, y };
+      isMarking = false;
+      
+      // Hide annotation drawing
+      annotationDraw.style.display = 'none';
+      
+      // Calculate position and dimensions
+      const left = Math.min(markingStart.x, markingEnd.x);
+      const top = Math.min(markingStart.y, markingEnd.y);
+      const width = Math.abs(markingEnd.x - markingStart.x);
+      const height = Math.abs(markingEnd.y - markingStart.y);
+      
+      // Add new annotation if area is large enough
+      if (width > 10 && height > 10) {
+        const newAnnotation = {
+          id: generateId(),
+          rect: {
+            x: left,
+            y: top,
+            width: width,
+            height: height,
+            pageNumber: pageNum
+          },
+          color: statusColors.new_comment,
+          comment: '',
+          status: 'new_comment',
+          createdBy: 'Current User',
+          createdAt: new Date().toISOString()
+        };
+        
+        annotations.push(newAnnotation);
+        renderAnnotations();
+        
+        // Select the new annotation
+        setActiveAnnotation(newAnnotation);
+        
+        // Switch to annotations tab
+        annotationsTab.click();
+      }
+    });
+
+    // Render annotations
+    function renderAnnotations() {
+      // Clear annotation layer
+      annotationLayer.innerHTML = '';
+      
+      // Filter annotations for current page
+      const pageAnnotations = annotations.filter(anno => anno.rect.pageNumber === pageNum);
+      
+      // Create annotation elements
+      pageAnnotations.forEach(anno => {
+        const annoElement = document.createElement('div');
+        annoElement.className = 'pdf-annotation';
+        annoElement.dataset.id = anno.id;
+        
+        // Position and dimensions
+        annoElement.style.left = anno.rect.x + 'px';
+        annoElement.style.top = anno.rect.y + 'px';
+        annoElement.style.width = anno.rect.width + 'px';
+        annoElement.style.height = anno.rect.height + 'px';
+        
+        // Color based on status
+        annoElement.style.backgroundColor = getStatusColor(anno.status, 0.3);
+        annoElement.style.borderColor = getStatusColor(anno.status, 0.7);
+        
+        // Add active class if this is the active annotation
+        if (activeAnnotation && anno.id === activeAnnotation.id) {
+          annoElement.classList.add('active');
+        }
+        
+        // Click handler
+        annoElement.addEventListener('click', function() {
+          setActiveAnnotation(anno);
+        });
+        
+        annotationLayer.appendChild(annoElement);
+      });
+    }
+
+    // Get color for status
+    function getStatusColor(status, alpha = 1) {
+      const baseColor = statusColors[status] || '#727cf5';
+      
+      // For simple alpha, just return with rgba
+      if (alpha < 1) {
+        // Convert hex to rgb
+        const r = parseInt(baseColor.substring(1, 3), 16);
+        const g = parseInt(baseColor.substring(3, 5), 16);
+        const b = parseInt(baseColor.substring(5, 7), 16);
+        
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      
+      return baseColor;
+    }
+
+    // Set active annotation
+    function setActiveAnnotation(annotation) {
+      activeAnnotation = annotation;
+      
+      // Update UI
+      if (annotation) {
+        // Show annotation details
+        noAnnotationSelected.style.display = 'none';
+        annotationDetails.style.display = 'block';
+        
+        // Update details
+        annotationAuthor.textContent = annotation.createdBy;
+        annotationDate.textContent = formatDate(annotation.createdAt);
+        
+        // Map status to readable text
+        const statusText = {
+          new_comment: 'Ny kommentar',
+          action_required: 'Åtgärd krävs',
+          rejected: 'Avvisad',
+          new_review: 'Ny granskning',
+          other_forum: 'Diskuteras i annat forum',
+          resolved: 'Löst'
+        };
+        
+        annotationStatus.textContent = 'Status: ' + (statusText[annotation.status] || annotation.status);
+        annotationStatus.style.color = getStatusColor(annotation.status);
+        
+        // Update comment
+        annotationComment.textContent = annotation.comment || 'Ingen kommentar tillagd.';
+        
+        // Set form values
+        commentInput.value = annotation.comment || '';
+        statusSelect.value = annotation.status;
+      } else {
+        // Hide annotation details
+        noAnnotationSelected.style.display = 'block';
+        annotationDetails.style.display = 'none';
+      }
+      
+      // Update annotation highlighting
+      renderAnnotations();
+    }
+
+    // Save comment
+    saveCommentBtn.addEventListener('click', function() {
+      if (!activeAnnotation) return;
+      
+      // Update annotation
+      activeAnnotation.comment = commentInput.value;
+      activeAnnotation.status = statusSelect.value;
+      
+      // Update UI
+      setActiveAnnotation(activeAnnotation);
+      
+      // Spara till localStorage med rätt nyckel baserad på PDF-id
+      saveAnnotationsToStorage();
+    });
+
+    // Cancel comment
+    cancelCommentBtn.addEventListener('click', function() {
+      if (!activeAnnotation) return;
+      
+      // Reset form
+      commentInput.value = activeAnnotation.comment || '';
+      statusSelect.value = activeAnnotation.status;
+    });
+
+    // Load stored annotations (for demo)
+    try {
+      const storedAnnotations = localStorage.getItem('pdfDialogAnnotations');
+      if (storedAnnotations) {
+        annotations = JSON.parse(storedAnnotations);
+      }
+    } catch (e) {
+      console.error('Error loading stored annotations:', e);
+    }
+    
+    // Stäng funktionen initializeButtons
+    }
+  </script>
+</body>
+</html>

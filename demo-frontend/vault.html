@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValvX Vault</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2><span class="logo-icon">⚡</span> ValvX</h2>
+    </div>
+    
+    <a href="/" class="nav-item">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="/calendar" class="nav-item">
+      <span class="icon">📅</span>
+      <span>Kalender</span>
+    </a>
+    <a href="/notice-board" class="nav-item">
+      <span class="icon">📌</span>
+      <span>Anslagstavla</span>
+    </a>
+    <a href="/vault" class="nav-item active">
+      <span class="icon">📁</span>
+      <span>Vault</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">✏️</span>
+      <span>Tidsrapportering</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">📝</span>
+      <span>Wiki</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">👥</span>
+      <span>Team</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon">⚙️</span>
+      <span>Inställningar</span>
+    </a>
+    
+    <div class="sidebar-footer">
+      &copy; 2025 ValvX Platform
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="header">
+      <h2>Vault</h2>
+      <div class="header-right">
+        <span class="material-symbols-outlined">notifications</span>
+        <div class="avatar">AK</div>
+      </div>
+    </header>
+    
+    <div class="page-content">
+      <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1>Filhantering</h1>
+          <p>
+            Ladda upp, organisera och dela projektdokument och filer.
+          </p>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+          <button style="padding: 8px 16px; background: #1a237e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px; margin-right: 4px;">upload</span> 
+            Ladda upp
+          </button>
+          <button style="padding: 8px 16px; background: white; border: 1px solid #1a237e; color: #1a237e; border-radius: 4px; cursor: pointer;">
+            <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px; margin-right: 4px;">create_new_folder</span> 
+            Ny mapp
+          </button>
+        </div>
+      </div>
+      
+      <div class="container" style="padding: 0; overflow: hidden;">
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 1rem;">
+            <select style="padding: 6px 12px; border: 1px solid #e0e0e0; border-radius: 4px; background: white;">
+              <option>Alla projekt</option>
+              <option>Bygge Norrtälje</option>
+              <option>Renovering Kungsgatan</option>
+              <option>Köpcentrum Malmö</option>
+            </select>
+            
+            <div style="display: flex; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden;">
+              <input type="text" placeholder="Sök filer och mappar..." style="padding: 6px 12px; border: none; width: 250px;" />
+              <button style="background: #f5f5f5; border: none; width: 40px; cursor: pointer;">
+                <span class="material-symbols-outlined">search</span>
+              </button>
+            </div>
+          </div>
+          
+          <div>
+            <select style="padding: 6px 12px; border: 1px solid #e0e0e0; border-radius: 4px; background: white;">
+              <option>Sortera: Senast ändrad</option>
+              <option>Alfabetiskt (A-Ö)</option>
+              <option>Filstorlek</option>
+              <option>Filtyp</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="file-explorer">
+          <div class="folder-tree">
+            <div style="font-weight: bold; margin-bottom: 1rem;">Projektmappar</div>
+            
+            <div class="folder-item">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Bygge Norrtälje</span>
+            </div>
+            <div class="folder-item" style="padding-left: 2rem;">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Ritningar</span>
+            </div>
+            <div class="folder-item" style="padding-left: 2rem; background-color: #e3f2fd; color: #1a237e;">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Dokument</span>
+            </div>
+            <div class="folder-item" style="padding-left: 2rem;">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Foton</span>
+            </div>
+            
+            <div class="folder-item">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Renovering Kungsgatan</span>
+            </div>
+            <div class="folder-item">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Köpcentrum Malmö</span>
+            </div>
+            
+            <div style="font-weight: bold; margin: 1.5rem 0 0.5rem 0;">Gemensamma mappar</div>
+            <div class="folder-item">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Mallar</span>
+            </div>
+            <div class="folder-item">
+              <span class="icon material-symbols-outlined">folder</span>
+              <span>Företagsdokument</span>
+            </div>
+          </div>
+          
+          <div class="file-list">
+            <div style="padding: 0.5rem; font-weight: bold; color: #1a237e;">
+              Bygge Norrtälje > Dokument
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #f5f5f5; font-weight: 500;">
+                  <th style="text-align: left; padding: 12px 8px;">Namn</th>
+                  <th style="text-align: left; padding: 12px 8px;">Ändrad</th>
+                  <th style="text-align: left; padding: 12px 8px;">Storlek</th>
+                  <th style="text-align: left; padding: 12px 8px;">Uppladdad av</th>
+                  <th style="width: 100px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="file-item">
+                  <td>
+                    <div style="display: flex; align-items: center;">
+                      <span class="material-symbols-outlined" style="color: #e53935; margin-right: 10px;">description</span>
+                      <div class="file-details">
+                        <div class="file-name">fasadritning-v2.pdf</div>
+                        <div class="file-meta">PDF-dokument</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>2025-05-14</td>
+                  <td>2.4 MB</td>
+                  <td>Erik Johansson</td>
+                  <td>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">download</span>
+                      </button>
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                
+                <tr class="file-item">
+                  <td>
+                    <div style="display: flex; align-items: center;">
+                      <span class="material-symbols-outlined" style="color: #1565c0; margin-right: 10px;">description</span>
+                      <div class="file-details">
+                        <div class="file-name">projektbeskrivning.docx</div>
+                        <div class="file-meta">Word-dokument</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>2025-05-10</td>
+                  <td>457 KB</td>
+                  <td>Maria Nilsson</td>
+                  <td>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">download</span>
+                      </button>
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                
+                <tr class="file-item">
+                  <td>
+                    <div style="display: flex; align-items: center;">
+                      <span class="material-symbols-outlined" style="color: #43a047; margin-right: 10px;">description</span>
+                      <div class="file-details">
+                        <div class="file-name">budgetberäkning_2025.xlsx</div>
+                        <div class="file-meta">Excel-dokument</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>2025-05-08</td>
+                  <td>1.2 MB</td>
+                  <td>Sofia Berg</td>
+                  <td>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">download</span>
+                      </button>
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                
+                <tr class="file-item">
+                  <td>
+                    <div style="display: flex; align-items: center;">
+                      <span class="material-symbols-outlined" style="color: #fb8c00; margin-right: 10px;">description</span>
+                      <div class="file-details">
+                        <div class="file-name">tidsplan_q2.pptx</div>
+                        <div class="file-meta">PowerPoint-presentation</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>2025-05-05</td>
+                  <td>3.8 MB</td>
+                  <td>Lars Andersson</td>
+                  <td>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">download</span>
+                      </button>
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                
+                <tr class="file-item">
+                  <td>
+                    <div style="display: flex; align-items: center;">
+                      <span class="material-symbols-outlined" style="color: #6a1b9a; margin-right: 10px;">description</span>
+                      <div class="file-details">
+                        <div class="file-name">kontraktsutkast_leverantörer.pdf</div>
+                        <div class="file-meta">PDF-dokument</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>2025-04-28</td>
+                  <td>890 KB</td>
+                  <td>Johan Karlsson</td>
+                  <td>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">download</span>
+                      </button>
+                      <button style="background: none; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

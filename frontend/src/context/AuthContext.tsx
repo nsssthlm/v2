@@ -1,6 +1,24 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from '@services/api';
-import { User, AuthState } from '@types/index';
+import axios from 'axios';
+import api from '../services/api';
+
+// Define types locally instead of importing from types
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  profile_pic?: string;
+}
+
+interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  error: string | null;
+}
 
 // Initial auth state
 const initialState: AuthState = {
@@ -14,12 +32,74 @@ const initialState: AuthState = {
 // Create context
 interface AuthContextProps {
   authState: AuthState;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+// Set up axios interceptor for authentication headers and token refresh
+const setupAxiosInterceptors = () => {
+  // Add token to outgoing requests
+  api.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  // Handle token expiration and refresh
+  api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+      
+      // If error is unauthorized and we haven't tried to refresh yet
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        try {
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (!refreshToken) {
+            // No refresh token available, trigger logout
+            window.dispatchEvent(new Event('auth:logout'));
+            return Promise.reject(error);
+          }
+          
+          // Try to get a new access token
+          const response = await axios.post(`${api.defaults.baseURL}/token/refresh/`, {
+            refresh: refreshToken
+          });
+          
+          console.log('Token refresh successful');
+          
+          const { access } = response.data;
+          
+          // Update stored token
+          localStorage.setItem('access_token', access);
+          
+          // Update header and retry original request
+          originalRequest.headers['Authorization'] = `Bearer ${access}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          // Refresh failed, trigger logout
+          window.dispatchEvent(new Event('auth:logout'));
+          return Promise.reject(refreshError);
+        }
+      }
+      
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Setup interceptors right away
+setupAxiosInterceptors();
 
 // Provider component
 interface AuthProviderProps {
@@ -29,13 +109,27 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>(initialState);
 
+  // Listen for logout events (from token refresh failure)
+  useEffect(() => {
+    const handleLogout = () => {
+      logout();
+    };
+    
+    window.addEventListener('auth:logout', handleLogout);
+    
+    return () => {
+      window.removeEventListener('auth:logout', handleLogout);
+    };
+  }, []);
+
   // Check if user is already logged in when component mounts
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         
         if (!token) {
+          console.log('No token found, user not logged in');
           setAuthState({
             ...initialState,
             loading: false,
@@ -43,9 +137,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
 
+        console.log('Token found, verifying...');
         // Token exists, attempt to validate by getting user info
-        const response = await api.get('/users/me/');
+        const response = await api.get('/me/');
         
+        console.log('User data received:', response.data);
         setAuthState({
           isAuthenticated: true,
           user: response.data as User,
@@ -54,8 +150,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           error: null,
         });
       } catch (error) {
+        console.error('Failed to load user:', error);
         // Token invalid or other error
-        localStorage.removeItem('token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         setAuthState({
           ...initialState,
           loading: false,
@@ -67,7 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Login function
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (username: string, password: string): Promise<void> => {
     try {
       setAuthState((prev) => ({
         ...prev,
@@ -75,16 +173,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null,
       }));
 
-      // Get token
-      const tokenResponse = await api.post('/token/', { email, password });
+      console.log('Attempting login with:', { username });
+      
+      // Get token - use the Django JWT endpoint
+      // Note: Django requires email, not username for authentication
+      const tokenResponse = await api.post('/token/', { email: username, password });
+      console.log('Token response received:', tokenResponse.data);
+      
+      // Extract tokens
       const { access, refresh } = tokenResponse.data;
       
-      // Store tokens
-      localStorage.setItem('token', access);
-      localStorage.setItem('refreshToken', refresh);
+      console.log('Login successful, storing tokens');
       
-      // Get user info
-      const userResponse = await api.get('/users/me/');
+      // Store tokens
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      
+      // Now fetch user data with the token
+      api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+      const userResponse = await api.get('/me/');
+      console.log('User data received:', userResponse.data);
       
       setAuthState({
         isAuthenticated: true,
@@ -93,30 +201,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         loading: false,
         error: null,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Login error:', error);
       setAuthState((prev) => ({
         ...prev,
         isAuthenticated: false,
         user: null,
         token: null,
         loading: false,
-        error: 'Invalid credentials or server error',
+        error: error.response?.data?.detail || 'Ogiltiga inloggningsuppgifter eller serverfel.',
       }));
     }
   };
 
   // Logout function
-  const logout = (): void => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      token: null,
-      loading: false,
-      error: null,
-    });
+  const logout = async (): Promise<void> => {
+    try {
+      console.log('Logout initiated');
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (refreshToken) {
+        // Call backend logout endpoint to blacklist token
+        await api.post('/logout/', { refresh: refreshToken });
+        console.log('Token blacklisted successfully');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear tokens and reset state regardless of API call success
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      console.log('Tokens cleared from storage');
+      
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        loading: false,
+        error: null,
+      });
+    }
   };
 
   // Clear any error messages
