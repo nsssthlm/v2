@@ -160,8 +160,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 overflow: 'auto'
               }}
             >
-              <iframe 
+              <embed 
                 src={pdfUrl}
+                type="application/pdf" 
                 style={{
                   width: '100%',
                   height: '100%',
