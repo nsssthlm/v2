@@ -48,7 +48,8 @@ export default defineConfig({
     fs: {
       strict: false,
       allow: ['..'],
-    }
+    },
+    allowedHosts: ['3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev']
   },
   preview: {
     host: '0.0.0.0',
