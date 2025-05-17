@@ -18,6 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FolderIcon from '@mui/icons-material/Folder';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
+import PDFDialog from '../../components/PDFDialog';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -50,14 +51,27 @@ interface FileRowProps {
   folder: string;
   status?: string;
   id: string;
+  fileUrl: string;
   onDelete?: (id: string) => void;
+  onPdfClick: (url: string, name: string) => void;
 }
 
-const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, status, id, onDelete }: FileRowProps) => {
+const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, status, id, fileUrl, onDelete, onPdfClick }: FileRowProps) => {
   return (
     <tr>
       <td style={{ padding: '12px 8px' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1,
+            cursor: 'pointer',
+            '&:hover': {
+              color: 'primary.main'
+            }
+          }}
+          onClick={() => onPdfClick(fileUrl, name)}
+        >
           <Box component="span" sx={{ color: 'primary.500' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
@@ -80,7 +94,10 @@ const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, s
           size="sm" 
           variant="plain" 
           color="danger"
-          onClick={() => onDelete && onDelete(id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete && onDelete(id);
+          }}
         >
           <DeleteIcon fontSize="small" />
         </IconButton>
@@ -95,6 +112,10 @@ const FolderPageNew = () => {
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  
+  // PDF Dialog state
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
 
   const fetchFolderData = async () => {
     setLoading(true);
@@ -145,6 +166,13 @@ const FolderPageNew = () => {
     console.log("Radera fil:", fileId);
     // Efter radering skulle vi uppdatera listan
     // fetchFolderData();
+  };
+  
+  // Hantera klick på PDF-filer
+  const handlePdfClick = (fileUrl: string, fileName: string) => {
+    console.log("Öppnar PDF:", fileUrl, fileName);
+    setSelectedPdf({ url: fileUrl, name: fileName });
+    setPdfDialogOpen(true);
   };
 
   if (loading) {
@@ -278,7 +306,9 @@ const FolderPageNew = () => {
                   uploadedBy="user@example.com"
                   folder={folderData.name}
                   id={file.id || `pdf_${index}`}
+                  fileUrl={file.file}
                   onDelete={handleDeleteFile}
+                  onPdfClick={handlePdfClick}
                 />
               ))
             )}
@@ -293,6 +323,16 @@ const FolderPageNew = () => {
         folderSlug={slug}
         onSuccess={handleUploadSuccess}
       />
+      
+      {/* PDF Viewer Dialog */}
+      {selectedPdf && (
+        <PDFDialog
+          open={pdfDialogOpen}
+          onClose={() => setPdfDialogOpen(false)}
+          pdfUrl={selectedPdf.url}
+          filename={selectedPdf.name}
+        />
+      )}
     </Box>
   );
 };
