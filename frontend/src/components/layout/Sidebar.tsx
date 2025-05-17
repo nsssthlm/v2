@@ -26,6 +26,12 @@ import { useProject } from '../../contexts/ProjectContext';
 // Importera MUI ikoner för menyn 
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MessageIcon from '@mui/icons-material/Message';
+import CalendarIcon from '@mui/icons-material/CalendarToday';
+import WorkspaceIcon from '@mui/icons-material/Work';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import FolderIcon from '@mui/icons-material/Folder';
+import WikiIcon from '@mui/icons-material/MenuBook';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
 
 // Menu items for the sidebar
 const menuItems = [
