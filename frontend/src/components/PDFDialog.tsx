@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Box, 
   Typography, 
@@ -14,6 +14,8 @@ import {
   Avatar,
   CircularProgress
 } from '@mui/joy';
+
+// Importera andra verktyg för visning
 
 // Icons
 import CloseIcon from '@mui/icons-material/Close';
@@ -33,8 +35,16 @@ interface PDFDialogProps {
 
 const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
   const [activeTab, setActiveTab] = useState<string>('detaljer');
-  const [pageNumber, setPageNumber] = useState(1);
-  const [totalPages, setTotalPages] = useState(5); // Simulerat antal sidor
+  const [currentZoom, setCurrentZoom] = useState(100);
+  
+  // Enklare funktioner för navigering som vi kan använda senare
+  const zoomIn = () => {
+    setCurrentZoom(prev => Math.min(prev + 10, 200));
+  };
+  
+  const zoomOut = () => {
+    setCurrentZoom(prev => Math.max(prev - 10, 50));
+  };
 
   const handleDownload = () => {
     if (pdfUrl) {
@@ -88,24 +98,50 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* Page navigation */}
-              <Button
-                size="sm"
-                variant="soft"
-                color="primary"
-                startDecorator={<ArrowBackIcon fontSize="small" />}
-                endDecorator={<ArrowForwardIcon fontSize="small" />}
-              >
-                Sida {pageNumber} av {totalPages}
-              </Button>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <IconButton 
+                  size="sm" 
+                  variant="soft" 
+                  color="primary" 
+                  onClick={() => {}}
+                >
+                  <ArrowBackIcon fontSize="small" />
+                </IconButton>
+                <Typography level="body-sm" sx={{ mx: 1 }}>
+                  Sida 1 av 5
+                </Typography>
+                <IconButton 
+                  size="sm" 
+                  variant="soft" 
+                  color="primary" 
+                  onClick={() => {}}
+                >
+                  <ArrowForwardIcon fontSize="small" />
+                </IconButton>
+              </Box>
               
               {/* Zoom control */}
-              <Button
-                size="sm"
-                variant="soft"
-                color="primary"
-              >
-                100%
-              </Button>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <IconButton 
+                  size="sm" 
+                  variant="soft" 
+                  color="primary"
+                  onClick={zoomOut}
+                >
+                  <span>-</span>
+                </IconButton>
+                <Typography level="body-sm" sx={{ mx: 1 }}>
+                  {currentZoom}%
+                </Typography>
+                <IconButton 
+                  size="sm" 
+                  variant="soft" 
+                  color="primary"
+                  onClick={zoomIn}
+                >
+                  <span>+</span>
+                </IconButton>
+              </Box>
               
               {/* Action buttons */}
               <Button
@@ -154,23 +190,54 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 flex: 1, 
                 bgcolor: '#333',
                 display: 'flex',
+                flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
                 position: 'relative',
-                overflow: 'auto'
+                overflow: 'hidden'
               }}
             >
-              <embed 
-                src={pdfUrl}
-                type="application/pdf" 
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  backgroundColor: 'white'
+              <Box 
+                sx={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  bgcolor: '#333',
+                  overflow: 'auto',
+                  position: 'relative'
                 }}
-                title={filename}
-              />
+              >
+                {/* Visa den faktiska PDF:en med object-tag som fungerar bättre */}
+                <object
+                  data={pdfUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                  style={{ 
+                    background: 'white',
+                    display: 'block',
+                    margin: '0 auto' 
+                  }}
+                >
+                  <Typography level="body-sm" sx={{ color: 'white', p: 2 }}>
+                    Det går inte att visa PDF-filen. <a href={pdfUrl} target="_blank" rel="noopener noreferrer">Ladda ner</a> istället.
+                  </Typography>
+                </object>
+                
+                {/* Gröna sidramen för designen som matchar bild 2 */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    width: '8px',
+                    backgroundColor: '#4caf50'
+                  }}
+                />
+              </Box>
               
               {/* Progress bar at bottom */}
               <Box 
@@ -188,7 +255,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               >
                 <Box 
                   sx={{ 
-                    width: `${(pageNumber / totalPages) * 100}%`, 
+                    width: '100%', 
                     height: '100%', 
                     bgcolor: '#4caf50'
                   }}
