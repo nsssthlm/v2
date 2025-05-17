@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert } from '@mui/joy';
+import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
-import PDFViewer from '../../components/PDFViewer';
+import EnhancedPDFViewer from '../../components/EnhancedPDFViewer';
+import { usePDFDialog } from '../../contexts/PDFDialogContext';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -35,13 +36,19 @@ const FolderPage = () => {
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   
-  // PDF-visare
-  const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
+  // PDF-visare via kontext
+  const { openPDFDialog } = usePDFDialog();
+  const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string, folderId: string } | null>(null);
   
   // Hantera klick på PDF-filer
   const handlePdfClick = (fileUrl: string, fileName: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName);
-    setSelectedPdf({ url: fileUrl, name: fileName });
+    // Öppna PDF:en med den förbättrade visaren i dialog-läge
+    openPDFDialog({
+      initialUrl: fileUrl,
+      filename: fileName,
+      folderId: slug ? parseInt(slug.split('-')[1]) : null,
+    });
   };
 
   const fetchFolderData = async () => {
@@ -202,15 +209,7 @@ const FolderPage = () => {
         onSuccess={handleUploadSuccess}
       />
       
-      {/* PDF Viewer */}
-      {selectedPdf && (
-        <PDFViewer
-          open={selectedPdf !== null}
-          onClose={() => setSelectedPdf(null)}
-          pdfUrl={selectedPdf.url}
-          fileName={selectedPdf.name}
-        />
-      )}
+      {/* Äldre PDF-läsaren togs bort eftersom vi nu använder PDFDialogContext för att visa PDF-filer */}
     </Box>
   );
 };

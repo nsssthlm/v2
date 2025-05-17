@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Modal, ModalDialog } from '@mui/joy';
-import EnhancedPDFViewer from "../components/EnhancedPDFViewer";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import EnhancedPDFViewer from "@/components/EnhancedPDFViewer";
 
 // Typ för dialogen
 interface PDFDialogState {
@@ -51,8 +51,10 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
       
-      <Modal open={dialogState.isOpen} onClose={() => closePDFDialog()}>
-        <ModalDialog sx={{ maxWidth: '90vw', maxHeight: '90vh', width: '90vw', height: '90vh', p: 0, overflow: 'hidden' }}>
+      <Dialog open={dialogState.isOpen} onOpenChange={isOpen => {
+        if (!isOpen) closePDFDialog();
+      }}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] w-[90vw] h-[90vh] p-0 overflow-hidden">
           {dialogState.isOpen && (
             <EnhancedPDFViewer
               fileId={dialogState.fileId}
@@ -70,8 +72,8 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
               folderId={dialogState.folderId} // Skicka med folderId till PDF-visaren för korrekt mappassociation
             />
           )}
-        </ModalDialog>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </PDFDialogContext.Provider>
   );
 }

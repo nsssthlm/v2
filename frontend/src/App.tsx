@@ -5,6 +5,7 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
 import NotFoundPage from './pages/NotFoundPage';
 import { ProjectProvider } from './contexts/ProjectContext';
+import { PDFDialogProvider } from './contexts/PDFDialogContext';
 import theme from './theme'; // Importera vårt anpassade SEB-tema
 
 // Vault pages
