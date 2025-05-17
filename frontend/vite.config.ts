@@ -40,7 +40,7 @@ export default defineConfig({
     strictPort: true,
     cors: true,
     hmr: {
-      host: 'localhost',
+      host: '0.0.0.0',
     },
     watch: {
       usePolling: true,
@@ -49,6 +49,12 @@ export default defineConfig({
       strict: false,
       allow: ['..'],
     }
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 5000,
+    strictPort: true,
+    cors: true
   },
   define: {
     'process.env.VITE_API_URL': JSON.stringify(`${backendUrl}/api`),
