@@ -33,41 +33,32 @@ export default defineConfig({
       '@types': path.resolve(__dirname, './src/types'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@hooks': path.resolve(__dirname, './src/hooks')
-    },
-    server: {
+    }
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5000,
+    strictPort: true,
+    cors: true,
+    hmr: {
       host: '0.0.0.0',
-      port: 5000,
-      strictPort: true,
-      cors: true,
-      hmr: {
-        host: '0.0.0.0',
-      },
-      watch: {
-        usePolling: true,
-      },
-      // Add allowedHosts to fix the blocking issue with Replit domain
-      proxy: {
-        '/api': {
-          target: 'http://localhost:8000',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path
-        }
-      },
-      fs: {
-        strict: true,
-        allow: ['.'],
-      },
-      // Add the Replit domain to allowed hosts
-      origin: '0.0.0.0:5000',
-      allowedHosts: ['all', '3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev'],
     },
-    proxy: {
-      '/api': {
-        target: backendUrl,
-        changeOrigin: true,
-        secure: false,
-      }
+    watch: {
+      usePolling: true,
+    },
+    fs: {
+      strict: true,
+      allow: ['.'],
+    },
+    // Add the Replit domain to allowed hosts
+    origin: '0.0.0.0:5000',
+    allowedHosts: ['all', '3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev'],
+  },
+  proxy: {
+    '/api': {
+      target: backendUrl,
+      changeOrigin: true,
+      secure: false,
     }
   },
   define: {
