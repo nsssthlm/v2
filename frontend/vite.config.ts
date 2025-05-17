@@ -19,7 +19,6 @@ const getBackendUrl = () => {
 
 const backendUrl = getBackendUrl();
 
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -41,24 +40,14 @@ export default defineConfig({
     strictPort: true,
     cors: true,
     hmr: {
-      host: '0.0.0.0',
+      host: 'localhost',
     },
     watch: {
       usePolling: true,
     },
     fs: {
-      strict: true,
-      allow: ['.'],
-    },
-    // Add the Replit domain to allowed hosts
-    origin: '0.0.0.0:5000',
-    allowedHosts: ['all', '3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev'],
-  },
-  proxy: {
-    '/api': {
-      target: backendUrl,
-      changeOrigin: true,
-      secure: false,
+      strict: false,
+      allow: ['..'],
     }
   },
   define: {
