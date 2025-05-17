@@ -33,6 +33,6 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-    allowedHosts: ["fbe63b48-eab5-47bd-acbc-11b3091c8b79-00-37gww3ixj0zy1.janeway.replit.dev"]
+    allowedHosts: ["3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev"]
   },
 });
