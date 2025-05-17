@@ -17,7 +17,7 @@ import VersionsPage from './pages/vault/versions/VersionsPage';
 import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 
 // Folder pages
-import FolderPage from './pages/folders/FolderPage';
+import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
 
 // The main App component doesn't access context directly
@@ -48,7 +48,7 @@ function App() {
                 
                 {/* Folder routes */}
                 <Route path="folders" element={<FolderListPage />} />
-                <Route path="folders/:slug" element={<FolderPage />} />
+                <Route path="folders/:slug" element={<FolderPageNew />} />
                 
                 {/* Vault routes */}
                 <Route path="vault">
