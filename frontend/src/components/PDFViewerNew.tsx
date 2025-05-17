@@ -18,11 +18,8 @@ import {
   Avatar
 } from '@mui/joy';
 
-// Konfigurera PDF.js worker lokalt istället för via CDN
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
+// Konfigurera PDF.js worker med en CDN som är säkrare
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 // Icons
 import ZoomInIcon from '@mui/icons-material/ZoomIn';

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
-import PDFViewerNew from '../../components/PDFViewerNew';
+import SimplePDFViewer from '../../components/SimplePDFViewer';
 import { usePDFDialog } from '../../contexts/PDFDialogContext';
 
 // Cache för mappdata för att minska inladdningstiden
@@ -222,10 +222,9 @@ const FolderPage = () => {
             </Button>
           </Box>
           
-          <PDFViewerNew
+          <SimplePDFViewer
             initialUrl={selectedPdf.url}
             filename={selectedPdf.name}
-            folderId={Number(selectedPdf.folderId.split('-')[1])}
             onClose={() => setSelectedPdf(null)}
           />
         </Box>
