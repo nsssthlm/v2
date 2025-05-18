@@ -6,6 +6,7 @@ import SimpleBarChart from '../../components/dashboard/SimpleBarChart';
 import SimplePieChart from '../../components/dashboard/SimplePieChart';
 import RecentActivityList from '../../components/dashboard/RecentActivityList';
 import TopProjectsTable from '../../components/dashboard/TopProjectsTable';
+import RevenueLineChart from '../../components/dashboard/RevenueLineChart';
 import { 
   metricsData, 
   projectChartData, 
@@ -22,7 +23,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 // Dashboard Widget typ
 export interface DashboardWidget {
   id: string;
-  type: 'metrics' | 'barChart' | 'pieChart' | 'topProjects' | 'recentActivity';
+  type: 'metrics' | 'barChart' | 'pieChart' | 'topProjects' | 'recentActivity' | 'revenueLineChart';
   title: string;
   size: 'small' | 'medium' | 'large';
   metricIndex?: number;
@@ -39,10 +40,11 @@ const Dashboard = () => {
     { id: 'metrics-1', type: 'metrics', title: metricsData[1].title, metricIndex: 1, size: 'small', order: 1, visible: true },
     { id: 'metrics-2', type: 'metrics', title: metricsData[2].title, metricIndex: 2, size: 'small', order: 2, visible: true },
     { id: 'metrics-3', type: 'metrics', title: metricsData[3].title, metricIndex: 3, size: 'small', order: 3, visible: true },
-    { id: 'barChart', type: 'barChart', title: 'PROJEKTIONER VS FAKTISKA', size: 'medium', order: 4, visible: true },
-    { id: 'pieChart', type: 'pieChart', title: 'PROJEKTTYPER', size: 'medium', order: 5, visible: true },
-    { id: 'topProjects', type: 'topProjects', title: 'TOPPROJEKT', size: 'medium', order: 6, visible: true },
-    { id: 'recentActivity', type: 'recentActivity', title: 'SENASTE AKTIVITET', size: 'medium', order: 7, visible: true },
+    { id: 'revenueLineChart', type: 'revenueLineChart', title: 'INTÄKTER', size: 'medium', order: 4, visible: true },
+    { id: 'barChart', type: 'barChart', title: 'PROJEKTIONER VS FAKTISKA', size: 'medium', order: 5, visible: true },
+    { id: 'pieChart', type: 'pieChart', title: 'PROJEKTTYPER', size: 'medium', order: 6, visible: true },
+    { id: 'topProjects', type: 'topProjects', title: 'TOPPROJEKT', size: 'medium', order: 7, visible: true },
+    { id: 'recentActivity', type: 'recentActivity', title: 'SENASTE AKTIVITET', size: 'medium', order: 8, visible: true },
   ];
   
   // State för widgets
@@ -179,6 +181,12 @@ const Dashboard = () => {
           <RecentActivityList 
             title={widget.title}
             activities={recentActivityData}
+          />
+        );
+      case 'revenueLineChart':
+        return (
+          <RevenueLineChart 
+            title={widget.title}
           />
         );
       default:
