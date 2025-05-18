@@ -86,26 +86,28 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {/* Page navigation - blå knappar som i din bild */}
+              {/* Page navigation - gröna knappar */}
               <Button
                 size="sm"
                 variant="soft"
-                color="primary"
-                startDecorator={<ArrowBackIcon fontSize="small" />}
+                color="success"
                 sx={{ 
-                  bgcolor: '#6366f1', 
+                  bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#4f46e5' }
+                  '&:hover': { bgcolor: '#3d8b40' },
+                  minWidth: '40px',
+                  px: 1
                 }}
               >
+                ←
               </Button>
               
               <Button
                 size="sm"
                 variant="soft"
-                color="neutral"
+                color="success"
                 sx={{
-                  bgcolor: '#6366f1', 
+                  bgcolor: '#4caf50', 
                   color: 'white',
                   borderRadius: 'md',
                   px: 2
@@ -117,17 +119,34 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               <Button
                 size="sm"
                 variant="soft"
-                color="primary"
-                endDecorator={<ArrowForwardIcon fontSize="small" />}
+                color="success"
                 sx={{ 
-                  bgcolor: '#6366f1', 
+                  bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#4f46e5' }
+                  '&:hover': { bgcolor: '#3d8b40' },
+                  minWidth: '40px',
+                  px: 1
                 }}
               >
+                →
               </Button>
               
-              {/* Zoom control - grön knapp */}
+              {/* Zoom control - gröna knappar */}
+              <Button
+                size="sm"
+                variant="soft"
+                color="success"
+                sx={{ 
+                  bgcolor: '#4caf50', 
+                  color: 'white',
+                  borderRadius: 'md',
+                  minWidth: '40px',
+                  px: 1
+                }}
+              >
+                -
+              </Button>
+              
               <Button
                 size="sm"
                 variant="soft"
@@ -150,8 +169,8 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   bgcolor: '#4caf50', 
                   color: 'white',
                   borderRadius: 'md',
-                  minWidth: '32px',
-                  p: 0
+                  minWidth: '40px',
+                  px: 1
                 }}
               >
                 +
@@ -164,9 +183,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 color="primary"
                 startDecorator={<BookmarkBorderIcon />}
                 sx={{ 
-                  bgcolor: '#6366f1', 
+                  bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#4f46e5' }
+                  '&:hover': { bgcolor: '#3d8b40' }
                 }}
               >
                 Versioner
@@ -177,9 +196,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 variant="soft"
                 color="primary"
                 sx={{ 
-                  bgcolor: '#6366f1', 
+                  bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#4f46e5' }
+                  '&:hover': { bgcolor: '#3d8b40' }
                 }}
               >
                 Markera område
@@ -191,9 +210,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 color="primary"
                 startDecorator={<UploadIcon />}
                 sx={{ 
-                  bgcolor: '#6366f1', 
+                  bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#4f46e5' }
+                  '&:hover': { bgcolor: '#3d8b40' }
                 }}
               >
                 Ny version
