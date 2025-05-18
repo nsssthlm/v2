@@ -205,22 +205,19 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   position: 'relative'
                 }}
               >
-                {/* Visa den faktiska PDF:en med object-tag som fungerar bättre */}
-                <object
-                  data={pdfUrl}
-                  type="application/pdf"
+                {/* Visa den faktiska PDF:en med iframe som fungerar bättre */}
+                <iframe
+                  src={pdfUrl}
                   width="100%"
                   height="100%"
                   style={{ 
                     background: 'white',
                     display: 'block',
-                    margin: '0 auto' 
+                    margin: '0 auto',
+                    border: 'none'
                   }}
-                >
-                  <Typography level="body-sm" sx={{ color: 'white', p: 2 }}>
-                    Det går inte att visa PDF-filen. <a href={pdfUrl} target="_blank" rel="noopener noreferrer">Ladda ner</a> istället.
-                  </Typography>
-                </object>
+                  title={filename}
+                />
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
                 <Box

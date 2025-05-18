@@ -44,22 +44,27 @@ export const PDFDialogProvider: React.FC<{ children: ReactNode }> = ({ children 
   return (
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
-      <Dialog
+      <Modal
         open={dialogState.isOpen}
         onClose={() => closePDFDialog()}
-        size="lg"
         sx={{
-          '& .MuiDialogContent-root': {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <ModalDialog
+          variant="outlined"
+          size="lg"
+          sx={{
             p: 0,
             width: '90vw', 
             maxWidth: '1400px',
             height: '90vh',
             maxHeight: '800px',
             overflow: 'hidden'
-          }
-        }}
-      >
-        <DialogContent>
+          }}
+        >
           {dialogState.isOpen && dialogState.initialUrl && (
             <iframe 
               src={dialogState.initialUrl}
@@ -71,8 +76,8 @@ export const PDFDialogProvider: React.FC<{ children: ReactNode }> = ({ children 
               title={dialogState.filename || 'PDF'}
             />
           )}
-        </DialogContent>
-      </Dialog>
+        </ModalDialog>
+      </Modal>
     </PDFDialogContext.Provider>
   );
 };
