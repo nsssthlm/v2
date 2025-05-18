@@ -26,7 +26,7 @@ def directory_data(request, slug):
     
     # Hämta filer i denna mapp
     files = File.objects.filter(directory=directory, is_latest=True).values(
-        'name', 'file', 'content_type', 'created_at'
+        'id', 'name', 'file', 'content_type', 'created_at'
     )
     
     # Formatera data för frontend

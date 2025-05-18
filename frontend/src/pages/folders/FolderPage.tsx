@@ -125,8 +125,26 @@ const FolderPage = () => {
     try {
       console.log("Radera fil:", fileId);
       
-      // Anropa API för att radera filen
-      await axios.delete(`${API_BASE_URL}/files/${fileId}/`);
+      // Kontrollera om fileId börjar med "pdf_"
+      if (fileId.startsWith("pdf_")) {
+        const fileIndex = parseInt(fileId.replace("pdf_", ""));
+        if (folderData && folderData.files && folderData.files[fileIndex]) {
+          // Använd file_identifier från folderData för att hitta rätt fil
+          const fileInfo = folderData.files[fileIndex];
+          if (fileInfo.id) {
+            console.log("Radera fil med ID:", fileInfo.id);
+            // Anropa API för att radera filen med ett korrekt ID
+            await axios.delete(`${API_BASE_URL}/files/${fileInfo.id}/`);
+          } else {
+            throw new Error("Filen har inget giltigt ID");
+          }
+        } else {
+          throw new Error("Kunde inte hitta filen i listan");
+        }
+      } else {
+        // Om fileId redan är ett riktigt ID
+        await axios.delete(`${API_BASE_URL}/files/${fileId}/`);
+      }
       
       // Rensa cachen för denna mapp
       delete folderDataCache[slug];
