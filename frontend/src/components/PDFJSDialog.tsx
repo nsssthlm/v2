@@ -24,8 +24,8 @@ interface PDFJSDialogProps {
   filename: string;
 }
 
-// Gröna SEB-färgen för knappar och highlights
-const SEBGreen = '#007934';
+// Blå färgen för knappar och highlights
+const mainColor = '#1976d2';
 
 const PDFJSDialog: React.FC<PDFJSDialogProps> = ({ open, onClose, pdfUrl, filename }) => {
   const [numPages, setNumPages] = useState<number>(0);
@@ -154,7 +154,7 @@ const PDFJSDialog: React.FC<PDFJSDialogProps> = ({ open, onClose, pdfUrl, filena
       {/* Header med titel och stängknapp */}
       <DialogTitle 
         sx={{ 
-          backgroundColor: SEBGreen, 
+          backgroundColor: mainColor, 
           color: 'white', 
           display: 'flex', 
           alignItems: 'center',
@@ -247,7 +247,7 @@ const PDFJSDialog: React.FC<PDFJSDialogProps> = ({ open, onClose, pdfUrl, filena
             <Button 
               onClick={() => window.open(pdfUrl, '_blank')} 
               variant="contained" 
-              sx={{ mt: 2, backgroundColor: SEBGreen, '&:hover': { backgroundColor: '#005a25' } }}
+              sx={{ mt: 2, backgroundColor: mainColor, '&:hover': { backgroundColor: '#1565c0' } }}
             >
               Öppna i ny flik
             </Button>
