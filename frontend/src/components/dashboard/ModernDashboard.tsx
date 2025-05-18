@@ -83,8 +83,11 @@ const metricsData = [
 const ModernDashboard: React.FC = () => {
   const { currentProject } = useProject();
   
-  // Vi har avsiktligen tagit bort det duplicerade handleCalendarDateClick här
-  // Den finns längre ner i filen
+  // Hantera klick på ett datum i kalendern
+  const handleCalendarDateClick = (date: Date) => {
+    console.log('Datum klickat:', date.toLocaleDateString('sv-SE'));
+    // Här kan vi lägga till mer funktionalitet i framtiden, t.ex. visa aktiviteter för det valda datumet
+  };
   
   // State för dashboard widgets
   const [widgets, setWidgets] = useState<DashboardWidget[]>(() => {
@@ -213,11 +216,7 @@ const ModernDashboard: React.FC = () => {
     icon?: string;
   };
 
-  // Hantera klick på ett datum från kalendern
-  const handleCalendarDateClicked = (date: Date) => {
-    console.log('Datum valt:', date.toLocaleDateString('sv-SE'));
-    // Här kan du implementera funktionalitet för att visa aktiviteter för det valda datumet
-  };
+  // Vi tar bort den duplicerade funktionen här eftersom vi redan har handleCalendarDateClick ovan
 
   // Rendera en specifik widget baserat på dess typ
   const renderWidget = (widget: DashboardWidget) => {
@@ -318,7 +317,7 @@ const ModernDashboard: React.FC = () => {
           <CalendarWidget
             title={widget.title}
             height={height}
-            onDateClick={handleCalendarDateClicked}
+            onDateClick={handleCalendarDateClick}
             markedDates={markedDates}
           />
         );
