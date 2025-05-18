@@ -195,20 +195,25 @@ const FolderPageNew = () => {
     // Extrahera den faktiska sökvägen från URL:en
     let fullUrl = fileUrl;
     
+    // Kontrollera om det är en API-URL från web_api.py där vi får komplett sökväg till filen
+    if (fileUrl.includes('/api/files/web/')) {
+      // Hitta vilken del av URL:en som innehåller project_files
+      if (fileUrl.includes('project_files/')) {
+        // Extrahera sökvägen från project_files och framåt
+        const pathFromProject = fileUrl.substring(fileUrl.indexOf('project_files/'));
+        fullUrl = `${API_BASE_URL}/media/${pathFromProject}`;
+      } else {
+        // Om URL:en inte innehåller project_files, använd sista delen som filnamn
+        const parts = fileUrl.split('/');
+        const filename = parts[parts.length - 1];
+        fullUrl = `${API_BASE_URL}/media/project_files/${filename}`;
+      }
+    }
     // Kontrollera om den innehåller media/ - det är en korrekt sökväg
-    if (fileUrl.includes('media/')) {
+    else if (fileUrl.includes('media/')) {
       const mediaPath = fileUrl.substring(fileUrl.indexOf('media/'));
       fullUrl = `${API_BASE_URL}/${mediaPath}`;
     } 
-    // Kontrollera om det är en direkt URL till en API-endpoint
-    else if (fileUrl.includes('/api/files/web/')) {
-      // Hitta faktiska filnamnet från slutet av URL:en
-      const parts = fileUrl.split('/');
-      // Få ut filnamnet från sista delen
-      const filename = parts[parts.length - 1];
-      // Bygg om URL:en för direkt åtkomst
-      fullUrl = `${API_BASE_URL}/media/project_files/${filename}`;
-    }
     // För alla andra typer av URL:er
     else if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
       fullUrl = `${API_BASE_URL}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
