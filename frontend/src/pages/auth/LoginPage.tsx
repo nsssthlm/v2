@@ -9,20 +9,20 @@ import {
   Stack,
   FormLabel,
   Input,
-  Checkbox,
-  Divider,
-  Alert
+  Tabs,
+  TabList,
+  Tab,
+  Divider
 } from '@mui/joy';
 
 // URL till skogsbilden i public-mappen
 const forestImageUrl = '/images/swedish-forest.webp';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('login');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +32,8 @@ const LoginPage = () => {
     setTimeout(() => {
       // Här skulle riktig inloggningslogik finnas
       setIsLoading(false);
-      setErrorMessage(''); // Rensa eventuella felmeddelanden vid framgång
       // Redirect till dashboard/hem efter inloggning
+      window.location.href = '/dashboard';
     }, 1000);
   };
 
@@ -46,163 +46,154 @@ const LoginPage = () => {
         position: 'relative'
       }}
     >
-      {/* Bakgrundsbilden som täcker hela skärmen */}
+      {/* Vänster sida med formulär */}
       <Box
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `url(${forestImageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          zIndex: 0
-        }}
-      />
-      
-      {/* Mörkare overlay ovanpå bakgrundsbilden */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          zIndex: 1
-        }}
-      />
-      
-      {/* Innehåll */}
-      <Box
-        sx={{
+          width: '100%',
+          maxWidth: '450px',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
           justifyContent: 'center',
-          width: '100%',
-          zIndex: 2,
-          p: 2
+          alignItems: 'center',
+          p: 4,
+          backgroundColor: 'white',
+          zIndex: 2
         }}
       >
-        {/* ValvX-logotyp/text */}
-        <Typography
-          level="h1"
-          sx={{
-            fontSize: '2.5rem',
-            fontWeight: 'bold',
-            color: 'white',
-            mb: 4,
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          ValvX
-        </Typography>
-        
-        {/* Inloggningskort */}
         <Card
           variant="outlined"
           sx={{
-            maxWidth: 400,
             width: '100%',
+            maxWidth: '350px',
             p: 3,
-            boxShadow: 'lg',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)'
+            boxShadow: 'sm',
+            border: '1px solid #e0e0e0'
           }}
         >
-          <Typography level="h2" sx={{ fontWeight: 'bold', mb: 3, textAlign: 'center' }}>
-            Logga in
+          {/* Titel */}
+          <Typography
+            level="h3"
+            sx={{
+              fontWeight: 'bold',
+              mb: 1,
+              color: '#333'
+            }}
+          >
+            ValvX
           </Typography>
+          <Typography
+            level="body-sm"
+            sx={{ mb: 3, color: '#666' }}
+          >
+            Sign in to your account or create a new one
+          </Typography>
+
+          {/* Tabs för Login/Register */}
+          <Tabs
+            value={activeTab}
+            onChange={(_, value) => setActiveTab(value as string)}
+            sx={{ mb: 3 }}
+          >
+            <TabList>
+              <Tab value="login">Login</Tab>
+              <Tab value="register">Register</Tab>
+            </TabList>
+          </Tabs>
           
-          {errorMessage && (
-            <Alert color="danger" sx={{ mb: 3 }}>
-              {errorMessage}
-            </Alert>
+          {/* Inloggningsformulär */}
+          {activeTab === 'login' && (
+            <form onSubmit={handleLogin}>
+              <Stack spacing={3}>
+                <FormControl>
+                  <FormLabel>Username</FormLabel>
+                  <Input
+                    type="text"
+                    placeholder="johnsmith"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </FormControl>
+                
+                <FormControl>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </FormControl>
+                
+                <Button
+                  type="submit"
+                  loading={isLoading}
+                  fullWidth
+                  sx={{ 
+                    mt: 1, 
+                    backgroundColor: '#4caf50', // Grön färg som matchar projektet
+                    '&:hover': {
+                      backgroundColor: '#388e3c'
+                    }
+                  }}
+                >
+                  Login
+                </Button>
+              </Stack>
+            </form>
           )}
           
-          <form onSubmit={handleLogin}>
-            <Stack spacing={2}>
-              <FormControl>
-                <FormLabel>E-postadress</FormLabel>
-                <Input
-                  type="email"
-                  placeholder="namn@exempel.se"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </FormControl>
-              
-              <FormControl>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <FormLabel>Lösenord</FormLabel>
-                  <Link level="body-sm" href="#glömt-lösenord">
-                    Glömt lösenord?
-                  </Link>
-                </Box>
-                <Input
-                  type="password"
-                  placeholder="Ange lösenord"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </FormControl>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Checkbox
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  label="Kom ihåg mig"
-                />
-              </Box>
-              
-              <Button
-                type="submit"
-                loading={isLoading}
-                sx={{ 
-                  mt: 1, 
-                  backgroundColor: '#1976d2',
-                  '&:hover': {
-                    backgroundColor: '#1565c0'
-                  }
-                }}
-              >
-                Logga in
-              </Button>
-            </Stack>
-          </form>
-          
-          <Divider sx={{ my: 3 }}>eller</Divider>
-          
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography level="body-sm">
-              Har du inget konto?{' '}
-              <Link href="#registrera">
-                Registrera dig här
-              </Link>
-            </Typography>
-          </Box>
+          {/* Registreringsformulär (enkelt visas bara i designen) */}
+          {activeTab === 'register' && (
+            <Box sx={{ textAlign: 'center', py: 3 }}>
+              <Typography level="body-md">
+                Contact your administrator to create a new account.
+              </Typography>
+            </Box>
+          )}
         </Card>
-        
-        {/* Footer */}
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Typography level="body-sm" sx={{ color: 'white' }}>
-            © {new Date().getFullYear()} ValvX. Alla rättigheter förbehållna.
-          </Typography>
-          <Box sx={{ mt: 1 }}>
-            <Link href="#sekretess" sx={{ color: 'white', mx: 1, fontSize: '0.875rem' }}>
-              Sekretess
-            </Link>
-            <Link href="#villkor" sx={{ color: 'white', mx: 1, fontSize: '0.875rem' }}>
-              Användarvillkor
-            </Link>
-            <Link href="#hjälp" sx={{ color: 'white', mx: 1, fontSize: '0.875rem' }}>
-              Hjälp
-            </Link>
-          </Box>
-        </Box>
+      </Box>
+      
+      {/* Höger sida med bakgrundsbild */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          position: 'relative',
+          display: { xs: 'none', md: 'block' }
+        }}
+      >
+        {/* Bakgrundsbilden som täcker hela högra sidan */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${forestImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 0
+          }}
+        />
+      </Box>
+      
+      {/* Footer - visas endast på mobil */}
+      <Box 
+        sx={{ 
+          position: 'absolute', 
+          bottom: 10, 
+          left: 0, 
+          width: '100%', 
+          textAlign: 'center',
+          display: { md: 'none' },
+          zIndex: 10
+        }}
+      >
+        <Typography level="body-xs" sx={{ color: '#666' }}>
+          © {new Date().getFullYear()} ValvX. All rights reserved.
+        </Typography>
       </Box>
     </Box>
   );
