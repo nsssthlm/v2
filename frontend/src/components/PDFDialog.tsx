@@ -112,7 +112,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   color: 'white',
                   borderRadius: 'sm',
                   height: '35px',
-                  px: 2
+                  px: 1.5,
+                  fontSize: '0.875rem',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 Sida 1 av 5
@@ -159,7 +161,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   color: 'white',
                   borderRadius: 'sm',
                   height: '35px',
-                  px: 2
+                  px: 1,
+                  fontSize: '0.875rem',
+                  minWidth: '50px'
                 }}
               >
                 100%
@@ -191,7 +195,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   color: 'white',
                   '&:hover': { bgcolor: '#3d8b40' },
                   borderRadius: 'sm',
-                  height: '35px'
+                  height: '35px',
+                  px: 1.5,
+                  fontSize: '0.875rem'
                 }}
               >
                 Versioner
@@ -205,7 +211,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   color: 'white',
                   '&:hover': { bgcolor: '#3d8b40' },
                   borderRadius: 'sm',
-                  height: '35px'
+                  height: '35px',
+                  px: 1.5,
+                  fontSize: '0.875rem'
                 }}
               >
                 Markera område
@@ -220,7 +228,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   color: 'white',
                   '&:hover': { bgcolor: '#3d8b40' },
                   borderRadius: 'sm',
-                  height: '35px'
+                  height: '35px',
+                  px: 1.5,
+                  fontSize: '0.875rem'
                 }}
               >
                 Ny version
