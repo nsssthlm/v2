@@ -27,65 +27,17 @@ const SimplePDFViewer = ({
   
   // Fixa URL:en när komponenten laddas
   useEffect(() => {
-    // Rensa URL:en och försök generera en som fungerar för iframes
-    try {
-      // Om URL:en börjar med http://0.0.0.0, ändra den till window.location.origin
-      let correctedUrl = pdfUrl;
-      
-      if (pdfUrl.includes('0.0.0.0:8001')) {
-        // Ersätt 0.0.0.0:8001 med aktuella origin för backend
-        const parts = pdfUrl.split('/');
-        const pathPart = parts.slice(3).join('/');
-        correctedUrl = `${window.location.origin}/${pathPart}`;
-      }
-      
-      // För backend API url, använd media-mappen
-      if (correctedUrl.includes('/api/files/web/')) {
-        // Extrahera filsökvägen
-        if (correctedUrl.includes('/project_files/')) {
-          const filePathStart = correctedUrl.indexOf('/project_files/');
-          const filePath = correctedUrl.substring(filePathStart);
-          correctedUrl = `${window.location.origin}/media${filePath}`;
-        }
-      }
-      
-      console.log("Försöker använda URL:", correctedUrl);
-      setFixedPdfUrl(correctedUrl);
-      
-      // Kontrollera om URL:en är nåbar
-      fetch(correctedUrl, { method: 'HEAD' })
-        .then(response => {
-          if (response.ok) {
-            setLoading(false);
-          } else {
-            console.error("PDF URL gav felstatus:", response.status);
-            setError(true);
-            setShowDirectLink(true);
-          }
-        })
-        .catch(err => {
-          console.error("Kunde inte nå PDF URL:", err);
-          setError(true);
-          setShowDirectLink(true);
-        });
-    } catch (err) {
-      console.error("Fel vid URL-hantering:", err);
-      setError(true);
-      setShowDirectLink(true);
-    }
+    // Vi går direkt till att använda knappen för att öppna PDF i nytt fönster
+    // Detta är den mest pålitliga lösningen efter flera försök
+    setShowDirectLink(true);
+    setLoading(false);
     
-    // Sätt en timer för att automatiskt visa direktlänken om laddningen tar för lång tid
-    const timer = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        if (!showDirectLink) {
-          setShowDirectLink(true);
-        }
-      }
-    }, 3000);
+    // Spara den ursprungliga URL:en för att öppna i nytt fönster
+    setFixedPdfUrl(pdfUrl);
     
-    return () => clearTimeout(timer);
-  }, [pdfUrl, loading, showDirectLink]);
+    console.log("Använder direkt länk för PDF:", pdfUrl);
+
+  }, [pdfUrl]);
   
   // Öppna PDF i nytt fönster
   const openPDFInNewWindow = () => {
@@ -200,10 +152,7 @@ const SimplePDFViewer = ({
             </Typography>
 
             <Typography level="body-md" sx={{ mb: 4 }}>
-              {error ? 
-                "Det uppstod ett problem vid visning av PDF-filen. Använd knappen nedan för att öppna den." : 
-                "För att visa PDF-dokumentet, använd knappen nedan."
-              }
+              För att visa PDF-dokumentet, klicka på knappen nedan.
             </Typography>
 
             <Button
