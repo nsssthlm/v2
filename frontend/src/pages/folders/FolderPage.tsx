@@ -23,9 +23,13 @@ interface FolderData {
     slug: string;
   }[];
   files: {
+    id?: string;
     name: string;
     file: string;
     uploaded_at: string;
+    uploaded_by?: string;
+    description?: string;
+    version?: number;
   }[];
 }
 
