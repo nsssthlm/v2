@@ -45,9 +45,9 @@ const FolderPage = () => {
   const { openPDFDialog } = usePDFDialog();
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string, folderId: string } | null>(null);
   
-  // Hantera klick på PDF-filer
+  // Hantera klick på PDF-filer - öppna direkt i nytt fönster
   const handlePdfClick = (fileUrl: string, fileName: string, fileId: string) => {
-    console.log("Öppnar PDF:", fileUrl, fileName, fileId);
+    console.log("Öppnar PDF i nytt fönster:", fileUrl, fileName);
     
     // Se till att URL:en har http:// eller https:// prefixet 
     let fullUrl = fileUrl;
@@ -60,13 +60,8 @@ const FolderPage = () => {
       }
     }
     
-    // Öppna PDF i vår dialogkontext
-    openPDFDialog({
-      initialUrl: fullUrl,
-      filename: fileName,
-      fileId: fileId,
-      folderId: slug ? parseInt(slug) : null
-    });
+    // Öppna PDF direkt i ett nytt fönster/flik
+    window.open(fullUrl, '_blank');
   };
 
   const fetchFolderData = async () => {

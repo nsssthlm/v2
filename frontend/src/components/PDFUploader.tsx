@@ -62,13 +62,8 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         // Skapa en temporär lokal URL för direkt förhandsgranskning
         const fileURL = URL.createObjectURL(file);
         
-        // Visa den nytladdade PDF:en direkt i vår PDF-visare
-        openPDFDialog({
-          initialUrl: fileURL, // Använd lokal URL för omedelbar visning
-          filename: file.name,
-          fileId: data.id,
-          folderId: folderId as number
-        });
+        // Öppna den uppladdade PDF:en i ett nytt fönster för visning
+        window.open(fileURL, '_blank');
         
         handleClose();
         if (onUploadSuccess) {
