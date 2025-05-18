@@ -191,7 +191,16 @@ const FolderPageNew = () => {
   // Hantera klick på PDF-filer
   const handlePdfClick = (fileUrl: string, fileName: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName);
-    setSelectedPdf({ url: fileUrl, name: fileName });
+    
+    // Kontrollera att URL:en är fullständig
+    let fullUrl = fileUrl;
+    if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
+      // Om det inte är en fullständig URL, lägg till API_BASE_URL
+      fullUrl = `${API_BASE_URL}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+    }
+    
+    console.log("Använder full URL:", fullUrl);
+    setSelectedPdf({ url: fullUrl, name: fileName });
     setPdfDialogOpen(true);
   };
 
