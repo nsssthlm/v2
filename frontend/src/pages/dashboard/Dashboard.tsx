@@ -146,7 +146,7 @@ const Dashboard = () => {
         if (typeof widget.metricIndex === 'number') {
           const metric = metricsData[widget.metricIndex];
           return (
-            <ProjectMetricsCard 
+            <ModernMetricsCard 
               title={metric.title}
               value={metric.value}
               trend={metric.trend}
