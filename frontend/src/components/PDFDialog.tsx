@@ -284,9 +284,10 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   Nuvarande version
                 </Box>
                 
-                {/* Visa den faktiska PDF:en med iframe som fungerar bättre */}
-                <iframe
-                  src={pdfUrl ? `${pdfUrl}#toolbar=0` : ''}
+                {/* Visa den faktiska PDF:en med object tag som fungerar bättre för PDF-filer */}
+                <object
+                  data={pdfUrl ? `${pdfUrl}#toolbar=0` : ''}
+                  type="application/pdf"
                   width="100%"
                   height="100%"
                   style={{ 
@@ -295,9 +296,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     margin: '0 auto',
                     border: 'none'
                   }}
-                  title={filename}
-                  sandbox="allow-same-origin allow-scripts allow-forms"
-                />
+                >
+                  <p>Det gick inte att visa PDF-filen. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen i ett nytt fönster</a>.</p>
+                </object>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
                 <Box
