@@ -9,92 +9,26 @@ import {
 } from '@mui/joy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer
-} from 'recharts';
-
-interface RevenueData {
-  name: string;
-  currentWeek: number;
-  previousWeek: number;
-}
-
 interface RevenueCurveChartProps {
   title?: string;
 }
 
 const RevenueCurveChart: React.FC<RevenueCurveChartProps> = ({ title = 'INTÄKTER' }) => {
-  // Data för diagrammet som matchar bilden
-  const data: RevenueData[] = [
-    { name: 'Mån', currentWeek: 9000, previousWeek: 0 },
-    { name: 'Tis', currentWeek: 18000, previousWeek: 15000 },
-    { name: 'Ons', currentWeek: 16000, previousWeek: 9000 },
-    { name: 'Tor', currentWeek: 27000, previousWeek: 22000 },
-    { name: 'Fre', currentWeek: 18000, previousWeek: 36000 },
-    { name: 'Lör', currentWeek: 27000, previousWeek: 30000 },
-    { name: 'Sön', currentWeek: 24000, previousWeek: 28000 },
-  ];
-
+  // Enkel implementation utan externa diagram-bibliotek
+  // Statisk data baserat på bilden
+  const currentWeekTotal = 58254;
+  const previousWeekTotal = 69524;
+  const todaysEarning = 2562.30;
+  
   // Format nummer med tusentalsavgränsare
   const formatNumber = (num: number) => {
     return "$" + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
-
-  // Custom tooltip för diagram
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <Box
-          sx={{
-            bgcolor: '#fff',
-            p: 1.5,
-            border: '1px solid #ddd',
-            borderRadius: 'sm',
-            boxShadow: 'sm',
-          }}
-        >
-          <Typography level="title-sm">{label}</Typography>
-          <Box sx={{ mt: 1 }}>
-            <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-              <Box
-                component="span"
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  bgcolor: '#8884d8',
-                  display: 'inline-block',
-                  mr: 1,
-                }}
-              />
-              Aktuell vecka: {formatNumber(payload[0].value)}
-            </Typography>
-            <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box
-                component="span"
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  bgcolor: '#00D397',
-                  display: 'inline-block',
-                  mr: 1,
-                }}
-              />
-              Föregående vecka: {formatNumber(payload[1].value)}
-            </Typography>
-          </Box>
-        </Box>
-      );
-    }
-    return null;
-  };
+  
+  // Data för kurvor som kommer visas som SVG
+  const dayLabels = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
+  const currentWeekPoints = [9000, 18000, 16000, 27000, 18000, 27000, 24000];
+  const previousWeekPoints = [0, 15000, 9000, 22000, 36000, 30000, 28000];
 
   return (
     <Card variant="outlined" sx={{ 
@@ -173,49 +107,142 @@ const RevenueCurveChart: React.FC<RevenueCurveChartProps> = ({ title = 'INTÄKTE
         </Button>
       </Box>
       
-      <Box sx={{ width: '100%', height: 250, mt: 1 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{
-              top: 5,
-              right: 5,
-              left: 5,
-              bottom: 5,
+      {/* Manuellt ritat diagram med SVG istället för Recharts */}
+      <Box sx={{ width: '100%', height: 220, mt: 1, position: 'relative', p: 2 }}>
+        {/* Bakgrund och linjer */}
+        <Box sx={{ 
+          position: 'absolute', 
+          top: 30, 
+          left: 30, 
+          right: 10,
+          bottom: 20,
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Box 
+              key={i} 
+              sx={{ 
+                width: '100%', 
+                borderTop: i === 0 ? 'none' : '1px dashed #e0e0e0',
+                height: i === 0 ? 0 : 1 
+              }} 
+            />
+          ))}
+        </Box>
+        
+        {/* X-axel etiketter */}
+        <Box sx={{ 
+          position: 'absolute',
+          bottom: 0,
+          left: 30,
+          right: 10,
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}>
+          {dayLabels.map((day, i) => (
+            <Typography 
+              key={i} 
+              level="body-xs" 
+              sx={{ 
+                color: 'text.tertiary', 
+                width: '14%', 
+                textAlign: 'center' 
+              }}
+            >
+              {day}
+            </Typography>
+          ))}
+        </Box>
+        
+        {/* Y-axel etiketter */}
+        <Box sx={{ 
+          position: 'absolute',
+          top: 20,
+          left: 0,
+          bottom: 20,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>36k</Typography>
+          <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>27k</Typography>
+          <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>18k</Typography>
+          <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>9k</Typography>
+          <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>0</Typography>
+        </Box>
+        
+        {/* Linjen för aktuell vecka */}
+        <svg 
+          style={{ 
+            position: 'absolute', 
+            top: 30, 
+            left: 30, 
+            right: 10, 
+            bottom: 20, 
+            width: 'calc(100% - 40px)', 
+            height: 'calc(100% - 50px)'
+          }}
+        >
+          <polyline
+            points="0,165 43,80 86,90 129,30 172,80 215,30 258,40"
+            style={{
+              fill: 'none',
+              stroke: '#8884d8',
+              strokeWidth: 2
             }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-            <XAxis 
-              dataKey="name" 
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#777', fontSize: 12 }}
-            />
-            <YAxis 
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#777', fontSize: 12 }}
-              tickFormatter={(value) => `${value / 1000}k`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="currentWeek"
-              stroke="#8884d8"
-              strokeWidth={2.5}
-              dot={false}
-              activeDot={{ r: 6 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="previousWeek"
-              stroke="#00D397"
-              strokeWidth={2.5}
-              dot={false}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+          />
+          {currentWeekPoints.map((point, i) => {
+            const x = i * 43;
+            const y = 165 - (point / 36000 * 165);
+            return (
+              <circle
+                key={i}
+                cx={x}
+                cy={y}
+                r="4"
+                fill="#8884d8"
+              />
+            );
+          })}
+        </svg>
+        
+        {/* Linjen för föregående vecka */}
+        <svg 
+          style={{ 
+            position: 'absolute', 
+            top: 30, 
+            left: 30, 
+            right: 10, 
+            bottom: 20, 
+            width: 'calc(100% - 40px)', 
+            height: 'calc(100% - 50px)'
+          }}
+        >
+          <polyline
+            points="0,165 43,100 86,140 129,60 172,10 215,20 258,25"
+            style={{
+              fill: 'none',
+              stroke: '#00D397',
+              strokeWidth: 2
+            }}
+          />
+          {previousWeekPoints.map((point, i) => {
+            const x = i * 43;
+            const y = 165 - (point / 36000 * 165);
+            return (
+              <circle
+                key={i}
+                cx={x}
+                cy={y}
+                r="4"
+                fill="#00D397"
+              />
+            );
+          })}
+        </svg>
       </Box>
     </Card>
   );
