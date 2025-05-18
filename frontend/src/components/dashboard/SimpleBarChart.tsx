@@ -1,92 +1,136 @@
 import React from 'react';
-import { Box, Card, Typography, IconButton } from '@mui/joy';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Box, Typography, Card } from '@mui/joy';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface SimpleBarChartProps {
   title: string;
-  data: Array<{
-    name: string;
-    projected: number;
-    actual: number;
-  }>;
+  data: any[];
+  height?: number | string;
 }
 
-const SimpleBarChart = ({ title, data }: SimpleBarChartProps) => {
-  // Eftersom Recharts har kompatibilitetsproblem så ersätter vi med en enkel representation
-  const maxValue = Math.max(...data.flatMap(d => [d.projected, d.actual]));
+// Anpassad tooltip
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <Card variant="outlined" sx={{ 
+        p: 1.5, 
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        border: '1px solid rgba(0, 121, 52, 0.12)',
+        backdropFilter: 'blur(8px)',
+        background: 'rgba(255, 255, 255, 0.95)'
+      }}>
+        <Typography level="title-sm" sx={{ mb: 0.5, fontWeight: 600 }}>
+          {label}
+        </Typography>
+        {payload.map((entry: any, index: number) => (
+          <Box key={`tooltip-item-${index}`} sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            mb: index === payload.length - 1 ? 0 : 0.5,
+            gap: 1
+          }}>
+            <Box 
+              component="span" 
+              sx={{ 
+                width: 10, 
+                height: 10, 
+                borderRadius: '50%', 
+                backgroundColor: entry.color 
+              }} 
+            />
+            <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+              {entry.name}:
+            </Typography>
+            <Typography level="body-sm" sx={{ fontWeight: 600 }}>
+              {entry.value}
+            </Typography>
+          </Box>
+        ))}
+      </Card>
+    );
+  }
 
+  return null;
+};
+
+const SimpleBarChart: React.FC<SimpleBarChartProps> = ({ 
+  title, 
+  data,
+  height = 300
+}) => {
   return (
-    <Card variant="plain" sx={{ 
-      p: 2, 
-      height: '100%',
-      bgcolor: 'background.surface', 
-      boxShadow: 'none',
-      borderRadius: 'lg',
-      border: '1px solid',
-      borderColor: 'divider'
-    }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography level="title-sm" sx={{ 
-          textTransform: 'uppercase', 
-          letterSpacing: '0.5px',
-          color: 'text.secondary',
-          fontWeight: 'medium'
-        }}>
+    <Card 
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+        transition: 'box-shadow 0.2s',
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+        overflow: 'hidden',
+        '&:hover': {
+          boxShadow: '0 8px 24px rgba(0, 121, 52, 0.08)',
+          border: '1px solid rgba(0, 121, 52, 0.12)'
+        }
+      }}
+    >
+      <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'rgba(0, 0, 0, 0.04)' }}>
+        <Typography 
+          level="title-md" 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#2e7d32',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            fontSize: '0.875rem'
+          }}
+        >
           {title}
         </Typography>
-        <IconButton variant="plain" color="neutral" size="sm">
-          <MoreVertIcon />
-        </IconButton>
-      </Box>
-
-      <Box sx={{ height: '300px', overflowX: 'auto', overflowY: 'hidden', mb: 1 }}>
-        <Box sx={{ display: 'flex', height: '100%', minWidth: data.length * 70, gap: 2 }}>
-          {data.map((item, index) => (
-            <Box key={index} sx={{ display: 'flex', flexDirection: 'column', flex: 1, px: 0.5 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'flex-end' }}>
-                <Box 
-                  sx={{ 
-                    height: `${(item.projected / maxValue) * 100}%`, 
-                    bgcolor: '#e0e0e0',
-                    width: '100%',
-                    mb: 0.5,
-                    borderRadius: '4px 4px 0 0',
-                    position: 'relative',
-                    '&:hover': {
-                      opacity: 0.9
-                    }
-                  }} 
-                />
-                <Box 
-                  sx={{ 
-                    height: `${(item.actual / maxValue) * 100}%`, 
-                    bgcolor: '#e0f2e9',
-                    width: '100%',
-                    borderRadius: '4px 4px 0 0',
-                    position: 'relative',
-                    '&:hover': {
-                      opacity: 0.9
-                    }
-                  }} 
-                />
-              </Box>
-              <Typography level="body-xs" textAlign="center" sx={{ mt: 1, color: 'text.secondary' }}>
-                {item.name}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
       </Box>
       
-      <Box sx={{ display: 'flex', mt: 3, justifyContent: 'center', gap: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ width: 12, height: 12, bgcolor: '#e0e0e0', mr: 1, borderRadius: '2px' }} />
-          <Typography level="body-sm" sx={{ color: 'text.secondary' }}>Planerade timmar</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ width: 12, height: 12, bgcolor: '#e0f2e9', mr: 1, borderRadius: '2px' }} />
-          <Typography level="body-sm" sx={{ color: 'text.secondary' }}>Faktiska timmar</Typography>
-        </Box>
+      <Box sx={{ flexGrow: 1, p: 2, minHeight: height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fill: '#757575' }} 
+              axisLine={{ stroke: '#e0e0e0' }}
+              tickLine={{ stroke: '#e0e0e0' }}
+            />
+            <YAxis 
+              tick={{ fill: '#757575' }} 
+              axisLine={{ stroke: '#e0e0e0' }}
+              tickLine={{ stroke: '#e0e0e0' }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              wrapperStyle={{ paddingTop: 10 }}
+              formatter={(value) => {
+                return <span style={{ color: '#616161', fontSize: '0.875rem' }}>{value}</span>;
+              }}
+            />
+            <Bar 
+              dataKey="planerat" 
+              name="Planerade timmar" 
+              fill="#007934" 
+              radius={[4, 4, 0, 0]}
+              barSize={25}
+            />
+            <Bar 
+              dataKey="faktiskt" 
+              name="Faktiska timmar" 
+              fill="#81c784" 
+              radius={[4, 4, 0, 0]}
+              barSize={25}
+            />
+          </BarChart>
+        </ResponsiveContainer>
       </Box>
     </Card>
   );

@@ -1,113 +1,167 @@
 import React from 'react';
-import { Box, Card, Typography, IconButton, List, ListItem, Avatar } from '@mui/joy';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import CommentIcon from '@mui/icons-material/Comment';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Box, Typography, Card, List, ListItem, ListItemContent, ListDivider, ListItemDecorator } from '@mui/joy';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import AddCommentOutlinedIcon from '@mui/icons-material/AddCommentOutlined';
+import MeetingRoomOutlinedIcon from '@mui/icons-material/MeetingRoomOutlined';
+import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 
-interface ActivityItem {
+interface Activity {
   id: number;
-  icon: string;
-  text: string;
+  action: string;
+  project: string;
+  user: string;
   time: string;
-  user?: string;
 }
 
 interface RecentActivityListProps {
   title: string;
-  activities: ActivityItem[];
+  activities: Activity[];
+  height?: number | string;
+  maxItems?: number;
 }
 
-const RecentActivityList = ({ title, activities }: RecentActivityListProps) => {
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'upload':
-        return <ArrowUpwardIcon sx={{ color: '#60cd18' }} />;
-      case 'download':
-        return <FileDownloadIcon sx={{ color: '#1976d2' }} />;
-      case 'comment':
-        return <CommentIcon sx={{ color: '#ff9800' }} />;
-      case 'user':
-        return <AccountCircleIcon sx={{ color: '#9e9e9e' }} />;
-      default:
-        return <CommentIcon sx={{ color: '#9e9e9e' }} />;
-    }
-  };
+// Hjälpfunktion för att visa aktionsikon
+const getActionIcon = (action: string) => {
+  const actionLower = action.toLowerCase();
+  
+  if (actionLower.includes('laddat upp') || actionLower.includes('dokument') || actionLower.includes('ritning')) {
+    return <InsertDriveFileOutlinedIcon sx={{ color: '#007934', fontSize: '1.2rem' }} />;
+  } else if (actionLower.includes('uppdaterat') || actionLower.includes('ändr')) {
+    return <EditOutlinedIcon sx={{ color: '#2196f3', fontSize: '1.2rem' }} />;
+  } else if (actionLower.includes('komment')) {
+    return <AddCommentOutlinedIcon sx={{ color: '#9c27b0', fontSize: '1.2rem' }} />;
+  } else if (actionLower.includes('möte')) {
+    return <MeetingRoomOutlinedIcon sx={{ color: '#ff9800', fontSize: '1.2rem' }} />;
+  } else if (actionLower.includes('budget')) {
+    return <AccountBalanceOutlinedIcon sx={{ color: '#f44336', fontSize: '1.2rem' }} />;
+  }
+  
+  return <InsertDriveFileOutlinedIcon sx={{ color: '#757575', fontSize: '1.2rem' }} />;
+};
 
+const RecentActivityList: React.FC<RecentActivityListProps> = ({ 
+  title, 
+  activities,
+  height = 'auto',
+  maxItems = 5
+}) => {
+  // Begränsa antalet aktiviteter som visas
+  const displayedActivities = activities.slice(0, maxItems);
+  
   return (
-    <Card variant="plain" sx={{ 
-      p: 2, 
-      height: '100%',
-      bgcolor: 'background.surface', 
-      boxShadow: 'none',
-      borderRadius: 'lg',
-      border: '1px solid',
-      borderColor: 'divider'
-    }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography level="title-sm" sx={{ 
-          textTransform: 'uppercase', 
-          letterSpacing: '0.5px',
-          color: 'text.secondary',
-          fontWeight: 'medium'
-        }}>
+    <Card 
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+        transition: 'box-shadow 0.2s',
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+        overflow: 'hidden',
+        '&:hover': {
+          boxShadow: '0 8px 24px rgba(0, 121, 52, 0.08)',
+          border: '1px solid rgba(0, 121, 52, 0.12)'
+        }
+      }}
+    >
+      <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'rgba(0, 0, 0, 0.04)' }}>
+        <Typography 
+          level="title-md" 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#2e7d32',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            fontSize: '0.875rem'
+          }}
+        >
           {title}
         </Typography>
-        <IconButton variant="plain" color="neutral" size="sm">
-          <MoreVertIcon />
-        </IconButton>
       </Box>
       
-      <List sx={{ '--ListItem-paddingY': '0.75rem' }}>
-        {activities.map((activity) => (
-          <ListItem
-            key={activity.id}
-            sx={{ 
-              alignItems: 'flex-start',
-              gap: 2,
-              borderBottom: '1px solid',
-              borderColor: 'rgba(0, 0, 0, 0.05)',
-              py: 1.5,
-              '&:last-child': {
-                borderBottom: 'none'
-              },
-              '&:hover': {
-                bgcolor: '#e0f2e9'
-              }
-            }}
-          >
-            <Avatar 
-              size="sm" 
-              sx={{ 
-                bgcolor: activity.icon === 'upload' ? '#e0f2e9' : 'background.level1',
-                color: activity.icon === 'upload' ? '#e0f2e9' : 
-                       activity.icon === 'comment' ? '#e0f2e9' :
-                       activity.icon === 'download' ? '#e0f2e9' : '#e0f2e9',
-                mt: 0.5,
-                fontSize: '1rem'
-              }}
-            >
-              {getActivityIcon(activity.icon)}
-            </Avatar>
-            
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography 
-                level="body-sm" 
+      <Box 
+        sx={{ 
+          flexGrow: 1,
+          overflowY: 'auto',
+          height: height !== 'auto' ? height : undefined,
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#e0e0e0',
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          }
+        }}
+      >
+        <List sx={{ '--ListDivider-gap': '0px' }}>
+          {displayedActivities.map((activity, index) => (
+            <React.Fragment key={activity.id}>
+              <ListItem
                 sx={{ 
-                  color: 'text.primary',
-                  fontWeight: activity.icon === 'upload' ? 'medium' : 'normal'
+                  py: 1.5,
+                  transition: 'background-color 0.2s',
+                  '&:hover': {
+                    bgcolor: '#f5f5f5'
+                  }
                 }}
               >
-                {activity.text}
-              </Typography>
-              <Typography level="body-xs" sx={{ color: 'text.tertiary', mt: 0.5 }}>
-                {activity.time}
-              </Typography>
-            </Box>
-          </ListItem>
-        ))}
-      </List>
+                <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
+                  {getActionIcon(activity.action)}
+                </ListItemDecorator>
+                <ListItemContent>
+                  <Box sx={{ mb: 0.5 }}>
+                    <Typography level="body-sm" sx={{ fontWeight: 600 }}>
+                      {activity.action}
+                    </Typography>
+                    <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
+                      Projekt: {activity.project}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <Typography level="body-xs" sx={{ color: 'text.tertiary', fontStyle: 'italic' }}>
+                      av {activity.user}
+                    </Typography>
+                    <Typography level="body-xs" sx={{ 
+                      color: '#007934', 
+                      fontWeight: 600,
+                      bgcolor: '#e8f5e9',
+                      py: 0.5,
+                      px: 1,
+                      borderRadius: '4px'
+                    }}>
+                      {activity.time}
+                    </Typography>
+                  </Box>
+                </ListItemContent>
+              </ListItem>
+              {index < displayedActivities.length - 1 && (
+                <ListDivider sx={{ 
+                  '--ListDivider-thickness': '1px',
+                  bgcolor: 'rgba(0, 0, 0, 0.04)'
+                }} />
+              )}
+            </React.Fragment>
+          ))}
+          {displayedActivities.length === 0 && (
+            <ListItem sx={{ py: 2 }}>
+              <ListItemContent sx={{ textAlign: 'center' }}>
+                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                  Ingen aktivitet tillgänglig
+                </Typography>
+              </ListItemContent>
+            </ListItem>
+          )}
+        </List>
+      </Box>
     </Card>
   );
 };

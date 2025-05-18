@@ -28,16 +28,55 @@ export interface DashboardWidget {
     isPositive?: boolean;
     text: string;
   };
-  icon?: 'people' | 'orders' | 'revenue' | 'growth';
+  icon?: string;
+  dataIndex?: number;
 }
 
+// Import dashboard data
 import { 
-  metricsData, 
-  projectChartData, 
-  projectTypeData, 
-  topProjectsData,
-  recentActivityData
+  projectHoursData, 
+  documentTypesData, 
+  projectStatusData, 
+  budgetAllocationData,
+  activeProjectsData,
+  recentActivitiesData,
+  documentStatsData,
+  projectStatsData
 } from './DashboardData';
+
+// Definiera metricsData för användning i dashborden
+const metricsData = [
+  {
+    title: 'Projektledare',
+    value: projectStatsData.totalProjects.toString(),
+    trend: { value: 12, isPositive: true, text: 'sedan förra månaden' },
+    icon: 'people'
+  },
+  {
+    title: 'Aktiva projekt',
+    value: projectStatsData.activeProjects.toString(),
+    trend: { value: 8, isPositive: true, text: 'sedan förra månaden' },
+    icon: 'task'
+  },
+  {
+    title: 'Dokument',
+    value: documentStatsData.totalDocuments.toString(),
+    trend: { value: 18, isPositive: true, text: 'nya denna månad' },
+    icon: 'document'
+  },
+  {
+    title: 'Budget',
+    value: projectStatsData.usedBudget,
+    trend: { value: 5, isPositive: false, text: 'över budget' },
+    icon: 'money'
+  },
+  {
+    title: 'Granskningar',
+    value: documentStatsData.reviewsPending.toString(),
+    trend: { value: 15, isPositive: false, text: 'behöver åtgärd' },
+    icon: 'review'
+  }
+];
 
 const ModernDashboard: React.FC = () => {
   const { currentProject } = useProject();
@@ -59,13 +98,16 @@ const ModernDashboard: React.FC = () => {
     return [
       { id: 'metric1', type: 'metrics', title: 'Projektledare', size: 'small', metricIndex: 0, order: 0, visible: true },
       { id: 'metric2', type: 'metrics', title: 'Aktiva projekt', size: 'small', metricIndex: 1, order: 1, visible: true },
-      { id: 'metric3', type: 'metrics', title: 'Mötande budget', size: 'small', metricIndex: 2, order: 2, visible: true },
-      { id: 'metric4', type: 'metrics', title: 'Ökade intäkter', size: 'small', metricIndex: 3, order: 3, visible: true },
-      { id: 'projectChart', type: 'barChart', title: 'Projektstatistik', size: 'medium', order: 4, visible: true },
-      { id: 'projectTypes', type: 'pieChart', title: 'Projekttyper', size: 'medium', order: 5, visible: true },
-      { id: 'topProjects', type: 'topProjects', title: 'Projekt i Fokus', size: 'medium', order: 6, visible: true },
-      { id: 'recentActivity', type: 'recentActivity', title: 'Senaste aktivitet', size: 'medium', order: 7, visible: true },
-      { id: 'revenueChart', type: 'lineChart', title: 'Intäkter & Kostnader', size: 'large', order: 8, visible: true },
+      { id: 'metric3', type: 'metrics', title: 'Dokument', size: 'small', metricIndex: 2, order: 2, visible: true },
+      { id: 'metric4', type: 'metrics', title: 'Budget', size: 'small', metricIndex: 3, order: 3, visible: true },
+      { id: 'metric5', type: 'metrics', title: 'Granskningar', size: 'small', metricIndex: 4, order: 4, visible: true },
+      { id: 'projectHours', type: 'barChart', title: 'Projekttimmar', size: 'medium', order: 5, visible: true },
+      { id: 'docTypes', type: 'pieChart', title: 'Dokumenttyper', size: 'medium', order: 6, visible: true },
+      { id: 'projectStatus', type: 'pieChart', title: 'Projektstatus', size: 'medium', order: 7, visible: true },
+      { id: 'budgetAlloc', type: 'pieChart', title: 'Budgetfördelning', size: 'medium', order: 8, visible: true },
+      { id: 'topProjects', type: 'topProjects', title: 'Projekt i Fokus', size: 'medium', order: 9, visible: true },
+      { id: 'recentActivity', type: 'recentActivity', title: 'Senaste aktivitet', size: 'medium', order: 10, visible: true },
+      { id: 'revenueChart', type: 'lineChart', title: 'Intäkter & Kostnader', size: 'large', order: 11, visible: true },
     ];
   });
   
@@ -155,9 +197,13 @@ const ModernDashboard: React.FC = () => {
   
   // Rendera en specifik widget baserat på dess typ
   const renderWidget = (widget: DashboardWidget) => {
+    // Bestäm höjd baserat på expanderat tillstånd
+    const isExpanded = expandedWidget === widget.id;
+    const height = isExpanded ? 500 : (widget.size === 'large' ? 400 : 300);
+
     switch (widget.type) {
       case 'metrics':
-        if (typeof widget.metricIndex === 'number') {
+        if (typeof widget.metricIndex === 'number' && widget.metricIndex < metricsData.length) {
           const metric = metricsData[widget.metricIndex];
           return (
             <ModernMetricsCard 
@@ -170,31 +216,83 @@ const ModernDashboard: React.FC = () => {
         }
         return null;
       case 'barChart':
-        return (
-          <SimpleBarChart 
-            title={widget.title}
-            data={projectChartData}
-          />
-        );
+        // Välj rätt data baserat på widget-ID
+        switch (widget.id) {
+          case 'projectHours':
+            return (
+              <SimpleBarChart 
+                title={widget.title}
+                data={projectHoursData}
+                height={height}
+              />
+            );
+          default:
+            return (
+              <SimpleBarChart 
+                title={widget.title}
+                data={projectHoursData}
+                height={height}
+              />
+            );
+        }
       case 'pieChart':
-        return (
-          <SimplePieChart 
-            title={widget.title}
-            data={projectTypeData}
-          />
-        );
+        // Välj rätt data baserat på widget-ID
+        switch (widget.id) {
+          case 'docTypes':
+            return (
+              <SimplePieChart 
+                title={widget.title}
+                data={documentTypesData}
+                height={height}
+                innerRadius={isExpanded ? 60 : 0}
+                outerRadius={isExpanded ? 120 : 80}
+              />
+            );
+          case 'projectStatus':
+            return (
+              <SimplePieChart 
+                title={widget.title}
+                data={projectStatusData}
+                height={height}
+                innerRadius={isExpanded ? 60 : 40}
+                outerRadius={isExpanded ? 120 : 80}
+              />
+            );
+          case 'budgetAlloc':
+            return (
+              <SimplePieChart 
+                title={widget.title}
+                data={budgetAllocationData}
+                height={height}
+                innerRadius={isExpanded ? 60 : 40}
+                outerRadius={isExpanded ? 120 : 80}
+              />
+            );
+          default:
+            return (
+              <SimplePieChart 
+                title={widget.title}
+                data={documentTypesData}
+                height={height}
+              />
+            );
+        }
       case 'topProjects':
         return (
           <TopProjectsTable 
             title={widget.title}
-            projects={topProjectsData}
+            projects={activeProjectsData}
+            height={height}
+            maxRows={isExpanded ? 8 : 5}
           />
         );
       case 'recentActivity':
         return (
           <RecentActivityList 
             title={widget.title}
-            activities={recentActivityData}
+            activities={recentActivitiesData}
+            height={height}
+            maxItems={isExpanded ? 10 : 5}
           />
         );
       case 'lineChart':
