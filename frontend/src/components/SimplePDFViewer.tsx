@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, CircularProgress } from '@mui/joy';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Typography, Button, CircularProgress, Tooltip } from '@mui/joy';
 
 interface SimplePDFViewerProps {
   pdfUrl: string;
@@ -9,7 +9,7 @@ interface SimplePDFViewerProps {
 }
 
 /**
- * En enkel PDF-visare med förbättrad visning som hanterar olika sätt att visa PDF-filer
+ * En PDF-visare som visar PDF direkt i applikationen
  */
 const SimplePDFViewer = ({ 
   pdfUrl, 
@@ -17,31 +17,42 @@ const SimplePDFViewer = ({
   width = '100%', 
   height = '100%' 
 }: SimplePDFViewerProps) => {
-  const [showDirectLink, setShowDirectLink] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
-  // Använd bara domännamnet från pdfUrl för att undvika CORS-problem
-  const [fixedPdfUrl, setFixedPdfUrl] = useState("");
-  
-  // Fixa URL:en när komponenten laddas
-  useEffect(() => {
-    // Vi går direkt till att använda knappen för att öppna PDF i nytt fönster
-    // Detta är den mest pålitliga lösningen efter flera försök
-    setShowDirectLink(true);
-    setLoading(false);
-    
-    // Spara den ursprungliga URL:en för att öppna i nytt fönster
-    setFixedPdfUrl(pdfUrl);
-    
-    console.log("Använder direkt länk för PDF:", pdfUrl);
+  // Testa URL-varianter
+  const urlVariants = [
+    pdfUrl, // Originalet först
+    pdfUrl.replace('0.0.0.0:8001', window.location.host), // Ersätt 0.0.0.0 med host
+    pdfUrl.replace('/api/files/web/', '/media/project_files/') // Direkt media-URL
+  ];
 
+  // När komponenten laddas, försök visa PDF direkt i iframen
+  useEffect(() => {
+    // Sätt en timer för att visa laddningsindikatorn i endast 2 sekunder
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, [pdfUrl]);
-  
-  // Öppna PDF i nytt fönster
+
+  // Öppna PDF i nytt fönster om användaren klickar på knappen
   const openPDFInNewWindow = () => {
-    window.open(fixedPdfUrl || pdfUrl, '_blank');
+    window.open(pdfUrl, '_blank');
+  };
+  
+  // Hantera framgångsrik laddning av iframe
+  const handleIframeLoad = () => {
+    setLoading(false);
+  };
+  
+  // Hantera fel vid laddning av iframe
+  const handleIframeError = () => {
+    setPdfError(true);
+    setLoading(false);
   };
 
   return (
@@ -97,82 +108,71 @@ const SimplePDFViewer = ({
         </Box>
       )}
 
-      {/* PDF innehåll */}
+      {/* PDF innehåll - direktvisning med iframe */}
       <Box
         sx={{
           flex: 1,
           overflow: 'hidden',
-          position: 'relative'
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        {/* Inbäddad PDF via object-tag med fallback till iframe */}
-        {!error && !showDirectLink && (
-          <object
-            data={fixedPdfUrl}
-            type="application/pdf"
-            width="100%"
-            height="100%"
-            style={{ border: 'none' }}
-            onLoad={() => setLoading(false)}
-            onError={() => {
-              setError(true);
-              setShowDirectLink(true);
-            }}
-          >
-            <iframe
-              src={fixedPdfUrl}
-              width="100%"
-              height="100%"
-              style={{ border: 'none' }}
-              title={filename}
-              onLoad={() => setLoading(false)}
-              onError={() => {
-                setError(true);
-                setShowDirectLink(true);
-              }}
-            />
-          </object>
-        )}
-
-        {/* Visa en direktlänk om objektvisaren inte fungerar */}
-        {showDirectLink && (
-          <Box
-            sx={{
-              p: 3,
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%'
-            }}
-          >
-            <Typography level="title-lg" sx={{ mb: 2 }}>
-              {filename}
-            </Typography>
-
-            <Typography level="body-md" sx={{ mb: 4 }}>
-              För att visa PDF-dokumentet, klicka på knappen nedan.
-            </Typography>
-
+        {/* Använd object-tag istället för iframe för bättre kompatibilitet med PDF */}
+        <object
+          ref={iframeRef as any}
+          data={pdfUrl}
+          type="application/pdf"
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            display: 'block'
+          }}
+          onLoad={handleIframeLoad}
+          onError={handleIframeError}
+        >
+          <Typography level="body-md" sx={{ p: 2 }}>
+            Din webbläsare kan inte visa PDF-filer direkt.
+            <br />
+            Använd knappen "Öppna i nytt fönster" nedan.
+          </Typography>
+        </object>
+        
+        {/* Åtgärdsfält med knappar */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 1,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: '#f8f9fa'
+          }}
+        >
+          <Typography level="body-sm" sx={{ fontWeight: 'bold', ml: 1 }}>
+            {filename}
+          </Typography>
+          
+          <Tooltip title="Öppna PDF i ett nytt fönster för bättre läsbarhet">
             <Button
               onClick={openPDFInNewWindow}
-              variant="solid"
+              variant="outlined"
               color="primary"
-              size="lg"
-              sx={{ mb: 2 }}
+              size="sm"
             >
-              Öppna PDF i nytt fönster
+              Öppna i nytt fönster
             </Button>
-          </Box>
-        )}
+          </Tooltip>
+        </Box>
       </Box>
 
       {/* Debug-knapp i hörnet */}
       <Box
         sx={{
           position: 'absolute',
-          bottom: 8,
+          bottom: 40,
           right: 8,
           zIndex: 10
         }}
@@ -190,15 +190,15 @@ const SimplePDFViewer = ({
       {/* Debug information */}
       {showDebug && (
         <Box
-          sx={{
+          sx={{ 
             position: 'absolute',
-            bottom: 40,
+            bottom: 70,
             right: 8,
             width: 300,
-            p: 2,
-            bgcolor: '#f5f5f5',
-            borderRadius: 'md',
-            maxWidth: '100%',
+            p: 2, 
+            bgcolor: '#f5f5f5', 
+            borderRadius: 'md', 
+            maxWidth: '100%', 
             overflow: 'hidden',
             zIndex: 10,
             boxShadow: 'sm'
@@ -208,19 +208,15 @@ const SimplePDFViewer = ({
             Debug information:
           </Typography>
           <Typography level="body-xs" sx={{ wordBreak: 'break-all', mb: 1 }}>
-            Original URL: {pdfUrl}
+            PDF URL: {pdfUrl}
           </Typography>
-          <Typography level="body-xs" sx={{ wordBreak: 'break-all', mb: 1 }}>
-            Fixad URL: {fixedPdfUrl}
-          </Typography>
+          {urlVariants.slice(1).map((url, index) => (
+            <Typography key={index} level="body-xs" sx={{ wordBreak: 'break-all', mb: 1 }}>
+              Variant {index+1}: {url}
+            </Typography>
+          ))}
           <Typography level="body-xs" sx={{ mb: 1 }}>
             Laddar: {loading ? 'Ja' : 'Nej'}
-          </Typography>
-          <Typography level="body-xs" sx={{ mb: 1 }}>
-            Fel: {error ? 'Ja' : 'Nej'}
-          </Typography>
-          <Typography level="body-xs" sx={{ mb: 1 }}>
-            Visar direktlänk: {showDirectLink ? 'Ja' : 'Nej'}
           </Typography>
           <Typography level="body-xs" sx={{ mb: 1 }}>
             Origin: {window.location.origin}
