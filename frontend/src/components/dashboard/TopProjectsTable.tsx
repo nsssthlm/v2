@@ -55,7 +55,7 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
               borderColor: '#60cd18',
               '&:hover': {
                 borderColor: '#60cd18',
-                bgcolor: 'rgba(96, 205, 24, 0.08)'
+                bgcolor: '#e0f2e9'
               }
             }}
           >
@@ -85,7 +85,7 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
             },
             '& tbody tr:hover': {
               boxShadow: 'none',
-              backgroundColor: 'rgba(96, 205, 24, 0.05)'
+              backgroundColor: '#e0f2e9'
             },
             '& tbody td': {
               borderBottom: '1px solid',

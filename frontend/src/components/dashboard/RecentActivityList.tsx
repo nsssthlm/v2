@@ -73,7 +73,7 @@ const RecentActivityList = ({ title, activities }: RecentActivityListProps) => {
                 borderBottom: 'none'
               },
               '&:hover': {
-                bgcolor: 'rgba(96, 205, 24, 0.04)'
+                bgcolor: '#e0f2e9'
               }
             }}
           >

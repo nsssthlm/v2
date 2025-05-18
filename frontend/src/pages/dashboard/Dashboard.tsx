@@ -41,7 +41,7 @@ const Dashboard = () => {
         <Typography level="body-md" sx={{ mb: 2, mt: 1 }}>
           {currentProject?.description || 'Välkommen till din projektöversikt. Här kan du se nyckeltal, tidslinjer och aktivitet för alla dina arkitektprojekt.'}
         </Typography>
-        <Divider sx={{ bgcolor: 'rgba(96, 205, 24, 0.1)' }} />
+        <Divider sx={{ bgcolor: '#e0f2e9' }} />
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
           <Typography level="body-sm">
             {currentProject?.endDate ? 
