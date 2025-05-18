@@ -195,24 +195,30 @@ const FolderPageNew = () => {
     // Extrahera den faktiska sökvägen från URL:en
     let fullUrl = fileUrl;
     
+    // Först, hämta base server URL utan /api
+    // Detta är viktigt eftersom mediafiler serveras från roten, inte från /api
+    const serverBaseUrl = window.location.origin;
+    
     // Kontrollera om det är en API-URL från web_api.py där vi får komplett sökväg till filen
     if (fileUrl.includes('/api/files/web/')) {
       // Hitta vilken del av URL:en som innehåller project_files
       if (fileUrl.includes('project_files/')) {
         // Extrahera sökvägen från project_files och framåt
         const pathFromProject = fileUrl.substring(fileUrl.indexOf('project_files/'));
-        fullUrl = `${API_BASE_URL}/media/${pathFromProject}`;
+        // Använd server base URL och bygg upp komplett mediasökväg
+        fullUrl = `${serverBaseUrl}/media/${pathFromProject}`;
       } else {
         // Om URL:en inte innehåller project_files, använd sista delen som filnamn
         const parts = fileUrl.split('/');
         const filename = parts[parts.length - 1];
-        fullUrl = `${API_BASE_URL}/media/project_files/${filename}`;
+        // Använd server base URL och bygg upp komplett mediasökväg
+        fullUrl = `${serverBaseUrl}/media/project_files/${filename}`;
       }
     }
     // Kontrollera om den innehåller media/ - det är en korrekt sökväg
     else if (fileUrl.includes('media/')) {
       const mediaPath = fileUrl.substring(fileUrl.indexOf('media/'));
-      fullUrl = `${API_BASE_URL}/${mediaPath}`;
+      fullUrl = `${serverBaseUrl}/${mediaPath}`;
     } 
     // För alla andra typer av URL:er
     else if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
