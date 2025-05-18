@@ -18,7 +18,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import SimplePDFViewer from './SimplePDFViewer';
+import EmbeddedPDFViewer from './EmbeddedPDFViewer';
 
 interface PDFDialogProps {
   open: boolean;
@@ -314,9 +314,8 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   Nuvarande version
                 </Box>
                 
-                {/* Visa PDF:en med en iframe för maximal kompatibilitet */}
-                {/* Använd vår nya SimplePDFViewer-komponent */}
-                <SimplePDFViewer
+                {/* Visa PDF:en med vår nya komponent */}
+                <EmbeddedPDFViewer
                   pdfUrl={pdfUrl}
                   filename={filename}
                   height="100%"
