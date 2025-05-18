@@ -48,45 +48,44 @@ const SimplePDFViewer = ({
         Nuvarande version
       </Box>
 
-      {/* PDF iframe */}
-      <Box sx={{ flex: 1, overflow: 'hidden' }}>
-        <object
-          data={pdfUrl}
-          type="application/pdf"
-          width="100%"
-          height="100%"
-          style={{ border: 'none' }}
+      {/* Fallback med direktlänk i alla lägen, eftersom PDF-visning kan vara problematisk i vissa miljöer */}
+      <Box 
+        sx={{
+          flex: 1, 
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          p: 4,
+          textAlign: 'center',
+          backgroundColor: '#f5f5f5'
+        }}
+      >
+        <Typography level="title-lg" sx={{ mb: 2 }}>
+          {filename}
+        </Typography>
+        <Typography sx={{ mb: 4 }}>
+          För att visa PDF-innehållet, klicka på knappen nedan:
+        </Typography>
+        <Button
+          component="a"
+          href={pdfUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="solid"
+          color="primary"
+          size="lg"
+          sx={{ mb: 2 }}
         >
-          <Box 
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              p: 4,
-              textAlign: 'center'
-            }}
-          >
-            <Typography level="title-lg" sx={{ mb: 2 }}>
-              Det gick inte att visa PDF-filen
-            </Typography>
-            <Typography sx={{ mb: 2 }}>
-              Din webbläsare kunde inte visa PDF-filen "{filename}".
-            </Typography>
-            <Button
-              component="a"
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="solid"
-              color="primary"
-              size="lg"
-            >
-              Öppna i nytt fönster
-            </Button>
-          </Box>
-        </object>
+          Visa PDF i nytt fönster
+        </Button>
+        
+        <Typography level="body-sm" sx={{ mt: 4, color: 'text.secondary' }}>
+          För att se PDF-filen direkt i ditt program behöver du eventuellt tillåta 
+          popupfönster eller ändra säkerhetsinställningar i din webbläsare.
+        </Typography>
       </Box>
 
       {/* Grön vertikal linje till vänster */}
