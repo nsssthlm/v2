@@ -18,7 +18,6 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ReactPDFViewer from './ReactPDFViewer';
 
 interface PDFDialogProps {
   open: boolean;
@@ -285,13 +284,28 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   Nuvarande version
                 </Box>
                 
-                {/* Visa PDF:en med vår avancerade ReactPDFViewer */}
-                <ReactPDFViewer 
-                  pdfUrl={pdfUrl}
-                  filename={filename}
-                  height="100%"
-                  width="100%"
-                />
+                {/* Visa PDF:en med en iframe för maximal kompatibilitet */}
+                <Box 
+                  sx={{ 
+                    position: 'relative', 
+                    height: '100%', 
+                    width: '100%', 
+                    bgcolor: '#333',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <iframe
+                    src={`${pdfUrl}#view=FitH&navpanes=0`}
+                    width="100%"
+                    height="100%"
+                    style={{ 
+                      border: 'none',
+                      background: 'white',
+                      display: 'block'
+                    }}
+                    title={filename}
+                  />
+                </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
                 <Box
