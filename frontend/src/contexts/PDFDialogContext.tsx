@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from 'react';
-import SimplePDFJSDialog from '../components/SimplePDFJSDialog';
+import DirectPDFDialog from '../components/DirectPDFDialog';
 
 // Interface för PDF-dialog state
 interface PDFDialogState {
@@ -52,7 +52,7 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
       {dialogState.isOpen && dialogState.pdfUrl && (
-        <SimplePDFJSDialog 
+        <DirectPDFDialog 
           open={dialogState.isOpen} 
           onClose={closePDFDialog}
           pdfUrl={dialogState.pdfUrl}
