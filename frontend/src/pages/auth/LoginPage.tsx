@@ -46,11 +46,10 @@ const LoginPage = () => {
         position: 'relative'
       }}
     >
-      {/* Vänster sida med formulär */}
+      {/* Vänster sida med formulär - exakt 50% av skärmen */}
       <Box
         sx={{
-          width: '100%',
-          maxWidth: '450px',
+          width: '50%', // Exakt halva skärmen
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -67,7 +66,8 @@ const LoginPage = () => {
             maxWidth: '350px',
             p: 3,
             boxShadow: 'sm',
-            border: '1px solid #e0e0e0'
+            border: '1px solid #e0e0e0',
+            borderRadius: '16px' // Mer rundade hörn
           }}
         >
           {/* Titel */}
@@ -88,59 +88,96 @@ const LoginPage = () => {
             Sign in to your account or create a new one
           </Typography>
 
-          {/* Tabs för Login/Register */}
-          <Tabs
-            value={activeTab}
-            onChange={(_, value) => setActiveTab(value as string)}
-            sx={{ mb: 3 }}
+          {/* Login/Register knappar som i exemplet */}
+          <Box 
+            sx={{
+              display: 'flex',
+              mb: 3,
+              borderBottom: '1px solid #e0e0e0'
+            }}
           >
-            <TabList>
-              <Tab value="login">Login</Tab>
-              <Tab value="register">Register</Tab>
-            </TabList>
-          </Tabs>
+            <Button
+              variant={activeTab === 'login' ? 'outlined' : 'plain'}
+              color={activeTab === 'login' ? 'success' : 'neutral'}
+              onClick={() => setActiveTab('login')}
+              sx={{ 
+                mr: 1,
+                borderRadius: '8px 8px 0 0',
+                borderBottom: 'none',
+                borderColor: activeTab === 'login' ? '#4caf50' : 'transparent',
+                color: activeTab === 'login' ? '#4caf50' : 'inherit'
+              }}
+            >
+              Login
+            </Button>
+            <Button
+              variant={activeTab === 'register' ? 'outlined' : 'plain'}
+              color={activeTab === 'register' ? 'success' : 'neutral'}
+              onClick={() => setActiveTab('register')}
+              sx={{ 
+                borderRadius: '8px 8px 0 0',
+                borderBottom: 'none',
+                borderColor: activeTab === 'register' ? '#4caf50' : 'transparent',
+                color: activeTab === 'register' ? '#4caf50' : 'inherit'
+              }}
+            >
+              Register
+            </Button>
+          </Box>
           
           {/* Inloggningsformulär */}
           {activeTab === 'login' && (
             <form onSubmit={handleLogin}>
-              <Stack spacing={3}>
-                <FormControl>
-                  <FormLabel>Username</FormLabel>
-                  <Input
-                    type="text"
-                    placeholder="johnsmith"
-                    required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel>Password</FormLabel>
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </FormControl>
-                
-                <Button
-                  type="submit"
-                  loading={isLoading}
-                  fullWidth
+              <Box sx={{ mb: 3 }}>
+                <Typography level="body-sm" sx={{ mb: 1 }}>Username</Typography>
+                <Input
+                  type="text"
+                  placeholder="johnsmith"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   sx={{ 
-                    mt: 1, 
-                    backgroundColor: '#4caf50', // Grön färg som matchar projektet
-                    '&:hover': {
-                      backgroundColor: '#388e3c'
-                    }
+                    borderRadius: '8px',
+                    height: '40px',
+                    border: '1px solid #e0e0e0'
                   }}
-                >
-                  Login
-                </Button>
-              </Stack>
+                />
+              </Box>
+              
+              <Box sx={{ mb: 3 }}>
+                <Typography level="body-sm" sx={{ mb: 1 }}>Password</Typography>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  sx={{ 
+                    borderRadius: '8px',
+                    height: '40px',
+                    border: '1px solid #e0e0e0'
+                  }}
+                />
+              </Box>
+              
+              <Button
+                type="submit"
+                loading={isLoading}
+                fullWidth
+                sx={{ 
+                  mt: 1, 
+                  backgroundColor: '#4caf50', // Grön färg som matchar projektet
+                  '&:hover': {
+                    backgroundColor: '#388e3c'
+                  },
+                  borderRadius: '8px',
+                  height: '44px',
+                  textTransform: 'none', // Ingen automatisk versalisering av texten
+                  fontWeight: 500
+                }}
+              >
+                Login
+              </Button>
             </form>
           )}
           
@@ -155,10 +192,10 @@ const LoginPage = () => {
         </Card>
       </Box>
       
-      {/* Höger sida med bakgrundsbild */}
+      {/* Höger sida med bakgrundsbild - exakt 50% av skärmen */}
       <Box
         sx={{
-          flexGrow: 1,
+          width: '50%', // Exakt halva skärmen
           position: 'relative',
           display: { xs: 'none', md: 'block' }
         }}
