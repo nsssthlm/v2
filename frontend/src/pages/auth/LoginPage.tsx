@@ -12,8 +12,10 @@ import {
   Tabs,
   TabList,
   Tab,
-  Divider
+  Divider,
+  Alert
 } from '@mui/joy';
+import { loginUser } from '../../utils/authUtils';
 
 // URL till skogsbilden i public-mappen
 const forestImageUrl = '/images/swedish-forest.webp';
@@ -23,17 +25,36 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const [error, setError] = useState<string | null>(null);
+
+  // Registreringsformulär fält
+  const [registerUsername, setRegisterUsername] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    // Simulera inloggningsprocess
+    // Använd loginUser från utils/authUtils
+    const result = loginUser(username, password);
+    
     setTimeout(() => {
-      // Här skulle riktig inloggningslogik finnas
       setIsLoading(false);
-      // Redirect till dashboard/hem efter inloggning
-      window.location.href = '/dashboard';
+      
+      if (result.success) {
+        // Visa info om inloggad användare
+        console.log(`Inloggad som ${result.user?.username} med rollen ${result.user?.role}`);
+        
+        // Redirect till dashboard/hem efter inloggning
+        window.location.href = '/dashboard';
+      } else {
+        // Visa felmeddelande
+        setError(result.message || 'Inloggningen misslyckades');
+      }
     }, 1000);
   };
 
@@ -137,6 +158,12 @@ const LoginPage = () => {
           {/* Inloggningsformulär */}
           {activeTab === 'login' && (
             <form onSubmit={handleLogin}>
+              {error && (
+                <Alert color="danger" sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+              
               <Box sx={{ mb: 3 }}>
                 <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Username</Typography>
                 <Input
@@ -169,6 +196,21 @@ const LoginPage = () => {
                 />
               </Box>
               
+              <Box sx={{ mb: 1, mt: 1 }}>
+                <Typography level="body-xs" color="neutral">
+                  Tillgängliga testanvändare:
+                </Typography>
+                <Typography level="body-xs" color="neutral">
+                  projectleader / 123456 (Project Leader)
+                </Typography>
+                <Typography level="body-xs" color="neutral">
+                  admin / 123456 (Admin)
+                </Typography>
+                <Typography level="body-xs" color="neutral">
+                  user / 123456 (User)
+                </Typography>
+              </Box>
+              
               <Button
                 type="submit"
                 loading={isLoading}
@@ -199,6 +241,8 @@ const LoginPage = () => {
                   type="text"
                   placeholder="johndoe"
                   required
+                  value={registerUsername}
+                  onChange={(e) => setRegisterUsername(e.target.value)}
                   sx={{ 
                     borderRadius: '8px',
                     height: '40px',
@@ -213,6 +257,8 @@ const LoginPage = () => {
                   type="password"
                   placeholder="••••••••"
                   required
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
                   sx={{ 
                     borderRadius: '8px',
                     height: '40px',
@@ -227,6 +273,8 @@ const LoginPage = () => {
                   type="password"
                   placeholder="••••••••"
                   required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   sx={{ 
                     borderRadius: '8px',
                     height: '40px',
@@ -241,6 +289,8 @@ const LoginPage = () => {
                   type="email"
                   placeholder="john.doe@example.com"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   sx={{ 
                     borderRadius: '8px',
                     height: '40px',
@@ -255,6 +305,8 @@ const LoginPage = () => {
                   type="text"
                   placeholder="Enter invite code"
                   required
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value)}
                   sx={{ 
                     borderRadius: '8px',
                     height: '40px',
