@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
 import SimplePDFViewer from '../../components/SimplePDFViewer';
 import { usePDFDialog } from '../../contexts/PDFDialogContext';
+import PDFUploader from '../../components/PDFUploader';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -43,11 +44,11 @@ const FolderPage = () => {
   // Hantera klick på PDF-filer
   const handlePdfClick = (fileUrl: string, fileName: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName);
-    // Istället för dialog-läge, sätt den valda PDF:en direkt
-    setSelectedPdf({ 
-      url: fileUrl, 
-      name: fileName, 
-      folderId: slug || '' 
+    // Öppna PDF i vår dialogkontext istället
+    openPDFDialog({
+      initialUrl: fileUrl,
+      filename: fileName,
+      folderId: slug || ''
     });
   };
 
@@ -193,13 +194,10 @@ const FolderPage = () => {
           {/* Hanteringsalternativ */}
           <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button 
-              variant="solid" 
-              color="primary"
-              onClick={() => setUploadDialogOpen(true)}
-            >
-              Ladda upp PDF
-            </Button>
+            <PDFUploader
+              folderId={slug}
+              onUploadSuccess={handleUploadSuccess}
+            />
           </Box>
         </>
       ) : (
