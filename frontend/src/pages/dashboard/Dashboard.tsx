@@ -1,4 +1,5 @@
-import { Box, Typography, Grid, Card, Divider } from '@mui/joy';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Card, Divider, Button, IconButton, Sheet, Modal, ModalDialog, DialogTitle, DialogContent, DialogActions } from '@mui/joy';
 import { useProject } from '../../contexts/ProjectContext';
 import ProjectMetricsCard from '../../components/dashboard/ProjectMetricsCard';
 import SimpleBarChart from '../../components/dashboard/SimpleBarChart';
@@ -12,6 +13,11 @@ import {
   recentActivityData,
   topProjectsData
 } from '../../components/dashboard/DashboardData';
+import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Dashboard = () => {
   const { currentProject } = useProject();

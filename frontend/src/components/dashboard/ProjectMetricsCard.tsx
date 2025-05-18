@@ -91,7 +91,7 @@ export const ProjectMetricsCard = ({
         sx={{ 
           my: 1, 
           fontWeight: 'bold',
-          color: '#2b8a3e', // Mörkare grön för bättre kontrast
+          color: '#007934', // SEB grön för siffror - bra kontrast mot vit bakgrund
           fontSize: '1.8rem'
         }}
       >
