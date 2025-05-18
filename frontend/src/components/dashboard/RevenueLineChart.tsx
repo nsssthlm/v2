@@ -17,8 +17,7 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  Area
+  ResponsiveContainer
 } from 'recharts';
 
 interface RevenueData {
@@ -32,6 +31,7 @@ interface RevenueLineChartProps {
 }
 
 const RevenueLineChart: React.FC<RevenueLineChartProps> = ({ title = 'INTÄKTER' }) => {
+  console.log("RevenueLineChart rendered");
   // Data för diagrammet
   const data: RevenueData[] = [
     { name: 'Mån', currentWeek: 9000, previousWeek: 0 },
