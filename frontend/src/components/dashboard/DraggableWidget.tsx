@@ -62,8 +62,9 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
       // Bestäm rektanglar för UI-element
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
       
-      // Hitta mittpunkten
+      // Hitta mittpunkter
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
       
       // Bestäm musens position
       const clientOffset = monitor.getClientOffset();
@@ -74,20 +75,10 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
       
       // Hitta musens position relativt till det hövrade elementet
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      const hoverClientX = clientOffset.x - hoverBoundingRect.left;
       
-      // Flytta endast om musen passerar halvägs
-      // När man drar nedåt, flytta endast om musen är under 50%
-      // När man drar uppåt, flytta endast om musen är över 50%
-      
-      // Drar uppåt
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      
-      // Drar nedåt
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
+      // Utför flyttning oavsett riktning (vänster-höger, höger-vänster, upp-ner, ner-upp)
+      // Detta gör att drag-and-drop fungerar i alla riktningar
       
       // Dags att flytta widgeten
       moveWidget(dragIndex, hoverIndex);
