@@ -48,44 +48,25 @@ const SimplePDFViewer = ({
         Nuvarande version
       </Box>
 
-      {/* Fallback med direktlänk i alla lägen, eftersom PDF-visning kan vara problematisk i vissa miljöer */}
+      {/* PDF iframe som visar innehållet direkt i dialogen */}
       <Box 
         sx={{
           flex: 1, 
           overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          p: 4,
-          textAlign: 'center',
-          backgroundColor: '#f5f5f5'
+          position: 'relative'
         }}
       >
-        <Typography level="title-lg" sx={{ mb: 2 }}>
-          {filename}
-        </Typography>
-        <Typography sx={{ mb: 4 }}>
-          För att visa PDF-innehållet, klicka på knappen nedan:
-        </Typography>
-        <Button
-          component="a"
-          href={pdfUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="solid"
-          color="primary"
-          size="lg"
-          sx={{ mb: 2 }}
-        >
-          Visa PDF i nytt fönster
-        </Button>
-        
-        <Typography level="body-sm" sx={{ mt: 4, color: 'text.secondary' }}>
-          För att se PDF-filen direkt i ditt program behöver du eventuellt tillåta 
-          popupfönster eller ändra säkerhetsinställningar i din webbläsare.
-        </Typography>
+        <iframe
+          src={pdfUrl}
+          title={filename}
+          width="100%"
+          height="100%"
+          style={{ 
+            border: 'none',
+            display: 'block'
+          }}
+          allow="fullscreen"
+        />
       </Box>
 
       {/* Grön vertikal linje till vänster */}
