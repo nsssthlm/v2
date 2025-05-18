@@ -16,6 +16,9 @@ import FilesPage from './pages/vault/files/FilesPage';
 import VersionsPage from './pages/vault/versions/VersionsPage';
 import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 
+// Calendar page
+import CalendarPage from './pages/dashboard/CalendarPage';
+
 // Folder pages
 import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
