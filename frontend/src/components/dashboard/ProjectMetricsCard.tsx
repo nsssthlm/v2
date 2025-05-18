@@ -48,7 +48,7 @@ export const ProjectMetricsCard = ({
     if (!trend) return null;
     
     if (trend.isPositive) {
-      return <TrendingUpIcon sx={{ color: '#e0f2e9', fontSize: '1rem' }} />;
+      return <TrendingUpIcon sx={{ color: '#007934', fontSize: '1rem' }} />;
     } else if (trend.isPositive === false) {
       return <TrendingDownIcon sx={{ color: '#f44336', fontSize: '1rem' }} />;
     } else {
@@ -104,7 +104,7 @@ export const ProjectMetricsCard = ({
           <Typography 
             level="body-sm" 
             sx={{ 
-              color: trend.isPositive ? '#e0f2e9' : 
+              color: trend.isPositive ? '#007934' : 
                     trend.isPositive === false ? '#f44336' : 
                     'text.secondary',
               fontWeight: 'bold'
