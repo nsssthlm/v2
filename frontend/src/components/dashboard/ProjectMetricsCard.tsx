@@ -72,14 +72,14 @@ export const ProjectMetricsCard = ({
         </Typography>
         {icon && (
           <Box sx={{ 
-            bgcolor: `${color}20`, // Transparent bakgrund av huvudfärgen
+            bgcolor: '#e0f2e9', // Ljusgrön bakgrund
             borderRadius: '50%', 
             width: 32, 
             height: 32, 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            color: color
+            color: '#007934' // Tydligare mörkgrön färg för ikonerna
           }}>
             {getIcon()}
           </Box>
