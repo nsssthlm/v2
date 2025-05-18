@@ -14,17 +14,13 @@ import {
   Avatar,
   CircularProgress
 } from '@mui/joy';
-
-// Importera andra verktyg för visning
-
-// Icons
 import CloseIcon from '@mui/icons-material/Close';
-import DownloadIcon from '@mui/icons-material/Download';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import AddIcon from '@mui/icons-material/Add';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
-import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface PDFDialogProps {
   open: boolean;

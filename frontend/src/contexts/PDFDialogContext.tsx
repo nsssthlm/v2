@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Modal, ModalDialog } from '@mui/joy';
-import EnhancedPDFViewer from "../components/EnhancedPDFViewer";
 
-// Typ för dialogen
 interface PDFDialogState {
   isOpen: boolean;
   fileId?: string | number;
@@ -13,74 +11,78 @@ interface PDFDialogState {
   versionId?: number;
   pdfFile?: Blob | null;
   highlightAnnotationId?: number;
-  annotationId?: number; // För att fokusera på en specifik annotation
-  folderId?: number | null; // För att hålla reda på i vilken mapp PDF:en tillhör
+  annotationId?: number;
+  folderId?: number | null;
 }
 
-// Kontextens typ
 interface PDFDialogContextType {
   dialogState: PDFDialogState;
   openPDFDialog: (params: Omit<PDFDialogState, 'isOpen'>) => void;
   closePDFDialog: () => void;
 }
 
-// Skapa kontext
+const initialDialogState: PDFDialogState = {
+  isOpen: false
+};
+
 const PDFDialogContext = createContext<PDFDialogContextType | undefined>(undefined);
 
-// Provider-komponent
-export function PDFDialogProvider({ children }: { children: ReactNode }) {
-  const [dialogState, setDialogState] = useState<PDFDialogState>({
-    isOpen: false,
-  });
+export const PDFDialogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [dialogState, setDialogState] = useState<PDFDialogState>(initialDialogState);
 
   const openPDFDialog = (params: Omit<PDFDialogState, 'isOpen'>) => {
-    setDialogState({ 
+    setDialogState({
       ...params,
-      isOpen: true 
+      isOpen: true
     });
   };
 
   const closePDFDialog = () => {
-    setDialogState(prevState => ({ 
-      ...prevState,
-      isOpen: false 
-    }));
+    setDialogState(initialDialogState);
   };
 
   return (
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
-      
-      <Modal open={dialogState.isOpen} onClose={() => closePDFDialog()}>
-        <ModalDialog sx={{ maxWidth: '90vw', maxHeight: '90vh', width: '90vw', height: '90vh', p: 0, overflow: 'hidden' }}>
-          {dialogState.isOpen && (
-            <EnhancedPDFViewer
-              fileId={dialogState.fileId}
-              initialUrl={dialogState.initialUrl}
-              filename={dialogState.filename}
-              onClose={closePDFDialog}
-              projectId={dialogState.projectId}
-              useDatabase={!!dialogState.fileId}
-              file={dialogState.file}
-              versionId={dialogState.versionId}
-              pdfFile={dialogState.pdfFile}
-              highlightAnnotationId={dialogState.highlightAnnotationId}
-              annotationId={dialogState.annotationId}
-              isDialogMode={true}
-              folderId={dialogState.folderId} // Skicka med folderId till PDF-visaren för korrekt mappassociation
+      <Dialog
+        open={dialogState.isOpen}
+        onClose={() => closePDFDialog()}
+        size="lg"
+        sx={{
+          '& .MuiDialogContent-root': {
+            p: 0,
+            width: '90vw', 
+            maxWidth: '1400px',
+            height: '90vh',
+            maxHeight: '800px',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogContent>
+          {dialogState.isOpen && dialogState.initialUrl && (
+            <iframe 
+              src={dialogState.initialUrl}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none'
+              }}
+              title={dialogState.filename || 'PDF'}
             />
           )}
-        </ModalDialog>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </PDFDialogContext.Provider>
   );
-}
+};
 
-// Hook för att använda PDF-dialogen
-export function usePDFDialog() {
+export const usePDFDialog = (): PDFDialogContextType => {
   const context = useContext(PDFDialogContext);
+  
   if (context === undefined) {
-    throw new Error('usePDFDialog måste användas inom en PDFDialogProvider');
+    throw new Error('usePDFDialog must be used within a PDFDialogProvider');
   }
+  
   return context;
-}
+};

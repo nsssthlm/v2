@@ -4,32 +4,31 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
 import { 
-  Sheet, 
   Box, 
   Typography, 
   Button, 
   IconButton, 
-  CircularProgress,
-  Divider
+  Sheet, 
+  Tabs,
+  TabList,
+  Tab,
+  Avatar,
+  CircularProgress
 } from '@mui/joy';
 
-// Konfigurera PDF.js worker lokalt istället för via CDN
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
+// Import Lucide icons
+import { 
+  ChevronLeft, 
+  ChevronRight,
+  ZoomIn, 
+  ZoomOut,
+  X,
+  Upload 
+} from "lucide-react";
 
-// Icons
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import ZoomOutIcon from '@mui/icons-material/ZoomOut';
-import CloseIcon from '@mui/icons-material/Close';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'; 
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import DownloadIcon from '@mui/icons-material/Download';
-import CommentIcon from '@mui/icons-material/Comment';
-import HistoryIcon from '@mui/icons-material/History';
+// Konfigurera PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-// PDF Annotation interface
 export interface PDFAnnotation {
   id: string;
   pdfVersionId?: number;
@@ -51,7 +50,6 @@ export interface PDFAnnotation {
   deadline?: string;
 }
 
-// File Version interface
 export interface FileVersion {
   id: string;
   versionNumber: number;
@@ -63,20 +61,6 @@ export interface FileVersion {
   commentCount?: number;
 }
 
-// Status color mapping
-const statusColors = {
-  new_comment: '#FF69B4',      // HotPink (Rosa)
-  action_required: '#FF0000',  // Röd
-  rejected: '#808080',         // Grå
-  new_review: '#FFA500',       // Orange
-  other_forum: '#4169E1',      // RoyalBlue (Blå)
-  resolved: '#ADFF2F',         // GreenYellow (Grön)
-  
-  // Backward compatibility for old status values
-  open: '#FF69B4',             // Mappa till new_comment (Rosa)
-  reviewing: '#FFA500'         // Mappa till new_review (Orange)
-};
-
 interface EnhancedPDFViewerProps {
   fileId?: string | number;
   initialUrl?: string;
@@ -85,26 +69,21 @@ interface EnhancedPDFViewerProps {
   projectId?: number | null;
   useDatabase?: boolean;
   file?: File | null;
-  // Parameters for direct PDF viewing with annotations
   versionId?: number;
   pdfFile?: Blob | null;
   highlightAnnotationId?: number;
   annotationId?: number;
-  // Dialog mode flag - när true visas PDF:en i dialog/popup-läge
   isDialogMode?: boolean;
-  // Folder association - vilken mapp filen tillhör
   folderId?: number | null;
 }
 
-type Position = { x: number; y: number };
-
-export default function EnhancedPDFViewer({
+const EnhancedPDFViewer = ({
   fileId,
   initialUrl,
-  filename,
+  filename = 'PDF Dokument',
   onClose,
   projectId,
-  useDatabase = false,
+  useDatabase = true,
   file,
   versionId,
   pdfFile,
@@ -112,421 +91,285 @@ export default function EnhancedPDFViewer({
   annotationId,
   isDialogMode = false,
   folderId
-}: EnhancedPDFViewerProps) {
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1);
+}: EnhancedPDFViewerProps) => {
+  const [activeTab, setActiveTab] = useState<string>('detaljer');
+  const [currentZoom, setCurrentZoom] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(5);
   const [loading, setLoading] = useState(true);
   
-  // Annotations and commenting
-  const [annotations, setAnnotations] = useState<PDFAnnotation[]>([]);
-  const [activeAnnotation, setActiveAnnotation] = useState<PDFAnnotation | null>(null);
-  
-  // Version management
-  const [fileVersions, setFileVersions] = useState<FileVersion[]>([]);
-  const [pdfUrl, setPdfUrl] = useState<string | undefined>(initialUrl);
-  
-  // Current sidebar view mode
-  const [sidebarMode, setSidebarMode] = useState<'details' | 'history' | 'comment'>('details');
-  
-  // Refs
-  const containerRef = useRef<HTMLDivElement>(null);
+  // Referens till PDF container
   const pdfContainerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
-
-  // Load PDF data when component mounts
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Om vi har en direkt fil, använd den
-        if (file) {
-          const url = URL.createObjectURL(file);
-          setPdfUrl(url);
-          setLoading(false);
-          return;
-        }
-
-        // Om vi har en URL, använd den
-        if (initialUrl) {
-          setPdfUrl(initialUrl);
-          setLoading(false);
-          return;
-        }
-        
-        // I en verklig implementation skulle vi hämta från server här
-        setLoading(false);
-      } catch (error) {
-        console.error("Error loading PDF data:", error);
-        setLoading(false);
-      }
-    }
-    
-    loadData();
-  }, [fileId, initialUrl, file, folderId]);
-
-  // Handle document load success
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-    setLoading(false);
-  }
-
-  // Handle document load error
-  const onDocumentLoadError = (error: Error) => {
-    console.error("Error loading PDF document:", error);
-    setLoading(false);
+  
+  // Funktioner för navigering
+  const zoomIn = () => {
+    setCurrentZoom(prev => Math.min(prev + 10, 200));
+  };
+  
+  const zoomOut = () => {
+    setCurrentZoom(prev => Math.max(prev - 10, 50));
+  };
+  
+  const goToPrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+  
+  const goToNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
   };
 
-  // Handle page navigation
-  function changePage(offset: number) {
-    setPageNumber(prevPageNumber => {
-      const newPageNumber = prevPageNumber + offset;
-      return Math.max(1, Math.min(numPages || 1, newPageNumber));
-    });
-  }
-
-  function previousPage() {
-    changePage(-1);
-  }
-
-  function nextPage() {
-    changePage(1);
-  }
-
-  // Handle zoom
-  function zoomIn() {
-    setScale(prevScale => Math.min(prevScale + 0.2, 3));
-  }
-
-  function zoomOut() {
-    setScale(prevScale => Math.max(prevScale - 0.2, 0.5));
-  }
-
-  // Close handler
-  function handleClose() {
-    if (onClose) onClose();
-  }
-
-  // Funktion för att ladda ner PDF
-  function downloadPdf() {
-    if (pdfUrl) {
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = filename || 'document.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }
-
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden" style={{ height: isDialogMode ? '90vh' : '100%', backgroundColor: '#f9fafb' }}>
-      {/* Övre toolbar - ny design enligt bild 1 */}
-      <Sheet
-        sx={{
-          display: 'flex',
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+      {/* Header */}
+      <Sheet 
+        variant="outlined"
+        sx={{ 
+          display: 'flex', 
           justifyContent: 'space-between',
           alignItems: 'center',
+          p: 1,
           px: 2,
-          py: 0.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          backgroundColor: 'white'
+          borderTopLeftRadius: 'md',
+          borderTopRightRadius: 'md',
+          borderLeft: 'none',
+          borderRight: 'none',
+          borderTop: 'none'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {onClose && (
-            <IconButton 
-              variant="plain" 
-              color="neutral" 
-              size="sm" 
-              onClick={handleClose}
-              sx={{ mr: 1 }}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          )}
-          <Typography level="title-md" sx={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {filename || "Dokument"}
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton 
+            variant="plain" 
+            color="neutral" 
+            onClick={onClose}
+            sx={{ mr: 1 }}
+          >
+            <X size={18} />
+          </IconButton>
+          <Typography level="title-lg">{filename}</Typography>
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Sidnavigering */}
+          {/* Page navigation */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton 
+              size="sm" 
+              variant="soft" 
+              color="primary" 
+              onClick={goToPrevPage}
+              disabled={currentPage <= 1}
+            >
+              <ChevronLeft size={16} />
+            </IconButton>
+            <Typography level="body-sm" sx={{ mx: 1 }}>
+              Sida {currentPage} av {totalPages}
+            </Typography>
+            <IconButton 
+              size="sm" 
+              variant="soft" 
+              color="primary" 
+              onClick={goToNextPage}
+              disabled={currentPage >= totalPages}
+            >
+              <ChevronRight size={16} />
+            </IconButton>
+          </Box>
+          
+          {/* Zoom control */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton 
+              size="sm" 
+              variant="soft" 
+              color="primary"
+              onClick={zoomOut}
+            >
+              <ZoomOut size={16} />
+            </IconButton>
+            <Typography level="body-sm" sx={{ mx: 1 }}>
+              {currentZoom}%
+            </Typography>
+            <IconButton 
+              size="sm" 
+              variant="soft" 
+              color="primary"
+              onClick={zoomIn}
+            >
+              <ZoomIn size={16} />
+            </IconButton>
+          </Box>
+          
+          {/* Action buttons */}
           <Button
             size="sm"
             variant="soft"
             color="primary"
-            sx={{ 
-              borderRadius: '4px 0 0 4px', 
-              backgroundColor: 'primary.100',
-              '&:hover': { backgroundColor: 'primary.200' } 
-            }}
           >
-            Sida {pageNumber} av {numPages || '-'}
-          </Button>
-          
-          {/* Prev/Next knappar */}
-          <IconButton 
-            variant="soft"
-            color="primary" 
-            size="sm"
-            onClick={previousPage}
-            disabled={pageNumber <= 1}
-            sx={{ borderRadius: 0 }}
-          >
-            <ArrowBackIcon fontSize="small" />
-          </IconButton>
-          
-          <IconButton 
-            variant="soft"
-            color="primary" 
-            size="sm"
-            onClick={nextPage}
-            disabled={!numPages || pageNumber >= numPages}
-            sx={{ borderRadius: '0 4px 4px 0' }}
-          >
-            <ArrowForwardIcon fontSize="small" />
-          </IconButton>
-          
-          {/* Zoom knappar */}
-          <IconButton 
-            variant="soft"
-            color="primary" 
-            size="sm"
-            onClick={zoomOut}
-            disabled={scale <= 0.5}
-            sx={{ 
-              borderRadius: '4px 0 0 4px',
-              ml: 1
-            }}
-          >
-            <ZoomOutIcon fontSize="small" />
-          </IconButton>
-          
-          <Button
-            size="sm"
-            variant="soft"
-            color="primary"
-            sx={{ 
-              borderRadius: 0,
-              minWidth: '60px',
-              backgroundColor: 'primary.100',
-              '&:hover': { backgroundColor: 'primary.100' } 
-            }}
-          >
-            {Math.round(scale * 100)}%
-          </Button>
-          
-          <IconButton 
-            variant="soft"
-            color="primary" 
-            size="sm"
-            onClick={zoomIn}
-            disabled={scale >= 3}
-            sx={{ borderRadius: '0 4px 4px 0' }}
-          >
-            <ZoomInIcon fontSize="small" />
-          </IconButton>
-          
-          {/* Verktyg enligt bild 1 */}
-          <Button
-            variant="soft"
-            color="primary"
-            size="sm"
-            onClick={() => setSidebarMode(sidebarMode === 'comment' ? 'details' : 'comment')}
-            sx={{ ml: 1 }}
-          >
-            Lägg till kommentar
-          </Button>
-          
-          <Button
-            variant="soft"
-            color="primary"
-            size="sm"
-            onClick={downloadPdf}
-          >
-            <DownloadIcon fontSize="small" sx={{ mr: 0.5 }} />
             Ladda ner
           </Button>
           
           <Button
+            size="sm"
             variant="soft"
             color="primary"
-            size="sm"
           >
-            Markera som granskad
+            Versioner
           </Button>
           
           <Button
+            size="sm"
             variant="soft"
             color="primary"
+          >
+            Markera område
+          </Button>
+          
+          <Button
             size="sm"
+            variant="soft"
+            color="primary"
+            startDecorator={<Upload size={16} />}
           >
             Ny version
           </Button>
         </Box>
       </Sheet>
       
+      {/* Main content */}
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Main PDF Viewer */}
+        {/* PDF Viewer */}
         <Box 
-          ref={pdfContainerRef}
           sx={{ 
             flex: 1, 
-            overflow: 'auto', 
-            backgroundColor: '#333', // Mörkare bakgrund enligt bild 1
+            bgcolor: '#333',
             display: 'flex',
-            justifyContent: 'center'
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+            overflow: 'hidden'
           }}
+          ref={pdfContainerRef}
         >
           {loading ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white' }}>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              height: '100%'
+            }}>
               <CircularProgress size="lg" />
-              <Typography level="body-lg" sx={{ ml: 2, color: 'white' }}>Laddar dokument...</Typography>
             </Box>
-          ) : pdfUrl ? (
+          ) : (
             <Box 
-              ref={containerRef}
-              sx={{
+              sx={{ 
+                width: '100%', 
+                height: '100%', 
                 display: 'flex',
                 justifyContent: 'center',
-                minHeight: '100%',
-                p: 4,
-                position: 'relative'
+                alignItems: 'flex-start',
+                bgcolor: '#333',
+                overflow: 'auto',
+                position: 'relative',
+                p: 2
               }}
+              ref={containerRef}
             >
-              {/* PDF progress bar enligt bild 1 */}
-              <Box sx={{ 
-                position: 'absolute', 
-                bottom: '8px', 
-                left: '50%', 
-                transform: 'translateX(-50%)', 
-                width: '80%', 
-                height: '4px', 
-                bgcolor: '#1b1b1b',
-                borderRadius: '2px',
-                overflow: 'hidden'
-              }}>
-                <Box sx={{ 
-                  width: numPages ? `${(pageNumber / numPages) * 100}%` : '0%', 
-                  height: '100%', 
-                  bgcolor: '#4caf50', // Grön progress
-                  transition: 'width 0.3s'
-                }} />
-              </Box>
-              
               <Document
-                file={pdfUrl}
-                onLoadSuccess={onDocumentLoadSuccess}
-                onLoadError={onDocumentLoadError}
-                loading={
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px' }}>
-                    <CircularProgress size="sm" />
-                  </Box>
-                }
+                file={initialUrl}
+                onLoadSuccess={({ numPages }) => {
+                  setTotalPages(numPages);
+                  setLoading(false);
+                }}
+                onLoadError={(error) => console.error("Error loading PDF:", error)}
+                loading={<CircularProgress />}
               >
-                <Box 
-                  ref={pageRef} 
-                  sx={{ 
-                    backgroundColor: 'white',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                    mb: 4
-                  }}
-                >
+                <Box ref={pageRef}>
                   <Page
-                    pageNumber={pageNumber}
-                    scale={scale}
+                    pageNumber={currentPage}
+                    scale={currentZoom / 100}
                     renderTextLayer={true}
                     renderAnnotationLayer={true}
                   />
                 </Box>
               </Document>
-            </Box>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-              <Typography level="h3" color="danger">
-                Ingen PDF vald eller kunde inte ladda dokumentet
-              </Typography>
+              
+              {/* Gröna sidramen för designen som matchar bild 2 */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  width: '8px',
+                  backgroundColor: '#4caf50'
+                }}
+              />
             </Box>
           )}
-        </Box>
-        
-        {/* Högersidebar - tabbar liknande bild 1 */}
-        <Sheet
-          sx={{
-            width: 320,
-            borderLeft: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
-          {/* Tab-knappar */}
+          
+          {/* Progress bar at bottom */}
           <Box 
             sx={{ 
-              display: 'flex', 
-              borderBottom: '1px solid', 
-              borderColor: 'divider' 
+              position: 'absolute', 
+              bottom: 10, 
+              left: '50%', 
+              transform: 'translateX(-50%)',
+              width: '80%',
+              height: 4,
+              bgcolor: '#4b4b4b',
+              borderRadius: 2,
+              overflow: 'hidden'
             }}
           >
-            <Button
-              variant={sidebarMode === 'details' ? 'soft' : 'plain'}
-              color={sidebarMode === 'details' ? 'primary' : 'neutral'}
-              onClick={() => setSidebarMode('details')}
+            <Box 
               sx={{ 
-                flex: 1, 
-                borderRadius: 0,
-                py: 1
+                width: `${(currentPage / totalPages) * 100}%`, 
+                height: '100%', 
+                bgcolor: '#4caf50'
               }}
-            >
-              Detaljer
-            </Button>
-            
-            <Button
-              variant={sidebarMode === 'history' ? 'soft' : 'plain'}
-              color={sidebarMode === 'history' ? 'primary' : 'neutral'}
-              onClick={() => setSidebarMode('history')}
-              sx={{ 
-                flex: 1, 
-                borderRadius: 0,
-                py: 1
-              }}
-            >
-              Historik
-            </Button>
-            
-            <Button
-              variant={sidebarMode === 'comment' ? 'soft' : 'plain'}
-              color={sidebarMode === 'comment' ? 'primary' : 'neutral'}
-              onClick={() => setSidebarMode('comment')}
-              sx={{ 
-                flex: 1, 
-                borderRadius: 0,
-                py: 1
-              }}
-            >
-              Kommentar
-            </Button>
+            />
           </Box>
+        </Box>
+        
+        {/* Sidebar */}
+        <Sheet 
+          variant="outlined"
+          sx={{
+            width: 320,
+            display: 'flex',
+            flexDirection: 'column',
+            borderTop: 'none',
+            borderBottom: 'none',
+            borderRight: 'none',
+          }}
+        >
+          {/* Tabs */}
+          <Tabs 
+            value={activeTab}
+            onChange={(_, value) => setActiveTab(value as string)}
+          >
+            <TabList sx={{ borderRadius: 0 }}>
+              <Tab value="detaljer">Detaljer</Tab>
+              <Tab value="historik">Historik</Tab>
+              <Tab value="kommentar">Kommentar</Tab>
+            </TabList>
+          </Tabs>
           
-          {/* Tab innehåll */}
+          {/* Tab content */}
           <Box sx={{ p: 2, overflow: 'auto', flex: 1 }}>
-            {sidebarMode === 'details' && (
+            {activeTab === 'detaljer' && (
               <>
-                <Typography level="h4" sx={{ mb: 2 }}>PDF Anteckning</Typography>
+                <Typography level="title-md" sx={{ mb: 2 }}>PDF Anteckning</Typography>
                 
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{ mb: 4 }}>
                   <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
                     Skapad av
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box 
-                      sx={{ 
-                        width: 24, 
-                        height: 24, 
-                        bgcolor: 'primary.300', 
-                        borderRadius: '50%' 
-                      }} 
+                    <Avatar 
+                      size="sm" 
+                      sx={{ bgcolor: 'primary.400' }}
                     />
                     <Box>
                       <Typography level="body-sm">user@example.com</Typography>
@@ -537,39 +380,36 @@ export default function EnhancedPDFViewer({
                   </Box>
                 </Box>
                 
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{ mb: 4 }}>
                   <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
                     Deadline
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography level="body-sm">22 maj 2025</Typography>
-                  </Box>
+                  <Typography level="body-sm">22 maj 2025</Typography>
                 </Box>
                 
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{ mb: 4 }}>
                   <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
                     Granskningspaket
                   </Typography>
                   <Typography level="body-sm">K - Granskning BH Hus 3-4</Typography>
                 </Box>
                 
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{ mb: 4 }}>
                   <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
                     Typ
                   </Typography>
                   <Typography level="body-sm">Gransknings kommentar</Typography>
                 </Box>
                 
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{ mb: 4 }}>
                   <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
                     Aktivitet
                   </Typography>
-                  <Button 
+                  <Button
                     variant="outlined"
-                    color="primary"
-                    size="sm"
+                    color="neutral"
                     fullWidth
-                    sx={{ justifyContent: 'center', mt: 1 }}
+                    sx={{ mt: 1 }}
                   >
                     VERSIONER
                   </Button>
@@ -577,81 +417,28 @@ export default function EnhancedPDFViewer({
               </>
             )}
             
-            {sidebarMode === 'comment' && (
+            {activeTab === 'historik' && (
               <>
-                <Typography level="h4" sx={{ mb: 2 }}>Kommentarer</Typography>
-                {annotations.length === 0 ? (
-                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    Inga kommentarer har lagts till än. Markera ett område i dokumentet och lägg till en kommentar.
-                  </Typography>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {annotations.map(annotation => (
-                      <Sheet 
-                        key={annotation.id}
-                        variant="outlined"
-                        sx={{ 
-                          p: 2, 
-                          borderRadius: 'sm',
-                          borderLeft: '4px solid',
-                          borderLeftColor: statusColors[annotation.status] || 'primary.main'
-                        }}
-                      >
-                        <Typography level="body-sm" fontWeight="bold">
-                          {annotation.createdBy}
-                        </Typography>
-                        <Typography level="body-xs" sx={{ color: 'text.secondary', mb: 1 }}>
-                          {new Date(annotation.createdAt).toLocaleString()}
-                        </Typography>
-                        <Typography level="body-sm">{annotation.comment}</Typography>
-                      </Sheet>
-                    ))}
-                  </Box>
-                )}
+                <Typography level="title-md" sx={{ mb: 2 }}>Versionshistorik</Typography>
+                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                  Ingen versionshistorik tillgänglig för detta dokument.
+                </Typography>
               </>
             )}
             
-            {sidebarMode === 'history' && (
+            {activeTab === 'kommentar' && (
               <>
-                <Typography level="h4" sx={{ mb: 2 }}>Versionshistorik</Typography>
-                {fileVersions.length === 0 ? (
-                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    Ingen versionshistorik tillgänglig för detta dokument.
-                  </Typography>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {fileVersions.map(version => (
-                      <Sheet 
-                        key={version.id}
-                        variant="outlined"
-                        sx={{ p: 2, borderRadius: 'sm' }}
-                      >
-                        <Typography level="body-sm" fontWeight="bold">
-                          Version {version.versionNumber}: {version.filename}
-                        </Typography>
-                        <Typography level="body-xs" sx={{ color: 'text.secondary', mb: 1 }}>
-                          Uppladdad av {version.uploadedBy} den {version.uploaded}
-                        </Typography>
-                        {version.description && (
-                          <Typography level="body-sm">{version.description}</Typography>
-                        )}
-                        <Button 
-                          variant="soft" 
-                          color="primary" 
-                          size="sm" 
-                          sx={{ mt: 1 }}
-                        >
-                          Visa denna version
-                        </Button>
-                      </Sheet>
-                    ))}
-                  </Box>
-                )}
+                <Typography level="title-md" sx={{ mb: 2 }}>Kommentarer</Typography>
+                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                  Inga kommentarer har lagts till än.
+                </Typography>
               </>
             )}
           </Box>
         </Sheet>
       </Box>
-    </div>
+    </Box>
   );
-}
+};
+
+export default EnhancedPDFViewer;
