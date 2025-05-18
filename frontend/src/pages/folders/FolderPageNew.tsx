@@ -195,9 +195,23 @@ const FolderPageNew = () => {
     // Extrahera den faktiska sökvägen från URL:en
     let fullUrl = fileUrl;
     
-    // Först, hämta base server URL utan /api
-    // Detta är viktigt eftersom mediafiler serveras från roten, inte från /api
-    const serverBaseUrl = window.location.origin;
+    // Generera korrekt bas-URL för servern
+    // Vi behöver använda API_BASE_URL:s bas för att hantera både lokala och Replit-miljöer korrekt
+    let serverBaseUrl = window.location.origin;
+    
+    // I utvecklingsmiljön, särskilt hos Replit, behöver vi vara säkra på att använda backend-serverns URL
+    if (API_BASE_URL.startsWith('/api')) {
+      // Om vi använder relativ URL, behåll window.location.origin
+      serverBaseUrl = window.location.origin;
+    } else if (API_BASE_URL.includes('localhost')) {
+      // För localhost, använd port 8001 eftersom det är där Django-servern körs
+      serverBaseUrl = 'http://localhost:8001';
+    } else if (API_BASE_URL.includes('0.0.0.0')) {
+      // Om vi använder 0.0.0.0, behöver vi ersätta det med korrekt IP
+      serverBaseUrl = 'http://0.0.0.0:8001';
+    }
+    
+    console.log("Använder server URL:", serverBaseUrl);
     
     // Kontrollera om det är en API-URL från web_api.py där vi får komplett sökväg till filen
     if (fileUrl.includes('/api/files/web/')) {
