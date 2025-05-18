@@ -6,7 +6,7 @@ import SimpleBarChart from '../../components/dashboard/SimpleBarChart';
 import SimplePieChart from '../../components/dashboard/SimplePieChart';
 import RecentActivityList from '../../components/dashboard/RecentActivityList';
 import TopProjectsTable from '../../components/dashboard/TopProjectsTable';
-import ModernRevenueChart from '../../components/dashboard/ModernRevenueChart';
+import RevenueCurveChart from '../../components/dashboard/RevenueCurveChart';
 import { 
   metricsData, 
   projectChartData, 
@@ -185,7 +185,7 @@ const Dashboard = () => {
         );
       case 'lineChart':
         return (
-          <SimpleLineChart 
+          <RevenueCurveChart 
             title={widget.title}
           />
         );
