@@ -24,7 +24,7 @@ export const ProjectMetricsCard = ({
   value, 
   trend, 
   icon,
-  color = '#60cd18' // Default till vår gröna färg
+  color = '#e0f2e9' // Default till vår ljusgröna färg
 }: ProjectMetricsCardProps) => {
   const getIcon = () => {
     if (typeof icon === 'string') {
@@ -48,7 +48,7 @@ export const ProjectMetricsCard = ({
     if (!trend) return null;
     
     if (trend.isPositive) {
-      return <TrendingUpIcon sx={{ color: '#60cd18', fontSize: '1rem' }} />;
+      return <TrendingUpIcon sx={{ color: '#e0f2e9', fontSize: '1rem' }} />;
     } else if (trend.isPositive === false) {
       return <TrendingDownIcon sx={{ color: '#f44336', fontSize: '1rem' }} />;
     } else {
@@ -91,7 +91,7 @@ export const ProjectMetricsCard = ({
         sx={{ 
           my: 1, 
           fontWeight: 'bold',
-          color: '#60cd18',
+          color: '#e0f2e9',
           fontSize: '1.8rem'
         }}
       >
@@ -104,7 +104,7 @@ export const ProjectMetricsCard = ({
           <Typography 
             level="body-sm" 
             sx={{ 
-              color: trend.isPositive ? '#60cd18' : 
+              color: trend.isPositive ? '#e0f2e9' : 
                     trend.isPositive === false ? '#f44336' : 
                     'text.secondary',
               fontWeight: 'bold'
