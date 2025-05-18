@@ -15,8 +15,8 @@ interface DirectPDFDialogProps {
 }
 
 const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl, filename }) => {
-  // Använd SEB:s gröna färg
-  const SEBGreen = '#007934';
+  // Använd blå färg
+  const BlueColor = '#1976d2';
 
   return (
     <Dialog 
@@ -34,7 +34,7 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
     >
       <DialogTitle 
         sx={{ 
-          backgroundColor: SEBGreen, 
+          backgroundColor: BlueColor, 
           color: 'white', 
           display: 'flex', 
           alignItems: 'center',
