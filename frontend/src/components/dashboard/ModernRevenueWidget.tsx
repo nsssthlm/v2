@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Card, Tabs, TabList, Tab, TabPanel, Select, Option } from '@mui/joy';
+import { Box, Typography, Card, Select, Option } from '@mui/joy';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import DateRangeOutlinedIcon from '@mui/icons-material/DateRangeOutlined';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
@@ -100,12 +100,9 @@ interface ModernRevenueWidgetProps {
   title: string;
 }
 
-const ModernRevenueWidget: React.FC<ModernRevenueWidgetProps> = ({ title }) => {
-  // State för aktiv tab - intäkter/kostnader eller kostnadsfördelning
-  const [activeTab, setActiveTab] = useState(0);
-  
+export default function ModernRevenueWidget({ title }: ModernRevenueWidgetProps) {
   // State för tidsperiod
-  const [period, setPeriod] = useState('7m'); // 7 månader
+  const [period, setPeriod] = useState('year');
   
   // Formatera pengar med valutasymbol och tusentalsavgränsare
   const formatCurrency = (amount: number) => {
@@ -116,15 +113,186 @@ const ModernRevenueWidget: React.FC<ModernRevenueWidgetProps> = ({ title }) => {
     }).format(amount);
   };
   
-  // Anpassad tooltip för diagram
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <Card variant="outlined" sx={{ 
-          p: 1.5, 
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(0, 121, 52, 0.12)',
-          backdropFilter: 'blur(8px)',
+  return (
+    <Card
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+        transition: 'box-shadow 0.2s',
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+        overflow: 'hidden',
+        '&:hover': {
+          boxShadow: '0 8px 24px rgba(0, 121, 52, 0.08)',
+          border: '1px solid rgba(0, 121, 52, 0.12)'
+        }
+      }}
+    >
+      <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'rgba(0, 0, 0, 0.04)' }}>
+        <Typography 
+          level="title-md" 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#2e7d32',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            fontSize: '0.875rem',
+            mb: 1
+          }}
+        >
+          {title}
+        </Typography>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <TrendingUpIcon sx={{ color: '#007934', fontSize: '1.25rem', mr: 1 }} />
+            <Typography level="title-lg" sx={{ fontWeight: 700 }}>
+              Ekonomisk översikt
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <DateRangeOutlinedIcon sx={{ color: 'text.secondary', mr: 1, fontSize: '1rem' }} />
+            <Select 
+              value={period} 
+              onChange={(_, newValue) => setPeriod(newValue as string)}
+              size="sm"
+              variant="outlined"
+              sx={{ 
+                minWidth: 100,
+                '--Select-decoratorChildHeight': '24px'
+              }}
+            >
+              <Option value="month">Månad</Option>
+              <Option value="quarter">Kvartal</Option>
+              <Option value="year">År</Option>
+              <Option value="all">Allt</Option>
+            </Select>
+          </Box>
+        </Box>
+      </Box>
+      
+      {/* Diagraminnehåll */}
+      <Box sx={{ flexGrow: 1, p: 2, overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          {/* Sammanfattande statistik */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            mb: 3,
+            gap: 2,
+            flexWrap: 'wrap'
+          }}>
+            <Box sx={{ 
+              bgcolor: '#f8faf9', 
+              borderRadius: '8px', 
+              p: 1.5, 
+              minWidth: 150,
+              flexGrow: 1,
+              border: '1px solid #e0f2e9'
+            }}>
+              <Typography level="body-xs" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                Total intäkt
+              </Typography>
+              <Typography level="h5" sx={{ color: '#2e7d32', fontWeight: 700 }}>
+                4.32 Mkr
+              </Typography>
+              <Typography level="body-xs" sx={{ color: '#007934', display: 'flex', alignItems: 'center' }}>
+                +8.2%
+              </Typography>
+            </Box>
+            
+            <Box sx={{ 
+              bgcolor: '#f8faf9', 
+              borderRadius: '8px', 
+              p: 1.5, 
+              minWidth: 150,
+              flexGrow: 1,
+              border: '1px solid #e0f2e9'
+            }}>
+              <Typography level="body-xs" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                Total kostnad
+              </Typography>
+              <Typography level="h5" sx={{ color: '#d32f2f', fontWeight: 700 }}>
+                3.18 Mkr
+              </Typography>
+              <Typography level="body-xs" sx={{ color: '#d32f2f', display: 'flex', alignItems: 'center' }}>
+                +5.1%
+              </Typography>
+            </Box>
+            
+            <Box sx={{ 
+              bgcolor: '#f8faf9', 
+              borderRadius: '8px', 
+              p: 1.5, 
+              minWidth: 150,
+              flexGrow: 1,
+              border: '1px solid #e0f2e9'
+            }}>
+              <Typography level="body-xs" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                Vinst
+              </Typography>
+              <Typography level="h5" sx={{ color: '#2e7d32', fontWeight: 700 }}>
+                1.14 Mkr
+              </Typography>
+              <Typography level="body-xs" sx={{ color: '#007934', display: 'flex', alignItems: 'center' }}>
+                +12.4%
+              </Typography>
+            </Box>
+          </Box>
+          
+          {/* Diagram */}
+          <Box sx={{ flexGrow: 1, height: '100%' }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart
+                data={revenueData}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="month" 
+                  tick={{ fill: '#666666', fontSize: 12 }}
+                />
+                <YAxis 
+                  tick={{ fill: '#666666', fontSize: 12 }} 
+                  tickFormatter={(value) => `${value/1000}k`}
+                />
+                <Tooltip 
+                  formatter={(value) => [`${value} kr`, undefined]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="intäkter"
+                  name="Intäkter"
+                  stroke="#4caf50"
+                  strokeWidth={2}
+                  activeDot={{ r: 8 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="kostnader" 
+                  name="Kostnader"
+                  stroke="#f44336"
+                  strokeWidth={2} 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="vinst" 
+                  name="Vinst"
+                  stroke="#2196f3"
+                  strokeWidth={2} 
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </Box>
           background: 'rgba(255, 255, 255, 0.95)'
         }}>
           <Typography level="title-sm" sx={{ mb: 0.5, fontWeight: 600 }}>
@@ -222,52 +390,55 @@ const ModernRevenueWidget: React.FC<ModernRevenueWidgetProps> = ({ title }) => {
           </Box>
         </Box>
         
-        <Tabs 
-          value={activeTab} 
-          onChange={(_, newValue) => setActiveTab(newValue as number)} 
-          sx={{ 
-            backgroundColor: '#f8faf9', 
-            borderRadius: '8px', 
-            '--Tab-indicatorColor': '#007934' 
-          }}
-        >
-          <TabList sx={{ bgcolor: 'transparent' }}>
-            <Tab
-              variant={activeTab === 0 ? "soft" : "plain"}
-              sx={{ 
-                fontWeight: 600, 
-                fontSize: '0.875rem',
-                bgcolor: activeTab === 0 ? '#e8f5e9' : 'transparent',
-                color: activeTab === 0 ? '#007934' : 'text.secondary',
-                '&:hover': {
-                  bgcolor: activeTab === 0 ? '#e8f5e9' : 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-            >
-              Intäkter & Kostnader
-            </Tab>
-            <Tab
-              variant={activeTab === 1 ? "soft" : "plain"}
-              sx={{ 
-                fontWeight: 600, 
-                fontSize: '0.875rem',
-                bgcolor: activeTab === 1 ? '#e8f5e9' : 'transparent',
-                color: activeTab === 1 ? '#007934' : 'text.secondary',
-                '&:hover': {
-                  bgcolor: activeTab === 1 ? '#e8f5e9' : 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-            >
-              Kostnadsfördelning
-            </Tab>
-          </TabList>
-        </Tabs>
+        <TabsProvider>
+          <Tabs 
+            value={activeTab} 
+            onChange={(_, newValue) => setActiveTab(newValue as number)} 
+            sx={{ 
+              backgroundColor: '#f8faf9', 
+              borderRadius: '8px', 
+              '--Tab-indicatorColor': '#007934' 
+            }}
+          >
+            <TabList sx={{ bgcolor: 'transparent' }}>
+              <Tab
+                variant={activeTab === 0 ? "soft" : "plain"}
+                sx={{ 
+                  fontWeight: 600, 
+                  fontSize: '0.875rem',
+                  bgcolor: activeTab === 0 ? '#e8f5e9' : 'transparent',
+                  color: activeTab === 0 ? '#007934' : 'text.secondary',
+                  '&:hover': {
+                    bgcolor: activeTab === 0 ? '#e8f5e9' : 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                Intäkter & Kostnader
+              </Tab>
+              <Tab
+                variant={activeTab === 1 ? "soft" : "plain"}
+                sx={{ 
+                  fontWeight: 600, 
+                  fontSize: '0.875rem',
+                  bgcolor: activeTab === 1 ? '#e8f5e9' : 'transparent',
+                  color: activeTab === 1 ? '#007934' : 'text.secondary',
+                  '&:hover': {
+                    bgcolor: activeTab === 1 ? '#e8f5e9' : 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                Kostnadsfördelning
+              </Tab>
+            </TabList>
+          </Tabs>
+        </TabsProvider>
       </Box>
       
       {/* Diagraminnehåll */}
       <Box sx={{ flexGrow: 1, p: 2, overflow: 'hidden' }}>
-        <TabPanel value={0} sx={{ p: 0, height: '100%' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <TabsProvider defaultValue={activeTab}>
+          <TabPanel value={0} sx={{ p: 0, height: '100%' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Sammanfattande statistik */}
             <Box sx={{ 
               display: 'flex', 

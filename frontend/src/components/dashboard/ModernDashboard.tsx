@@ -7,6 +7,8 @@ import SimplePieChart from './SimplePieChart';
 import RecentActivityList from './RecentActivityList';
 import TopProjectsTable from './TopProjectsTable';
 import ModernRevenueWidget from './ModernRevenueWidget';
+import SimpleCalendarWidget from './SimpleCalendarWidget';
+import { getMarkedDates } from './CalendarData';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import ModernDraggableWidget from './ModernDraggableWidget';
@@ -43,8 +45,7 @@ import {
   documentStatsData,
   projectStatsData
 } from './DashboardData';
-import { markedDates } from './CalendarData';
-import CalendarWidget from './CalendarWidget';
+// Använd bara SimpleCalendarWidget och getMarkedDates
 
 // Definiera metricsData för användning i dashborden
 const metricsData = [
@@ -314,11 +315,11 @@ const ModernDashboard: React.FC = () => {
         );
       case 'calendar':
         return (
-          <CalendarWidget
+          <SimpleCalendarWidget
             title={widget.title}
             height={height}
             onDateClick={handleCalendarDateClick}
-            markedDates={markedDates}
+            markedDates={getMarkedDates()}
           />
         );
       default:
