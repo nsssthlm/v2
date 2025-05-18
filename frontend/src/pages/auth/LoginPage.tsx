@@ -196,21 +196,6 @@ const LoginPage = () => {
                 />
               </Box>
               
-              <Box sx={{ mb: 1, mt: 1 }}>
-                <Typography level="body-xs" color="neutral">
-                  Tillgängliga testanvändare:
-                </Typography>
-                <Typography level="body-xs" color="neutral">
-                  projectleader / 123456 (Project Leader)
-                </Typography>
-                <Typography level="body-xs" color="neutral">
-                  admin / 123456 (Admin)
-                </Typography>
-                <Typography level="body-xs" color="neutral">
-                  user / 123456 (User)
-                </Typography>
-              </Box>
-              
               <Button
                 type="submit"
                 loading={isLoading}
