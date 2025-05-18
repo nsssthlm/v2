@@ -2,6 +2,10 @@ import { Box, Card, Typography } from '@mui/joy';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
+import PeopleIcon from '@mui/icons-material/People';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 
 interface ProjectMetricsCardProps {
   title: string;
@@ -11,7 +15,7 @@ interface ProjectMetricsCardProps {
     isPositive?: boolean;
     text: string;
   };
-  icon?: React.ReactNode;
+  icon?: 'people' | 'orders' | 'revenue' | 'growth' | React.ReactNode;
   color?: string;
 }
 
@@ -22,6 +26,24 @@ export const ProjectMetricsCard = ({
   icon,
   color = '#60cd18' // Default till vår gröna färg
 }: ProjectMetricsCardProps) => {
+  const getIcon = () => {
+    if (typeof icon === 'string') {
+      switch (icon) {
+        case 'people':
+          return <PeopleIcon />;
+        case 'orders':
+          return <BusinessCenterIcon />;
+        case 'revenue':
+          return <AttachMoneyIcon />;
+        case 'growth':
+          return <TrendingUpOutlinedIcon />;
+        default:
+          return null;
+      }
+    }
+    return icon;
+  };
+
   const getTrendIcon = () => {
     if (!trend) return null;
     
@@ -51,7 +73,7 @@ export const ProjectMetricsCard = ({
             justifyContent: 'center',
             color: color
           }}>
-            {icon}
+            {getIcon()}
           </Box>
         )}
       </Box>

@@ -1,11 +1,11 @@
 import React from 'react';
 import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer,
-  Tooltip,
-  Legend
+  PieChart as RechartsPieChart, 
+  Pie as RechartsPie, 
+  Cell as RechartsCell, 
+  ResponsiveContainer as RechartsResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  Legend as RechartsLegend
 } from 'recharts';
 import { Box, Card, Typography, IconButton, List, ListItem } from '@mui/joy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
