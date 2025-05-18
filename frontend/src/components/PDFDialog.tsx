@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { 
   Box, 
   Typography, 
@@ -7,12 +7,10 @@ import {
   Sheet, 
   Modal, 
   ModalDialog,
-  ModalClose,
-  Tabs,
-  TabList,
   Tab,
-  Avatar,
-  CircularProgress
+  TabList,
+  Tabs,
+  Avatar
 } from '@mui/joy';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -20,7 +18,6 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import DownloadIcon from '@mui/icons-material/Download';
 
 interface PDFDialogProps {
   open: boolean;
@@ -66,18 +63,14 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
           {/* Header */}
           <Sheet 
-            variant="outlined"
+            variant="plain"
             sx={{ 
               display: 'flex', 
               justifyContent: 'space-between',
               alignItems: 'center',
               p: 1,
-              px: 2,
-              borderTopLeftRadius: 'md',
-              borderTopRightRadius: 'md',
-              borderLeft: 'none',
-              borderRight: 'none',
-              borderTop: 'none'
+              bgcolor: '#f5f5f5', 
+              borderBottom: '1px solid #e0e0e0'
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -89,71 +82,92 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               >
                 <CloseIcon />
               </IconButton>
-              <Typography level="title-lg">{filename}</Typography>
+              <Typography level="title-sm" sx={{ fontWeight: 'bold', mr: 2 }}>{filename}</Typography>
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {/* Page navigation */}
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton 
-                  size="sm" 
-                  variant="soft" 
-                  color="primary" 
-                  onClick={() => {}}
-                >
-                  <ArrowBackIcon fontSize="small" />
-                </IconButton>
-                <Typography level="body-sm" sx={{ mx: 1 }}>
-                  Sida 1 av 5
-                </Typography>
-                <IconButton 
-                  size="sm" 
-                  variant="soft" 
-                  color="primary" 
-                  onClick={() => {}}
-                >
-                  <ArrowForwardIcon fontSize="small" />
-                </IconButton>
-              </Box>
-              
-              {/* Zoom control */}
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton 
-                  size="sm" 
-                  variant="soft" 
-                  color="primary"
-                  onClick={zoomOut}
-                >
-                  <span>-</span>
-                </IconButton>
-                <Typography level="body-sm" sx={{ mx: 1 }}>
-                  {currentZoom}%
-                </Typography>
-                <IconButton 
-                  size="sm" 
-                  variant="soft" 
-                  color="primary"
-                  onClick={zoomIn}
-                >
-                  <span>+</span>
-                </IconButton>
-              </Box>
-              
-              {/* Action buttons */}
+              {/* Page navigation - blå knappar som i din bild */}
               <Button
                 size="sm"
                 variant="soft"
                 color="primary"
-                startDecorator={<AddIcon />}
+                startDecorator={<ArrowBackIcon fontSize="small" />}
+                sx={{ 
+                  bgcolor: '#6366f1', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#4f46e5' }
+                }}
               >
-                Ladda ner
+              </Button>
+              
+              <Button
+                size="sm"
+                variant="soft"
+                color="neutral"
+                sx={{
+                  bgcolor: '#6366f1', 
+                  color: 'white',
+                  borderRadius: 'md',
+                  px: 2
+                }}
+              >
+                Sida 1 av 5
               </Button>
               
               <Button
                 size="sm"
                 variant="soft"
                 color="primary"
+                endDecorator={<ArrowForwardIcon fontSize="small" />}
+                sx={{ 
+                  bgcolor: '#6366f1', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#4f46e5' }
+                }}
+              >
+              </Button>
+              
+              {/* Zoom control - grön knapp */}
+              <Button
+                size="sm"
+                variant="soft"
+                color="success"
+                sx={{ 
+                  bgcolor: '#4caf50', 
+                  color: 'white',
+                  borderRadius: 'md',
+                  px: 2
+                }}
+              >
+                100%
+              </Button>
+              
+              <Button
+                size="sm"
+                variant="soft"
+                color="success"
+                sx={{ 
+                  bgcolor: '#4caf50', 
+                  color: 'white',
+                  borderRadius: 'md',
+                  minWidth: '32px',
+                  p: 0
+                }}
+              >
+                +
+              </Button>
+              
+              {/* Action buttons */}
+              <Button
+                size="sm"
+                variant="soft"
+                color="primary"
                 startDecorator={<BookmarkBorderIcon />}
+                sx={{ 
+                  bgcolor: '#6366f1', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#4f46e5' }
+                }}
               >
                 Versioner
               </Button>
@@ -162,7 +176,11 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="soft"
                 color="primary"
-                startDecorator={<BookmarkBorderIcon />}
+                sx={{ 
+                  bgcolor: '#6366f1', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#4f46e5' }
+                }}
               >
                 Markera område
               </Button>
@@ -172,6 +190,11 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 variant="soft"
                 color="primary"
                 startDecorator={<UploadIcon />}
+                sx={{ 
+                  bgcolor: '#6366f1', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#4f46e5' }
+                }}
               >
                 Ny version
               </Button>
@@ -180,7 +203,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
           
           {/* Main content */}
           <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-            {/* PDF Viewer */}
+            {/* PDF Viewer med en grön vertikal linje på vänster sida */}
             <Box 
               sx={{ 
                 flex: 1, 
@@ -205,6 +228,25 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   position: 'relative'
                 }}
               >
+                {/* "Nuvarande version" badge som i exemplet */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 16,
+                    left: 16,
+                    zIndex: 2,
+                    bgcolor: '#6366f1',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    py: 0.5,
+                    px: 1.5,
+                    borderRadius: 'md',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Nuvarande version
+                </Box>
+                
                 {/* Visa den faktiska PDF:en med iframe som fungerar bättre */}
                 <iframe
                   src={pdfUrl}
