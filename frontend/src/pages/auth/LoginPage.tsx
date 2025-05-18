@@ -63,8 +63,9 @@ const LoginPage = () => {
           variant="outlined"
           sx={{
             width: '100%',
-            maxWidth: '350px',
+            maxWidth: '400px',
             p: 3,
+            minHeight: '500px', // Fast höjd för att hålla samma storlek i flikarna
             boxShadow: 'sm',
             border: '1px solid #e0e0e0',
             borderRadius: '16px' // Mer rundade hörn
@@ -137,7 +138,7 @@ const LoginPage = () => {
           {activeTab === 'login' && (
             <form onSubmit={handleLogin}>
               <Box sx={{ mb: 3 }}>
-                <Typography level="body-sm" sx={{ mb: 1 }}>Username</Typography>
+                <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Username</Typography>
                 <Input
                   type="text"
                   placeholder="johnsmith"
@@ -153,7 +154,7 @@ const LoginPage = () => {
               </Box>
               
               <Box sx={{ mb: 3 }}>
-                <Typography level="body-sm" sx={{ mb: 1 }}>Password</Typography>
+                <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Password</Typography>
                 <Input
                   type="password"
                   placeholder="••••••••"
@@ -193,7 +194,7 @@ const LoginPage = () => {
           {activeTab === 'register' && (
             <form onSubmit={(e) => e.preventDefault()}>
               <Box sx={{ mb: 3 }}>
-                <Typography level="body-sm" sx={{ mb: 1 }}>Username</Typography>
+                <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Username</Typography>
                 <Input
                   type="text"
                   placeholder="johndoe"
@@ -207,7 +208,7 @@ const LoginPage = () => {
               </Box>
               
               <Box sx={{ mb: 3 }}>
-                <Typography level="body-sm" sx={{ mb: 1 }}>Password</Typography>
+                <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Password</Typography>
                 <Input
                   type="password"
                   placeholder="••••••••"
@@ -221,7 +222,7 @@ const LoginPage = () => {
               </Box>
               
               <Box sx={{ mb: 3 }}>
-                <Typography level="body-sm" sx={{ mb: 1 }}>Confirm Password</Typography>
+                <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Confirm Password</Typography>
                 <Input
                   type="password"
                   placeholder="••••••••"
@@ -235,7 +236,7 @@ const LoginPage = () => {
               </Box>
               
               <Box sx={{ mb: 3 }}>
-                <Typography level="body-sm" sx={{ mb: 1 }}>Email</Typography>
+                <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Email</Typography>
                 <Input
                   type="email"
                   placeholder="john.doe@example.com"
@@ -249,7 +250,7 @@ const LoginPage = () => {
               </Box>
               
               <Box sx={{ mb: 3 }}>
-                <Typography level="body-sm" sx={{ mb: 1 }}>Invite Code</Typography>
+                <Typography level="body-sm" fontWeight="normal" sx={{ mb: 1 }}>Invite Code</Typography>
                 <Input
                   type="text"
                   placeholder="Enter invite code"
@@ -267,9 +268,9 @@ const LoginPage = () => {
                 fullWidth
                 sx={{ 
                   mt: 1, 
-                  backgroundColor: '#1976d2', // Blå färg för Create Account-knappen som i bilden
+                  backgroundColor: '#60cd18', // Grön färg för Create Account-knappen
                   '&:hover': {
-                    backgroundColor: '#1565c0'
+                    backgroundColor: '#60cd18'
                   },
                   borderRadius: '8px',
                   height: '44px',
