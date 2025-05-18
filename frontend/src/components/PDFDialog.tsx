@@ -10,8 +10,7 @@ import {
   Tab,
   TabList,
   Tabs,
-  Avatar,
-  CircularProgress
+  Avatar
 } from '@mui/joy';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -19,10 +18,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { Document, Page, pdfjs } from 'react-pdf';
-
-// Konfigurera PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+import SimplePDFViewer from './SimplePDFViewer';
 
 interface PDFDialogProps {
   open: boolean;
@@ -319,58 +315,13 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 </Box>
                 
                 {/* Visa PDF:en med en iframe för maximal kompatibilitet */}
-                <Box 
-                  sx={{ 
-                    position: 'relative', 
-                    height: '100%', 
-                    width: '100%', 
-                    overflow: 'hidden'
-                  }}
-                >
-                  {/* Använd iframe som fungerar bättre i vissa webbläsare */}
-                  <iframe
-                    src={pdfUrl}
-                    width="100%"
-                    height="100%"
-                    style={{ 
-                      border: 'none',
-                      background: 'white',
-                      display: 'block'
-                    }}
-                    title={filename}
-                  />
-                  
-                  {/* Grön vertikal linje till vänster */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      bottom: 0,
-                      left: 0,
-                      width: '8px',
-                      backgroundColor: '#1976d2'
-                    }}
-                  />
-                  
-                  {/* "Nuvarande version" badge */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 16,
-                      left: 16,
-                      zIndex: 2,
-                      bgcolor: '#6366f1',
-                      color: 'white',
-                      fontSize: '0.75rem',
-                      py: 0.5,
-                      px: 1.5,
-                      borderRadius: 'md',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    Nuvarande version
-                  </Box>
-                </Box>
+                {/* Använd vår nya SimplePDFViewer-komponent */}
+                <SimplePDFViewer
+                  pdfUrl={pdfUrl}
+                  filename={filename}
+                  height="100%"
+                  width="100%"
+                />
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
                 <Box

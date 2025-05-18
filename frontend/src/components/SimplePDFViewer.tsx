@@ -1,272 +1,107 @@
-import { useState, useEffect } from 'react';
-import { Box, Typography, Button, IconButton, Sheet, CircularProgress, Tabs, Tab, TabList } from '@mui/joy';
-import CloseIcon from '@mui/icons-material/Close';
-import DownloadIcon from '@mui/icons-material/Download';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import React from 'react';
+import { Box, Typography, Button, CircularProgress } from '@mui/joy';
 
 interface SimplePDFViewerProps {
-  initialUrl?: string;
-  filename?: string;
-  onClose?: () => void;
+  pdfUrl: string;
+  filename: string;
+  width?: string | number;
+  height?: string | number;
 }
 
-export default function SimplePDFViewer({ initialUrl, filename, onClose }: SimplePDFViewerProps) {
-  const [activeTab, setActiveTab] = useState<string>('details');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulera laddningstid
-    if (initialUrl) {
-      const timer = setTimeout(() => setIsLoading(false), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [initialUrl]);
-
-  const handleDownload = () => {
-    if (initialUrl) {
-      const link = document.createElement('a');
-      link.href = initialUrl;
-      link.download = filename || 'document.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
+/**
+ * En enkel PDF-visare som använder direkt länkning för att visa PDF-filer
+ */
+const SimplePDFViewer = ({ 
+  pdfUrl, 
+  filename, 
+  width = '100%', 
+  height = '100%' 
+}: SimplePDFViewerProps) => {
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        height: '100%', 
-        width: '100%',
-        bgcolor: '#f9fafb',
+    <Box
+      sx={{
+        width,
+        height,
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
         overflow: 'hidden',
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: '8px'
+        bgcolor: '#ffffff'
       }}
     >
-      {/* Övre verktygsfält */}
-      <Sheet
-        variant="outlined"
+      {/* "Nuvarande version" badge */}
+      <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          p: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'white',
+          position: 'absolute',
+          top: 16,
+          left: 16,
+          zIndex: 10,
+          bgcolor: '#6366f1',
+          color: 'white',
+          fontSize: '0.75rem',
+          py: 0.5,
+          px: 1.5,
+          borderRadius: 'md',
+          fontWeight: 'bold'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {onClose && (
-            <IconButton 
-              variant="plain" 
-              color="neutral" 
-              size="sm" 
-              onClick={onClose}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          )}
-          <Typography level="title-md" sx={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {filename || "Dokument"}
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Sidnavigering */}
-          <Button
-            size="sm"
-            variant="soft"
-            color="primary"
-            sx={{ 
-              borderRadius: '4px 0 0 4px', 
-              bgcolor: 'primary.100',
-              '&:hover': { bgcolor: 'primary.200' } 
-            }}
-          >
-            Sida 1 av 5
-          </Button>
-          
-          {/* Prev/Next knappar */}
-          <IconButton 
-            variant="soft"
-            color="primary" 
-            size="sm"
-            sx={{ borderRadius: 0 }}
-          >
-            <ArrowBackIcon fontSize="small" />
-          </IconButton>
-          
-          <IconButton 
-            variant="soft"
-            color="primary" 
-            size="sm"
-            sx={{ borderRadius: '0 4px 4px 0' }}
-          >
-            <ArrowForwardIcon fontSize="small" />
-          </IconButton>
-          
-          {/* Funktionsknappar */}
-          <Button
-            variant="soft"
-            color="primary"
-            size="sm"
-            startDecorator={<DownloadIcon />}
-            onClick={handleDownload}
-            sx={{ ml: 2 }}
-          >
-            Ladda ner
-          </Button>
-        </Box>
-      </Sheet>
-      
-      {/* Huvudinnehåll */}
-      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* PDF-visare */}
-        <Box 
-          sx={{ 
-            flex: 1, 
-            overflow: 'auto', 
-            bgcolor: '#333', // Mörk bakgrund
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-        >
-          {isLoading ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, color: 'white' }}>
-              <CircularProgress size="lg" />
-              <Typography level="body-lg" sx={{ color: 'white' }}>Laddar dokument...</Typography>
-            </Box>
-          ) : initialUrl ? (
-            <Box sx={{ width: '100%', height: '100%', p: 2 }}>
-              <iframe 
-                src={initialUrl} 
-                width="100%" 
-                height="100%" 
-                style={{ 
-                  border: 'none',
-                  backgroundColor: 'white',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                }}
-                title={filename || "PDF Dokument"}
-              />
-            </Box>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white' }}>
-              <Typography level="h3">
-                Ingen PDF vald eller kunde inte ladda dokumentet
-              </Typography>
-            </Box>
-          )}
-        </Box>
-        
-        {/* Högersidebar */}
-        <Sheet
-          variant="soft"
-          sx={{
-            width: 320,
-            borderLeft: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            flexDirection: 'column',
-            bgcolor: 'white'
-          }}
-        >
-          {/* Flikar */}
-          <Tabs 
-            value={activeTab}
-            onChange={(_, value) => setActiveTab(value as string)}
-            sx={{ 
-              borderBottom: '1px solid',
-              borderColor: 'divider'
-            }}
-          >
-            <TabList variant="plain" sx={{ width: '100%' }}>
-              <Tab value="details" variant={activeTab === 'details' ? 'soft' : 'plain'} sx={{ flex: 1 }}>Detaljer</Tab>
-              <Tab value="history" variant={activeTab === 'history' ? 'soft' : 'plain'} sx={{ flex: 1 }}>Historik</Tab>
-              <Tab value="comments" variant={activeTab === 'comments' ? 'soft' : 'plain'} sx={{ flex: 1 }}>Kommentar</Tab>
-            </TabList>
-          </Tabs>
-          
-          {/* Fliktinnehåll */}
-          <Box sx={{ p: 2, overflow: 'auto', flex: 1 }}>
-            {activeTab === 'details' && (
-              <>
-                <Typography level="h4" sx={{ mb: 2 }}>PDF Anteckning</Typography>
-                
-                <Box sx={{ mb: 3 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Skapad av
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box 
-                      sx={{ 
-                        width: 24, 
-                        height: 24, 
-                        bgcolor: 'primary.300', 
-                        borderRadius: '50%' 
-                      }} 
-                    />
-                    <Box>
-                      <Typography level="body-sm">user@example.com</Typography>
-                      <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
-                        2025-05-16
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-                
-                <Box sx={{ mb: 3 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Deadline
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography level="body-sm">22 maj 2025</Typography>
-                  </Box>
-                </Box>
-                
-                <Box sx={{ mb: 3 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Granskningspaket
-                  </Typography>
-                  <Typography level="body-sm">K - Granskning BH Hus 3-4</Typography>
-                </Box>
-                
-                <Box sx={{ mb: 3 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Typ
-                  </Typography>
-                  <Typography level="body-sm">Gransknings kommentar</Typography>
-                </Box>
-              </>
-            )}
-            
-            {activeTab === 'comments' && (
-              <>
-                <Typography level="h4" sx={{ mb: 2 }}>Kommentarer</Typography>
-                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                  Inga kommentarer har lagts till än. Markera ett område i dokumentet för att lägga till en kommentar.
-                </Typography>
-              </>
-            )}
-            
-            {activeTab === 'history' && (
-              <>
-                <Typography level="h4" sx={{ mb: 2 }}>Versionshistorik</Typography>
-                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                  Ingen versionshistorik tillgänglig för detta dokument.
-                </Typography>
-              </>
-            )}
-          </Box>
-        </Sheet>
+        Nuvarande version
       </Box>
+
+      {/* PDF iframe */}
+      <Box sx={{ flex: 1, overflow: 'hidden' }}>
+        <object
+          data={pdfUrl}
+          type="application/pdf"
+          width="100%"
+          height="100%"
+          style={{ border: 'none' }}
+        >
+          <Box 
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              p: 4,
+              textAlign: 'center'
+            }}
+          >
+            <Typography level="title-lg" sx={{ mb: 2 }}>
+              Det gick inte att visa PDF-filen
+            </Typography>
+            <Typography sx={{ mb: 2 }}>
+              Din webbläsare kunde inte visa PDF-filen "{filename}".
+            </Typography>
+            <Button
+              component="a"
+              href={pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="solid"
+              color="primary"
+              size="lg"
+            >
+              Öppna i nytt fönster
+            </Button>
+          </Box>
+        </object>
+      </Box>
+
+      {/* Grön vertikal linje till vänster */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: '8px',
+          backgroundColor: '#4caf50'
+        }}
+      />
     </Box>
   );
-}
+};
+
+export default SimplePDFViewer;
