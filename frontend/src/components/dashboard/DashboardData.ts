@@ -62,10 +62,10 @@ export const projectChartData = [
 
 // Cirkeldiagram - Projekttyper
 export const projectTypeData = [
-  { name: 'Nybyggnation', value: 45, color: '#60cd18' },
-  { name: 'Renovering', value: 25, color: '#60cd18' },
-  { name: 'Tillbyggnad', value: 20, color: '#60cd18' },
-  { name: 'Planering', value: 10, color: '#60cd18' }
+  { name: 'Nybyggnation', value: 45, color: '#e0f2e9' },
+  { name: 'Renovering', value: 25, color: '#e0f2e9' },
+  { name: 'Tillbyggnad', value: 20, color: '#e0f2e9' },
+  { name: 'Planering', value: 10, color: '#e0f2e9' }
 ];
 
 // Aktivitetslista

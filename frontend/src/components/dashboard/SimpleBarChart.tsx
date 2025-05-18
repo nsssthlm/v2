@@ -60,7 +60,7 @@ const SimpleBarChart = ({ title, data }: SimpleBarChartProps) => {
                 <Box 
                   sx={{ 
                     height: `${(item.actual / maxValue) * 100}%`, 
-                    bgcolor: '#60cd18',
+                    bgcolor: '#e0f2e9',
                     width: '100%',
                     borderRadius: '4px 4px 0 0',
                     position: 'relative',
@@ -84,7 +84,7 @@ const SimpleBarChart = ({ title, data }: SimpleBarChartProps) => {
           <Typography level="body-sm" sx={{ color: 'text.secondary' }}>Planerade timmar</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ width: 12, height: 12, bgcolor: '#60cd18', mr: 1, borderRadius: '2px' }} />
+          <Box sx={{ width: 12, height: 12, bgcolor: '#e0f2e9', mr: 1, borderRadius: '2px' }} />
           <Typography level="body-sm" sx={{ color: 'text.secondary' }}>Faktiska timmar</Typography>
         </Box>
       </Box>
