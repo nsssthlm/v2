@@ -192,15 +192,24 @@ const FolderPageNew = () => {
   const handlePdfClick = (fileUrl: string, fileName: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName);
     
-    // Kontrollera att URL:en är fullständig
+    // Extrahera den faktiska sökvägen från URL:en
     let fullUrl = fileUrl;
     
-    // Om URL:en innehåller "media/"
+    // Kontrollera om den innehåller media/ - det är en korrekt sökväg
     if (fileUrl.includes('media/')) {
       const mediaPath = fileUrl.substring(fileUrl.indexOf('media/'));
       fullUrl = `${API_BASE_URL}/${mediaPath}`;
     } 
-    // Om URL:en inte är fullständig
+    // Kontrollera om det är en direkt URL till en API-endpoint
+    else if (fileUrl.includes('/api/files/web/')) {
+      // Hitta faktiska filnamnet från slutet av URL:en
+      const parts = fileUrl.split('/');
+      // Få ut filnamnet från sista delen
+      const filename = parts[parts.length - 1];
+      // Bygg om URL:en för direkt åtkomst
+      fullUrl = `${API_BASE_URL}/media/project_files/${filename}`;
+    }
+    // För alla andra typer av URL:er
     else if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
       fullUrl = `${API_BASE_URL}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
     }
