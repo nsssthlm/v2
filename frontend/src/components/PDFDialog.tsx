@@ -108,7 +108,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="plain"
                 sx={{
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
                   borderRadius: 'sm',
                   height: '35px',
@@ -124,9 +124,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="plain"
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' },
+                  '&:hover': { bgcolor: '#1565c0' },
                   borderRadius: 'sm',
                   minWidth: '45px',
                   width: '45px',
@@ -141,7 +141,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="plain"
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
                   borderRadius: 'sm',
                   minWidth: '45px',
@@ -157,7 +157,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="plain"
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
                   borderRadius: 'sm',
                   height: '35px',
@@ -173,7 +173,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="plain"
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
                   borderRadius: 'sm',
                   minWidth: '45px',
@@ -191,9 +191,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 variant="plain"
                 startDecorator={<BookmarkBorderIcon />}
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' },
+                  '&:hover': { bgcolor: '#1565c0' },
                   borderRadius: 'sm',
                   height: '35px',
                   px: 1.5,
@@ -207,9 +207,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="plain"
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' },
+                  '&:hover': { bgcolor: '#1565c0' },
                   borderRadius: 'sm',
                   height: '35px',
                   px: 1.5,
@@ -224,9 +224,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 variant="plain"
                 startDecorator={<UploadIcon />}
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' },
+                  '&:hover': { bgcolor: '#1565c0' },
                   borderRadius: 'sm',
                   height: '35px',
                   px: 1.5,
@@ -315,7 +315,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     bottom: 0,
                     left: 0,
                     width: '8px',
-                    backgroundColor: '#4caf50'
+                    backgroundColor: '#1976d2'
                   }}
                 />
               </Box>
@@ -338,7 +338,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   sx={{ 
                     width: '100%', 
                     height: '100%', 
-                    bgcolor: '#4caf50'
+                    bgcolor: '#1976d2'
                   }}
                 />
               </Box>
