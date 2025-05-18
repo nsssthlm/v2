@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Modal, ModalDialog } from '@mui/joy';
+import PDFDialog from '../components/PDFDialog';
 
 interface PDFDialogState {
   isOpen: boolean;
@@ -44,40 +44,14 @@ export const PDFDialogProvider: React.FC<{ children: ReactNode }> = ({ children 
   return (
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
-      <Modal
-        open={dialogState.isOpen}
-        onClose={() => closePDFDialog()}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <ModalDialog
-          variant="outlined"
-          size="lg"
-          sx={{
-            p: 0,
-            width: '90vw', 
-            maxWidth: '1400px',
-            height: '90vh',
-            maxHeight: '800px',
-            overflow: 'hidden'
-          }}
-        >
-          {dialogState.isOpen && dialogState.initialUrl && (
-            <iframe 
-              src={dialogState.initialUrl}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none'
-              }}
-              title={dialogState.filename || 'PDF'}
-            />
-          )}
-        </ModalDialog>
-      </Modal>
+      {dialogState.isOpen && dialogState.initialUrl && (
+        <PDFDialog 
+          open={dialogState.isOpen} 
+          onClose={closePDFDialog}
+          pdfUrl={dialogState.initialUrl}
+          filename={dialogState.filename || 'PDF-dokument'}
+        />
+      )}
     </PDFDialogContext.Provider>
   );
 };
