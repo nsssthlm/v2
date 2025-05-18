@@ -18,6 +18,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PDFEmbedViewer from './PDFEmbedViewer';
 
 interface PDFDialogProps {
   open: boolean;
@@ -284,21 +285,13 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   Nuvarande version
                 </Box>
                 
-                {/* Visa den faktiska PDF:en med object tag som fungerar bättre för PDF-filer */}
-                <object
-                  data={pdfUrl ? `${pdfUrl}#toolbar=0` : ''}
-                  type="application/pdf"
-                  width="100%"
+                {/* Visa PDF:en med vår robusta PDFEmbedViewer */}
+                <PDFEmbedViewer 
+                  pdfUrl={pdfUrl}
+                  filename={filename}
                   height="100%"
-                  style={{ 
-                    background: 'white',
-                    display: 'block',
-                    margin: '0 auto',
-                    border: 'none'
-                  }}
-                >
-                  <p>Det gick inte att visa PDF-filen. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen i ett nytt fönster</a>.</p>
-                </object>
+                  width="100%"
+                />
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
                 <Box

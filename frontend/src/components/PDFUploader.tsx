@@ -59,12 +59,12 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         const data = await response.json();
         console.log('Uppladdning lyckades:', data);
         
-        // Konvertera filen till en URL för direkt visning
+        // Skapa en temporär lokal URL för direkt förhandsgranskning
         const fileURL = URL.createObjectURL(file);
         
-        // Visa PDF:en i vår PDF-visare
+        // Visa den nytladdade PDF:en direkt i vår PDF-visare
         openPDFDialog({
-          initialUrl: fileURL, // Använd local URL för direkt visning
+          initialUrl: fileURL, // Använd lokal URL för omedelbar visning
           filename: file.name,
           fileId: data.id,
           folderId: folderId as number
