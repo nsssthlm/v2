@@ -189,13 +189,97 @@ const LoginPage = () => {
             </form>
           )}
           
-          {/* Registreringsformulär (enkelt visas bara i designen) */}
+          {/* Registreringsformulär med de önskade fälten */}
           {activeTab === 'register' && (
-            <Box sx={{ textAlign: 'center', py: 3 }}>
-              <Typography level="body-md">
-                Contact your administrator to create a new account.
-              </Typography>
-            </Box>
+            <form onSubmit={(e) => e.preventDefault()}>
+              <Box sx={{ mb: 3 }}>
+                <Typography level="body-sm" sx={{ mb: 1 }}>Username</Typography>
+                <Input
+                  type="text"
+                  placeholder="johndoe"
+                  required
+                  sx={{ 
+                    borderRadius: '8px',
+                    height: '40px',
+                    border: '1px solid #e0e0e0'
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ mb: 3 }}>
+                <Typography level="body-sm" sx={{ mb: 1 }}>Password</Typography>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  sx={{ 
+                    borderRadius: '8px',
+                    height: '40px',
+                    border: '1px solid #e0e0e0'
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ mb: 3 }}>
+                <Typography level="body-sm" sx={{ mb: 1 }}>Confirm Password</Typography>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  sx={{ 
+                    borderRadius: '8px',
+                    height: '40px',
+                    border: '1px solid #e0e0e0'
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ mb: 3 }}>
+                <Typography level="body-sm" sx={{ mb: 1 }}>Email</Typography>
+                <Input
+                  type="email"
+                  placeholder="john.doe@example.com"
+                  required
+                  sx={{ 
+                    borderRadius: '8px',
+                    height: '40px',
+                    border: '1px solid #e0e0e0'
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ mb: 3 }}>
+                <Typography level="body-sm" sx={{ mb: 1 }}>Invite Code</Typography>
+                <Input
+                  type="text"
+                  placeholder="Enter invite code"
+                  required
+                  sx={{ 
+                    borderRadius: '8px',
+                    height: '40px',
+                    border: '1px solid #e0e0e0'
+                  }}
+                />
+              </Box>
+              
+              <Button
+                type="submit"
+                fullWidth
+                sx={{ 
+                  mt: 1, 
+                  backgroundColor: '#1976d2', // Blå färg för Create Account-knappen som i bilden
+                  '&:hover': {
+                    backgroundColor: '#1565c0'
+                  },
+                  borderRadius: '8px',
+                  height: '44px',
+                  textTransform: 'none',
+                  fontWeight: 500
+                }}
+              >
+                Create Account
+              </Button>
+            </form>
           )}
         </Card>
       </Box>
