@@ -104,8 +104,8 @@ const LoginPage = () => {
                 mr: 1,
                 borderRadius: '8px 8px 0 0',
                 borderBottom: 'none',
-                borderColor: activeTab === 'login' ? '#4caf50' : 'transparent',
-                color: activeTab === 'login' ? '#4caf50' : 'inherit'
+                borderColor: activeTab === 'login' ? '#60cd18' : 'transparent',
+                color: activeTab === 'login' ? '#60cd18' : 'inherit'
               }}
             >
               Login
@@ -117,8 +117,8 @@ const LoginPage = () => {
               sx={{ 
                 borderRadius: '8px 8px 0 0',
                 borderBottom: 'none',
-                borderColor: activeTab === 'register' ? '#4caf50' : 'transparent',
-                color: activeTab === 'register' ? '#4caf50' : 'inherit'
+                borderColor: activeTab === 'register' ? '#60cd18' : 'transparent',
+                color: activeTab === 'register' ? '#60cd18' : 'inherit'
               }}
             >
               Register
@@ -166,9 +166,9 @@ const LoginPage = () => {
                 fullWidth
                 sx={{ 
                   mt: 1, 
-                  backgroundColor: '#4caf50', // Grön färg som matchar projektet
+                  backgroundColor: '#60cd18', // Specifik grön färg enligt önskemål
                   '&:hover': {
-                    backgroundColor: '#388e3c'
+                    backgroundColor: '#60cd18' // Samma färg för hover
                   },
                   borderRadius: '8px',
                   height: '44px',
