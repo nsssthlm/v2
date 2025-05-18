@@ -16,7 +16,7 @@ import {
 } from '../../components/dashboard/DashboardData';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import DraggableWidget from '../../components/dashboard/DraggableWidget';
+import ModernDraggableWidget from '../../components/dashboard/ModernDraggableWidget';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -285,7 +285,7 @@ const Dashboard = () => {
         <Grid container spacing={2}>
           {visibleWidgets.map((widget, index) => (
             <Grid key={widget.id} {...getGridSize(widget)}>
-              <DraggableWidget
+              <ModernDraggableWidget
                 widget={widget}
                 index={index}
                 moveWidget={moveWidget}
@@ -294,7 +294,7 @@ const Dashboard = () => {
                 isExpanded={expandedWidget === widget.id}
               >
                 {renderWidget(widget)}
-              </DraggableWidget>
+              </ModernDraggableWidget>
             </Grid>
           ))}
         </Grid>
