@@ -86,16 +86,18 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {/* Page navigation - gröna knappar */}
+              {/* Page navigation & Zoom controls - alla lika breda knappar i grönt */}
               <Button
                 size="sm"
-                variant="soft"
-                color="success"
+                variant="plain"
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
                   '&:hover': { bgcolor: '#3d8b40' },
-                  minWidth: '40px',
+                  borderRadius: 'sm',
+                  minWidth: '45px',
+                  width: '45px',
+                  height: '35px',
                   px: 1
                 }}
               >
@@ -104,12 +106,12 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               
               <Button
                 size="sm"
-                variant="soft"
-                color="success"
+                variant="plain"
                 sx={{
                   bgcolor: '#4caf50', 
                   color: 'white',
-                  borderRadius: 'md',
+                  borderRadius: 'sm',
+                  height: '35px',
                   px: 2
                 }}
               >
@@ -118,29 +120,31 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               
               <Button
                 size="sm"
-                variant="soft"
-                color="success"
+                variant="plain"
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
                   '&:hover': { bgcolor: '#3d8b40' },
-                  minWidth: '40px',
+                  borderRadius: 'sm',
+                  minWidth: '45px',
+                  width: '45px',
+                  height: '35px',
                   px: 1
                 }}
               >
                 →
               </Button>
               
-              {/* Zoom control - gröna knappar */}
               <Button
                 size="sm"
-                variant="soft"
-                color="success"
+                variant="plain"
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
-                  borderRadius: 'md',
-                  minWidth: '40px',
+                  borderRadius: 'sm',
+                  minWidth: '45px',
+                  width: '45px',
+                  height: '35px',
                   px: 1
                 }}
               >
@@ -149,12 +153,12 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               
               <Button
                 size="sm"
-                variant="soft"
-                color="success"
+                variant="plain"
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
-                  borderRadius: 'md',
+                  borderRadius: 'sm',
+                  height: '35px',
                   px: 2
                 }}
               >
@@ -163,29 +167,31 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               
               <Button
                 size="sm"
-                variant="soft"
-                color="success"
+                variant="plain"
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
-                  borderRadius: 'md',
-                  minWidth: '40px',
+                  borderRadius: 'sm',
+                  minWidth: '45px',
+                  width: '45px',
+                  height: '35px',
                   px: 1
                 }}
               >
                 +
               </Button>
               
-              {/* Action buttons */}
+              {/* Action buttons - samma storlek och stil */}
               <Button
                 size="sm"
-                variant="soft"
-                color="primary"
+                variant="plain"
                 startDecorator={<BookmarkBorderIcon />}
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' }
+                  '&:hover': { bgcolor: '#3d8b40' },
+                  borderRadius: 'sm',
+                  height: '35px'
                 }}
               >
                 Versioner
@@ -193,12 +199,13 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               
               <Button
                 size="sm"
-                variant="soft"
-                color="primary"
+                variant="plain"
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' }
+                  '&:hover': { bgcolor: '#3d8b40' },
+                  borderRadius: 'sm',
+                  height: '35px'
                 }}
               >
                 Markera område
@@ -206,13 +213,14 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
               
               <Button
                 size="sm"
-                variant="soft"
-                color="primary"
+                variant="plain"
                 startDecorator={<UploadIcon />}
                 sx={{ 
                   bgcolor: '#4caf50', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' }
+                  '&:hover': { bgcolor: '#3d8b40' },
+                  borderRadius: 'sm',
+                  height: '35px'
                 }}
               >
                 Ny version
