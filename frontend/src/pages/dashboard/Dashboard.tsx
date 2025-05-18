@@ -17,6 +17,8 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 // Widget-typer för dashboarden
 interface DashboardWidget {
@@ -101,19 +103,23 @@ const Dashboard = () => {
   
   // Flytta en widget uppåt i ordningen
   const moveWidgetUp = (widgetId: string) => {
-    const widgetIndex = widgets.findIndex(w => w.id === widgetId);
+    const visibleWidgets = widgets.filter(w => w.visible);
+    const widgetIndex = visibleWidgets.findIndex(w => w.id === widgetId);
     if (widgetIndex <= 0) return; // Redan högst upp
     
-    const updatedWidgets = [...widgets];
-    const currentWidget = updatedWidgets[widgetIndex];
-    const aboveWidget = updatedWidgets[widgetIndex - 1];
+    const currentWidget = visibleWidgets[widgetIndex];
+    const aboveWidget = visibleWidgets[widgetIndex - 1];
     
-    // Byt ordningsnummer
-    const tempOrder = currentWidget.order;
-    updatedWidgets[widgetIndex] = { ...currentWidget, order: aboveWidget.order };
-    updatedWidgets[widgetIndex - 1] = { ...aboveWidget, order: tempOrder };
-    
-    setWidgets(updatedWidgets.sort((a, b) => a.order - b.order));
+    setWidgets(prev => 
+      prev.map(widget => {
+        if (widget.id === currentWidget.id) {
+          return { ...widget, order: aboveWidget.order };
+        } else if (widget.id === aboveWidget.id) {
+          return { ...widget, order: currentWidget.order };
+        }
+        return widget;
+      })
+    );
   };
   
   // Flytta en widget nedåt i ordningen
@@ -122,21 +128,19 @@ const Dashboard = () => {
     const widgetIndex = visibleWidgets.findIndex(w => w.id === widgetId);
     if (widgetIndex === -1 || widgetIndex >= visibleWidgets.length - 1) return; // Redan längst ner
     
-    const allWidgetsIndex = widgets.findIndex(w => w.id === widgetId);
-    const nextVisibleIndex = widgets.findIndex(w => w.order > widgets[allWidgetsIndex].order && w.visible);
+    const currentWidget = visibleWidgets[widgetIndex];
+    const belowWidget = visibleWidgets[widgetIndex + 1];
     
-    if (nextVisibleIndex === -1) return; // Ingen synlig widget under denna
-    
-    const updatedWidgets = [...widgets];
-    const currentWidget = updatedWidgets[allWidgetsIndex];
-    const belowWidget = updatedWidgets[nextVisibleIndex];
-    
-    // Byt ordningsnummer
-    const tempOrder = currentWidget.order;
-    updatedWidgets[allWidgetsIndex] = { ...currentWidget, order: belowWidget.order };
-    updatedWidgets[nextVisibleIndex] = { ...belowWidget, order: tempOrder };
-    
-    setWidgets(updatedWidgets.sort((a, b) => a.order - b.order));
+    setWidgets(prev => 
+      prev.map(widget => {
+        if (widget.id === currentWidget.id) {
+          return { ...widget, order: belowWidget.order };
+        } else if (widget.id === belowWidget.id) {
+          return { ...widget, order: currentWidget.order };
+        }
+        return widget;
+      })
+    );
   };
   
   // Rendera en specifik widget baserat på dess typ
@@ -260,6 +264,7 @@ const Dashboard = () => {
           color="primary" 
           startDecorator={<AddIcon />}
           onClick={() => setShowWidgetDialog(true)}
+          sx={{ bgcolor: '#e0f2e9', borderColor: '#007934', color: '#007934' }}
         >
           Redigera dashboard
         </Button>
@@ -329,7 +334,7 @@ const Dashboard = () => {
                   onClick={() => moveWidgetUp(widget.id)}
                   disabled={widget.order === Math.min(...visibleWidgets.map(w => w.order))}
                 >
-                  ↑
+                  <KeyboardArrowUpIcon fontSize="small" />
                 </IconButton>
                 
                 {/* Flytta ner-knapp */}
@@ -340,7 +345,7 @@ const Dashboard = () => {
                   onClick={() => moveWidgetDown(widget.id)}
                   disabled={widget.order === Math.max(...visibleWidgets.map(w => w.order))}
                 >
-                  ↓
+                  <KeyboardArrowDownIcon fontSize="small" />
                 </IconButton>
               </Box>
               
@@ -377,7 +382,8 @@ const Dashboard = () => {
                       width: 'calc(50% - 8px)',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between'
+                      justifyContent: 'space-between',
+                      bgcolor: '#e0f2e9'
                     }}
                   >
                     <Typography level="body-sm">{widget.title}</Typography>
