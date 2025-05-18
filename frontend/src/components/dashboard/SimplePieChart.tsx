@@ -95,7 +95,7 @@ const SimplePieChart = ({ title, data }: PieChartProps) => {
             flexDirection: 'column',
             boxShadow: '0 0 8px rgba(0,0,0,0.05)'
           }}>
-            <Typography level="h3" sx={{ fontWeight: 'bold', color: '#e0f2e9' }}>
+            <Typography level="h3" sx={{ fontWeight: 'bold', color: '#60cd18' }}>
               {total}
             </Typography>
             <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
@@ -121,7 +121,7 @@ const SimplePieChart = ({ title, data }: PieChartProps) => {
               <Typography level="body-sm" sx={{ flexGrow: 1, color: 'text.secondary' }}>
                 {item.name}
               </Typography>
-              <Typography level="body-sm" sx={{ fontWeight: 'bold', color: item.name === 'Nybyggnation' ? '#e0f2e9' : 'text.primary' }}>
+              <Typography level="body-sm" sx={{ fontWeight: 'bold', color: '#60cd18' }}>
                 {item.value} ({Math.round((item.value / total) * 100)}%)
               </Typography>
             </Box>
