@@ -195,6 +195,18 @@ const ModernDashboard: React.FC = () => {
     .filter(widget => !widget.visible)
     .sort((a, b) => a.id.localeCompare(b.id));
   
+  // Definiera en ModernMetricsCardProps-typ för vår ModernMetricsCard
+  type ModernMetricsCardProps = {
+    title: string;
+    value: string | number;
+    trend?: {
+      value: number;
+      isPositive?: boolean;
+      text: string;
+    };
+    icon?: string;
+  };
+
   // Rendera en specifik widget baserat på dess typ
   const renderWidget = (widget: DashboardWidget) => {
     // Bestäm höjd baserat på expanderat tillstånd
@@ -205,36 +217,24 @@ const ModernDashboard: React.FC = () => {
       case 'metrics':
         if (typeof widget.metricIndex === 'number' && widget.metricIndex < metricsData.length) {
           const metric = metricsData[widget.metricIndex];
-          return (
-            <ModernMetricsCard 
-              title={metric.title}
-              value={metric.value}
-              trend={metric.trend}
-              icon={metric.icon}
-            />
-          );
+          const props: ModernMetricsCardProps = {
+            title: metric.title,
+            value: metric.value,
+            trend: metric.trend,
+            icon: metric.icon
+          };
+          return <ModernMetricsCard {...props} />;
         }
         return null;
       case 'barChart':
         // Välj rätt data baserat på widget-ID
-        switch (widget.id) {
-          case 'projectHours':
-            return (
-              <SimpleBarChart 
-                title={widget.title}
-                data={projectHoursData}
-                height={height}
-              />
-            );
-          default:
-            return (
-              <SimpleBarChart 
-                title={widget.title}
-                data={projectHoursData}
-                height={height}
-              />
-            );
-        }
+        return (
+          <SimpleBarChart 
+            title={widget.title}
+            data={projectHoursData}
+            height={height}
+          />
+        );
       case 'pieChart':
         // Välj rätt data baserat på widget-ID
         switch (widget.id) {

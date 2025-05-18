@@ -14,7 +14,7 @@ interface ModernMetricsCardProps {
     isPositive?: boolean;
     text: string;
   };
-  icon?: 'people' | 'orders' | 'revenue' | 'growth';
+  icon?: string;
 }
 
 const ModernMetricsCard: React.FC<ModernMetricsCardProps> = ({
@@ -28,10 +28,13 @@ const ModernMetricsCard: React.FC<ModernMetricsCardProps> = ({
       case 'people':
         return <PeopleAltOutlinedIcon sx={{ fontSize: '1.8rem', color: '#007934' }} />;
       case 'orders':
+      case 'task':  
         return <AssignmentOutlinedIcon sx={{ fontSize: '1.8rem', color: '#007934' }} />;
       case 'revenue':
+      case 'money':
         return <AccountBalanceWalletOutlinedIcon sx={{ fontSize: '1.8rem', color: '#007934' }} />;
       case 'growth':
+      case 'document':
         return <TrendingUpIcon sx={{ fontSize: '1.8rem', color: '#007934' }} />;
       default:
         return <PeopleAltOutlinedIcon sx={{ fontSize: '1.8rem', color: '#007934' }} />;
