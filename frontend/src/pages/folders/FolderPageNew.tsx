@@ -194,8 +194,14 @@ const FolderPageNew = () => {
     
     // Kontrollera att URL:en är fullständig
     let fullUrl = fileUrl;
-    if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
-      // Om det inte är en fullständig URL, lägg till API_BASE_URL
+    
+    // Om URL:en innehåller "media/"
+    if (fileUrl.includes('media/')) {
+      const mediaPath = fileUrl.substring(fileUrl.indexOf('media/'));
+      fullUrl = `${API_BASE_URL}/${mediaPath}`;
+    } 
+    // Om URL:en inte är fullständig
+    else if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
       fullUrl = `${API_BASE_URL}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
     }
     

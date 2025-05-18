@@ -39,7 +39,7 @@ urlpatterns = [
 # Registrera PDF API routes
 register_pdf_api_routes(urlpatterns)
 
-# Add static and media URLs in development
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Add static and media URLs - i utvecklingsläge tillåter vi direkt åtkomst till alla filer
+# Detta är nödvändigt för att PDF-filer ska kunna visas direkt från servern
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
