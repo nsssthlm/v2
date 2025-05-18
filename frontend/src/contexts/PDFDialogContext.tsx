@@ -1,25 +1,77 @@
-import React, { ReactNode } from 'react';
+import React, { useState, ReactNode } from 'react';
+import PDFJSDialog from '../components/PDFJSDialog';
+
+// Interface för PDF-dialog state
+interface PDFDialogState {
+  isOpen: boolean;
+  pdfUrl?: string;
+  filename?: string;
+  fileId?: string | number;
+  folderId?: number | null;
+}
+
+// Interface för context värdet
+interface PDFDialogContextType {
+  dialogState: PDFDialogState;
+  openPDFDialog: (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null }) => void;
+  closePDFDialog: () => void;
+}
+
+// Initial state för dialogen
+const initialDialogState: PDFDialogState = {
+  isOpen: false
+};
+
+// Skapa context
+const PDFDialogContext = React.createContext<PDFDialogContextType | undefined>(undefined);
 
 /**
- * Tom provider som bara returnerar children
- * PDF-visningsfunktionaliteten har tagits bort
+ * Provider komponent för PDF-dialogen
  */
 export function PDFDialogProvider({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+  const [dialogState, setDialogState] = useState<PDFDialogState>(initialDialogState);
+
+  // Öppna dialogen med de angivna parametrarna
+  const openPDFDialog = (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null }) => {
+    console.log('Öppnar PDF:', params.pdfUrl, params.filename);
+    setDialogState({
+      isOpen: true,
+      pdfUrl: params.pdfUrl,
+      filename: params.filename,
+      fileId: params.fileId,
+      folderId: params.folderId
+    });
+  };
+
+  // Stäng dialogen och återställ state
+  const closePDFDialog = () => {
+    setDialogState(initialDialogState);
+  };
+
+  return (
+    <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
+      {children}
+      {dialogState.isOpen && dialogState.pdfUrl && (
+        <PDFJSDialog 
+          open={dialogState.isOpen} 
+          onClose={closePDFDialog}
+          pdfUrl={dialogState.pdfUrl}
+          filename={dialogState.filename || 'PDF-dokument'}
+        />
+      )}
+    </PDFDialogContext.Provider>
+  );
 }
 
 /**
- * Dummy hook som inte gör något 
- * Detta är bara för bakåtkompatibilitet så vi inte bryter existerande kod
+ * Custom hook för att använda PDF-dialog context
  */
 export function usePDFDialog() {
-  return {
-    dialogState: { isOpen: false },
-    openPDFDialog: (params: any) => {
-      console.log('PDF-funktionalitet borttagen. Params:', params);
-    },
-    closePDFDialog: () => {
-      console.log('PDF-funktionalitet borttagen.');
-    }
-  };
+  const context = React.useContext(PDFDialogContext);
+  
+  if (context === undefined) {
+    throw new Error('usePDFDialog måste användas inom en PDFDialogProvider');
+  }
+  
+  return context;
 }
