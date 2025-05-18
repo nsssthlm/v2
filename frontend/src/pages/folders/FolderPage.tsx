@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid } from '@mui/joy';
+import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid, IconButton, Tooltip } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
 import SimplePDFViewer from '../../components/SimplePDFViewer';
 import { usePDFDialog } from '../../contexts/PDFDialogContext';
 import PDFUploader from '../../components/PDFUploader';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -40,6 +41,8 @@ const FolderPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   
   // PDF-visare via kontext
   const { openPDFDialog } = usePDFDialog();
@@ -112,6 +115,31 @@ const FolderPage = () => {
   const handleUploadSuccess = () => {
     fetchFolderData();
   };
+  
+  // Funktion för att radera PDF-filer
+  const handleDeleteFile = async (fileId: string) => {
+    // Sätt laddningsstatus för den specifika filen
+    setDeleteLoading(fileId);
+    setDeleteError(null);
+    
+    try {
+      console.log("Radera fil:", fileId);
+      
+      // Anropa API för att radera filen
+      await axios.delete(`${API_BASE_URL}/files/${fileId}/`);
+      
+      // Rensa cachen för denna mapp
+      delete folderDataCache[slug];
+      
+      // Ladda om data
+      fetchFolderData();
+    } catch (err: any) {
+      console.error('Fel vid radering av fil:', err);
+      setDeleteError(`Kunde inte radera filen: ${err.message || 'Okänt fel'}`);
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -182,7 +210,32 @@ const FolderPage = () => {
             ) : (
               <List>
                 {folderData.files.map((file, index) => (
-                  <ListItem key={`${file.name}-${index}`}>
+                  <ListItem 
+                    key={`${file.name}-${index}`}
+                    endAction={
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <Tooltip title="Radera fil" placement="top">
+                          <IconButton
+                            variant="plain"
+                            color="danger"
+                            size="sm"
+                            onClick={() => handleDeleteFile(file.id || `pdf_${index}`)}
+                            disabled={deleteLoading === (file.id || `pdf_${index}`)}
+                            sx={{ 
+                              '&:hover': { backgroundColor: '#f8e0e0' },
+                              borderRadius: 'sm'
+                            }}
+                          >
+                            {deleteLoading === (file.id || `pdf_${index}`) ? (
+                              <CircularProgress size="sm" />
+                            ) : (
+                              <DeleteIcon />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    }
+                  >
                     <ListItemContent>
                       <Button
                         variant="plain"
