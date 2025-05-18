@@ -1,14 +1,13 @@
 import React, { useRef } from 'react';
+import { Card, Box, Typography, IconButton, Sheet } from '@mui/joy';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import { useDrag, useDrop } from 'react-dnd';
-import { Box, IconButton } from '@mui/joy';
-import CloseIcon from '@mui/icons-material/Close';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { DashboardWidget } from '../../pages/dashboard/Dashboard';
+import { DashboardWidget } from './ModernDashboard';
 
-// Konstant för drag-and-drop typen
-const WIDGET_TYPE = 'DASHBOARD_WIDGET';
+// Identifierare för drag-and-drop
+const WIDGET_TYPE = 'dashboard-widget';
 
 interface ModernDraggableWidgetProps {
   widget: DashboardWidget;
@@ -35,17 +34,20 @@ const ModernDraggableWidget: React.FC<ModernDraggableWidgetProps> = ({
   isExpanded,
   children
 }) => {
-  // Referens till den faktiska DOM-noden
   const ref = useRef<HTMLDivElement>(null);
   
-  // Sätt upp drop target (där andra widgets kan släppas)
-  const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: string | symbol | null }>({
+  // Konfigurera drag-funktionalitet
+  const [{ isDragging }, drag] = useDrag({
+    type: WIDGET_TYPE,
+    item: { index, id: widget.id, type: WIDGET_TYPE } as DragItem,
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging()
+    })
+  });
+  
+  // Konfigurera drop-funktionalitet
+  const [{ isOver }, drop] = useDrop({
     accept: WIDGET_TYPE,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      };
-    },
     hover(item: DragItem, monitor) {
       if (!ref.current) {
         return;
@@ -54,216 +56,130 @@ const ModernDraggableWidget: React.FC<ModernDraggableWidgetProps> = ({
       const dragIndex = item.index;
       const hoverIndex = index;
       
-      // Hoppa över om musen hovrar över samma objekt
+      // Undvik onödig uppdatering om vi drar över samma widget
       if (dragIndex === hoverIndex) {
         return;
       }
       
-      // Bestäm rektanglar för UI-element
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      
-      // Hitta mittpunkter
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
-      
-      // Bestäm musens position
-      const clientOffset = monitor.getClientOffset();
-      
-      if (!clientOffset) {
-        return;
-      }
-      
-      // Hitta musens position relativt till det hövrade elementet
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      const hoverClientX = clientOffset.x - hoverBoundingRect.left;
-      
-      // Utför flyttning oavsett riktning (vänster-höger, höger-vänster, upp-ner, ner-upp)
-      // Detta gör att drag-and-drop fungerar i alla riktningar
-      
-      // Dags att flytta widgeten
+      // Flytta widget i dashboard
       moveWidget(dragIndex, hoverIndex);
       
-      // Uppdatera indexet på det dragna objektet omedelbart
+      // Uppdatera index för dragen widget
       item.index = hoverIndex;
     },
-  });
-  
-  // Sätt upp drag source (vad som kan dras)
-  const [{ isDragging }, drag, dragPreview] = useDrag({
-    type: WIDGET_TYPE,
-    item: () => {
-      return { id: widget.id, index };
-    },
     collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
+      isOver: monitor.isOver()
+    })
   });
   
-  // Kombinera drag och drop funktionalitet
-  dragPreview(drop(ref));
+  // Kombinera drag och drop
+  drag(drop(ref));
+  
+  // Beräkna styling baserat på drag-status
+  const opacity = isDragging ? 0.4 : 1;
+  const scale = isOver ? 1.02 : 1;
+  const zIndex = isOver ? 10 : 1;
   
   return (
-    <div
+    <Card
       ref={ref}
-      style={{ 
-        opacity: isDragging ? 0.5 : 1,
-        height: '100%'
+      sx={{
+        opacity,
+        transform: `scale(${scale})`,
+        zIndex,
+        transition: 'all 0.2s ease',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: '12px',
+        bgcolor: '#ffffff',
+        position: 'relative',
+        boxShadow: isExpanded 
+          ? '0 8px 32px rgba(0, 0, 0, 0.12)' 
+          : '0 4px 16px rgba(0, 0, 0, 0.06)',
+        '&:hover': {
+          boxShadow: '0 8px 24px rgba(0, 121, 52, 0.08)',
+          border: '1px solid rgba(0, 121, 52, 0.12)',
+        },
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+        overflow: 'hidden',
       }}
-      data-handler-id={handlerId}
     >
-      <Box 
-        sx={{ 
-          height: '100%', 
-          position: 'relative',
-          overflow: 'hidden',
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03)',
-          border: '1px solid #f0f0f0',
-          transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
-          transform: 'translateY(0)',
-          '&:hover': {
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            transform: 'translateY(-4px)',
-            borderColor: '#e0e0e0',
-            '& .widget-controls': {
-              opacity: 1,
-              transform: 'translateY(0)'
-            },
-            '& .drag-handle': {
-              opacity: 1,
-              transform: 'translateY(0)'
-            }
-          }
+      {/* Widget Header - visar alltid oavsett widget-typ */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          px: 2,
+          py: 1.5,
+          borderBottom: '1px solid',
+          borderColor: 'rgba(0, 0, 0, 0.04)',
+          cursor: 'move',
+          background: 'linear-gradient(to right, #f8faf9, #e8f5e9)',
         }}
       >
-        {/* Handtag för drag-and-drop */}
-        <Box
-          className="drag-handle"
-          ref={drag}
+        <Typography
+          level="title-md"
           sx={{
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            cursor: 'grab',
-            zIndex: 10,
-            p: 0.5,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(0, 0, 0, 0.4)',
-            opacity: 0,
-            transform: 'translateY(-5px)',
-            transition: 'all 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
-            width: '28px',
-            height: '28px',
-            '&:hover': {
-              color: '#007934',
-              backgroundColor: 'rgba(224, 242, 233, 0.7)'
-            },
-            '&:active': {
-              cursor: 'grabbing',
-              backgroundColor: 'rgba(224, 242, 233, 0.9)'
-            }
+            fontWeight: 600,
+            color: '#2e7d32',
+            letterSpacing: '-0.01em',
+            fontSize: { xs: '0.9rem', md: '1rem' },
           }}
         >
-          <DragIndicatorIcon style={{ fontSize: '18px' }} />
-        </Box>
+          {widget.title}
+        </Typography>
         
-        {/* Widget-kontroller */}
-        <Box 
-          className="widget-controls"
-          sx={{ 
-            position: 'absolute', 
-            top: '12px', 
-            right: '12px', 
-            display: 'flex',
-            opacity: 0,
-            transform: 'translateY(-5px)',
-            transition: 'all 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
-            zIndex: 10,
-            gap: 0.5,
-            backdropFilter: 'blur(4px)',
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            p: '4px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)'
-          }}
-        >
-          {/* Expandera/förminska-knapp */}
-          <IconButton 
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <IconButton
+            variant="plain"
+            color="neutral"
             size="sm"
-            sx={{
-              color: '#007934',
-              borderRadius: '6px',
-              backgroundColor: 'rgba(224, 242, 233, 0.5)',
-              '&:hover': {
-                backgroundColor: 'rgba(224, 242, 233, 0.9)'
-              },
-              width: '26px',
-              height: '26px'
-            }}
             onClick={() => toggleExpand(widget.id)}
-          >
-            {isExpanded ? 
-              <FullscreenExitIcon style={{ fontSize: '16px' }} /> : 
-              <FullscreenIcon style={{ fontSize: '16px' }} />
-            }
-          </IconButton>
-
-          {/* Ta bort-knapp */}
-          <IconButton 
-            size="sm"
             sx={{
-              color: '#e53935',
-              borderRadius: '6px',
-              backgroundColor: 'rgba(253, 237, 237, 0.5)',
               '&:hover': {
-                backgroundColor: 'rgba(253, 237, 237, 0.9)'
+                bgcolor: 'rgba(0, 121, 52, 0.08)',
               },
-              width: '26px',
-              height: '26px'
             }}
-            onClick={() => removeWidget(widget.id)}
           >
-            <CloseIcon style={{ fontSize: '16px' }} />
+            {isExpanded ? (
+              <CloseFullscreenIcon fontSize="small" />
+            ) : (
+              <OpenInFullIcon fontSize="small" />
+            )}
           </IconButton>
-        </Box>
-        
-        {/* Widget-innehåll med inre skugga för 3D-effekt */}
-        <Box 
-          sx={{ 
-            p: 3,
-            height: '100%', 
-            pt: 5,
-            position: 'relative',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '6px',
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 100%)',
-              zIndex: 1
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '6px',
-              background: 'linear-gradient(0deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 100%)',
-              zIndex: 1
-            }
-          }}
-        >
-          {children}
+          
+          <IconButton
+            variant="plain"
+            color="danger"
+            size="sm"
+            onClick={() => removeWidget(widget.id)}
+            sx={{
+              '&:hover': {
+                bgcolor: 'rgba(211, 47, 47, 0.08)',
+              },
+            }}
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
         </Box>
       </Box>
-    </div>
+      
+      {/* Widget Content */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflow: 'auto',
+          p: 2,
+          transition: 'all 0.3s ease',
+          // Förbättra visuellt djup med subtil gradient
+          background: 'linear-gradient(145deg, #ffffff, #fafcfa)',
+        }}
+      >
+        {children}
+      </Box>
+    </Card>
   );
 };
 

@@ -1,152 +1,166 @@
-// Exempeldata för dashboard-komponenter
+// Testdata för dashboard-widgets
 
-// Projektstatistik
+// Metrics-data för statuswidgets
 export const metricsData = [
   {
-    title: 'Kunder',
-    value: '36,254',
+    title: 'Projektledare',
+    value: '32',
     trend: {
-      value: 5.27,
+      value: 8.2,
       isPositive: true,
-      text: 'Sedan förra månaden'
+      text: 'sedan förra månaden'
     },
     icon: 'people'
   },
   {
-    title: 'Projekt',
-    value: '5,543',
+    title: 'Aktiva projekt',
+    value: '84',
     trend: {
-      value: 1.08,
+      value: 12.5,
       isPositive: true,
-      text: 'Sedan förra månaden'
+      text: 'sedan förra månaden'
     },
     icon: 'orders'
   },
   {
-    title: 'Intäkter',
-    value: '6 254 kr',
+    title: 'Mötande budget',
+    value: '92%',
     trend: {
-      value: 7.00,
-      isPositive: false,
-      text: 'Sedan förra månaden'
+      value: 3.6,
+      isPositive: true,
+      text: 'sedan förra månaden'
     },
     icon: 'revenue'
   },
   {
-    title: 'Tillväxt',
-    value: '30.56%',
+    title: 'Ökade intäkter',
+    value: '14.2M kr',
     trend: {
-      value: 4.87,
+      value: 5.8,
       isPositive: true,
-      text: 'Sedan förra månaden'
+      text: 'sedan förra månaden'
     },
     icon: 'growth'
   }
 ];
 
-// Diagramdata - Projektioner vs Faktiska timmar
+// Data för stapeldiagram
 export const projectChartData = [
-  { name: 'Jan', projected: 120, actual: 100 },
-  { name: 'Feb', projected: 140, actual: 120 },
-  { name: 'Mar', projected: 170, actual: 160 },
-  { name: 'Apr', projected: 190, actual: 180 },
-  { name: 'Maj', projected: 170, actual: 140 },
-  { name: 'Jun', projected: 190, actual: 180 },
-  { name: 'Jul', projected: 120, actual: 100 },
-  { name: 'Aug', projected: 90, actual: 80 },
-  { name: 'Sep', projected: 170, actual: 140 },
-  { name: 'Okt', projected: 160, actual: 140 },
-  { name: 'Nov', projected: 180, actual: 150 },
-  { name: 'Dec', projected: 190, actual: 170 }
-];
-
-// Cirkeldiagram - Projekttyper
-export const projectTypeData = [
-  { name: 'Nybyggnation', value: 45, color: '#e0f2e9' },
-  { name: 'Renovering', value: 25, color: '#e0f2e9' },
-  { name: 'Tillbyggnad', value: 20, color: '#e0f2e9' },
-  { name: 'Planering', value: 10, color: '#e0f2e9' }
-];
-
-// Aktivitetslista
-export const recentActivityData = [
   {
-    id: 1,
-    icon: 'upload',
-    text: 'Nytt ritningsunderlag uppladdad för Kontorskomplex Malmö',
-    time: 'För 5 minuter sedan',
-    user: 'Mikael Björk'
+    name: 'Jan',
+    planerat: 11,
+    faktiskt: 9
   },
   {
-    id: 2,
-    icon: 'comment',
-    text: 'Kommentar tillagd på Bostadshus Liljeholmen',
-    time: 'För 2 timmar sedan',
-    user: 'Anna Sundström'
+    name: 'Feb',
+    planerat: 15,
+    faktiskt: 17
   },
   {
-    id: 3,
-    icon: 'user',
-    text: 'Robert Delaney öppnade Fasadritning Norrtälje',
-    time: 'För 3 timmar sedan',
-    user: 'Robert Delaney'
+    name: 'Mar',
+    planerat: 18,
+    faktiskt: 16
   },
   {
-    id: 4,
-    icon: 'download',
-    text: 'Konstruktionsritningar för Kulturhuset hämtade',
-    time: 'För 5 timmar sedan',
-    user: 'Johanna Berg'
+    name: 'Apr',
+    planerat: 21,
+    faktiskt: 20
   },
   {
-    id: 5,
-    icon: 'upload',
-    text: 'Ny version av energiutredning uppladdad',
-    time: 'För 8 timmar sedan',
-    user: 'Peter Nilsson'
+    name: 'Maj',
+    planerat: 24,
+    faktiskt: 22
+  },
+  {
+    name: 'Jun',
+    planerat: 22,
+    faktiskt: 20
   }
 ];
 
-// Toppsäljande projekt
+// Data för cirkeldiagram
+export const projectTypeData = [
+  { name: 'Kontorsbyggnader', value: 35 },
+  { name: 'Bostäder', value: 25 },
+  { name: 'Infrastruktur', value: 20 },
+  { name: 'Offentliga byggnader', value: 15 },
+  { name: 'Övriga', value: 5 }
+];
+
+// Data för topprojekt-tabell
 export const topProjectsData = [
   {
     id: 1,
-    name: 'Bostadskvarter Högdalen',
-    date: '27 april 2025',
-    quantity: 82,
-    price: '875 kr',
-    amount: '76 518 kr'
+    name: 'Citykvarteret Norrtälje',
+    progress: 75,
+    status: 'Pågående',
+    budget: '32.5M kr'
   },
   {
     id: 2,
-    name: 'Kontorsfastighet Lindhagen',
-    date: '25 mars 2025',
-    quantity: 37,
-    price: '1 128 kr',
-    amount: '44 754 kr'
+    name: 'Södertälje Centrum',
+    progress: 48,
+    status: 'Pågående',
+    budget: '54.2M kr'
   },
   {
     id: 3,
-    name: 'Skolbyggnad Bromma',
-    date: '17 mars 2025',
-    quantity: 64,
-    price: '939 kr',
-    amount: '62 559 kr'
+    name: 'Trädgårdsstaden Täby',
+    progress: 90,
+    status: 'Slutfas',
+    budget: '28.7M kr'
   },
   {
     id: 4,
-    name: 'Stadsbibliotek Uppsala',
-    date: '12 mars 2025',
-    quantity: 184,
-    price: '920 kr',
-    amount: '169 680 kr'
+    name: 'Kontorshuset Kista',
+    progress: 35,
+    status: 'Pågående',
+    budget: '63.1M kr'
   },
   {
     id: 5,
-    name: 'Vårdcentral Skövde',
-    date: '05 mars 2025',
-    quantity: 69,
-    price: '928 kr',
-    amount: '64 965 kr'
+    name: 'Nya Pendeltågsstationen',
+    progress: 15,
+    status: 'Påbörjad',
+    budget: '120.3M kr'
+  }
+];
+
+// Data för senaste aktiviteter
+export const recentActivityData = [
+  {
+    id: 1,
+    action: 'Laddat upp ritning',
+    project: 'Citykvarteret Norrtälje',
+    user: 'Anna Bergman',
+    time: '14:32'
+  },
+  {
+    id: 2,
+    action: 'Uppdaterat budget',
+    project: 'Södertälje Centrum',
+    user: 'Erik Johansson',
+    time: '13:15'
+  },
+  {
+    id: 3,
+    action: 'Skapat nytt möte',
+    project: 'Trädgårdsstaden Täby',
+    user: 'Maria Andersson',
+    time: '11:47'
+  },
+  {
+    id: 4,
+    action: 'Godkänt ritning',
+    project: 'Kontorshuset Kista',
+    user: 'Daniel Nilsson',
+    time: '10:28'
+  },
+  {
+    id: 5,
+    action: 'Kommenterat dokument',
+    project: 'Nya Pendeltågsstationen',
+    user: 'Sophia Lindberg',
+    time: '09:05'
   }
 ];
