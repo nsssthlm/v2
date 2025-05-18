@@ -27,16 +27,37 @@ interface TopProjectsTableProps {
 
 const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
   return (
-    <Card sx={{ p: 2, height: '100%' }}>
+    <Card variant="plain" sx={{ 
+      p: 2, 
+      height: '100%',
+      bgcolor: 'background.surface', 
+      boxShadow: 'none',
+      borderRadius: 'lg',
+      border: '1px solid',
+      borderColor: 'divider'
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography level="title-md">{title}</Typography>
+        <Typography level="title-sm" sx={{ 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.5px',
+          color: 'text.secondary',
+          fontWeight: 'medium'
+        }}>
+          {title}
+        </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button 
             size="sm" 
             variant="outlined" 
-            color="neutral" 
             startDecorator={<DownloadIcon />}
-            sx={{ bgcolor: 'background.surface' }}
+            sx={{ 
+              color: '#60cd18',
+              borderColor: '#60cd18',
+              '&:hover': {
+                borderColor: '#60cd18',
+                bgcolor: 'rgba(96, 205, 24, 0.08)'
+              }
+            }}
           >
             Export
           </Button>
@@ -51,13 +72,24 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
           hoverRow 
           size="sm"
           sx={{ 
+            '--TableCell-paddingY': '0.75rem',
             '& thead th': { 
-              bgcolor: 'background.level1',
-              fontWeight: 'bold',
-              color: 'text.secondary'
+              bgcolor: 'transparent',
+              fontWeight: 'medium',
+              color: 'text.secondary',
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              borderBottom: '1px solid',
+              borderColor: 'divider'
             },
             '& tbody tr:hover': {
-              boxShadow: 'none'
+              boxShadow: 'none',
+              backgroundColor: 'rgba(96, 205, 24, 0.05)'
+            },
+            '& tbody td': {
+              borderBottom: '1px solid',
+              borderColor: 'rgba(0,0,0,0.05)'
             }
           }}
         >
@@ -74,7 +106,9 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
             {projects.map((project) => (
               <tr key={project.id}>
                 <td>
-                  <Typography level="body-sm">{project.name}</Typography>
+                  <Typography level="body-sm" sx={{ fontWeight: 'medium', color: '#60cd18' }}>
+                    {project.name}
+                  </Typography>
                   <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>
                     {`ID: ${project.id}`}
                   </Typography>
@@ -89,7 +123,7 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
                   <Typography level="body-sm">{project.price}</Typography>
                 </td>
                 <td>
-                  <Typography level="body-sm" sx={{ fontWeight: 'md' }}>
+                  <Typography level="body-sm" sx={{ fontWeight: 'bold' }}>
                     {project.amount}
                   </Typography>
                 </td>

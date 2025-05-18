@@ -57,14 +57,22 @@ export const ProjectMetricsCard = ({
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 2, height: '100%' }}>
+    <Card variant="plain" sx={{ 
+      p: 2, 
+      height: '100%', 
+      bgcolor: 'background.surface', 
+      boxShadow: 'none',
+      borderRadius: 'lg',
+      border: '1px solid',
+      borderColor: 'divider'
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-        <Typography level="title-md" color="neutral">
+        <Typography level="title-sm" color="neutral" sx={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {title}
         </Typography>
         {icon && (
           <Box sx={{ 
-            bgcolor: `${color}20`, // Transparant bakgrund av huvudfärgen
+            bgcolor: `${color}20`, // Transparent bakgrund av huvudfärgen
             borderRadius: '50%', 
             width: 32, 
             height: 32, 
@@ -83,7 +91,8 @@ export const ProjectMetricsCard = ({
         sx={{ 
           my: 1, 
           fontWeight: 'bold',
-          color: 'text.primary'
+          color: '#60cd18',
+          fontSize: '1.8rem'
         }}
       >
         {value}
@@ -97,7 +106,8 @@ export const ProjectMetricsCard = ({
             sx={{ 
               color: trend.isPositive ? '#60cd18' : 
                     trend.isPositive === false ? '#f44336' : 
-                    'text.secondary'
+                    'text.secondary',
+              fontWeight: 'bold'
             }}
           >
             {trend.value}%

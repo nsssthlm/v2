@@ -8,7 +8,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 interface ActivityItem {
   id: number;
-  icon: 'upload' | 'download' | 'comment' | 'user';
+  icon: string;
   text: string;
   time: string;
   user?: string;
@@ -36,9 +36,24 @@ const RecentActivityList = ({ title, activities }: RecentActivityListProps) => {
   };
 
   return (
-    <Card sx={{ p: 2, height: '100%' }}>
+    <Card variant="plain" sx={{ 
+      p: 2, 
+      height: '100%',
+      bgcolor: 'background.surface', 
+      boxShadow: 'none',
+      borderRadius: 'lg',
+      border: '1px solid',
+      borderColor: 'divider'
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography level="title-md">{title}</Typography>
+        <Typography level="title-sm" sx={{ 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.5px',
+          color: 'text.secondary',
+          fontWeight: 'medium'
+        }}>
+          {title}
+        </Typography>
         <IconButton variant="plain" color="neutral" size="sm">
           <MoreVertIcon />
         </IconButton>
@@ -52,25 +67,40 @@ const RecentActivityList = ({ title, activities }: RecentActivityListProps) => {
               alignItems: 'flex-start',
               gap: 2,
               borderBottom: '1px solid',
-              borderColor: 'divider',
+              borderColor: 'rgba(0, 0, 0, 0.05)',
+              py: 1.5,
               '&:last-child': {
                 borderBottom: 'none'
+              },
+              '&:hover': {
+                bgcolor: 'rgba(96, 205, 24, 0.04)'
               }
             }}
           >
             <Avatar 
               size="sm" 
               sx={{ 
-                bgcolor: 'background.level1',
-                color: 'primary.500',
-                mt: 0.5
+                bgcolor: activity.icon === 'upload' ? 'rgba(96, 205, 24, 0.1)' : 'background.level1',
+                color: activity.icon === 'upload' ? '#60cd18' : 
+                       activity.icon === 'comment' ? '#ff9800' :
+                       activity.icon === 'download' ? '#1976d2' : '#9e9e9e',
+                mt: 0.5,
+                fontSize: '1rem'
               }}
             >
               {getActivityIcon(activity.icon)}
             </Avatar>
             
             <Box sx={{ flexGrow: 1 }}>
-              <Typography level="body-sm">{activity.text}</Typography>
+              <Typography 
+                level="body-sm" 
+                sx={{ 
+                  color: activity.icon === 'upload' ? '#60cd18' : 'text.primary',
+                  fontWeight: activity.icon === 'upload' ? 'medium' : 'normal'
+                }}
+              >
+                {activity.text}
+              </Typography>
               <Typography level="body-xs" sx={{ color: 'text.tertiary', mt: 0.5 }}>
                 {activity.time}
               </Typography>

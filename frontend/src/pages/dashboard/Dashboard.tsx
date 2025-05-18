@@ -18,26 +18,37 @@ const Dashboard = () => {
   
   return (
     <Box>
-      <Typography level="h1" component="h1" sx={{ mb: 2 }}>
+      <Typography level="h1" component="h1" sx={{ mb: 3, color: '#60cd18', fontWeight: 'bold' }}>
         Dashboard
       </Typography>
       
       {/* Aktuellt projekt-information */}
-      <Card variant="outlined" sx={{ mb: 4, p: 2 }}>
-        <Typography level="h2" component="h2">
+      <Card 
+        variant="plain" 
+        sx={{ 
+          mb: 4, 
+          p: 3,
+          bgcolor: 'background.surface', 
+          boxShadow: 'sm',
+          borderRadius: 'lg',
+          border: '1px solid',
+          borderColor: 'divider'
+        }}
+      >
+        <Typography level="h2" component="h2" sx={{ fontWeight: 'bold', color: '#60cd18' }}>
           {currentProject?.name || 'Arkitektprojekt Översikt'}
         </Typography>
-        <Typography level="body-md" sx={{ mb: 2 }}>
+        <Typography level="body-md" sx={{ mb: 2, mt: 1 }}>
           {currentProject?.description || 'Välkommen till din projektöversikt. Här kan du se nyckeltal, tidslinjer och aktivitet för alla dina arkitektprojekt.'}
         </Typography>
-        <Divider />
+        <Divider sx={{ bgcolor: 'rgba(96, 205, 24, 0.1)' }} />
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
           <Typography level="body-sm">
             {currentProject?.endDate ? 
               `Projektslut: ${new Date(currentProject.endDate).toLocaleDateString()}` : 
               'Välj ett specifikt projekt för detaljerad information'}
           </Typography>
-          <Typography level="body-sm" sx={{ color: '#60cd18' }}>
+          <Typography level="body-sm" sx={{ color: '#60cd18', fontWeight: 'medium' }}>
             {currentProject?.id ? `Projekt-ID: ${currentProject.id}` : 'Översiktsdashboard'}
           </Typography>
         </Box>

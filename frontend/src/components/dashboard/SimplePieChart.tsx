@@ -16,9 +16,24 @@ const SimplePieChart = ({ title, data }: PieChartProps) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   
   return (
-    <Card sx={{ p: 2, height: '100%' }}>
+    <Card variant="plain" sx={{ 
+      p: 2, 
+      height: '100%',
+      bgcolor: 'background.surface', 
+      boxShadow: 'none',
+      borderRadius: 'lg',
+      border: '1px solid',
+      borderColor: 'divider'
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography level="title-md">{title}</Typography>
+        <Typography level="title-sm" sx={{ 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.5px',
+          color: 'text.secondary',
+          fontWeight: 'medium'
+        }}>
+          {title}
+        </Typography>
         <IconButton variant="plain" color="neutral" size="sm">
           <MoreVertIcon />
         </IconButton>
@@ -30,7 +45,8 @@ const SimplePieChart = ({ title, data }: PieChartProps) => {
           width: 160, 
           height: 160,
           borderRadius: '50%',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
         }}>
           {data.map((item, index, arr) => {
             // Beräkna startposition för varje cirkelsektor
@@ -52,7 +68,12 @@ const SimplePieChart = ({ title, data }: PieChartProps) => {
                   width: '100%',
                   height: '100%',
                   background: item.color,
-                  clipPath: `conic-gradient(from ${startAngle}deg at 50% 50%, ${item.color} 0deg, ${item.color} ${endAngle - startAngle}deg, transparent ${endAngle - startAngle}deg, transparent 360deg)`
+                  clipPath: `conic-gradient(from ${startAngle}deg at 50% 50%, ${item.color} 0deg, ${item.color} ${endAngle - startAngle}deg, transparent ${endAngle - startAngle}deg, transparent 360deg)`,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    opacity: 0.9,
+                    transform: 'scale(1.02)'
+                  }
                 }}
               />
             );
@@ -71,9 +92,10 @@ const SimplePieChart = ({ title, data }: PieChartProps) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            boxShadow: '0 0 8px rgba(0,0,0,0.05)'
           }}>
-            <Typography level="h3" sx={{ fontWeight: 'bold' }}>
+            <Typography level="h3" sx={{ fontWeight: 'bold', color: '#60cd18' }}>
               {total}
             </Typography>
             <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
@@ -85,21 +107,21 @@ const SimplePieChart = ({ title, data }: PieChartProps) => {
       
       <List sx={{ '--ListItem-paddingY': '0.5rem' }}>
         {data.map((item, index) => (
-          <ListItem key={index}>
+          <ListItem key={index} sx={{ py: 0.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
               <Box
                 sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
+                  width: 10,
+                  height: 10,
+                  borderRadius: '2px',
                   bgcolor: item.color,
                   mr: 1.5,
                 }}
               />
-              <Typography level="body-sm" sx={{ flexGrow: 1 }}>
+              <Typography level="body-sm" sx={{ flexGrow: 1, color: 'text.secondary' }}>
                 {item.name}
               </Typography>
-              <Typography level="body-sm" sx={{ fontWeight: 'bold' }}>
+              <Typography level="body-sm" sx={{ fontWeight: 'bold', color: item.name === 'Nybyggnation' ? '#60cd18' : 'text.primary' }}>
                 {item.value} ({Math.round((item.value / total) * 100)}%)
               </Typography>
             </Box>
