@@ -49,6 +49,7 @@ function App() {
               {/* Protected routes with layout */}
               <Route element={<Layout />}>
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="calendar" element={<CalendarPage />} />
                 <Route path="projects" element={<ComingSoonPage title="Projekt" />} />
                 <Route path="tasks" element={<ComingSoonPage title="Uppgifter" />} />
                 <Route path="files" element={<ComingSoonPage title="Dokument" />} />

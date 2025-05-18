@@ -83,6 +83,12 @@ const metricsData = [
 const ModernDashboard: React.FC = () => {
   const { currentProject } = useProject();
   
+  // Rensa localStorage för dashboard widgets en gång för att visa nya widgets
+  // Vi gör detta vid komponentmontering för att säkerställa att nya widgets visas
+  useEffect(() => {
+    localStorage.removeItem('dashboardWidgets');
+  }, []);
+  
   // State för dashboard widgets
   const [widgets, setWidgets] = useState<DashboardWidget[]>(() => {
     // Försök läsa sparade widgets från localStorage
