@@ -161,11 +161,31 @@ const FolderPageNew = () => {
     fetchFolderData();
   };
 
-  const handleDeleteFile = (fileId: string) => {
-    // Här skulle vi anropa ett API för att radera filen
-    console.log("Radera fil:", fileId);
-    // Efter radering skulle vi uppdatera listan
-    // fetchFolderData();
+  const handleDeleteFile = async (fileId: string) => {
+    // Bekräfta radering med användaren
+    if (!confirm('Är du säker på att du vill radera denna fil?')) {
+      return;
+    }
+    
+    try {
+      console.log("Radera fil:", fileId);
+      
+      // Anropa API för att radera filen
+      const response = await axios.delete(`${API_BASE_URL}/files/delete/${fileId}/`);
+      console.log("Svar från radering:", response.data);
+      
+      // Visa meddelande om lyckad radering
+      alert('Filen har raderats');
+      
+      // Rensa cachen för denna mapp
+      delete folderDataCache[slug];
+      
+      // Ladda om data
+      fetchFolderData();
+    } catch (err: any) {
+      console.error('Fel vid radering av fil:', err);
+      alert(`Kunde inte radera filen: ${err.message || 'Okänt fel'}`);
+    }
   };
   
   // Hantera klick på PDF-filer
