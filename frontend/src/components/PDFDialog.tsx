@@ -294,8 +294,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     overflow: 'hidden'
                   }}
                 >
-                  <object
-                    data={pdfUrl}
+                  {/* Använd en embed-tag som fungerar bättre med PDF-filer */}
+                  <embed
+                    src={pdfUrl}
                     type="application/pdf"
                     width="100%"
                     height="100%"
@@ -304,30 +305,39 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                       background: 'white',
                       display: 'block'
                     }}
-                  >
-                    <Box sx={{ 
-                      p: 3, 
-                      bgcolor: 'white', 
-                      display: 'flex', 
-                      height: '100%', 
-                      alignItems: 'center', 
+                  />
+                  
+                  {/* Fallback om embed inte fungerar */}
+                  <Box 
+                    sx={{ 
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'none',
+                      alignItems: 'center',
                       justifyContent: 'center',
-                      flexDirection: 'column'
-                    }}>
-                      <Typography level="h5" sx={{ mb: 2 }}>
-                        Kunde inte visa PDF-filen
-                      </Typography>
-                      <Button
-                        variant="solid"
-                        color="primary"
-                        component="a"
-                        href={pdfUrl}
-                        target="_blank"
-                      >
-                        Öppna i nytt fönster
-                      </Button>
-                    </Box>
-                  </object>
+                      flexDirection: 'column',
+                      bgcolor: 'white',
+                      p: 3,
+                      zIndex: 2
+                    }}
+                    className="pdf-fallback"
+                  >
+                    <Typography level="h5" sx={{ mb: 2 }}>
+                      Kunde inte visa PDF-filen
+                    </Typography>
+                    <Button
+                      variant="solid"
+                      color="primary"
+                      component="a"
+                      href={pdfUrl}
+                      target="_blank"
+                    >
+                      Öppna i nytt fönster
+                    </Button>
+                  </Box>
                 </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
