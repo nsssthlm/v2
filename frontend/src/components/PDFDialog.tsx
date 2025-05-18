@@ -18,7 +18,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PDFEmbedViewer from './PDFEmbedViewer';
+import ReactPDFViewer from './ReactPDFViewer';
 
 interface PDFDialogProps {
   open: boolean;
@@ -285,8 +285,8 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   Nuvarande version
                 </Box>
                 
-                {/* Visa PDF:en med vår robusta PDFEmbedViewer */}
-                <PDFEmbedViewer 
+                {/* Visa PDF:en med vår avancerade ReactPDFViewer */}
+                <ReactPDFViewer 
                   pdfUrl={pdfUrl}
                   filename={filename}
                   height="100%"
