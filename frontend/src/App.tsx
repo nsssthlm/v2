@@ -20,6 +20,9 @@ import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
 
+// Auth pages
+import LoginPage from './pages/auth/LoginPage';
+
 // The main App component doesn't access context directly
 function App() {
   // Handle login success - can be empty now as AuthContext handles the state
@@ -34,8 +37,11 @@ function App() {
         <PDFDialogProvider>
           <BrowserRouter>
             <Routes>
-              {/* Redirect root to dashboard */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* Redirect root to login page */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              
+              {/* Auth routes */}
+              <Route path="/login" element={<LoginPage />} />
               
               {/* Protected routes with layout */}
               <Route element={<Layout />}>
