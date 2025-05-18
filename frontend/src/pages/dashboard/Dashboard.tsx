@@ -216,13 +216,32 @@ const Dashboard = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <Box>
-        <Typography level="h1" component="h1" sx={{ mb: 3, color: 'text.primary', fontWeight: 'bold' }}>
+        <Typography 
+          level="h1" 
+          component="h1" 
+          sx={{ 
+            mb: 4, 
+            color: '#007934', 
+            fontWeight: 'bold', 
+            fontSize: '2rem',
+            borderBottom: '3px solid #e0f2e9',
+            pb: 1
+          }}
+        >
           Dashboard
         </Typography>
         
         {/* Aktuellt projekt-information */}
         <Box sx={{ mb: 4 }}>
-          <Typography level="h2" component="h2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+          <Typography 
+            level="h2" 
+            component="h2" 
+            sx={{ 
+              fontWeight: 'bold', 
+              color: 'text.primary',
+              fontSize: '1.5rem'
+            }}
+          >
             {currentProject?.name || 'Arkitektprojekt Översikt'}
           </Typography>
           <Typography level="body-md" sx={{ mb: 2, mt: 1 }}>
