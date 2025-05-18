@@ -294,7 +294,7 @@ const EnhancedPDFViewer = ({
                 </Box>
               </Document>
               
-              {/* Gröna sidramen för designen som matchar bild 2 */}
+              {/* Blå sidramen för designen */}
               <Box
                 sx={{
                   position: 'absolute',
@@ -302,7 +302,7 @@ const EnhancedPDFViewer = ({
                   bottom: 0,
                   left: 0,
                   width: '8px',
-                  backgroundColor: '#4caf50'
+                  backgroundColor: '#1976d2'
                 }}
               />
             </Box>
@@ -326,7 +326,7 @@ const EnhancedPDFViewer = ({
               sx={{ 
                 width: `${(currentPage / totalPages) * 100}%`, 
                 height: '100%', 
-                bgcolor: '#4caf50'
+                bgcolor: '#1976d2'
               }}
             />
           </Box>
