@@ -38,6 +38,7 @@ def directory_data(request, slug):
         'page_title': directory.page_title or directory.name,
         'subfolders': list(subfolders),
         'files': [{
+            'id': file['id'],
             'name': file['name'],
             'file': request.build_absolute_uri(file['file']),
             'content_type': file['content_type'],
