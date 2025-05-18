@@ -221,26 +221,15 @@ const Dashboard = () => {
         </Typography>
         
         {/* Aktuellt projekt-information */}
-        <Card 
-          variant="plain" 
-          sx={{ 
-            mb: 4, 
-            p: 3,
-            bgcolor: 'background.surface', 
-            boxShadow: 'sm',
-            borderRadius: 'lg',
-            border: '1px solid',
-            borderColor: 'divider'
-          }}
-        >
+        <Box sx={{ mb: 4 }}>
           <Typography level="h2" component="h2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
             {currentProject?.name || 'Arkitektprojekt Översikt'}
           </Typography>
           <Typography level="body-md" sx={{ mb: 2, mt: 1 }}>
             {currentProject?.description || 'Välkommen till din projektöversikt. Här kan du se nyckeltal, tidslinjer och aktivitet för alla dina arkitektprojekt.'}
           </Typography>
-          <Divider sx={{ bgcolor: '#e0f2e9' }} />
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+          <Divider sx={{ bgcolor: '#e0f2e9', mb: 2 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography level="body-sm">
               {currentProject?.endDate ? 
                 `Projektslut: ${new Date(currentProject.endDate).toLocaleDateString()}` : 
@@ -250,7 +239,7 @@ const Dashboard = () => {
               {currentProject?.id ? `Projekt-ID: ${currentProject.id}` : 'Översiktsdashboard'}
             </Typography>
           </Box>
-        </Card>
+        </Box>
         
         {/* Knapp för att redigera dashboard */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
