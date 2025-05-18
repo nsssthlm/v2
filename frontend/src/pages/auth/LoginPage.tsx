@@ -14,8 +14,8 @@ import {
   Alert
 } from '@mui/joy';
 
-// Importera skogsbilden
-import forestImage from '../../assets/images/swedish-forest.webp';
+// URL till skogsbilden i public-mappen
+const forestImageUrl = '/images/swedish-forest.webp';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -54,7 +54,7 @@ const LoginPage = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url(${forestImage})`,
+          backgroundImage: `url(${forestImageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           zIndex: 0
