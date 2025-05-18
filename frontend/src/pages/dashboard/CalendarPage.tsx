@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Card, Container } from '@mui/joy';
-import CalendarWidget from '../../components/dashboard/CalendarWidget';
-import { markedDates } from '../../components/dashboard/CalendarData';
+import SimpleCalendarWidget from '../../components/dashboard/SimpleCalendarWidget';
+import { getMarkedDates } from '../../components/dashboard/CalendarData';
 
 const CalendarPage: React.FC = () => {
   // Funktion för att hantera klick på datum
@@ -27,11 +27,11 @@ const CalendarPage: React.FC = () => {
         }}
       >
         <Box sx={{ height: '100%', width: '100%' }}>
-          <CalendarWidget
+          <SimpleCalendarWidget
             title="Projektkalender"
             height="100%"
             onDateClick={handleDateClick}
-            markedDates={markedDates}
+            markedDates={getMarkedDates()}
           />
         </Box>
       </Card>

@@ -6,7 +6,7 @@ import SimpleBarChart from './SimpleBarChart';
 import SimplePieChart from './SimplePieChart';
 import RecentActivityList from './RecentActivityList';
 import TopProjectsTable from './TopProjectsTable';
-import ModernRevenueWidget from './ModernRevenueWidget';
+import SimpleRevenueWidget from './SimpleRevenueWidget';
 import SimpleCalendarWidget from './SimpleCalendarWidget';
 import { getMarkedDates } from './CalendarData';
 import AddIcon from '@mui/icons-material/Add';
@@ -309,7 +309,7 @@ const ModernDashboard: React.FC = () => {
         );
       case 'lineChart':
         return (
-          <ModernRevenueWidget 
+          <SimpleRevenueWidget 
             title={widget.title}
           />
         );
