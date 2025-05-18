@@ -106,7 +106,7 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
             {projects.map((project) => (
               <tr key={project.id}>
                 <td>
-                  <Typography level="body-sm" sx={{ fontWeight: 'medium', color: '#e0f2e9' }}>
+                  <Typography level="body-sm" sx={{ fontWeight: 'medium', color: 'text.primary' }}>
                     {project.name}
                   </Typography>
                   <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>

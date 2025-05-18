@@ -18,7 +18,7 @@ const Dashboard = () => {
   
   return (
     <Box>
-      <Typography level="h1" component="h1" sx={{ mb: 3, color: '#e0f2e9', fontWeight: 'bold' }}>
+      <Typography level="h1" component="h1" sx={{ mb: 3, color: 'text.primary', fontWeight: 'bold' }}>
         Dashboard
       </Typography>
       
@@ -35,7 +35,7 @@ const Dashboard = () => {
           borderColor: 'divider'
         }}
       >
-        <Typography level="h2" component="h2" sx={{ fontWeight: 'bold', color: '#e0f2e9' }}>
+        <Typography level="h2" component="h2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
           {currentProject?.name || 'Arkitektprojekt Översikt'}
         </Typography>
         <Typography level="body-md" sx={{ mb: 2, mt: 1 }}>
@@ -48,7 +48,7 @@ const Dashboard = () => {
               `Projektslut: ${new Date(currentProject.endDate).toLocaleDateString()}` : 
               'Välj ett specifikt projekt för detaljerad information'}
           </Typography>
-          <Typography level="body-sm" sx={{ color: '#e0f2e9', fontWeight: 'medium' }}>
+          <Typography level="body-sm" sx={{ color: 'text.secondary', fontWeight: 'medium' }}>
             {currentProject?.id ? `Projekt-ID: ${currentProject.id}` : 'Översiktsdashboard'}
           </Typography>
         </Box>

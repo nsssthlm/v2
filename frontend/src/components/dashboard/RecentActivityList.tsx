@@ -95,7 +95,7 @@ const RecentActivityList = ({ title, activities }: RecentActivityListProps) => {
               <Typography 
                 level="body-sm" 
                 sx={{ 
-                  color: activity.icon === 'upload' ? '#e0f2e9' : 'text.primary',
+                  color: 'text.primary',
                   fontWeight: activity.icon === 'upload' ? 'medium' : 'normal'
                 }}
               >
