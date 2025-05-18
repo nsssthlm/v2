@@ -98,16 +98,13 @@ class FileViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name']
     ordering_fields = ['name', 'created_at', 'size']
+    permission_classes = [permissions.AllowAny]  # Tillåt alla anrop för utvecklingsändamål
     
     def get_permissions(self):
         """
-        Allow GET and DELETE requests without authentication for testing purposes
+        Allow all requests without authentication for testing purposes
         """
-        if self.request.method in ['GET', 'DELETE']:
-            return []  # Tillåt alla GET och DELETE-förfrågningar utan autentisering
-        
-        # Default to authentication required
-        return [permissions.IsAuthenticated()]
+        return []  # Tillåt alla förfrågningar utan autentisering
     
     def get_queryset(self):
         """Filter files by project and directory"""

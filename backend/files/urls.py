@@ -17,6 +17,9 @@ urlpatterns = [
     # API för filuppladdning
     path('upload/', upload_api.upload_file, name='api_upload_file'),
     
+    # API för att radera en fil
+    path('delete/<int:file_id>/', web_api.delete_file, name='delete_file'),
+    
     # Webb-routes för mappspecifika sidor
     path('web/', include([
         # Lista alla mappar
