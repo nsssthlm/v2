@@ -101,10 +101,10 @@ class FileViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Allow GET requests without authentication for testing purposes
+        Allow GET and DELETE requests without authentication for testing purposes
         """
-        if self.request.method == 'GET':
-            return []  # Tillåt alla GET-förfrågningar utan autentisering
+        if self.request.method in ['GET', 'DELETE']:
+            return []  # Tillåt alla GET och DELETE-förfrågningar utan autentisering
         
         # Default to authentication required
         return [permissions.IsAuthenticated()]
@@ -152,3 +152,18 @@ class FileViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(all_versions, many=True)
         return Response(serializer.data)
+        
+    def destroy(self, request, *args, **kwargs):
+        """Delete a file and its physical file from storage"""
+        instance = self.get_object()
+        
+        # Försök ta bort den fysiska filen från lagring
+        try:
+            instance.file.delete(save=False)
+        except Exception as e:
+            pass  # Fortsätt även om filen inte kunde tas bort
+        
+        # Radera filens databaspost
+        self.perform_destroy(instance)
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
