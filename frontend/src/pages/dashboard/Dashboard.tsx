@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Card, Divider, Button, IconButton, Sheet, Modal, ModalDialog, DialogTitle, DialogContent, DialogActions, Grid } from '@mui/joy';
 import { useProject } from '../../contexts/ProjectContext';
 import ProjectMetricsCard from '../../components/dashboard/ProjectMetricsCard';
@@ -15,161 +15,130 @@ import {
 } from '../../components/dashboard/DashboardData';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import SettingsIcon from '@mui/icons-material/Settings';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
-// Widget typ för dashboard
+// Widget-typer för dashboarden
 interface DashboardWidget {
   id: string;
   type: 'metrics' | 'barChart' | 'pieChart' | 'topProjects' | 'recentActivity';
   title: string;
   size: 'small' | 'medium' | 'large';
-  order: number;
-  data?: any;
   metricIndex?: number;
-  visible?: boolean;
+  order: number;
+  visible: boolean;
 }
 
-// Dashboard komponent
 const Dashboard = () => {
   const { currentProject } = useProject();
   
-  // Definiera initialt tillgängliga widgets
-  const initialWidgets: DashboardWidget[] = [
+  // Definiera alla tillgängliga widgets
+  const allWidgets: DashboardWidget[] = [
     { id: 'metrics-0', type: 'metrics', title: metricsData[0].title, metricIndex: 0, size: 'small', order: 0, visible: true },
     { id: 'metrics-1', type: 'metrics', title: metricsData[1].title, metricIndex: 1, size: 'small', order: 1, visible: true },
     { id: 'metrics-2', type: 'metrics', title: metricsData[2].title, metricIndex: 2, size: 'small', order: 2, visible: true },
     { id: 'metrics-3', type: 'metrics', title: metricsData[3].title, metricIndex: 3, size: 'small', order: 3, visible: true },
-    { id: 'barChart', type: 'barChart', title: 'PROJEKTIONER VS FAKTISKA', data: projectChartData, size: 'medium', order: 4, visible: true },
-    { id: 'pieChart', type: 'pieChart', title: 'PROJEKTTYPER', data: projectTypeData, size: 'medium', order: 5, visible: true },
-    { id: 'topProjects', type: 'topProjects', title: 'TOPPROJEKT', data: topProjectsData, size: 'medium', order: 6, visible: true },
-    { id: 'recentActivity', type: 'recentActivity', title: 'SENASTE AKTIVITET', data: recentActivityData, size: 'medium', order: 7, visible: true }
+    { id: 'barChart', type: 'barChart', title: 'PROJEKTIONER VS FAKTISKA', size: 'medium', order: 4, visible: true },
+    { id: 'pieChart', type: 'pieChart', title: 'PROJEKTTYPER', size: 'medium', order: 5, visible: true },
+    { id: 'topProjects', type: 'topProjects', title: 'TOPPROJEKT', size: 'medium', order: 6, visible: true },
+    { id: 'recentActivity', type: 'recentActivity', title: 'SENASTE AKTIVITET', size: 'medium', order: 7, visible: true },
   ];
-
-  // State för widgets
+  
+  // State för widgets som visas på dashboarden
   const [widgets, setWidgets] = useState<DashboardWidget[]>(() => {
     try {
       const savedWidgets = localStorage.getItem('dashboardWidgets');
-      return savedWidgets ? JSON.parse(savedWidgets) : initialWidgets;
+      return savedWidgets ? JSON.parse(savedWidgets) : allWidgets;
     } catch (e) {
       console.error('Kunde inte läsa sparade widgets', e);
-      return initialWidgets;
+      return allWidgets;
     }
   });
-
-  // State för att visa dialog för att lägga till/ta bort widgets
+  
+  // State för att visa redigeringsdialog
   const [showWidgetDialog, setShowWidgetDialog] = useState(false);
   
-  // Referens för drag-funktionalitet
-  const dragWidget = useRef<DashboardWidget | null>(null);
-  const dragNode = useRef<HTMLElement | null>(null);
-  const dragOverNode = useRef<HTMLElement | null>(null);
+  // State för att hålla koll på vilken widget som är expanderad
+  const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   
   // Spara widgets när de ändras
   useEffect(() => {
     localStorage.setItem('dashboardWidgets', JSON.stringify(widgets));
   }, [widgets]);
   
-  // Ta bort en widget
+  // Ta bort (göm) en widget
   const removeWidget = (widgetId: string) => {
-    setWidgets(prevWidgets => 
-      prevWidgets.map(widget => 
+    setWidgets(prev => 
+      prev.map(widget => 
         widget.id === widgetId 
-          ? { ...widget, visible: false }
+          ? { ...widget, visible: false } 
           : widget
       )
     );
   };
   
-  // Visa en widget
-  const showWidget = (widgetId: string) => {
-    // Hitta nästa ordningsnummer
+  // Lägg till (visa) en widget
+  const addWidget = (widgetId: string) => {
+    const maxOrder = widgets.reduce((max, widget) => widget.visible && widget.order > max ? widget.order : max, -1);
+    
+    setWidgets(prev => 
+      prev.map(widget => 
+        widget.id === widgetId 
+          ? { ...widget, visible: true, order: maxOrder + 1 } 
+          : widget
+      )
+    );
+  };
+  
+  // Expandera/minimera en widget
+  const toggleWidgetSize = (widgetId: string) => {
+    if (expandedWidget === widgetId) {
+      setExpandedWidget(null);
+    } else {
+      setExpandedWidget(widgetId);
+    }
+  };
+  
+  // Flytta en widget uppåt i ordningen
+  const moveWidgetUp = (widgetId: string) => {
+    const widgetIndex = widgets.findIndex(w => w.id === widgetId);
+    if (widgetIndex <= 0) return; // Redan högst upp
+    
+    const updatedWidgets = [...widgets];
+    const currentWidget = updatedWidgets[widgetIndex];
+    const aboveWidget = updatedWidgets[widgetIndex - 1];
+    
+    // Byt ordningsnummer
+    const tempOrder = currentWidget.order;
+    updatedWidgets[widgetIndex] = { ...currentWidget, order: aboveWidget.order };
+    updatedWidgets[widgetIndex - 1] = { ...aboveWidget, order: tempOrder };
+    
+    setWidgets(updatedWidgets.sort((a, b) => a.order - b.order));
+  };
+  
+  // Flytta en widget nedåt i ordningen
+  const moveWidgetDown = (widgetId: string) => {
     const visibleWidgets = widgets.filter(w => w.visible);
-    const nextOrder = visibleWidgets.length > 0 
-      ? Math.max(...visibleWidgets.map(w => w.order)) + 1 
-      : 0;
+    const widgetIndex = visibleWidgets.findIndex(w => w.id === widgetId);
+    if (widgetIndex === -1 || widgetIndex >= visibleWidgets.length - 1) return; // Redan längst ner
     
-    setWidgets(prevWidgets => 
-      prevWidgets.map(widget => 
-        widget.id === widgetId 
-          ? { ...widget, visible: true, order: nextOrder }
-          : widget
-      )
-    );
-  };
-  
-  // Hantera start av drag
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, widget: DashboardWidget) => {
-    dragWidget.current = widget;
-    dragNode.current = e.currentTarget;
-    dragNode.current.addEventListener('dragend', handleDragEnd);
+    const allWidgetsIndex = widgets.findIndex(w => w.id === widgetId);
+    const nextVisibleIndex = widgets.findIndex(w => w.order > widgets[allWidgetsIndex].order && w.visible);
     
-    setTimeout(() => {
-      if (dragNode.current) {
-        dragNode.current.style.opacity = '0.4';
-      }
-    }, 0);
-  };
-  
-  // Hantera drag över
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, widget: DashboardWidget) => {
-    e.preventDefault();
-    dragOverNode.current = e.currentTarget;
+    if (nextVisibleIndex === -1) return; // Ingen synlig widget under denna
     
-    if (dragWidget.current && dragWidget.current.id !== widget.id) {
-      e.currentTarget.style.background = '#e0f2e9';
-    }
-  };
-  
-  // Hantera drag leave
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.currentTarget.style.background = '';
-  };
-  
-  // Hantera drop
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetWidget: DashboardWidget) => {
-    e.preventDefault();
-    e.currentTarget.style.background = '';
+    const updatedWidgets = [...widgets];
+    const currentWidget = updatedWidgets[allWidgetsIndex];
+    const belowWidget = updatedWidgets[nextVisibleIndex];
     
-    if (dragWidget.current && dragWidget.current.id !== targetWidget.id) {
-      const updatedWidgets = [...widgets];
-      
-      // Byt plats på widgets
-      const draggedIndex = updatedWidgets.findIndex(w => w.id === dragWidget.current?.id);
-      const targetIndex = updatedWidgets.findIndex(w => w.id === targetWidget.id);
-      
-      const draggedOrder = updatedWidgets[draggedIndex].order;
-      const targetOrder = updatedWidgets[targetIndex].order;
-      
-      updatedWidgets[draggedIndex] = { ...updatedWidgets[draggedIndex], order: targetOrder };
-      updatedWidgets[targetIndex] = { ...updatedWidgets[targetIndex], order: draggedOrder };
-      
-      setWidgets(updatedWidgets);
-    }
+    // Byt ordningsnummer
+    const tempOrder = currentWidget.order;
+    updatedWidgets[allWidgetsIndex] = { ...currentWidget, order: belowWidget.order };
+    updatedWidgets[nextVisibleIndex] = { ...belowWidget, order: tempOrder };
+    
+    setWidgets(updatedWidgets.sort((a, b) => a.order - b.order));
   };
   
-  // Hantera slut på drag
-  const handleDragEnd = () => {
-    if (dragNode.current) {
-      dragNode.current.removeEventListener('dragend', handleDragEnd);
-      dragNode.current.style.opacity = '1';
-      dragNode.current = null;
-    }
-    dragWidget.current = null;
-    dragOverNode.current = null;
-  };
-  
-  // Ändra storlek på widget
-  const changeWidgetSize = (widgetId: string, newSize: 'small' | 'medium' | 'large') => {
-    setWidgets(prevWidgets => 
-      prevWidgets.map(widget => 
-        widget.id === widgetId 
-          ? { ...widget, size: newSize }
-          : widget
-      )
-    );
-  };
-
   // Rendera en specifik widget baserat på dess typ
   const renderWidget = (widget: DashboardWidget) => {
     switch (widget.type) {
@@ -219,6 +188,33 @@ const Dashboard = () => {
     }
   };
   
+  // Filtrera widgets som ska visas och sortera dem efter ordning
+  const visibleWidgets = widgets
+    .filter(widget => widget.visible)
+    .sort((a, b) => a.order - b.order);
+  
+  // Widgets som är dolda (kan läggas till)
+  const hiddenWidgets = widgets
+    .filter(widget => !widget.visible)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  
+  // Bestäm gridstorlek baserad på widgetstorlek och om den är expanderad
+  const getGridSize = (widget: DashboardWidget) => {
+    if (expandedWidget === widget.id) {
+      return { xs: 12 }; // Tar hela bredden om expanderad
+    }
+    
+    if (widget.type === 'metrics') {
+      return { xs: 12, sm: 6, md: 3 }; // Små metrics-kort
+    }
+    
+    if (widget.type === 'barChart' || widget.type === 'topProjects') {
+      return { xs: 12, md: 8 }; // Breda diagram/tabeller
+    }
+    
+    return { xs: 12, md: 4 }; // Standard för mindre widgets
+  };
+  
   return (
     <Box>
       <Typography level="h1" component="h1" sx={{ mb: 3, color: 'text.primary', fontWeight: 'bold' }}>
@@ -256,124 +252,195 @@ const Dashboard = () => {
           </Typography>
         </Box>
       </Card>
-
-      {/* Knapp för att lägga till widgets */}
+      
+      {/* Knapp för att redigera dashboard */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button 
           variant="outlined" 
           color="primary" 
           startDecorator={<AddIcon />}
-          onClick={() => setShowAddDialog(true)}
+          onClick={() => setShowWidgetDialog(true)}
         >
-          Lägg till widget
+          Redigera dashboard
         </Button>
       </Box>
-
-      {/* Den flyttbara dashboard-layouten */}
-      <Sheet 
-        variant="outlined" 
-        sx={{ 
-          p: 2, 
-          borderRadius: 'lg', 
-          mb: 4, 
-          bgcolor: 'background.level1',
-          position: 'relative'
-        }}
-      >
-        <ResponsiveGridLayout
-          className="layout"
-          layouts={layouts}
-          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: 12, md: 12, sm: 6, xs: 4, xxs: 2 }}
-          rowHeight={80}
-          containerPadding={[0, 0]}
-          margin={[16, 16]}
-          onLayoutChange={handleLayoutChange}
-          isDraggable={true}
-          isResizable={true}
-          draggableCancel=".widget-non-draggable"
-        >
-          {activeWidgets.map(widget => (
-            <Box key={widget.id} className="widget-wrapper" sx={{ overflow: 'hidden' }}>
-              <Card 
-                variant="outlined" 
+      
+      {/* Dashboard-widgets */}
+      <Grid container spacing={2}>
+        {visibleWidgets.map(widget => (
+          <Grid key={widget.id} {...getGridSize(widget)}>
+            <Card 
+              variant="outlined" 
+              sx={{ 
+                height: '100%', 
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+                '&:hover .widget-controls': {
+                  opacity: 1
+                }
+              }}
+            >
+              {/* Widget-kontroller */}
+              <Box 
+                className="widget-controls"
                 sx={{ 
-                  height: '100%', 
-                  p: 2,
-                  position: 'relative',
-                  borderRadius: 'md',
-                  '&:hover .widget-remove-btn': {
-                    opacity: 1
-                  }
+                  position: 'absolute', 
+                  top: '8px', 
+                  right: '8px', 
+                  display: 'flex',
+                  opacity: 0,
+                  transition: 'opacity 0.2s ease',
+                  zIndex: 10,
+                  gap: 0.5,
+                  bgcolor: 'rgba(255,255,255,0.8)',
+                  p: 0.5,
+                  borderRadius: 'md'
                 }}
-                className="widget-content"
               >
                 {/* Ta bort-knapp */}
                 <IconButton 
-                  className="widget-remove-btn widget-non-draggable"
-                  variant="plain"
-                  color="danger"
                   size="sm"
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 8, 
-                    right: 8, 
-                    opacity: 0, 
-                    transition: 'opacity 0.2s',
-                    zIndex: 10 
-                  }}
+                  color="danger"
+                  variant="plain"
                   onClick={() => removeWidget(widget.id)}
                 >
                   <CloseIcon fontSize="small" />
                 </IconButton>
-
-                {/* Widget-innehåll */}
-                <Box sx={{ height: '100%', overflow: 'auto' }}>
-                  {renderWidget(widget)}
-                </Box>
-              </Card>
-            </Box>
-          ))}
-        </ResponsiveGridLayout>
-      </Sheet>
-
-      {/* Dialog för att lägga till nya widgets */}
-      <Modal open={showAddDialog} onClose={() => setShowAddDialog(false)}>
+                
+                {/* Expandera/förminska-knapp */}
+                <IconButton 
+                  size="sm"
+                  color="primary"
+                  variant="plain"
+                  onClick={() => toggleWidgetSize(widget.id)}
+                >
+                  {expandedWidget === widget.id ? 
+                    <FullscreenExitIcon fontSize="small" /> : 
+                    <FullscreenIcon fontSize="small" />
+                  }
+                </IconButton>
+                
+                {/* Flytta upp-knapp */}
+                <IconButton 
+                  size="sm"
+                  color="neutral"
+                  variant="plain"
+                  onClick={() => moveWidgetUp(widget.id)}
+                  disabled={widget.order === Math.min(...visibleWidgets.map(w => w.order))}
+                >
+                  ↑
+                </IconButton>
+                
+                {/* Flytta ner-knapp */}
+                <IconButton 
+                  size="sm"
+                  color="neutral"
+                  variant="plain"
+                  onClick={() => moveWidgetDown(widget.id)}
+                  disabled={widget.order === Math.max(...visibleWidgets.map(w => w.order))}
+                >
+                  ↓
+                </IconButton>
+              </Box>
+              
+              {/* Widget-innehåll */}
+              <Box sx={{ p: 2, height: '100%' }}>
+                {renderWidget(widget)}
+              </Box>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+      
+      {/* Dialog för att lägga till widgets */}
+      <Modal open={showWidgetDialog} onClose={() => setShowWidgetDialog(false)}>
         <ModalDialog sx={{ maxWidth: 500 }}>
-          <DialogTitle>Lägg till widget</DialogTitle>
+          <DialogTitle>Redigera dashboard</DialogTitle>
           <DialogContent>
             <Typography level="body-sm" sx={{ mb: 2 }}>
-              Välj en widget att lägga till på din dashboard:
+              Här kan du anpassa din dashboard genom att visa eller dölja widgets.
             </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {availableWidgets.length > 0 ? (
-                availableWidgets.map(widget => (
+            
+            {/* Widgets som är synliga */}
+            <Typography level="body-md" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>
+              Aktiva widgets
+            </Typography>
+            {visibleWidgets.length > 0 ? (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {visibleWidgets.map(widget => (
+                  <Card 
+                    key={widget.id} 
+                    variant="soft" 
+                    sx={{ 
+                      p: 1, 
+                      width: 'calc(50% - 8px)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <Typography level="body-sm">{widget.title}</Typography>
+                    <IconButton 
+                      size="sm" 
+                      color="danger" 
+                      onClick={() => removeWidget(widget.id)}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Card>
+                ))}
+              </Box>
+            ) : (
+              <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                Inga aktiva widgets. Lägg till nedan.
+              </Typography>
+            )}
+            
+            {/* Widgets som är dolda */}
+            <Typography level="body-md" sx={{ fontWeight: 'bold', mt: 3, mb: 1 }}>
+              Tillgängliga widgets
+            </Typography>
+            {hiddenWidgets.length > 0 ? (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {hiddenWidgets.map(widget => (
                   <Card 
                     key={widget.id} 
                     variant="outlined" 
                     sx={{ 
-                      p: 2, 
-                      width: '45%', 
+                      p: 1, 
+                      width: 'calc(50% - 8px)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       cursor: 'pointer',
                       '&:hover': { bgcolor: '#e0f2e9' }
                     }}
-                    onClick={() => addWidget(widget)}
+                    onClick={() => addWidget(widget.id)}
                   >
-                    <Typography level="body-md" fontWeight="bold">
-                      {widget.title}
-                    </Typography>
+                    <Typography level="body-sm">{widget.title}</Typography>
+                    <IconButton 
+                      size="sm" 
+                      color="primary"
+                    >
+                      <AddIcon fontSize="small" />
+                    </IconButton>
                   </Card>
-                ))
-              ) : (
-                <Typography level="body-sm" sx={{ color: 'text.secondary', p: 2 }}>
-                  Alla widgets är redan tillagda. Ta bort någon på dashboarden för att kunna lägga till den igen.
-                </Typography>
-              )}
-            </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                Alla widgets är redan aktiva.
+              </Typography>
+            )}
           </DialogContent>
           <DialogActions>
-            <Button variant="plain" color="neutral" onClick={() => setShowAddDialog(false)}>
-              Avbryt
+            <Button 
+              variant="plain" 
+              color="neutral" 
+              onClick={() => setShowWidgetDialog(false)}
+            >
+              Stäng
             </Button>
           </DialogActions>
         </ModalDialog>
