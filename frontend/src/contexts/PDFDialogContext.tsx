@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import BasicPDFDialog from '../components/BasicPDFDialog';
 
+// Temporär implementering: detta kommer att ersättas med en annan PDF-visningsstrategi
 // Interface för PDF-dialog state
 interface PDFDialogState {
   isOpen: boolean;
@@ -8,12 +8,6 @@ interface PDFDialogState {
   initialUrl?: string;
   filename?: string;
   projectId?: number | null;
-  file?: File | null;
-  versionId?: number;
-  pdfFile?: Blob | null;
-  highlightAnnotationId?: number;
-  annotationId?: number;
-  folderId?: number | null;
 }
 
 // Interface för context värdet
@@ -39,11 +33,12 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
 
   // Öppna dialogen med de angivna parametrarna
   const openPDFDialog = (params: Omit<PDFDialogState, 'isOpen'>) => {
-    console.log('Öppnar PDF:', params.initialUrl, params.filename);
-    setDialogState({
-      ...params,
-      isOpen: true
-    });
+    console.log('PDF öppning begärd:', params.initialUrl, params.filename);
+    // Öppna PDF:en i ett nytt fönster istället för en dialog
+    if (params.initialUrl) {
+      window.open(params.initialUrl, '_blank');
+    }
+    // Spara inte state för dialogen eftersom vi inte använder den för tillfället
   };
 
   // Stäng dialogen och återställ state
@@ -54,14 +49,7 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
   return (
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
-      {dialogState.isOpen && dialogState.initialUrl && (
-        <BasicPDFDialog 
-          open={dialogState.isOpen} 
-          onClose={closePDFDialog}
-          pdfUrl={dialogState.initialUrl}
-          filename={dialogState.filename || 'PDF-dokument'}
-        />
-      )}
+      {/* Ingen dialog för tillfället - vi använder window.open istället */}
     </PDFDialogContext.Provider>
   );
 }
