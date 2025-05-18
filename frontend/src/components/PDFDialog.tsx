@@ -286,7 +286,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 
                 {/* Visa den faktiska PDF:en med iframe som fungerar bättre */}
                 <iframe
-                  src={pdfUrl}
+                  src={pdfUrl ? `${pdfUrl}#toolbar=0` : ''}
                   width="100%"
                   height="100%"
                   style={{ 
@@ -296,6 +296,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     border: 'none'
                   }}
                   title={filename}
+                  sandbox="allow-same-origin allow-scripts allow-forms"
                 />
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}

@@ -42,13 +42,26 @@ const FolderPage = () => {
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string, folderId: string } | null>(null);
   
   // Hantera klick på PDF-filer
-  const handlePdfClick = (fileUrl: string, fileName: string) => {
-    console.log("Öppnar PDF:", fileUrl, fileName);
-    // Öppna PDF i vår dialogkontext istället
+  const handlePdfClick = (fileUrl: string, fileName: string, fileId: string) => {
+    console.log("Öppnar PDF:", fileUrl, fileName, fileId);
+    
+    // Se till att URL:en har http:// eller https:// prefixet 
+    let fullUrl = fileUrl;
+    if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://') && !fileUrl.startsWith('blob:')) {
+      // Om vi inte har en relativ URL från servern, använd hela URL:en
+      if (!fileUrl.startsWith('/')) {
+        fullUrl = `${API_BASE_URL}/${fileUrl}`;
+      } else {
+        fullUrl = `${API_BASE_URL}${fileUrl}`;
+      }
+    }
+    
+    // Öppna PDF i vår dialogkontext
     openPDFDialog({
-      initialUrl: fileUrl,
+      initialUrl: fullUrl,
       filename: fileName,
-      folderId: slug || ''
+      fileId: fileId,
+      folderId: slug ? parseInt(slug) : null
     });
   };
 
@@ -170,7 +183,7 @@ const FolderPage = () => {
                       <Button
                         variant="plain"
                         color="neutral"
-                        onClick={() => handlePdfClick(file.file, file.name)}
+                        onClick={() => handlePdfClick(file.file, file.name, file.id || `pdf_${index}`)}
                         sx={{ 
                           justifyContent: 'flex-start', 
                           textAlign: 'left', 
