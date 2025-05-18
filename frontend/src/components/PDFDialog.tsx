@@ -91,9 +91,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 size="sm"
                 variant="plain"
                 sx={{ 
-                  bgcolor: '#4caf50', 
+                  bgcolor: '#1976d2', 
                   color: 'white',
-                  '&:hover': { bgcolor: '#3d8b40' },
+                  '&:hover': { bgcolor: '#1565c0' },
                   borderRadius: 'sm',
                   minWidth: '45px',
                   width: '45px',
