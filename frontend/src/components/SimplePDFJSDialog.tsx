@@ -36,7 +36,7 @@ const SimplePDFJSDialog: React.FC<SimplePDFJSDialogProps> = ({ open, onClose, pd
     >
       <DialogTitle 
         sx={{ 
-          backgroundColor: '#007934', 
+          backgroundColor: '#1976d2', 
           color: 'white', 
           display: 'flex', 
           alignItems: 'center',
