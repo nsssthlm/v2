@@ -80,10 +80,10 @@ const RecentActivityList = ({ title, activities }: RecentActivityListProps) => {
             <Avatar 
               size="sm" 
               sx={{ 
-                bgcolor: activity.icon === 'upload' ? 'rgba(96, 205, 24, 0.1)' : 'background.level1',
-                color: activity.icon === 'upload' ? '#60cd18' : 
-                       activity.icon === 'comment' ? '#ff9800' :
-                       activity.icon === 'download' ? '#1976d2' : '#9e9e9e',
+                bgcolor: activity.icon === 'upload' ? '#e0f2e9' : 'background.level1',
+                color: activity.icon === 'upload' ? '#e0f2e9' : 
+                       activity.icon === 'comment' ? '#e0f2e9' :
+                       activity.icon === 'download' ? '#e0f2e9' : '#e0f2e9',
                 mt: 0.5,
                 fontSize: '1rem'
               }}

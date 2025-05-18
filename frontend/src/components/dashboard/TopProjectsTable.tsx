@@ -51,10 +51,10 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
             variant="outlined" 
             startDecorator={<DownloadIcon />}
             sx={{ 
-              color: '#60cd18',
-              borderColor: '#60cd18',
+              color: '#e0f2e9',
+              borderColor: '#e0f2e9',
               '&:hover': {
-                borderColor: '#60cd18',
+                borderColor: '#e0f2e9',
                 bgcolor: '#e0f2e9'
               }
             }}
@@ -106,7 +106,7 @@ const TopProjectsTable = ({ title, projects }: TopProjectsTableProps) => {
             {projects.map((project) => (
               <tr key={project.id}>
                 <td>
-                  <Typography level="body-sm" sx={{ fontWeight: 'medium', color: '#60cd18' }}>
+                  <Typography level="body-sm" sx={{ fontWeight: 'medium', color: '#e0f2e9' }}>
                     {project.name}
                   </Typography>
                   <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>
