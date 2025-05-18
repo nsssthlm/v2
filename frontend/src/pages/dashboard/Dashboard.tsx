@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Card, Divider, Button, IconButton, Sheet, Modal, ModalDialog, DialogTitle, DialogContent, DialogActions, Grid } from '@mui/joy';
 import { useProject } from '../../contexts/ProjectContext';
-import ProjectMetricsCard from '../../components/dashboard/ProjectMetricsCard';
+import ModernMetricsCard from '../../components/dashboard/ModernMetricsCard';
 import SimpleBarChart from '../../components/dashboard/SimpleBarChart';
 import SimplePieChart from '../../components/dashboard/SimplePieChart';
 import RecentActivityList from '../../components/dashboard/RecentActivityList';
 import TopProjectsTable from '../../components/dashboard/TopProjectsTable';
-import RevenueCurveChart from '../../components/dashboard/RevenueCurveChart';
+import ModernRevenueWidget from '../../components/dashboard/ModernRevenueWidget';
 import { 
   metricsData, 
   projectChartData, 
@@ -185,7 +185,7 @@ const Dashboard = () => {
         );
       case 'lineChart':
         return (
-          <RevenueCurveChart 
+          <ModernRevenueWidget 
             title={widget.title}
           />
         );

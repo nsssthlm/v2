@@ -61,10 +61,15 @@ export const ProjectMetricsCard = ({
       p: 2, 
       height: '100%', 
       bgcolor: 'background.surface', 
-      boxShadow: 'none',
-      borderRadius: 'lg',
+      boxShadow: 'sm',
+      borderRadius: 'md',
       border: '1px solid',
-      borderColor: 'divider'
+      borderColor: '#e0e0e0',
+      transition: 'all 0.2s ease-in-out',
+      '&:hover': {
+        boxShadow: 'md',
+        transform: 'translateY(-2px)'
+      }
     }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
         <Typography level="title-sm" color="neutral" sx={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
