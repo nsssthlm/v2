@@ -6,7 +6,7 @@ import SimpleBarChart from '../../components/dashboard/SimpleBarChart';
 import SimplePieChart from '../../components/dashboard/SimplePieChart';
 import RecentActivityList from '../../components/dashboard/RecentActivityList';
 import TopProjectsTable from '../../components/dashboard/TopProjectsTable';
-import SimpleLineChart from '../../components/dashboard/SimpleLineChart';
+import ModernRevenueChart from '../../components/dashboard/ModernRevenueChart';
 import { 
   metricsData, 
   projectChartData, 
