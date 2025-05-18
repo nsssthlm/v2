@@ -294,8 +294,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     overflow: 'hidden'
                   }}
                 >
-                  <iframe
-                    src={`${pdfUrl}#view=FitH&navpanes=0`}
+                  <object
+                    data={pdfUrl}
+                    type="application/pdf"
                     width="100%"
                     height="100%"
                     style={{ 
@@ -303,8 +304,30 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                       background: 'white',
                       display: 'block'
                     }}
-                    title={filename}
-                  />
+                  >
+                    <Box sx={{ 
+                      p: 3, 
+                      bgcolor: 'white', 
+                      display: 'flex', 
+                      height: '100%', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      flexDirection: 'column'
+                    }}>
+                      <Typography level="h5" sx={{ mb: 2 }}>
+                        Kunde inte visa PDF-filen
+                      </Typography>
+                      <Button
+                        variant="solid"
+                        color="primary"
+                        component="a"
+                        href={pdfUrl}
+                        target="_blank"
+                      >
+                        Öppna i nytt fönster
+                      </Button>
+                    </Box>
+                  </object>
                 </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
