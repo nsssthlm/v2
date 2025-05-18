@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, CircularProgress } from '@mui/joy';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Typography, Button, CircularProgress, IconButton } from '@mui/joy';
+import { Document, Page, pdfjs } from 'react-pdf';
+
+// Konfigurera PDF.js worker för att kunna läsa PDF-filer
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 interface SimplePDFViewerProps {
   pdfUrl: string;
@@ -9,8 +13,8 @@ interface SimplePDFViewerProps {
 }
 
 /**
- * En enkel PDF-visare som använder Google Docs Viewer för att visa PDF-filer direkt
- * med fallback till direktlänk om inbäddningen inte fungerar
+ * En förbättrad PDF-visare som använder PDF.js för att visa PDF-filer direkt i appen
+ * med zoom, bläddring och andra funktioner
  */
 const SimplePDFViewer = ({ 
   pdfUrl, 
@@ -18,35 +22,52 @@ const SimplePDFViewer = ({
   width = '100%', 
   height = '100%' 
 }: SimplePDFViewerProps) => {
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [embedFailed, setEmbedFailed] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [scale, setScale] = useState(1.0);
   const [showDebug, setShowDebug] = useState(false);
-  
-  // Skapa en Google Docs Viewer URL för PDF-visning
-  // Detta bäddar in PDF via Google's tjänst vilket fungerar i alla webbläsare
-  const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
-  
-  // När visaren laddas, dölj laddningsanimationen
-  const handleIframeLoad = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Hantera när ett PDF-dokument laddas framgångsrikt
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
     setLoading(false);
+    setLoadFailed(false);
   };
-  
-  // Vid fel med iframe, visa direktlänken istället
-  const handleIframeError = () => {
-    setEmbedFailed(true);
+
+  // Hantera när ett PDF-dokument inte kan laddas
+  const onDocumentLoadError = (error: Error) => {
+    console.error('Kunde inte ladda PDF:', error);
     setLoading(false);
+    setLoadFailed(true);
   };
-  
-  // Sätt en timer för att kontrollera om laddningen tar för lång tid
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-      }
-    }, 5000); // 5 sekunders timeout
-    
-    return () => clearTimeout(timer);
-  }, [loading]);
+
+  // Byt till föregående sida
+  const previousPage = () => {
+    setPageNumber(prev => Math.max(prev - 1, 1));
+  };
+
+  // Byt till nästa sida
+  const nextPage = () => {
+    setPageNumber(prev => Math.min(prev + 1, numPages || 1));
+  };
+
+  // Zooma in
+  const zoomIn = () => {
+    setScale(prev => Math.min(prev + 0.2, 3.0));
+  };
+
+  // Zooma ut
+  const zoomOut = () => {
+    setScale(prev => Math.max(prev - 0.2, 0.5));
+  };
+
+  // Återställ zoomnivån till 100%
+  const resetZoom = () => {
+    setScale(1.0);
+  };
 
   return (
     <Box
@@ -103,26 +124,35 @@ const SimplePDFViewer = ({
 
       {/* PDF innehåll */}
       <Box 
+        ref={containerRef}
         sx={{
           flex: 1, 
-          overflow: 'hidden',
+          overflow: 'auto',
           position: 'relative'
         }}
       >
-        {!embedFailed ? (
-          <iframe
-            src={googleDocsViewerUrl}
-            title={filename}
-            width="100%"
-            height="100%"
-            style={{ 
-              border: 'none',
-              display: 'block'
-            }}
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-            allow="fullscreen"
-          />
+        {!loadFailed ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: '100%' }}>
+            <Document
+              file={pdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={<CircularProgress />}
+              error={
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography level="body-lg">Kunde inte ladda PDF-filen</Typography>
+                </Box>
+              }
+            >
+              <Page 
+                pageNumber={pageNumber} 
+                scale={scale}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+                loading={<CircularProgress />}
+              />
+            </Document>
+          </Box>
         ) : (
           <Box 
             sx={{ 
@@ -140,7 +170,7 @@ const SimplePDFViewer = ({
             </Typography>
             
             <Typography level="body-md" sx={{ mb: 4 }}>
-              PDF-visaren kunde inte bädda in denna fil direkt.
+              Kunde inte ladda PDF-filen direkt. Prova att öppna den i ett nytt fönster.
             </Typography>
             
             <Button
@@ -158,6 +188,69 @@ const SimplePDFViewer = ({
           </Box>
         )}
       </Box>
+
+      {/* Kontrollpanel */}
+      {!loadFailed && numPages && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 1,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            gap: 2
+          }}
+        >
+          <Button 
+            variant="outlined" 
+            color="neutral" 
+            disabled={pageNumber <= 1} 
+            onClick={previousPage}
+          >
+            Föregående
+          </Button>
+
+          <Typography level="body-sm" sx={{ minWidth: 80, textAlign: 'center' }}>
+            Sida {pageNumber} av {numPages}
+          </Typography>
+
+          <Button 
+            variant="outlined" 
+            color="neutral" 
+            disabled={pageNumber >= numPages} 
+            onClick={nextPage}
+          >
+            Nästa
+          </Button>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+            <Button 
+              variant="plain" 
+              color="neutral" 
+              onClick={zoomOut}
+            >
+              -
+            </Button>
+
+            <Button 
+              variant="plain" 
+              color="neutral" 
+              onClick={resetZoom}
+            >
+              {Math.round(scale * 100)}%
+            </Button>
+
+            <Button 
+              variant="plain" 
+              color="neutral" 
+              onClick={zoomIn}
+            >
+              +
+            </Button>
+          </Box>
+        </Box>
+      )}
 
       {/* Debug-knapp i hörnet */}
       <Box
@@ -202,7 +295,10 @@ const SimplePDFViewer = ({
             PDF URL: {pdfUrl}
           </Typography>
           <Typography level="body-xs" sx={{ mb: 1 }}>
-            Google Viewer URL: {googleDocsViewerUrl.substring(0, 50)}...
+            Sidor: {numPages || 'Okänt'}
+          </Typography>
+          <Typography level="body-xs" sx={{ mb: 1 }}>
+            Scale: {scale}
           </Typography>
           <Typography level="body-xs" sx={{ mb: 1 }}>
             Origin: {window.location.origin}
