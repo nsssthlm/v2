@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import PDFDialog from '../components/PDFDialog';
+import NewPDFDialog from '../components/NewPDFDialog';
 
 interface PDFDialogState {
   isOpen: boolean;
@@ -45,7 +45,7 @@ export const PDFDialogProvider: React.FC<{ children: ReactNode }> = ({ children 
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
       {dialogState.isOpen && dialogState.initialUrl && (
-        <PDFDialog 
+        <NewPDFDialog 
           open={dialogState.isOpen} 
           onClose={closePDFDialog}
           pdfUrl={dialogState.initialUrl}
