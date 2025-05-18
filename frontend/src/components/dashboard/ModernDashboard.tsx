@@ -16,7 +16,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 // Dashboard Widget typ
 export interface DashboardWidget {
   id: string;
-  type: 'metrics' | 'barChart' | 'pieChart' | 'topProjects' | 'recentActivity' | 'lineChart';
+  type: 'metrics' | 'barChart' | 'pieChart' | 'topProjects' | 'recentActivity' | 'lineChart' | 'calendar';
   title: string;
   size: 'small' | 'medium' | 'large';
   metricIndex?: number;
@@ -43,6 +43,8 @@ import {
   documentStatsData,
   projectStatsData
 } from './DashboardData';
+import { markedDates } from './CalendarData';
+import CalendarWidget from './CalendarWidget';
 
 // Definiera metricsData för användning i dashborden
 const metricsData = [
@@ -105,9 +107,10 @@ const ModernDashboard: React.FC = () => {
       { id: 'docTypes', type: 'pieChart', title: 'Dokumenttyper', size: 'medium', order: 6, visible: true },
       { id: 'projectStatus', type: 'pieChart', title: 'Projektstatus', size: 'medium', order: 7, visible: true },
       { id: 'budgetAlloc', type: 'pieChart', title: 'Budgetfördelning', size: 'medium', order: 8, visible: true },
-      { id: 'topProjects', type: 'topProjects', title: 'Projekt i Fokus', size: 'medium', order: 9, visible: true },
-      { id: 'recentActivity', type: 'recentActivity', title: 'Senaste aktivitet', size: 'medium', order: 10, visible: true },
-      { id: 'revenueChart', type: 'lineChart', title: 'Intäkter & Kostnader', size: 'large', order: 11, visible: true },
+      { id: 'projectCalendar', type: 'calendar', title: 'Projektkalender', size: 'medium', order: 9, visible: true },
+      { id: 'topProjects', type: 'topProjects', title: 'Projekt i Fokus', size: 'medium', order: 10, visible: true },
+      { id: 'recentActivity', type: 'recentActivity', title: 'Senaste aktivitet', size: 'medium', order: 11, visible: true },
+      { id: 'revenueChart', type: 'lineChart', title: 'Intäkter & Kostnader', size: 'large', order: 12, visible: true },
     ];
   });
   
@@ -207,6 +210,12 @@ const ModernDashboard: React.FC = () => {
     icon?: string;
   };
 
+  // Hantera klick på ett datum från kalendern
+  const handleCalendarDateClick = (date: Date) => {
+    console.log('Datum valt:', date.toLocaleDateString());
+    // Här kan du implementera funktionalitet för att visa aktiviteter för det valda datumet
+  };
+
   // Rendera en specifik widget baserat på dess typ
   const renderWidget = (widget: DashboardWidget) => {
     // Bestäm höjd baserat på expanderat tillstånd
@@ -299,6 +308,15 @@ const ModernDashboard: React.FC = () => {
         return (
           <ModernRevenueWidget 
             title={widget.title}
+          />
+        );
+      case 'calendar':
+        return (
+          <CalendarWidget
+            title={widget.title}
+            height={height}
+            onDateClick={handleCalendarDateClick}
+            markedDates={markedDates}
           />
         );
       default:
