@@ -324,132 +324,52 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     position: 'relative', 
                     height: '100%', 
                     width: '100%', 
-                    bgcolor: '#333',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
+                    overflow: 'hidden'
                   }}
                 >
-                  {loading && (
-                    <Box 
-                      sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center',
-                        gap: 2,
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        zIndex: 10
-                      }}
-                    >
-                      <CircularProgress size="lg" />
-                      <Typography level="body-lg" sx={{ color: 'white' }}>
-                        Laddar PDF...
-                      </Typography>
-                    </Box>
-                  )}
+                  {/* Använd iframe som fungerar bättre i vissa webbläsare */}
+                  <iframe
+                    src={pdfUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ 
+                      border: 'none',
+                      background: 'white',
+                      display: 'block'
+                    }}
+                    title={filename}
+                  />
                   
-                  {error ? (
-                    <Box 
-                      sx={{ 
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        p: 4,
-                        color: 'white',
-                        textAlign: 'center',
-                        zIndex: 5
-                      }}
-                    >
-                      <Typography level="title-lg" sx={{ mb: 2, color: 'white' }}>
-                        Kunde inte visa PDF-filen
-                      </Typography>
-                      <Typography sx={{ mb: 3, color: 'white' }}>
-                        Det gick inte att ladda {filename}. Prova att öppna filen i ett nytt fönster.
-                      </Typography>
-                      <Button
-                        component="a"
-                        href={pdfUrl}
-                        target="_blank"
-                        variant="solid"
-                        color="primary"
-                        size="lg"
-                      >
-                        Öppna i nytt fönster
-                      </Button>
-                    </Box>
-                  ) : (
-                    <Box 
-                      sx={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        bgcolor: 'white',
-                        overflow: 'auto',
-                        position: 'relative',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start'
-                      }}
-                    >
-                      {/* "Nuvarande version" badge */}
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 16,
-                          left: 16,
-                          zIndex: 2,
-                          bgcolor: '#6366f1',
-                          color: 'white',
-                          fontSize: '0.75rem',
-                          py: 0.5,
-                          px: 1.5,
-                          borderRadius: 'md',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        Nuvarande version
-                      </Box>
-                      
-                      {/* React-PDF komponent */}
-                      <Document
-                        file={pdfUrl}
-                        onLoadSuccess={onDocumentLoadSuccess}
-                        onLoadError={onDocumentLoadError}
-                        loading={null}
-                        error={null}
-                        style={{ 
-                          display: 'flex', 
-                          flexDirection: 'column', 
-                          alignItems: 'center',
-                          padding: '20px'
-                        }}
-                      >
-                        <Page 
-                          pageNumber={currentPage} 
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                          scale={currentZoom / 100}
-                          width={Math.min(window.innerWidth * 0.7, 800)}
-                        />
-                      </Document>
-                      
-                      {/* Grön vertikal linje till vänster */}
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          bottom: 0,
-                          left: 0,
-                          width: '8px',
-                          backgroundColor: '#1976d2'
-                        }}
-                      />
-                    </Box>
-                  )}
+                  {/* Grön vertikal linje till vänster */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      width: '8px',
+                      backgroundColor: '#1976d2'
+                    }}
+                  />
+                  
+                  {/* "Nuvarande version" badge */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 16,
+                      left: 16,
+                      zIndex: 2,
+                      bgcolor: '#6366f1',
+                      color: 'white',
+                      fontSize: '0.75rem',
+                      py: 0.5,
+                      px: 1.5,
+                      borderRadius: 'md',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Nuvarande version
+                  </Box>
                 </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
