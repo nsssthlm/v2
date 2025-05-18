@@ -97,28 +97,36 @@ const LoginPage = () => {
             }}
           >
             <Button
-              variant={activeTab === 'login' ? 'outlined' : 'plain'}
-              color={activeTab === 'login' ? 'success' : 'neutral'}
               onClick={() => setActiveTab('login')}
               sx={{ 
                 mr: 1,
-                borderRadius: '8px 8px 0 0',
-                borderBottom: 'none',
-                borderColor: activeTab === 'login' ? '#60cd18' : 'transparent',
-                color: activeTab === 'login' ? '#60cd18' : 'inherit'
+                backgroundColor: activeTab === 'login' ? '#60cd18' : 'transparent',
+                color: activeTab === 'login' ? 'white' : 'black',
+                '&:hover': {
+                  backgroundColor: '#60cd18',
+                  color: 'white'
+                },
+                minWidth: '80px',
+                borderRadius: '4px',
+                textTransform: 'none',
+                fontWeight: 'normal'
               }}
             >
               Login
             </Button>
             <Button
-              variant={activeTab === 'register' ? 'outlined' : 'plain'}
-              color={activeTab === 'register' ? 'success' : 'neutral'}
               onClick={() => setActiveTab('register')}
               sx={{ 
-                borderRadius: '8px 8px 0 0',
-                borderBottom: 'none',
-                borderColor: activeTab === 'register' ? '#60cd18' : 'transparent',
-                color: activeTab === 'register' ? '#60cd18' : 'inherit'
+                backgroundColor: activeTab === 'register' ? '#60cd18' : 'transparent',
+                color: activeTab === 'register' ? 'white' : 'black',
+                '&:hover': {
+                  backgroundColor: '#60cd18',
+                  color: 'white'
+                },
+                minWidth: '80px',
+                borderRadius: '4px',
+                textTransform: 'none',
+                fontWeight: 'normal'
               }}
             >
               Register
