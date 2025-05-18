@@ -9,7 +9,7 @@ interface SimplePDFViewerProps {
 }
 
 /**
- * En enkel PDF-visare som använder inbäddad iframe för att visa PDF-filer
+ * En enkel PDF-visare med förbättrad visning som hanterar olika sätt att visa PDF-filer
  */
 const SimplePDFViewer = ({ 
   pdfUrl, 
@@ -19,30 +19,77 @@ const SimplePDFViewer = ({
 }: SimplePDFViewerProps) => {
   const [showDirectLink, setShowDirectLink] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [iframeError, setIframeError] = useState(false);
-
-  // Försök att visa direkt med iframe, använd direkt länk som reserv
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  
+  // Använd bara domännamnet från pdfUrl för att undvika CORS-problem
+  const [fixedPdfUrl, setFixedPdfUrl] = useState("");
+  
+  // Fixa URL:en när komponenten laddas
   useEffect(() => {
-    // Sätt en timer för att avgöra om iFrame laddas korrekt eller inte
-    const timer = setTimeout(() => {
-      if (!iframeLoaded) {
-        setShowDirectLink(true);
+    // Rensa URL:en och försök generera en som fungerar för iframes
+    try {
+      // Om URL:en börjar med http://0.0.0.0, ändra den till window.location.origin
+      let correctedUrl = pdfUrl;
+      
+      if (pdfUrl.includes('0.0.0.0:8001')) {
+        // Ersätt 0.0.0.0:8001 med aktuella origin för backend
+        const parts = pdfUrl.split('/');
+        const pathPart = parts.slice(3).join('/');
+        correctedUrl = `${window.location.origin}/${pathPart}`;
       }
-    }, 2000);
-
+      
+      // För backend API url, använd media-mappen
+      if (correctedUrl.includes('/api/files/web/')) {
+        // Extrahera filsökvägen
+        if (correctedUrl.includes('/project_files/')) {
+          const filePathStart = correctedUrl.indexOf('/project_files/');
+          const filePath = correctedUrl.substring(filePathStart);
+          correctedUrl = `${window.location.origin}/media${filePath}`;
+        }
+      }
+      
+      console.log("Försöker använda URL:", correctedUrl);
+      setFixedPdfUrl(correctedUrl);
+      
+      // Kontrollera om URL:en är nåbar
+      fetch(correctedUrl, { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            setLoading(false);
+          } else {
+            console.error("PDF URL gav felstatus:", response.status);
+            setError(true);
+            setShowDirectLink(true);
+          }
+        })
+        .catch(err => {
+          console.error("Kunde inte nå PDF URL:", err);
+          setError(true);
+          setShowDirectLink(true);
+        });
+    } catch (err) {
+      console.error("Fel vid URL-hantering:", err);
+      setError(true);
+      setShowDirectLink(true);
+    }
+    
+    // Sätt en timer för att automatiskt visa direktlänken om laddningen tar för lång tid
+    const timer = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        if (!showDirectLink) {
+          setShowDirectLink(true);
+        }
+      }
+    }, 3000);
+    
     return () => clearTimeout(timer);
-  }, [iframeLoaded]);
-
-  // Hanterare för när iFrame laddas
-  const handleIframeLoad = () => {
-    setIframeLoaded(true);
-  };
-
-  // Hanterare för när iFrame får fel
-  const handleIframeError = () => {
-    setIframeError(true);
-    setShowDirectLink(true);
+  }, [pdfUrl, loading, showDirectLink]);
+  
+  // Öppna PDF i nytt fönster
+  const openPDFInNewWindow = () => {
+    window.open(fixedPdfUrl || pdfUrl, '_blank');
   };
 
   return (
@@ -75,6 +122,28 @@ const SimplePDFViewer = ({
       >
         Nuvarande version
       </Box>
+      
+      {/* Laddningsindikator */}
+      {loading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(255,255,255,0.9)',
+            zIndex: 5
+          }}
+        >
+          <CircularProgress size="lg" sx={{ mb: 2 }} />
+          <Typography level="body-sm">Laddar PDF...</Typography>
+        </Box>
+      )}
 
       {/* PDF innehåll */}
       <Box
@@ -84,21 +153,36 @@ const SimplePDFViewer = ({
           position: 'relative'
         }}
       >
-        {/* Direkt inbäddad PDF via iframe - enklaste och mest pålitliga metoden */}
-        <iframe
-          src={pdfUrl}
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            display: showDirectLink ? 'none' : 'block'
-          }}
-          title={filename}
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
-        />
+        {/* Inbäddad PDF via object-tag med fallback till iframe */}
+        {!error && !showDirectLink && (
+          <object
+            data={fixedPdfUrl}
+            type="application/pdf"
+            width="100%"
+            height="100%"
+            style={{ border: 'none' }}
+            onLoad={() => setLoading(false)}
+            onError={() => {
+              setError(true);
+              setShowDirectLink(true);
+            }}
+          >
+            <iframe
+              src={fixedPdfUrl}
+              width="100%"
+              height="100%"
+              style={{ border: 'none' }}
+              title={filename}
+              onLoad={() => setLoading(false)}
+              onError={() => {
+                setError(true);
+                setShowDirectLink(true);
+              }}
+            />
+          </object>
+        )}
 
-        {/* Visa en direktlänk om iframe inte fungerar */}
+        {/* Visa en direktlänk om objektvisaren inte fungerar */}
         {showDirectLink && (
           <Box
             sx={{
@@ -116,14 +200,14 @@ const SimplePDFViewer = ({
             </Typography>
 
             <Typography level="body-md" sx={{ mb: 4 }}>
-              PDF-filen kunde inte visas direkt i appen. Använd knappen nedan för att öppna den.
+              {error ? 
+                "Det uppstod ett problem vid visning av PDF-filen. Använd knappen nedan för att öppna den." : 
+                "För att visa PDF-dokumentet, använd knappen nedan."
+              }
             </Typography>
 
             <Button
-              component="a"
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={openPDFInNewWindow}
               variant="solid"
               color="primary"
               size="lg"
@@ -175,13 +259,16 @@ const SimplePDFViewer = ({
             Debug information:
           </Typography>
           <Typography level="body-xs" sx={{ wordBreak: 'break-all', mb: 1 }}>
-            PDF URL: {pdfUrl}
+            Original URL: {pdfUrl}
+          </Typography>
+          <Typography level="body-xs" sx={{ wordBreak: 'break-all', mb: 1 }}>
+            Fixad URL: {fixedPdfUrl}
           </Typography>
           <Typography level="body-xs" sx={{ mb: 1 }}>
-            iFrame laddad: {iframeLoaded ? 'Ja' : 'Nej'}
+            Laddar: {loading ? 'Ja' : 'Nej'}
           </Typography>
           <Typography level="body-xs" sx={{ mb: 1 }}>
-            iFrame fel: {iframeError ? 'Ja' : 'Nej'}
+            Fel: {error ? 'Ja' : 'Nej'}
           </Typography>
           <Typography level="body-xs" sx={{ mb: 1 }}>
             Visar direktlänk: {showDirectLink ? 'Ja' : 'Nej'}

@@ -16,6 +16,9 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']  # For development, restrict this in production
 
+# Tillåt att resurser visas i iframes inom samma domän
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 
 # Application definition
 
