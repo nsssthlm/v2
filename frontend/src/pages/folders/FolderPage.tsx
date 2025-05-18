@@ -125,9 +125,10 @@ const FolderPage = () => {
     try {
       console.log("Radera fil:", fileId);
       
-      // Anropa API för att radera filen - använd korrekt URL-format
+      // Anropa API för att radera filen - använd vår nya specialgjorda endpoint
       console.log("Försöker radera fil med ID:", fileId);
-      await axios.delete(`${API_BASE_URL}/files/files/${fileId}/`);
+      const response = await axios.delete(`${API_BASE_URL}/files/delete/${fileId}/`);
+      console.log("Svar från radering:", response.data);
       
       // Visa meddelande om lyckad radering
       console.log("Fil raderad:", fileId);
