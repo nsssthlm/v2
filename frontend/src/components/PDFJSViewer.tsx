@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/joy";
 import { useProject } from "../contexts/ProjectContext";
-import IFramePDFViewer from "./IFramePDFViewer";
+import DirectPDFViewer from "./DirectPDFViewer";
 
 interface PDFJSViewerProps {
   pdfUrl: string;
@@ -39,7 +39,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
       display: "flex",
       flexDirection: "column"
     }}>
-      <IFramePDFViewer
+      <DirectPDFViewer
         pdfUrl={pdfUrl}
         fileName={filename}
         projectId={activeProjectId}

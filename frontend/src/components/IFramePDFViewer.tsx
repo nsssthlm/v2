@@ -46,11 +46,12 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
     setError('Failed to load PDF. The file may not exist or you may not have permission to view it.');
   };
 
-  // Prepare URL with authentication token
-  const token = localStorage.getItem('access_token');
-  const finalUrl = pdfUrl.includes('?') 
-    ? `${pdfUrl}&token=${token}` 
-    : `${pdfUrl}?token=${token}`;
+  // Get authentication token - but don't add it to URL if it's null
+  const token = localStorage.getItem('access_token') || '';
+  // Don't include token in URL if it's empty
+  const finalUrl = token
+    ? (pdfUrl.includes('?') ? `${pdfUrl}&token=${token}` : `${pdfUrl}?token=${token}`)
+    : pdfUrl;
     
   // Create an object URL for direct file access
   const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
@@ -62,8 +63,14 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
         setLoading(true);
         setError(null);
         
-        // Fetch the PDF file with authentication
-        const response = await fetch(finalUrl, {
+        // Create a direct fetch to the file URL without proxy
+        // Try connecting directly to the backend API
+        const backendUrl = pdfUrl.replace('/proxy/3000/api', '/api')
+                               .replace('https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev', '');
+        
+        console.log('Trying direct backend URL:', backendUrl);
+        
+        const response = await fetch(backendUrl, {
           headers: {
             'Accept': 'application/pdf',
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
