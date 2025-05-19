@@ -127,9 +127,15 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
             directUrl = `${window.location.origin}/api/files/get-data/${filename}?project_id=${effectiveProjectId}`;
           }
           
-          // FRÅN LOGS: Ser följande mönster
-          // https://3d0eb322-114e-428e-9b72-6dc9b22e9017-00.2ep.7cu1e4x25w.rtrk.replit.d.8001/pdf/2025/05/19/BEAst-PDF-Guidelines-2_T5uulEt.0_1.pdf
+          // FRÅN LOGS: vi kan se att det faktiska anropet som fungerar har följande format
+          // "/api/files/web/999-67/data/" som returnerar 200 OK
           const realMediaUrl = `${window.location.origin}/api/files/web/999-67/data/${fileId}`;
+          
+          // Detta verkar vara media-filen som nyligen laddades upp
+          const specificPdfUrl = `${window.location.origin}/media/project_files/2025/05/19/AAAAFexempel_pa_ritlingar_FIXBUG.pdf`;
+          
+          // Hämta direkt från backend media-katalogen
+          const mediaContentUrl = `${window.location.origin}/api/files/get-raw/${fileId}?project_id=${effectiveProjectId}`;
           
           // Använd även direct endpoints baserat på loggar
           console.log('Testar att använda nya URL alternativ:');
