@@ -23,9 +23,22 @@ interface DirectPDFDialogProps {
   onClose: () => void;
   pdfUrl: string;
   filename: string;
+  folderName?: string;
+  projectName?: string;
+  fileId?: string | number;
+  folderId?: number | null;
 }
 
-const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl, filename }) => {
+const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ 
+  open, 
+  onClose, 
+  pdfUrl, 
+  filename,
+  folderName,
+  projectName,
+  fileId,
+  folderId
+}) => {
   // Använd blå färg
   const BlueColor = '#1976d2';
   const hoverBlueColor = '#1565c0';
@@ -162,9 +175,18 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
           padding: '8px 16px'
         }}
       >
-        <Typography variant="h6" component="div">
-          {filename}
-        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Typography variant="h6" component="div">
+            {filename}
+          </Typography>
+          {(folderName || projectName) && (
+            <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5, fontSize: '0.8rem' }}>
+              {folderName && `Mapp: ${folderName}`} 
+              {folderName && projectName && ' | '} 
+              {projectName && `Projekt: ${projectName}`}
+            </Typography>
+          )}
+        </Box>
         <IconButton 
           edge="end" 
           color="inherit" 
