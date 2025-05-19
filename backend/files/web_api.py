@@ -188,18 +188,10 @@ def serve_pdf_file(request, file_path):
     """
     Dedikerad endpoint för att servera PDF-filer direkt från media-katalogen
     med korrekt Content-Type och headers.
-    
-    Denna funktion är specifikt designad för att lösa problem med PDF-visning i frontend
-    via Replit-proxyn, där Content-Type ibland går förlorad.
     """
     from django.http import HttpResponse, Http404, FileResponse
     import os
-    import mimetypes
     from django.conf import settings
-    
-    # Säkerställ att filsökvägen inte innehåller några farliga komponenter
-    if '..' in file_path:
-        raise Http404("Ogiltig filsökväg")
     
     # Hantera OPTIONS-anrop för CORS preflight requests
     if request.method == 'OPTIONS':
@@ -211,26 +203,31 @@ def serve_pdf_file(request, file_path):
         return response
     
     try:
-        # Konstruera fullständig sökväg till filen
-        # Ta bort eventuellt avslutande / (förväntas i URL-mönstret men inte i filsystemet)
-        clean_path = file_path.rstrip('/')
+        # Rensa sökvägen och skapa fullständig filsökväg
+        clean_path = file_path.rstrip('/').replace('..', '')
         full_path = os.path.join(settings.MEDIA_ROOT, clean_path)
         
         # Logga för felsökning
-        print(f"Försöker hitta PDF-fil: {full_path}")
-        print(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
-        print(f"Begärd sökväg: {file_path}")
+        print(f"Serving PDF file: {full_path}")
         
-        # Kontrollera att filen existerar och är läsbar
+        # Kontrollera att filen existerar
         if not os.path.exists(full_path) or not os.path.isfile(full_path):
-            print(f"PDF-fil hittades inte: {full_path}")
-            raise Http404("Filen hittades inte")
-        
-        # Kontrollera att det verkligen är en PDF-fil
-        if not full_path.lower().endswith('.pdf'):
-            print(f"Begärd fil är inte en PDF: {full_path}")
-            return HttpResponse(b"Endast PDF-filer stods via denna endpoint", status=400, content_type='text/plain')
-        
+            print(f"PDF file not found: {full_path}")
+            
+            # Leta efter liknande filer som hjälp för felsökning
+            import glob
+            parent_dir = os.path.dirname(full_path)
+            if os.path.exists(parent_dir):
+                similar_files = glob.glob(os.path.join(parent_dir, "*.pdf"))
+                if similar_files:
+                    print(f"Similar PDF files in directory: {similar_files}")
+            
+            return HttpResponse(
+                f"PDF file not found: {os.path.basename(full_path)}".encode('utf-8'), 
+                status=404, 
+                content_type='text/plain'
+            )
+            
         # För HEAD-förfrågningar, returnera bara headers
         if request.method == 'HEAD':
             response = HttpResponse(content_type='application/pdf')
@@ -240,40 +237,36 @@ def serve_pdf_file(request, file_path):
             response['Access-Control-Allow-Origin'] = '*'
             return response
             
-        # Använd FileResponse för bättre strömning av filer
-        response = FileResponse(
-            open(full_path, 'rb'),
-            content_type='application/pdf',
-            as_attachment=False,
-            filename=os.path.basename(full_path)
-        )
+        # För GET-förfrågningar, använd StreamingHttpResponse för att returnera PDF-datan direkt
+        with open(full_path, 'rb') as pdf_file:
+            response = HttpResponse(pdf_file.read(), content_type='application/pdf')
             
-        # Lägg till kritiska headers för PDF-visning
+        # Lägg till nödvändiga headers
         response['Content-Disposition'] = f'inline; filename="{os.path.basename(full_path)}"'
-        
-        # Tillåt innehållsdelning från alla domäner för CORS
+        response['Content-Length'] = os.path.getsize(full_path)
         response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Content-Type, Accept, Authorization'
         
-        # Ta bort headers som kan störa PDF-visning
-        if 'X-Frame-Options' in response:
-            del response['X-Frame-Options']
-            
-        # Debugging av headers
-        print(f"Serving PDF from media: {full_path}")
+        # Ta bort eventuella headers som kan störa pdf-visning
+        for header in ['X-Frame-Options', 'Content-Security-Policy']:
+            if header in response:
+                del response[header]
+                
+        # Debugging
+        print(f"Successfully served PDF: {full_path}")
         print(f"Content-Type: {response['Content-Type']}")
-        print(f"Content-Length: {response.get('Content-Length', 'unknown')}")
-        
+        print(f"Content-Length: {response['Content-Length']}")
+            
         return response
     
-    except Http404:
-        raise  # Skicka vidare 404-fel
     except Exception as e:
         import traceback
-        print(f"Fel vid servering av PDF: {str(e)}")
+        print(f"Error serving PDF: {str(e)}")
         traceback.print_exc()
-        return HttpResponse(f"Fel vid läsning av PDF: {str(e)}".encode('utf-8'), status=500, content_type='text/plain')
+        return HttpResponse(
+            f"Error serving PDF: {str(e)}".encode('utf-8'), 
+            status=500, 
+            content_type='text/plain'
+        )
 
 @api_view(['DELETE'])
 @permission_classes([AllowAny])

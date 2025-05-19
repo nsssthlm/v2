@@ -53,9 +53,8 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     
     // Hantera backend URL:er för Replit-miljön
     let finalUrl = pdfUrl;
-    let pdfPath = '';
     
-    console.log('Omvandlar PDF URL:', pdfUrl);
+    console.log('Bearbetar PDF URL:', pdfUrl);
     
     // Ersätt alla lokala URL:er (0.0.0.0:8001) med Replit proxy URL
     if (pdfUrl.includes('0.0.0.0:8001')) {
@@ -71,12 +70,15 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       // Extrahera sökvägen från project_files och framåt
       const pathMatch = finalUrl.match(/project_files\/.*\.pdf/);
       if (pathMatch) {
-        pdfPath = pathMatch[0];
+        const pdfPath = pathMatch[0];
         // Använd vår dedikerade PDF-endpoint som garanterar korrekt Content-Type
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/api/files/pdf-media/${pdfPath}/`;
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/api/files/pdf-media/${pdfPath}`;
         console.log("Använder dedikerad PDF-endpoint:", finalUrl);
       }
     }
+    
+    // Lägg alltid till en tidsstämpel parameter för att undvika cachning
+    finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
     
     return finalUrl;
   }, [pdfUrl]);
