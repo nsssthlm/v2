@@ -55,93 +55,52 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         
         console.log('PDF original URL:', pdfUrl);
         
-        // Extrahera fil-ID från URL:en eller filnamnet
-        let fileId = null;
-        let fileName = '';
-        
-        // Strategi 1: Extrahera ID från filnamn med format [namn]-[id].pdf eller liknande
-        if (typeof pdfUrl === 'string') {
-          const urlParts = pdfUrl.split('/');
-          fileName = urlParts[urlParts.length - 1]?.split('?')[0] || '';
-          
-          // Försök extrahera ID från filnamnet (t.ex. "dokument-67.pdf" => "67")
-          const filenameMatch = fileName.match(/.*-(\d+)(\.pdf)?/);
-          if (filenameMatch && filenameMatch[1]) {
-            fileId = filenameMatch[1];
-            console.log('Extraherat fil-ID från filnamn:', fileId);
-          }
-          
-          // Strategi 2: Direkt från URL-segment
-          if (!fileId) {
-            const idMatch = pdfUrl.match(/\/files\/(\d+)\//);
-            if (idMatch && idMatch[1]) {
-              fileId = idMatch[1];
-              console.log('Extraherat fil-ID från URL-segment:', fileId);
-            }
-          }
-        }
-        
-        // Om vi har ett fil-ID, försök hämta direkt via backend API:et
-        if (fileId) {
-          try {
-            // Konstruera en URL som använder vår API-endpoint
-            const directApiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/?t=${Date.now()}`;
-            console.log('Försöker hämta PDF direkt från API:', directApiUrl);
-            
-            const directTask = pdfjsLib.getDocument(directApiUrl);
-            const pdf = await directTask.promise;
-            
-            setPdfDocument(pdf);
-            setNumPages(pdf.numPages);
-            setCurrentPage(1);
-            setLoading(false);
-            return; // Avsluta om detta lyckas
-          } catch (directApiErr) {
-            console.error('Fel vid hämtning av PDF via API (fil-ID):', directApiErr);
-            // Fortsätt till nästa strategi
-          }
-        }
-        
-        // Strategi 3: Prova att hämta via direkt endpunkt för filhämtning
-        if (fileId) {
-          try {
-            const directFileUrl = `${window.location.origin}/api/files/direct/${fileId}/?t=${Date.now()}`;
-            console.log('Försöker hämta PDF via direct endpoint:', directFileUrl);
-            
-            const directFileTask = pdfjsLib.getDocument(directFileUrl);
-            const pdf = await directFileTask.promise;
-            
-            setPdfDocument(pdf);
-            setNumPages(pdf.numPages);
-            setCurrentPage(1);
-            setLoading(false);
-            return; // Avsluta om detta lyckas
-          } catch (directFileErr) {
-            console.error('Fel vid hämtning av PDF via direct endpoint:', directFileErr);
-            // Fortsätt till fallback
-          }
-        }
-        
-        // Fallback: Använd den ursprungliga URL:en om inget av ovanstående fungerar
-        let formattedUrl = pdfUrl;
+        // Använd exakt URL från API:et (som i url-fältet från /api/pdf/list/-responsen)
+        let apiUrl = pdfUrl;
         
         // Säkerställ att URL:en innehåller protokollet (http/https)
-        if (!formattedUrl.startsWith('http')) {
-          if (formattedUrl.startsWith('/')) {
+        if (!apiUrl.startsWith('http')) {
+          if (apiUrl.startsWith('/')) {
             // Relativ URL, lägg till basdomänen
-            formattedUrl = `${window.location.origin}${formattedUrl}`;
+            apiUrl = `${window.location.origin}${apiUrl}`;
           } else {
             // Lägg till protokoll och domän
-            formattedUrl = `${window.location.origin}/${formattedUrl}`;
+            apiUrl = `${window.location.origin}/${apiUrl}`;
+          }
+        }
+        
+        // Kontrollera om URL:en faktiskt pekar på API-endpointen (utan att försöka gissa)
+        if (!apiUrl.includes('/api/pdf/') && !apiUrl.includes('/api/files/get-file-content/')) {
+          // Om URL:en inte pekar på API:et, försök att extrahera ID från filnamnet
+          // och använd den korrekta API-endpointen
+          const filenameMatch = filename.match(/.*-(\d+)(\.pdf)?/);
+          if (filenameMatch && filenameMatch[1]) {
+            const fileId = filenameMatch[1];
+            console.log('Extraherat fil-ID från filnamn:', fileId);
+            apiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/`;
           }
         }
         
         // Lägg till timestamp för att förhindra caching-problem
-        formattedUrl = `${formattedUrl}${formattedUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        console.log('Fallback: Använder formaterad PDF URL:', formattedUrl);
+        apiUrl = `${apiUrl}${apiUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        console.log('Använder exakt API URL för PDF:', apiUrl);
         
-        // Ladda dokumentet med den formaterade URL:en
-        const loadingTask = pdfjsLib.getDocument(formattedUrl);
+        // Ställ in JWT-token för autentisering om tillgänglig
+        const options: any = {};
+        const token = localStorage.getItem('jwt_token');
+        if (token) {
+          options.httpHeaders = {
+            'Authorization': `Bearer ${token}`
+          };
+        }
+        
+        // Skicka direkt till PDF.js utan att gissa eller konstruera URL
+        const loadingTask = pdfjsLib.getDocument({
+          url: apiUrl,
+          ...options,
+          withCredentials: true  // Skicka med cookies för sessions-autentisering
+        });
+        
         const pdf = await loadingTask.promise;
         
         setPdfDocument(pdf);
@@ -149,8 +108,8 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         setCurrentPage(1);
         setLoading(false);
       } catch (err) {
-        console.error('Alla försök att ladda PDF misslyckades:', err);
-        setError('Kunde inte ladda PDF-dokumentet. Försök igen senare eller kontakta support.');
+        console.error('Misslyckades att ladda PDF från API:', err);
+        setError('Kunde inte ladda PDF-dokumentet. Vänligen kontrollera att du är inloggad och har behörighet.');
         setLoading(false);
       }
     };

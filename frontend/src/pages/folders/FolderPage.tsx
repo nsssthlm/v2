@@ -4,10 +4,11 @@ import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid, IconButton, Tooltip } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
-import SimplePDFViewer from '../../components/SimplePDFViewer';
+import DirectPDFDialog from '../../components/DirectPDFDialog';
 import { usePDFDialog } from '../../contexts/PDFDialogContext';
 import PDFUploader from '../../components/PDFUploader';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useProject } from '../../contexts/ProjectContext';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -293,11 +294,17 @@ const FolderPage = () => {
             </Button>
           </Box>
           
-          <SimplePDFViewer
-            initialUrl={selectedPdf.url}
-            filename={selectedPdf.name}
-            onClose={() => setSelectedPdf(null)}
-          />
+          {/* Använd PDF-dialogen istället för den enklare PDF-visaren */}
+          {selectedPdf && selectedPdf.url && (
+            <DirectPDFDialog 
+              open={!!selectedPdf}
+              onClose={() => setSelectedPdf(null)}
+              pdfUrl={selectedPdf.url}
+              filename={selectedPdf.name}
+              projectId={params.projectId || null}
+              folderId={null}
+            />
+          )}
         </Box>
       )}
       

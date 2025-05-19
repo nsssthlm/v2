@@ -36,27 +36,14 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
   const openPDFDialog = (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null; projectId?: number | string | null }) => {
     console.log('Öppnar PDF:', params.pdfUrl, params.filename, 'projektID:', params.projectId, 'mappID:', params.folderId);
     
-    // Optimera URL:en för att garantera att PDF-filen kan visas korrekt
-    let optimizedUrl = params.pdfUrl;
-    console.log('Öppnar PDF:', optimizedUrl, params.filename);
-    
-    // Anpassa för Replit-miljön om nödvändigt
-    if (window.location.hostname.includes('replit')) {
-      // Ersätt lokala URL:er med proxy-URL:er
-      if (optimizedUrl.includes('0.0.0.0:8001')) {
-        optimizedUrl = optimizedUrl.replace(
-          'http://0.0.0.0:8001', 
-          `${window.location.protocol}//${window.location.host}/proxy/3000`
-        );
-        console.log('Använda direkt PDF URL via Replit proxy');
-      }
-      
-      console.log('Använder final PDF URL:', optimizedUrl);
-    }
+    // Behåll den ursprungliga URL:en som vi får från API:et
+    // PDF-visaren kommer att hantera URL:en korrekt utan extra ändringar
+    let pdfApiUrl = params.pdfUrl;
+    console.log('Öppnar PDF med original URL:', pdfApiUrl, params.filename);
     
     setDialogState({
       isOpen: true,
-      pdfUrl: optimizedUrl,
+      pdfUrl: pdfApiUrl,
       filename: params.filename,
       fileId: params.fileId,
       folderId: params.folderId,
