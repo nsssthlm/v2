@@ -220,15 +220,20 @@ const SimplePDFUploader: React.FC<SimplePDFUploaderProps> = ({
               )}
             </Box>
             
-            <TextField
-              label="Beskrivning (valfritt)"
-              placeholder="Skriv en kort beskrivning av filen"
+            <input
+              type="text"
+              placeholder="Skriv en kort beskrivning av filen (valfritt)"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              fullWidth
-              multiline
-              minRows={2}
-              sx={{ mt: 2 }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
+              style={{ 
+                width: '100%', 
+                padding: '10px',
+                marginTop: '16px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '14px',
+                minHeight: '60px'
+              }}
             />
           </Box>
           

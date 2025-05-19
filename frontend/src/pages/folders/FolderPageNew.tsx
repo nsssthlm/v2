@@ -25,6 +25,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
 import PDFDialog from '../../components/PDFDialog';
+import SimplePDFUploader from '../../components/SimplePDFUploader';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -369,15 +370,10 @@ const FolderPageNew = () => {
           sx={{ width: 300 }}
         />
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            size="sm"
-            variant="soft"
-            color="primary"
-            startDecorator={<AddIcon />}
-            onClick={() => setUploadDialogOpen(true)}
-          >
-            Ladda upp
-          </Button>
+          <SimplePDFUploader 
+            folderId={slug}
+            onUploadSuccess={handleUploadSuccess}
+          />
           <Button 
             size="sm"
             variant="soft"
