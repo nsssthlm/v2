@@ -78,9 +78,8 @@ const projectService = {
   // Skapa en standardmapp för ett projekt
   createDefaultFolder: async (projectId: string): Promise<any> => {
     try {
-      // Använd explicit AuthHeader för att säkerställa att autentiseringen fungerar
+      // Använd auth-headers för att säkerställa att autentiseringen fungerar
       const headers = {
-        'Content-Type': 'application/json',
         ...getAuthHeader()
       };
       

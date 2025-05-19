@@ -1,0 +1,34 @@
+chunk-CAZREADN.js?v=dc9a4f35:3485 You are loading @emotion/react when it is already loaded. Running multiple instances may cause problems. This can happen if multiple versions are used, or if multiple builds of the same version are used.
+
+ProjectContext.tsx:133 Använder standardprojekt: 
+{id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+ProjectContext.tsx:133 Använder standardprojekt: 
+{id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+directoryService.ts:69 Hämtar mappdata från API för projekt: 3
+8
+Mixed Content: The page at '<URL>' was loaded over HTTPS, but requested an insecure XMLHttpRequest endpoint '<URL>'. This request has been blocked; the content must be served over HTTPS.
+ProjectContext.tsx:62 Försöker hämta projekt från databasen...
+directoryService.ts:69 Hämtar mappdata från API för projekt: 3
+ProjectContext.tsx:62 Försöker hämta projekt från databasen...
+directoryService.ts:90 Kunde inte hämta mappar via proxy, försöker med direkt anslutning 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+ModernFolderPage.tsx:120 Fel vid hämtning av mappdata: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+projectService.ts:37 Fel vid hämtning av projekt: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+ProjectContext.tsx:90 Inga projekt hittades i databasen, använder standardprojekt
+directoryService.ts:90 Kunde inte hämta mappar via proxy, försöker med direkt anslutning 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+ModernFolderPage.tsx:120 Fel vid hämtning av mappdata: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+projectService.ts:37 Fel vid hämtning av projekt: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+ProjectContext.tsx:90 Inga projekt hittades i databasen, använder standardprojekt
+directoryService.ts:117 Error fetching sidebar directories: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+directoryService.ts:117 Error fetching sidebar directories: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+getSidebarDirectories	@	directoryService.ts:117
+await in getSidebarDirectories		
+loadSidebarItems	@	Sidebar.tsx:522
+(anonymous)	@	Sidebar.tsx:543

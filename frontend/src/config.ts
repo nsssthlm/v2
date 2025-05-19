@@ -1,10 +1,10 @@
 // API och konfigurationsvariabler för applikationen
 
-// Basadress för API-anrop
-export const API_BASE_URL = 'http://0.0.0.0:8001';
+// Basadress för API-anrop - använd relativ URL för att undvika mixed content-problem
+export const API_BASE_URL = '';
 
-// Direktlänkar för PDF-visning
-export const DIRECT_API_URL = 'http://0.0.0.0:8001';
+// Direktlänkar för PDF-visning - använd relativ URL för att fungera både på HTTP och HTTPS
+export const DIRECT_API_URL = '';
 
 // Hämta standardheaders för API-anrop
 export const getStandardHeaders = () => {

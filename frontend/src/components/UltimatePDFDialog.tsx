@@ -50,7 +50,7 @@ export default function UltimatePDFDialog({
     
     // Hantera direkta media-URL:er
     if (pdfUrl.startsWith('/media/')) {
-      return `${DIRECT_API_URL}${pdfUrl}`;
+      return pdfUrl;
     }
     
     // Bevara absoluta URL:er som börjar med http eller https
