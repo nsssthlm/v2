@@ -35,6 +35,36 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
   // Logga information om mapp och projekt för felsökning
   console.log('PDF Dialog öppnas med projektId:', projectId, 'och mappId:', folderId);
   
+  // Hämta aktivt projekt från localStorage om det inte finns i props
+  const effectiveProjectId = projectId || (() => {
+    try {
+      // Försök först med direkta projektlistan från sessionslagring
+      const currentProjectJson = sessionStorage.getItem('currentProject');
+      if (currentProjectJson) {
+        try {
+          const currentProject = JSON.parse(currentProjectJson);
+          console.log('Använder aktivt projekt från sessionStorage:', currentProject);
+          return currentProject.id;
+        } catch (e) {
+          console.error('Fel vid parsning av aktivt projekt från session:', e);
+        }
+      }
+      
+      // Fallback till localStorage
+      const savedProject = localStorage.getItem('activeProject');
+      if (savedProject) {
+        const parsed = JSON.parse(savedProject);
+        console.log('Använder sparat projekt från localStorage:', parsed);
+        return parsed.id;
+      }
+    } catch (e) {
+      console.error('Fel vid läsning av lokalt sparat projekt:', e);
+    }
+    return "12"; // Använd standardprojekt om inget annat hittas
+  })();
+  
+  console.log('Effektivt projektId för PDF-visning:', effectiveProjectId);
+  
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
