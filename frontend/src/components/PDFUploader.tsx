@@ -50,12 +50,39 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
       // Lägg till felhantering och loggning för att spåra parametrar
       console.log(`Laddar upp fil till mapp: ${folderId}`);
       
-      // Använd den givna folderId (mapp-slug) för att säkerställa att filen uppladdas i rätt mapp
-      // OBS: I backend-API förväntas filuppladdningar under files/web/[slug]/upload/
-      // Lägg till credentials: 'include' för att skicka med cookies för autentisering
-      // och rätt headers för att hantera CORS-problem och CSRF-token
+      // Hämta CSRF-token från backend och sätt den i cookies
+      // Detta är ett viktigt steg för att lösa CSRF-problemet
+      try {
+        // Anropa dedikerad CSRF-endpoint för att sätta CSRF-cookie
+        console.log("Hämtar CSRF-token från server...");
+        
+        // Prova först med core API
+        const csrfResponseCore = await fetch('/api/csrf/get-token/', {
+          method: 'GET',
+          credentials: 'include', // Viktigt för att spara cookie
+        }).catch(() => null);
+        
+        // Fallback till alternativ CSRF-endpoint om första misslyckas
+        if (!csrfResponseCore || !csrfResponseCore.ok) {
+          console.log("Försöker med alternativ CSRF-endpoint...");
+          const csrfResponseFiles = await fetch('/api/files/csrf/', {
+            method: 'GET',
+            credentials: 'include',
+          });
+          
+          if (!csrfResponseFiles.ok) {
+            console.error("Kunde inte hämta CSRF-token från någon endpoint:", csrfResponseFiles.statusText);
+          } else {
+            console.log("CSRF-token hämtad från files API");
+          }
+        } else {
+          console.log("CSRF-token hämtad från core API");
+        }
+      } catch (csrfError) {
+        console.error("Fel vid hämtning av CSRF-token:", csrfError);
+      }
       
-      // Hämta först CSRF-token från cookies
+      // Hämta CSRF-token från cookies
       const getCookie = (name: string) => {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -63,18 +90,19 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         return undefined;
       };
       
+      // Hämta token från cookies efter att ha anropat CSRF-endpointen
       const csrfToken = getCookie('csrftoken');
-      console.log('CSRF-token:', csrfToken);
+      console.log('CSRF-token efter anrop:', csrfToken);
       
+      // I API-anropet skickar vi filen till mappen
       const response = await fetch(`/api/files/web/${folderId || 'dokument'}/upload/`, {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'include', // Viktigt för att skicka cookies
         headers: {
-          // Skippa Content-Type header eftersom FormData används
-          // Detta låter webbläsaren sätta rätt boundary för multipart/form-data
+          // Låt webbläsaren sätta rätt Content-Type för FormData
           'Accept': 'application/json',
-          // Lägg till CSRF-token om den finns tillgänglig
-          ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
+          // Sätt CSRF-token i header
+          'X-CSRFToken': csrfToken || '',
         },
         body: formData,
       });

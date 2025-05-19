@@ -45,6 +45,10 @@ class DirectoryPageView(DetailView):
         return context
 
 
+from django.views.decorators.csrf import csrf_protect
+from django.utils.decorators import method_decorator
+
+@method_decorator(csrf_protect, name='dispatch')
 class UploadPDFView(LoginRequiredMixin, CreateView):
     """Vy för att ladda upp PDF-filer till en mapp"""
     model = File
@@ -63,13 +67,26 @@ class UploadPDFView(LoginRequiredMixin, CreateView):
         # Om mappen är knuten till ett projekt, använd det
         kwargs['project'] = directory.project
         
+        # Spåra vilken mapp det handlar om i loggen
+        print(f"Förbereder uppladdning till mapp: {directory_slug}, directory ID: {directory.id}")
+        
         return kwargs
     
     def form_valid(self, form):
         """Anpassa återriktning efter uppladdning"""
         response = super().form_valid(form)
+        print(f"Uppladdning lyckades för fil: {form.instance.name} till mapp ID: {form.instance.directory.id}")
         messages.success(self.request, f"Filen '{form.instance.name}' har laddats upp.")
         return redirect('directory_page', slug=self.kwargs.get('slug'))
+        
+    def post(self, request, *args, **kwargs):
+        print(f"Hanterar POST-anrop för filuppladdning till slug: {kwargs.get('slug', 'okänd')}")
+        print(f"POST innehåller CSRF-token: {'X-CSRFToken' in request.headers}")
+        try:
+            return super().post(request, *args, **kwargs)
+        except Exception as e:
+            print(f"Fel vid filuppladdning: {e}")
+            raise
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
