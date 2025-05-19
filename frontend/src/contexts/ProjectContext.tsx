@@ -148,15 +148,19 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 
   const setCurrentProject = (project: Project) => {
     console.log('Sätter nytt projekt:', project);
+    
+    // Uppdatera state
     setCurrentProjectState(project);
+    
+    // Spara i sessionStorage för att persistera vid omladdning
     sessionStorage.setItem('currentProject', JSON.stringify(project));
     sessionStorage.setItem('selectedProjectId', project.id);
 
-    // Endast meddela projekbyte via konsolen - vi navigerar inte automatiskt till startsidan längre
+    // Meddela projektbytet
     console.log('Projekt har bytts till:', project.name);
     
-    // Eventuellt kan vi använda React Router för navigering om det behövs i framtiden
-    // navigate('/')
+    // Viktigt: Avkommentera INTE denna kod, den orsakar utloggning
+    // window.location.href = '/';
   };
 
   // Lägg till ett nytt projekt till projektkontexten

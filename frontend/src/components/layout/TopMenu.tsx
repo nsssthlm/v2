@@ -66,14 +66,37 @@ const TopMenu: React.FC = () => {
     // Sätt en sessionStorage-flagga som vi kan kontrollera för att veta vilket projekt att ladda
     sessionStorage.setItem('selectedProjectId', project.id);
     
-    // Ladda om sidan när man byter projekt för att säkerställa att rätt innehåll visas
-    // och för att förhindra att innehåll från föregående projekt visas
-    if (window.location.pathname.includes('/folders/')) {
-      // Om vi är på en mappsida, gå tillbaka till startsidan
-      window.location.href = '/';
-    } else {
-      // Ladda annars om hela sidan för att uppdatera mapparna i sidebaren
-      window.location.reload();
+    // Visa meddelande om projektbyte
+    console.log('Projektbyte slutfört till:', project.name);
+    
+    // Vi laddar inte om sidan längre, eftersom det orsakar utloggning
+    // Istället meddelar vi användaren att projektet har bytts
+    try {
+      // Visa en diskret notifikation bara för felsökning
+      const notification = document.createElement('div');
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.padding = '10px 20px';
+      notification.style.backgroundColor = '#e0f2e9';
+      notification.style.color = '#007934';
+      notification.style.borderRadius = '4px';
+      notification.style.zIndex = '9999';
+      notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+      notification.textContent = `Aktivt projekt: ${project.name}`;
+      
+      document.body.appendChild(notification);
+      
+      // Ta bort notifikationen efter 3 sekunder
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 500);
+      }, 3000);
+    } catch (err) {
+      console.log('Kunde inte visa notifikation, men projektbytet genomfördes');
     }
   };
   
