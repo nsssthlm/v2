@@ -48,35 +48,33 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
 
   // Bearbeta URL till ett format som kan visas med PDF.js
   const processedUrl = React.useMemo(() => {
+    // Om ingen URL, returnera tom sträng
+    if (!pdfUrl) return '';
+    
     // Hantera backend URL:er för Replit-miljön
     let finalUrl = pdfUrl;
+    let pdfPath = '';
     
-    // Lägg till direct=true parameter för att garantera att vi får binärdata tillbaka
-    // Detta säger till backend att vi vill ha raw PDF content, inte JSON
-    if (finalUrl.includes('/api/files/web/')) {
-      finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}direct=true`;
-      console.log("Använda direkt PDF URL via Replit proxy");
-    }
+    console.log('Omvandlar PDF URL:', pdfUrl);
     
     // Ersätt alla lokala URL:er (0.0.0.0:8001) med Replit proxy URL
-    if (pdfUrl && pdfUrl.includes('0.0.0.0:8001')) {
+    if (pdfUrl.includes('0.0.0.0:8001')) {
       finalUrl = pdfUrl.replace(
         'http://0.0.0.0:8001', 
         `${window.location.protocol}//${window.location.host}/proxy/3000`
       );
-      console.log("Använder final PDF URL:", finalUrl);
+      console.log("URL med proxy:", finalUrl);
     }
     
-    // Om URL:en innehåller /api/files/web/ och project_files, extrahera media-delen
-    if (finalUrl.includes('/api/files/web/') && finalUrl.includes('project_files/')) {
+    // Om URL:en innehåller project_files, extrahera sökvägen för vår speciella PDF-endpoint
+    if (finalUrl.includes('project_files/')) {
       // Extrahera sökvägen från project_files och framåt
       const pathMatch = finalUrl.match(/project_files\/.*\.pdf/);
       if (pathMatch) {
-        // Skapa direkt länk till media-filen
-        const mediaPath = pathMatch[0];
-        // Använd proxy eller direkt URL beroende på miljö
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/${mediaPath}`;
-        console.log("Konverterad till direkt media URL:", finalUrl);
+        pdfPath = pathMatch[0];
+        // Använd vår dedikerade PDF-endpoint som garanterar korrekt Content-Type
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/api/files/pdf-media/${pdfPath}/`;
+        console.log("Använder dedikerad PDF-endpoint:", finalUrl);
       }
     }
     
