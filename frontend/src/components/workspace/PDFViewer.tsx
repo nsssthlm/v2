@@ -55,6 +55,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
   useEffect(() => {
     if (pdf) {
       console.log('PDFViewer mounted/updated with PDF:', pdf);
+      
+      // Konvertera relativ sökväg till absolut URL
+      const baseUrl = window.location.origin;
+      const pdfUrl = pdf.file_url.startsWith('http') 
+        ? pdf.file_url 
+        : `${baseUrl}${pdf.file_url}`;
+      
+      console.log('Using PDF URL:', pdfUrl);
     }
   }, [pdf]);
   

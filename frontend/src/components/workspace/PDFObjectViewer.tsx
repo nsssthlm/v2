@@ -18,18 +18,18 @@ export default function PDFObjectViewer({ pdfUrl, title }: PDFObjectViewerProps)
   useEffect(() => {
     setLoading(true);
     setError(null);
-    
+
     if (!pdfUrl) {
       setError('Ingen PDF-URL tillhandahållen');
       setLoading(false);
       return;
     }
-    
+
     try {
       // Hantera URL-format
       let apiUrl = pdfUrl;
       const baseApiUrl = '/api/';
-      
+
       // Kontrollera och formatera URL:en korrekt
       if (apiUrl.startsWith('/api/')) {
         // URL:en har redan /api/ prefix - använd den direkt
@@ -43,7 +43,7 @@ export default function PDFObjectViewer({ pdfUrl, title }: PDFObjectViewerProps)
         apiUrl = baseApiUrl + apiUrl.substring(1);
         console.log('Fixed URL format with /api/ prefix. New URL:', apiUrl);
       }
-      
+
       // Lägg till auth token till URL
       const token = localStorage.getItem('access_token');
       if (token) {
@@ -51,16 +51,16 @@ export default function PDFObjectViewer({ pdfUrl, title }: PDFObjectViewerProps)
         const separator = apiUrl.includes('?') ? '&' : '?';
         apiUrl = `${apiUrl}${separator}token=${token}`;
       }
-      
+
       // Lägg till no-cache parameter för att förhindra caching
       apiUrl = `${apiUrl}&nocache=${new Date().getTime()}`;
-      
+
       // Logga slutlig URL (men dölj token i loggen)
       console.log('Final PDF URL (auth token hidden):', apiUrl.split('token=')[0] + 'token=HIDDEN');
-      
+
       // Sätt slutlig URL
       setFinalUrl(apiUrl);
-      
+
       // Om containerRef finns, försök att rendera PDF med PDFObject
       if (containerRef.current) {
         const options = {
@@ -72,12 +72,12 @@ export default function PDFObjectViewer({ pdfUrl, title }: PDFObjectViewerProps)
             view: "FitH"
           }
         };
-        
+
         // PDFObject hanterare
         setTimeout(() => {
           if (containerRef.current) {
             const success = PDFObject.embed(apiUrl, containerRef.current, options);
-            
+
             if (success) {
               console.log('PDF successfully embedded');
             } else {
@@ -166,7 +166,7 @@ export default function PDFObjectViewer({ pdfUrl, title }: PDFObjectViewerProps)
               Ladda ner
             </Button>
           </Box>
-          
+
           <Box 
             ref={containerRef}
             sx={{ 
