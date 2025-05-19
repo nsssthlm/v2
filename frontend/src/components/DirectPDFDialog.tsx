@@ -53,23 +53,18 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         setLoading(true);
         setError(null);
         
-        // Börja med att försöka med original URL
+        // Använd original URL utan att modifiera den
         let url = pdfUrl;
         console.log('Försöker ladda PDF från:', url);
         
-        // För Replit-miljön, gör extra anpassningar
-        if (window.location.hostname.includes('replit')) {
-          // Extrahera filnamnet från URL för att använda vår direkta pdf-finder
-          const urlParts = url.split('/');
-          const fileName = urlParts[urlParts.length - 1]?.split('?')[0]; // Ta bort eventuella parametrar
-          
-          if (fileName && fileName.endsWith('.pdf')) {
-            // Använd vår säkra PDF-finder som direkt streamar PDF-filen
-            const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
-            url = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
-            console.log('Använder PDF-finder med filnamn:', fileName);
-          }
+        // Kontrollera om URL:en redan innehåller nödvändiga parametrar
+        if (!url.includes('?')) {
+          // Lägg till timestamp för att förhindra cache-problem
+          url = `${url}?t=${Date.now()}`;
         }
+        
+        // Använd direkta URL:en från API:et för bästa kompatibilitet
+        console.log('Använder direkt URL för PDF:', url);
         
         // Ladda dokumentet med vår optimerade URL
         const loadingTask = pdfjsLib.getDocument(url);
@@ -83,28 +78,29 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
       } catch (err) {
         console.error('Fel vid laddning av PDF:', err);
         
-        // Fallbackstrategi - prova att ladda via PDF-finder oavsett URL-format
+        // Fallbackstrategi - prova att ladda direkt via media URL
         try {
-          if (window.location.hostname.includes('replit') && pdfUrl.includes('.pdf')) {
-            // Extrahera filnamnet för att använda med PDF-finder
-            const urlParts = pdfUrl.split('/');
-            const fileName = urlParts[urlParts.length - 1]?.split('?')[0];
+          // Skapa en direkt URL till media-filen
+          const originalUrl = pdfUrl;
+          // Extrahera viktiga parametrar från URL
+          const projectMatch = originalUrl.match(/\/web\/([^\/]+)/);
+          const projectSlug = projectMatch ? projectMatch[1] : null;
+          
+          // Skapa en fallback URL direkt från backend API
+          if (projectSlug) {
+            console.log('Fallback: Provar med direkt API-URL för projekt:', projectSlug);
+            const apiBaseUrl = `${window.location.protocol}//${window.location.host}/api`;
+            const fallbackUrl = `${apiBaseUrl}/files/web/${projectSlug}/data/?raw=true&t=${Date.now()}`;
             
-            if (fileName) {
-              console.log('Fallback: Provar med PDF-finder direkt:', fileName);
-              const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
-              const fallbackUrl = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
-              
-              // Försök igen med fallback URL
-              const fallbackTask = pdfjsLib.getDocument(fallbackUrl);
-              const pdf = await fallbackTask.promise;
-              
-              setPdfDocument(pdf);
-              setNumPages(pdf.numPages);
-              setCurrentPage(1);
-              setLoading(false);
-              return; // Avsluta om detta lyckas
-            }
+            // Försök igen med fallback URL
+            const fallbackTask = pdfjsLib.getDocument(fallbackUrl);
+            const pdf = await fallbackTask.promise;
+            
+            setPdfDocument(pdf);
+            setNumPages(pdf.numPages);
+            setCurrentPage(1);
+            setLoading(false);
+            return; // Avsluta om detta lyckas
           }
         } catch (fallbackErr) {
           console.error('Fallback misslyckades också:', fallbackErr);

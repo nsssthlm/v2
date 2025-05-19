@@ -56,20 +56,14 @@ const FolderPage = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentProjectId = urlParams.get('project') || null;
     
-    // Se till att URL:en har http:// eller https:// prefixet 
-    let fullUrl = fileUrl;
-    if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://') && !fileUrl.startsWith('blob:')) {
-      // Om vi inte har en relativ URL från servern, använd hela URL:en
-      if (!fileUrl.startsWith('/')) {
-        fullUrl = `${API_BASE_URL}/${fileUrl}`;
-      } else {
-        fullUrl = `${API_BASE_URL}${fileUrl}`;
-      }
-    }
+    // Använd API-URL direkt från backend för bästa kompatibilitet
+    // Denna URL pekar direkt till backend-filen med raw-parameter för att få filen direkt
+    const directApiUrl = `${API_BASE_URL}/files/get-file-content/${fileId}`;
+    console.log("Använder direkt API-URL för fil:", directApiUrl);
     
     // Öppna PDF i vår dialogruta med projektID och mappID för korrekt kontext
     openPDFDialog({
-      pdfUrl: fullUrl,
+      pdfUrl: directApiUrl,
       filename: fileName,
       fileId: fileId,
       folderId: slug ? parseInt(slug) : null,
