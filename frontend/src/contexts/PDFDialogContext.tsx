@@ -34,9 +34,34 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
   // Öppna dialogen med de angivna parametrarna
   const openPDFDialog = (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null }) => {
     console.log('Öppnar PDF:', params.pdfUrl, params.filename);
+    
+    // Optimera URL:en för att garantera att PDF-filen kan visas korrekt
+    let optimizedUrl = params.pdfUrl;
+    
+    // Anpassa för Replit-miljön om nödvändigt
+    if (window.location.hostname.includes('replit')) {
+      // Ersätt lokala URL:er med proxy-URL:er
+      if (optimizedUrl.includes('0.0.0.0:8001')) {
+        optimizedUrl = optimizedUrl.replace(
+          'http://0.0.0.0:8001', 
+          `${window.location.protocol}//${window.location.host}/proxy/3000`
+        );
+      }
+      
+      // Om det är en PDF-fil, använd vår säkra PDF-finder för att garantera korrekt visning
+      const urlParts = optimizedUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1]?.split('?')[0]; // Ta bort eventuella parametrar
+      
+      if (fileName && fileName.endsWith('.pdf')) {
+        const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
+        optimizedUrl = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
+        console.log('Använder optimerad PDF-visning via pdf-finder:', fileName);
+      }
+    }
+    
     setDialogState({
       isOpen: true,
-      pdfUrl: params.pdfUrl,
+      pdfUrl: optimizedUrl,
       filename: params.filename,
       fileId: params.fileId,
       folderId: params.folderId

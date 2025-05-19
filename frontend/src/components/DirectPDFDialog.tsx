@@ -48,17 +48,65 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         setLoading(true);
         setError(null);
         
-        // Ladda dokumentet
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        // Börja med att försöka med original URL
+        let url = pdfUrl;
+        console.log('Försöker ladda PDF från:', url);
+        
+        // För Replit-miljön, gör extra anpassningar
+        if (window.location.hostname.includes('replit')) {
+          // Extrahera filnamnet från URL för att använda vår direkta pdf-finder
+          const urlParts = url.split('/');
+          const fileName = urlParts[urlParts.length - 1]?.split('?')[0]; // Ta bort eventuella parametrar
+          
+          if (fileName && fileName.endsWith('.pdf')) {
+            // Använd vår säkra PDF-finder som direkt streamar PDF-filen
+            const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
+            url = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
+            console.log('Använder PDF-finder med filnamn:', fileName);
+          }
+        }
+        
+        // Ladda dokumentet med vår optimerade URL
+        const loadingTask = pdfjsLib.getDocument(url);
         const pdf = await loadingTask.promise;
         
         setPdfDocument(pdf);
         setNumPages(pdf.numPages);
         setCurrentPage(1);
         setLoading(false);
+        
       } catch (err) {
         console.error('Fel vid laddning av PDF:', err);
-        setError('Kunde inte ladda PDF-dokumentet. Försök igen senare.');
+        
+        // Fallbackstrategi - prova att ladda via PDF-finder oavsett URL-format
+        try {
+          if (window.location.hostname.includes('replit') && pdfUrl.includes('.pdf')) {
+            // Extrahera filnamnet för att använda med PDF-finder
+            const urlParts = pdfUrl.split('/');
+            const fileName = urlParts[urlParts.length - 1]?.split('?')[0];
+            
+            if (fileName) {
+              console.log('Fallback: Provar med PDF-finder direkt:', fileName);
+              const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
+              const fallbackUrl = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
+              
+              // Försök igen med fallback URL
+              const fallbackTask = pdfjsLib.getDocument(fallbackUrl);
+              const pdf = await fallbackTask.promise;
+              
+              setPdfDocument(pdf);
+              setNumPages(pdf.numPages);
+              setCurrentPage(1);
+              setLoading(false);
+              return; // Avsluta om detta lyckas
+            }
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback misslyckades också:', fallbackErr);
+        }
+        
+        // Om vi når hit har båda försöken misslyckats
+        setError('Kunde inte ladda PDF-dokumentet. Försök igen senare eller öppna i ny flik.');
         setLoading(false);
       }
     };
