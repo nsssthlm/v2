@@ -124,24 +124,36 @@ const TopMenu: React.FC = () => {
       
       // Skapa en standardmapp för det nya projektet för att undvika 500-fel
       try {
-        const createFolderResponse = await fetch('/api/files/directories/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: 'Standard',
-            project: result.id,
-            parent: null,
-            type: 'folder',
-            is_sidebar_item: true,
-          }),
-        });
+        // Hämta JWT-token från localStorage för autentisering
+        const token = localStorage.getItem('jwt_token');
         
-        if (!createFolderResponse.ok) {
-          console.warn('Kunde inte skapa standardmapp för projektet, men fortsätter ändå.');
+        // Gör inte anropet om vi inte har en token
+        if (!token) {
+          console.warn('Ingen JWT-token tillgänglig, kan inte skapa standardmapp');
         } else {
-          console.log('Standardmapp skapad för det nya projektet');
+          console.log('Försöker skapa standardmapp för projekt:', result.id);
+          
+          const createFolderResponse = await fetch('/api/files/directories/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              name: 'Standard',
+              project: result.id,
+              parent: null,
+              type: 'folder',
+              // Använd 'is_sidebar' istället baserat på API-felmeddelandet
+              is_sidebar: true,
+            })
+          });
+        
+          if (!createFolderResponse.ok) {
+            console.warn('Kunde inte skapa standardmapp för projektet, men fortsätter ändå.');
+          } else {
+            console.log('Standardmapp skapad för det nya projektet');
+          }
         }
       } catch (folderError) {
         console.warn('Fel vid skapande av standardmapp:', folderError);
