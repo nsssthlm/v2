@@ -192,7 +192,7 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
               display: 'block'
             }}
             title={fileName}
-            sandbox="allow-same-origin allow-scripts allow-forms"
+            sandbox="allow-scripts"
             onLoad={() => setLoading(false)}
             onError={() => {
               setError('Failed to load PDF in iframe');
