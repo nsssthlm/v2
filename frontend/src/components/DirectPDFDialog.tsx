@@ -53,21 +53,17 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         setLoading(true);
         setError(null);
         
-        // Använd original URL utan att modifiera den
-        let url = pdfUrl;
-        console.log('Försöker ladda PDF från:', url);
+        // Kontrollera om vi har ett fil-ID i URL:en
+        const fileId = pdfUrl.split('/').pop();
+        console.log('PDF original URL:', pdfUrl);
         
-        // Kontrollera om URL:en redan innehåller nödvändiga parametrar
-        if (!url.includes('?')) {
-          // Lägg till timestamp för att förhindra cache-problem
-          url = `${url}?t=${Date.now()}`;
-        }
+        // Använd vår nya direkta API-endpoint för att hämta PDF-innehåll
+        const baseUrl = `${window.location.protocol}//${window.location.host}/api`;
+        const directPdfUrl = `${baseUrl}/files/get-file-content/${fileId}?t=${Date.now()}`;
+        console.log('Använder ny PDF content endpoint:', directPdfUrl);
         
-        // Använd direkta URL:en från API:et för bästa kompatibilitet
-        console.log('Använder direkt URL för PDF:', url);
-        
-        // Ladda dokumentet med vår optimerade URL
-        const loadingTask = pdfjsLib.getDocument(url);
+        // Ladda dokumentet med vår direkta PDF-content URL
+        const loadingTask = pdfjsLib.getDocument(directPdfUrl);
         const pdf = await loadingTask.promise;
         
         setPdfDocument(pdf);
@@ -76,34 +72,41 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         setLoading(false);
         
       } catch (err) {
-        console.error('Fel vid laddning av PDF:', err);
+        console.error('Fel vid laddning av PDF (försök 1):', err);
         
-        // Fallbackstrategi - prova att ladda direkt via media URL
+        // Fallback 1: Försök med original URL utan modifiering
         try {
-          // Skapa en direkt URL till media-filen
-          const originalUrl = pdfUrl;
-          // Extrahera viktiga parametrar från URL
-          const projectMatch = originalUrl.match(/\/web\/([^\/]+)/);
-          const projectSlug = projectMatch ? projectMatch[1] : null;
+          console.log('Fallback 1: Försöker med original URL:', pdfUrl);
           
-          // Skapa en fallback URL direkt från backend API
-          if (projectSlug) {
-            console.log('Fallback: Provar med direkt API-URL för projekt:', projectSlug);
-            const apiBaseUrl = `${window.location.protocol}//${window.location.host}/api`;
-            const fallbackUrl = `${apiBaseUrl}/files/web/${projectSlug}/data/?raw=true&t=${Date.now()}`;
+          // Ladda dokumentet med original URL
+          const fallbackTask = pdfjsLib.getDocument(pdfUrl);
+          const pdf = await fallbackTask.promise;
+          
+          setPdfDocument(pdf);
+          setNumPages(pdf.numPages);
+          setCurrentPage(1);
+          setLoading(false);
+          return; // Avsluta om detta lyckas
+        } catch (fallback1Err) {
+          console.error('Fel vid laddning av PDF (försök 2):', fallback1Err);
+          
+          // Fallback 2: Lägg till timestamp i URL:en för att förhindra caching
+          try {
+            const timestampedUrl = `${pdfUrl}${pdfUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+            console.log('Fallback 2: Försöker med timestamped URL:', timestampedUrl);
             
-            // Försök igen med fallback URL
-            const fallbackTask = pdfjsLib.getDocument(fallbackUrl);
-            const pdf = await fallbackTask.promise;
+            // Ladda dokumentet med timestampad URL
+            const fallback2Task = pdfjsLib.getDocument(timestampedUrl);
+            const pdf = await fallback2Task.promise;
             
             setPdfDocument(pdf);
             setNumPages(pdf.numPages);
             setCurrentPage(1);
             setLoading(false);
             return; // Avsluta om detta lyckas
+          } catch (fallback2Err) {
+            console.error('Alla fallbacks misslyckades:', fallback2Err);
           }
-        } catch (fallbackErr) {
-          console.error('Fallback misslyckades också:', fallbackErr);
         }
         
         // Om vi når hit har båda försöken misslyckats
