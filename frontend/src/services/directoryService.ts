@@ -3,7 +3,7 @@ import { API_BASE_URL, DIRECT_API_URL } from '../config';
 
 // Cache för att spara hämtad data
 const directoryCache: Record<string, { data: any, timestamp: number }> = {};
-const CACHE_EXPIRY = 30000; // Cache-livslängd i millisekunder (30 sekunder)
+const CACHE_EXPIRY = 5000; // Cache-livslängd i millisekunder (5 sekunder) - kortare cache för att säkerställa aktuell data
 
 // Interface för Directory/Filsystemsobjekt
 export interface ApiDirectory {

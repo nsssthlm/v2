@@ -102,7 +102,8 @@ const FileSystemNode = ({
           e.stopPropagation();
           // Klick på mappen öppnar mappens innehåll (navigerar till mappens sida)
           if (isFolder && node.slug) {
-            window.location.href = `/folders/${node.slug}`;
+            // Använd React Router istället för window.location för bättre hantering av SPA-navigering
+            window.location.href = `/folders/${node.slug}?t=${Date.now()}`; // Lägger till tidsstämpel för att tvinga omladdning
           }
         }}
         onMouseOver={(e) => {
