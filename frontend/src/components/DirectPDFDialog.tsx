@@ -55,8 +55,74 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         
         console.log('PDF original URL:', pdfUrl);
         
-        // Använd den ursprungliga URL:en som kommer från API:et
-        // Vi behöver inte modifiera den eftersom backend redan ger oss korrekt URL
+        // Extrahera fil-ID från URL:en eller filnamnet
+        let fileId = null;
+        let fileName = '';
+        
+        // Strategi 1: Extrahera ID från filnamn med format [namn]-[id].pdf eller liknande
+        if (typeof pdfUrl === 'string') {
+          const urlParts = pdfUrl.split('/');
+          fileName = urlParts[urlParts.length - 1]?.split('?')[0] || '';
+          
+          // Försök extrahera ID från filnamnet (t.ex. "dokument-67.pdf" => "67")
+          const filenameMatch = fileName.match(/.*-(\d+)(\.pdf)?/);
+          if (filenameMatch && filenameMatch[1]) {
+            fileId = filenameMatch[1];
+            console.log('Extraherat fil-ID från filnamn:', fileId);
+          }
+          
+          // Strategi 2: Direkt från URL-segment
+          if (!fileId) {
+            const idMatch = pdfUrl.match(/\/files\/(\d+)\//);
+            if (idMatch && idMatch[1]) {
+              fileId = idMatch[1];
+              console.log('Extraherat fil-ID från URL-segment:', fileId);
+            }
+          }
+        }
+        
+        // Om vi har ett fil-ID, försök hämta direkt via backend API:et
+        if (fileId) {
+          try {
+            // Konstruera en URL som använder vår API-endpoint
+            const directApiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/?t=${Date.now()}`;
+            console.log('Försöker hämta PDF direkt från API:', directApiUrl);
+            
+            const directTask = pdfjsLib.getDocument(directApiUrl);
+            const pdf = await directTask.promise;
+            
+            setPdfDocument(pdf);
+            setNumPages(pdf.numPages);
+            setCurrentPage(1);
+            setLoading(false);
+            return; // Avsluta om detta lyckas
+          } catch (directApiErr) {
+            console.error('Fel vid hämtning av PDF via API (fil-ID):', directApiErr);
+            // Fortsätt till nästa strategi
+          }
+        }
+        
+        // Strategi 3: Prova att hämta via direkt endpunkt för filhämtning
+        if (fileId) {
+          try {
+            const directFileUrl = `${window.location.origin}/api/files/direct/${fileId}/?t=${Date.now()}`;
+            console.log('Försöker hämta PDF via direct endpoint:', directFileUrl);
+            
+            const directFileTask = pdfjsLib.getDocument(directFileUrl);
+            const pdf = await directFileTask.promise;
+            
+            setPdfDocument(pdf);
+            setNumPages(pdf.numPages);
+            setCurrentPage(1);
+            setLoading(false);
+            return; // Avsluta om detta lyckas
+          } catch (directFileErr) {
+            console.error('Fel vid hämtning av PDF via direct endpoint:', directFileErr);
+            // Fortsätt till fallback
+          }
+        }
+        
+        // Fallback: Använd den ursprungliga URL:en om inget av ovanstående fungerar
         let formattedUrl = pdfUrl;
         
         // Säkerställ att URL:en innehåller protokollet (http/https)
@@ -72,9 +138,9 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         
         // Lägg till timestamp för att förhindra caching-problem
         formattedUrl = `${formattedUrl}${formattedUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        console.log('Använder formaterad PDF URL:', formattedUrl);
+        console.log('Fallback: Använder formaterad PDF URL:', formattedUrl);
         
-        // Ladda dokumentet direkt
+        // Ladda dokumentet med den formaterade URL:en
         const loadingTask = pdfjsLib.getDocument(formattedUrl);
         const pdf = await loadingTask.promise;
         
@@ -82,103 +148,9 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         setNumPages(pdf.numPages);
         setCurrentPage(1);
         setLoading(false);
-        
       } catch (err) {
-        console.error('Fel vid laddning av PDF (försök 1):', err);
-        
-        // Fallback 1: Försök att konstruera en mer direkt URL
-        try {
-          // Extrahera filnamnet från URL:en
-          const urlParts = pdfUrl.split('/');
-          const fileName = urlParts[urlParts.length - 1]?.split('?')[0];
-          console.log('PDF original URL:', pdfUrl);
-          
-          if (fileName && fileName.endsWith('.pdf')) {
-            // Försök 1: Använd direkt PDF-endpoint
-            const dateParts = urlParts.filter(part => /^\d{4}\/\d{2}\/\d{2}$/.test(part));
-            const datePathSegment = dateParts.length > 0 ? dateParts[0] : '';
-            const directPdfUrl1 = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${datePathSegment ? datePathSegment + '/' : ''}${fileName}?t=${Date.now()}`;
-            console.log('1. Använder direkt PDF-endpoint:', directPdfUrl1);
-            
-            try {
-              console.log('Första försök att hämta PDF-data från URL:', directPdfUrl1);
-              const fallbackTask1 = pdfjsLib.getDocument(directPdfUrl1);
-              const pdf = await fallbackTask1.promise;
-              
-              setPdfDocument(pdf);
-              setNumPages(pdf.numPages);
-              setCurrentPage(1);
-              setLoading(false);
-              return; // Avsluta om detta lyckas
-            } catch (err1) {
-              console.error('Fel vid hämtning av PDF (försök 1/4):', err1);
-              
-              // Fallback 1: Använd pdf-finder med exakt matchning
-              console.log('Fallback 1: Använder pdf-finder med exact match', fileName);
-              const directPdfUrl2 = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf-finder/?filename=${fileName}&stream=true`;
-              console.log('Provar alternativ URL (1):', directPdfUrl2);
-              
-              try {
-                console.log('Försök 2/4: Alternativ URL:', directPdfUrl2);
-                const fallbackTask2 = pdfjsLib.getDocument(directPdfUrl2);
-                const pdf = await fallbackTask2.promise;
-                
-                setPdfDocument(pdf);
-                setNumPages(pdf.numPages);
-                setCurrentPage(1);
-                setLoading(false);
-                return; // Avsluta om detta lyckas
-              } catch (err2) {
-                console.error('Fel vid hämtning av PDF (försök 2/4):', err2);
-                
-                // Fallback 2: Använd exakt sökväg med datum
-                const datePath = dateParts.length > 0 ? dateParts[0] : '';
-                console.log('Fallback 2: Använder exakt sökväg med datum', `${datePath}/${fileName}`);
-                const directPdfUrl3 = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${datePath}/${fileName}`;
-                console.log('Provar alternativ URL (2):', directPdfUrl3);
-                
-                try {
-                  console.log('Försök 3/4: Alternativ URL:', directPdfUrl3);
-                  const fallbackTask3 = pdfjsLib.getDocument(directPdfUrl3);
-                  const pdf = await fallbackTask3.promise;
-                  
-                  setPdfDocument(pdf);
-                  setNumPages(pdf.numPages);
-                  setCurrentPage(1);
-                  setLoading(false);
-                  return; // Avsluta om detta lyckas
-                } catch (err3) {
-                  console.error('Fel vid hämtning av PDF (försök 3/4):', err3);
-                  
-                  // Fallback 3: Använd direct media API
-                  console.log('Fallback 3: Använder direct media API', fileName);
-                  const directPdfUrl4 = `${window.location.protocol}//${window.location.host}/proxy/3000/direct/media/project_files/${datePath}/${fileName}`;
-                  console.log('Provar alternativ URL (3):', directPdfUrl4);
-                  
-                  try {
-                    console.log('Försök 4/4: Alternativ URL:', directPdfUrl4);
-                    const fallbackTask4 = pdfjsLib.getDocument(directPdfUrl4);
-                    const pdf = await fallbackTask4.promise;
-                    
-                    setPdfDocument(pdf);
-                    setNumPages(pdf.numPages);
-                    setCurrentPage(1);
-                    setLoading(false);
-                    return; // Avsluta om detta lyckas
-                  } catch (err4) {
-                    console.error('Fel vid hämtning av PDF (försök 4/4):', err4);
-                    // Alla försök har misslyckats
-                  }
-                }
-              }
-            }
-          }
-        } catch (allFailedErr) {
-          console.error('Samtliga försök att hämta PDF misslyckades:', allFailedErr);
-        }
-        
-        // Om vi når hit har båda försöken misslyckats
-        setError('Kunde inte ladda PDF-dokumentet. Försök igen senare eller öppna i ny flik.');
+        console.error('Alla försök att ladda PDF misslyckades:', err);
+        setError('Kunde inte ladda PDF-dokumentet. Försök igen senare eller kontakta support.');
         setLoading(false);
       }
     };
