@@ -54,17 +54,22 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
           // Uppdatera projektlistan
           setProjects(projectsData);
           
-          // Hitta rätt projekt att aktivera
-          const selectedProjectId = sessionStorage.getItem('selectedProjectId');
+          // Hitta rätt projekt att aktivera - använd localStorage istället för sessionStorage
+          // för att behålla valet även efter inloggning
+          const selectedProjectId = localStorage.getItem('selectedProjectId');
           if (selectedProjectId) {
+            console.log('Hittade sparat projektId i localStorage:', selectedProjectId);
             const selectedProject = projectsData.find(p => p.id === selectedProjectId);
             if (selectedProject) {
+              console.log('Aktiverar sparat projekt:', selectedProject);
               setCurrentProjectState(selectedProject);
             } else {
+              console.log('Sparat projekt hittades ej, använder första i listan');
               setCurrentProjectState(projectsData[0]);
             }
           } else {
             // Om inget valt projekt, använd det första
+            console.log('Inget sparat projektval, använder första projekt i listan');
             setCurrentProjectState(projectsData[0]);
           }
         } else {
@@ -86,6 +91,14 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
   const setCurrentProject = (project: Project) => {
     console.log('Sätter nytt projekt:', project);
     setCurrentProjectState(project);
+    
+    // Spara både i sessionStorage och localStorage för att säkerställa att
+    // användarens val sparas även om de måste logga in igen
+    localStorage.setItem('currentProject', JSON.stringify(project));
+    localStorage.setItem('selectedProjectId', project.id);
+    console.log('Projektval sparat i localStorage, projektId:', project.id);
+    
+    // Även i sessionStorage för bakåtkompatibilitet
     sessionStorage.setItem('currentProject', JSON.stringify(project));
     sessionStorage.setItem('selectedProjectId', project.id);
 

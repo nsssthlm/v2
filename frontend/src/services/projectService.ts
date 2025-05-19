@@ -133,7 +133,7 @@ const projectService = {
         is_sidebar_item: true, // Använd korrekt fältnamn is_sidebar_item (inte is_sidebar)
       };
       
-      const response = await axios.post(`${API_BASE_URL}/files/directories/`, folderData, {
+      const response = await axios.post(`${API_BASE_URL}/api/files/directories/`, folderData, {
         headers
       });
       
