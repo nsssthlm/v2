@@ -16,6 +16,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 interface PDFJSViewerProps {
   pdfUrl: string;
   filename: string;
+  projectId?: number | string | null;
+  folderId?: number | string | null;
 }
 
 // Hjälpfunktion för att kontrollera om en URL pekar till en extern domän
@@ -39,7 +41,7 @@ const isPdfArrayBuffer = (buffer: ArrayBuffer): boolean => {
   return signature.startsWith('%PDF');
 };
 
-const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
+const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, folderId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
@@ -49,6 +51,9 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [finalUrl, setFinalUrl] = useState<string>('');
   const { currentProject } = useProject(); // Hämta aktuellt projekt från context
+  
+  // Använd projektID från props om det finns, annars från context
+  const activeProjectId = projectId || (currentProject?.id ? parseInt(currentProject.id) : null);
 
   // Bearbeta URL till ett format som kan visas med PDF.js
   const processedUrl = React.useMemo(() => {
