@@ -102,7 +102,7 @@ const UltimatePDFViewer = ({
       
       <iframe
         ref={iframeRef}
-        src={pdfUrl.startsWith('/') ? `http://0.0.0.0:8001${pdfUrl}` : pdfUrl}
+        src={pdfUrl}
         width="100%"
         height="100%"
         style={{ border: 'none' }}
@@ -133,9 +133,8 @@ const UltimatePDFViewer = ({
         <Button 
           onClick={() => {
             if (iframeRef.current) {
-              const fullUrl = pdfUrl.startsWith('/') ? `http://0.0.0.0:8001${pdfUrl}` : pdfUrl;
               setLoading(true);
-              iframeRef.current.src = fullUrl;
+              iframeRef.current.src = pdfUrl;
             }
           }}
           variant="outlined"
@@ -146,8 +145,7 @@ const UltimatePDFViewer = ({
         
         <Button
           onClick={() => {
-            const fullUrl = pdfUrl.startsWith('/') ? `http://0.0.0.0:8001${pdfUrl}` : pdfUrl;
-            window.open(fullUrl, '_blank');
+            window.open(pdfUrl, '_blank');
           }}
           variant="outlined"
           size="sm"
