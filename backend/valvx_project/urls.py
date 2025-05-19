@@ -29,6 +29,9 @@ urlpatterns = [
         # Custom endpoints för projekthantering
         path('custom/create-project', custom_views.create_project, name='create-project'),
         
+        # CSRF endpoint för filuppladdningar
+        path('csrf/', include('core.urls')),
+        
         # App routes
         path('', include('core.urls')),
         path('files/', include('files.urls')),

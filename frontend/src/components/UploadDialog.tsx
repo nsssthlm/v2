@@ -54,6 +54,29 @@ const UploadDialog: React.FC<UploadDialogProps> = ({ open, onClose, folderSlug, 
     }
   };
 
+  // Funktion för att hämta CSRF-token från Django
+  const getCSRFToken = async () => {
+    try {
+      // Gör ett GET-anrop till en endpoint i Django för att hämta CSRF-cookie
+      await axios.get('/api/csrf/', { withCredentials: true });
+      
+      // Hämta CSRF-token från cookies efter att anropet är klart
+      const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+        
+      // Hämta även från localStorage/sessionStorage som fallback
+      const localToken = localStorage.getItem('csrftoken') || sessionStorage.getItem('csrftoken');
+      
+      return csrfToken || localToken || '';
+    } catch (error) {
+      console.error('Kunde inte hämta CSRF-token:', error);
+      // Använd token från localStorage som fallback
+      return localStorage.getItem('csrftoken') || sessionStorage.getItem('csrftoken') || '';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -72,20 +95,24 @@ const UploadDialog: React.FC<UploadDialogProps> = ({ open, onClose, folderSlug, 
     
     try {
       console.log('Laddar upp fil till mapp:', folderSlug);
-      // Hämta CSRF-token
-      const csrfToken = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('csrftoken='))
-        ?.split('=')[1];
       
+      // Hämta en färsk CSRF-token
+      const csrfToken = await getCSRFToken();
       console.log('CSRF-token:', csrfToken);
       
+      // Spara token i localStorage för framtida användning
+      if (csrfToken) {
+        localStorage.setItem('csrftoken', csrfToken);
+        sessionStorage.setItem('csrftoken', csrfToken);
+      }
+      
+      // Gör API-anrop för att ladda upp fil med CSRF-token
       await axios.post(`/api/files/web/${folderSlug}/upload/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'X-CSRFToken': csrfToken || '',
+          'X-CSRFToken': csrfToken,
         },
-        withCredentials: true,
+        withCredentials: true, // Säkerställer att cookies skickas
       });
       
       setSuccess(true);

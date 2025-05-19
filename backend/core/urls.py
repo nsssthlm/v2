@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import custom_views
+from . import csrf_views
 
 router = DefaultRouter()
 router.register('users', views.UserViewSet)
@@ -14,6 +15,9 @@ router.register('project-sample', views.ProjectSampleViewSet, basename='project-
 urlpatterns = [
     # Main API endpoints
     path('', include(router.urls)),
+
+    # CSRF token endpoint for secure file uploads
+    path('csrf/', csrf_views.get_csrf_token, name='csrf'),
 
     # Anpassade vyer för att hantera projekt utan autentisering (för utveckling)
     path('custom/create-project', custom_views.create_project, name='create-project'),
