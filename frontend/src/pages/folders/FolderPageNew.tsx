@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Box, 
@@ -197,6 +197,8 @@ const FolderPageNew = () => {
     }
   };
   
+  const navigate = useNavigate();
+
   // Hantera borttagning av mapp med undermappar och filer
   const handleDeleteFolder = async () => {
     try {
@@ -226,19 +228,22 @@ const FolderPageNew = () => {
       // Stäng dialogrutan
       setDeleteFolderDialogOpen(false);
       
-      // Visa meddelande om lyckad radering
-      alert('Mappen och alla dess innehåll har raderats');
+      // Visa meddelande med detaljer från backend
+      alert(response.data.message);
       
-      // Rensa alla mappcache
+      // Rensa alla cachad data
       localStorage.removeItem('folderDataCache');
       
-      // Navigera med page reload för att säkerställa att data laddas om
+      // Rensa globala cache-objektet också
+      Object.keys(folderDataCache).forEach(key => delete folderDataCache[key]);
+      
+      // Hämta måladressen
       const targetUrl = folderData?.parent_slug 
         ? `/folders/${folderData.parent_slug}` 
         : '/folders';
       
-      // Tvinga en fullständig omladdning av sidan
-      window.location.replace(targetUrl);
+      // Använd navigate istället för window.location för att tvinga React-router att uppdatera
+      navigate(targetUrl, { replace: true, state: { forceRefresh: Date.now() } });
     } catch (err: any) {
       console.error('Fel vid radering av mapp:', err);
       alert(`Kunde inte radera mappen: ${err.message || 'Okänt fel'}`);

@@ -16,24 +16,42 @@ class DirectoryViewSet(viewsets.ModelViewSet):
     # Förbättrad destroy-metod för att rekursivt ta bort mappar och filer
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        slug_to_delete = instance.slug  # Spara slug för att kunna visa i svaret
         
-        # Rekursiv funktion för att radera undermappar och filer
-        def delete_directory_recursively(directory):
-            # Radera alla undermappar rekursivt först
-            for subdir in directory.subdirectories.all():
-                delete_directory_recursively(subdir)
+        # Hitta alla undermappar och filer direkt i databasen
+        def get_all_child_directories(directory_id):
+            child_dirs = Directory.objects.filter(parent_id=directory_id).values_list('id', flat=True)
+            all_dirs = list(child_dirs)
             
-            # Ta bort alla filer i mappen
-            from .models import File
-            File.objects.filter(directory=directory).delete()
-            
-            # Ta bort mappen själv
-            directory.delete()
+            for child_id in child_dirs:
+                all_dirs.extend(get_all_child_directories(child_id))
+                
+            return all_dirs
         
-        # Anropa den rekursiva funktionen på den önskade mappen
-        delete_directory_recursively(instance)
+        # Hitta alla undermappar
+        child_directory_ids = get_all_child_directories(instance.id)
         
-        return Response({"message": "Mappen och alla dess innehåll har raderats."}, status=status.HTTP_200_OK)
+        # Radera alla filer i dessa mappar 
+        from .models import File
+        deleted_files = 0
+        for dir_id in child_directory_ids + [instance.id]:
+            deleted_files += File.objects.filter(directory_id=dir_id).delete()[0]
+        
+        # Radera alla undermappar
+        deleted_directories = Directory.objects.filter(id__in=child_directory_ids).delete()[0]
+        
+        # Radera slutligen huvudmappen
+        instance.delete()
+        
+        # Returnera detaljerad information om raderingen
+        return Response({
+            "message": f"Mappen '{slug_to_delete}' och allt dess innehåll har raderats",
+            "details": {
+                "deleted_directories": deleted_directories + 1,  # +1 för huvudmappen
+                "deleted_files": deleted_files,
+                "slug": slug_to_delete
+            }
+        }, status=status.HTTP_200_OK)
     
     def get_permissions(self):
         """
