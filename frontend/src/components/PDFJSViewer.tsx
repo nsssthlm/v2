@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box } from "@mui/joy";
 import { useProject } from "../contexts/ProjectContext";
-import DirectMediaPDFViewer from "./DirectMediaPDFViewer";
+import StraightPDFViewer from "./StraightPDFViewer";
 
 interface PDFJSViewerProps {
   pdfUrl: string;
@@ -68,7 +68,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
       display: "flex",
       flexDirection: "column"
     }}>
-      <DirectMediaPDFViewer
+      <StraightPDFViewer
         pdfUrl={finalUrl}
         fileName={filename}
         onClose={() => {}} // Empty function since we're not using the close button in this context
