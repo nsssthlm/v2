@@ -237,13 +237,22 @@ const FolderPageNew = () => {
       // Rensa globala cache-objektet också
       Object.keys(folderDataCache).forEach(key => delete folderDataCache[key]);
       
-      // Hämta måladressen
+      // Ta bort eventuella sidebar-cache-nycklar i localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('sidebar') || key.includes('directory') || key.includes('folder'))) {
+          localStorage.removeItem(key);
+        }
+      }
+      
+      // Genomför en fullständig omladdning av sidan istället för React Router-navigering
+      // Detta säkerställer att alla komponenter laddas om från grunden
       const targetUrl = folderData?.parent_slug 
         ? `/folders/${folderData.parent_slug}` 
         : '/folders';
       
-      // Använd navigate istället för window.location för att tvinga React-router att uppdatera
-      navigate(targetUrl, { replace: true, state: { forceRefresh: Date.now() } });
+      // Forcera en fullständig sidorefresh
+      window.location.href = `${targetUrl}?refresh=${Date.now()}`;
     } catch (err: any) {
       console.error('Fel vid radering av mapp:', err);
       alert(`Kunde inte radera mappen: ${err.message || 'Okänt fel'}`);
