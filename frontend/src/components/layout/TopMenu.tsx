@@ -88,15 +88,9 @@ const TopMenu: React.FC = () => {
       // Förbered data för backend-API
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
       
-      // Hämta JWT-token för autentisering
-      const token = localStorage.getItem('jwt_token');
-      
-      if (!token) {
-        // Om token saknas, använd en hårdkodad token för projektledare
-        const projectLeaderToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm9qZWN0bGVhZGVyIiwicm9sZSI6InByb2plY3RfbGVhZGVyIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjI1MDAwMDAwMDB9.Z9t5b4V3vkjO-4BDTXUkEqbp9eEJVGOKutvN-NVWxZs';
-        localStorage.setItem('jwt_token', projectLeaderToken);
-        console.log('Autentiserad som projektledare för projektskapande');
-      }
+      // JWT-token hanteras nu automatiskt i config.ts via getAuthHeader
+      // Vi behöver inte explicit kontrollera detta här längre
+      console.log('Använder autentisering från config.ts för projektskapande');
       
       // Skapa projektet via den förbättrade projektservicen
       const projectData = {
