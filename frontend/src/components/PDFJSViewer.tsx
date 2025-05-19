@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/joy";
 import { useProject } from "../contexts/ProjectContext";
-import DirectPDFViewer from "./DirectPDFViewer";
+import FallbackPDFViewer from "./FallbackPDFViewer";
 
 interface PDFJSViewerProps {
   pdfUrl: string;
@@ -32,6 +32,10 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
   // Log the original URL for debugging
   console.log("PDF original URL:", pdfUrl);
 
+  // For Replit preview environment, keep the original URL which contains /proxy/3000/
+  // This is the URL that actually works in the preview environment
+  const finalUrl = pdfUrl;
+
   return (
     <Box sx={{ 
       height: "100%",
@@ -39,8 +43,8 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
       display: "flex",
       flexDirection: "column"
     }}>
-      <DirectPDFViewer
-        pdfUrl={pdfUrl}
+      <FallbackPDFViewer
+        pdfUrl={finalUrl}
         fileName={filename}
         projectId={activeProjectId}
       />

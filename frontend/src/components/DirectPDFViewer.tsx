@@ -16,21 +16,22 @@ const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
 }) => {
   const [loading, setLoading] = useState(true);
   
-  // Create direct link to backend by removing the Replit proxy parts
+  // Instead of trying to modify the URL, we'll use the "Open in new tab" approach
+  // This preserves the original URL which seems to be the only one that works
   const getDirectUrl = (url: string): string => {
-    // Get the part of the URL after /data/
-    const match = url.match(/\/data\/(.+)$/);
-    if (match && match[1]) {
-      return `/api/files/get/${match[1]}`;
+    // For Replit environment, use the direct URL that was passed
+    // We need to convert the URL from proxy format to direct format
+    
+    // Extract the original backend URL without the Replit proxy part
+    if (url.includes('proxy/3000/api')) {
+      const originalUrl = url.split('proxy/3000')[1];
+      console.log('Original URL extracted:', originalUrl);
+      
+      // If the URL is for the API, return it as is
+      return originalUrl;
     }
     
-    // Fallback: try to extract just the filename and use a direct endpoint
-    const fileNameMatch = url.match(/([^\/]+\.pdf)(\?|$)/);
-    if (fileNameMatch) {
-      return `/api/files/direct/${fileNameMatch[1]}`;
-    }
-    
-    // If all else fails, return the original URL
+    // Just return the original URL if we can't transform it
     return url;
   };
   

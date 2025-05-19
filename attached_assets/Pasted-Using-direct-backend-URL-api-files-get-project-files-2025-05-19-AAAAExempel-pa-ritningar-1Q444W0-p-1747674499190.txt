@@ -1,0 +1,129 @@
+Using direct backend URL: /api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+DirectPDFViewer.tsx:39 Using direct backend URL: /api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+FolderPageNew.tsx:271 Öppnar PDF: http://0.0.0.0:8001/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf AAAAExempel på ritningartest
+FolderPageNew.tsx:287 Använda direkt PDF URL via Replit proxy
+FolderPageNew.tsx:290 Använder final PDF URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+PDFJSViewer.tsx:25 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:33 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+PDFJSViewer.tsx:25 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:33 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+DirectPDFViewer.tsx:39 Using direct backend URL: /api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+DirectPDFViewer.tsx:39 Using direct backend URL: /api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+chunk-276SZO74.js?v=302c1db8:8438 
+            
+            
+           GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf 404 (Not Found)
+appendChildToContainer @ chunk-276SZO74.js?v=302c1db8:8438
+insertOrAppendPlacementNodeIntoContainer @ chunk-276SZO74.js?v=302c1db8:17411
+insertOrAppendPlacementNodeIntoContainer @ chunk-276SZO74.js?v=302c1db8:17420
+commitPlacement @ chunk-276SZO74.js?v=302c1db8:17396
+commitReconciliationEffects @ chunk-276SZO74.js?v=302c1db8:17906
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17700
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17813
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17737
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17737
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17737
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17737
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17737
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17699
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17896
+recursivelyTraverseMutationEffects @ chunk-276SZO74.js?v=302c1db8:17685
+commitMutationEffectsOnFiber @ chunk-276SZO74.js?v=302c1db8:17794
+commitMutationEffects @ chunk-276SZO74.js?v=302c1db8:17663
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19347
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+DirectPDFViewer.tsx:39 Using direct backend URL: /api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+DirectPDFViewer.tsx:39 Using direct backend URL: /api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf

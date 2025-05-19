@@ -1,0 +1,69 @@
+Page not found (404)
+Request Method:	GET
+Request URL:	http://0.0.0.0:8001/api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf
+Using the URLconf defined in valvx_project.urls, Django tried these URL patterns, in this order:
+
+admin/
+api/ token/ [name='token_obtain_pair']
+api/ token/refresh/ [name='token_refresh']
+api/ status/
+api/ custom/create-project [name='create-project']
+api/ ^users/$ [name='user-list']
+api/ ^users\.(?P<format>[a-z0-9]+)/?$ [name='user-list']
+api/ ^users/(?P<pk>[^/.]+)/$ [name='user-detail']
+api/ ^users/(?P<pk>[^/.]+)\.(?P<format>[a-z0-9]+)/?$ [name='user-detail']
+api/ ^projects/$ [name='project-list']
+api/ ^projects\.(?P<format>[a-z0-9]+)/?$ [name='project-list']
+api/ ^projects/(?P<pk>[^/.]+)/$ [name='project-detail']
+api/ ^projects/(?P<pk>[^/.]+)\.(?P<format>[a-z0-9]+)/?$ [name='project-detail']
+api/ ^tasks/$ [name='task-list']
+api/ ^tasks\.(?P<format>[a-z0-9]+)/?$ [name='task-list']
+api/ ^tasks/(?P<pk>[^/.]+)/$ [name='task-detail']
+api/ ^tasks/(?P<pk>[^/.]+)\.(?P<format>[a-z0-9]+)/?$ [name='task-detail']
+api/ ^roles/$ [name='roleaccess-list']
+api/ ^roles\.(?P<format>[a-z0-9]+)/?$ [name='roleaccess-list']
+api/ ^roles/(?P<pk>[^/.]+)/$ [name='roleaccess-detail']
+api/ ^roles/(?P<pk>[^/.]+)\.(?P<format>[a-z0-9]+)/?$ [name='roleaccess-detail']
+api/ ^time-reports/$ [name='timereport-list']
+api/ ^time-reports\.(?P<format>[a-z0-9]+)/?$ [name='timereport-list']
+api/ ^time-reports/(?P<pk>[^/.]+)/$ [name='timereport-detail']
+api/ ^time-reports/(?P<pk>[^/.]+)\.(?P<format>[a-z0-9]+)/?$ [name='timereport-detail']
+api/ ^project-sample/$ [name='project-sample-list']
+api/ ^project-sample\.(?P<format>[a-z0-9]+)/?$ [name='project-sample-list']
+api/ [name='api-root']
+api/ <drf_format_suffix:format> [name='api-root']
+api/ custom/create-project [name='create-project']
+api/ custom/projects [name='get-all-projects']
+api/ files/ ^directories/$ [name='directory-list']
+api/ files/ ^directories\.(?P<format>[a-z0-9]+)/?$ [name='directory-list']
+api/ files/ ^directories/sidebar_tree/$ [name='directory-sidebar-tree']
+api/ files/ ^directories/sidebar_tree\.(?P<format>[a-z0-9]+)/?$ [name='directory-sidebar-tree']
+api/ files/ ^directories/(?P<pk>[^/.]+)/$ [name='directory-detail']
+api/ files/ ^directories/(?P<pk>[^/.]+)\.(?P<format>[a-z0-9]+)/?$ [name='directory-detail']
+api/ files/ ^files/$ [name='file-list']
+api/ files/ ^files\.(?P<format>[a-z0-9]+)/?$ [name='file-list']
+api/ files/ ^files/(?P<pk>[^/.]+)/$ [name='file-detail']
+api/ files/ ^files/(?P<pk>[^/.]+)\.(?P<format>[a-z0-9]+)/?$ [name='file-detail']
+api/ files/ ^files/(?P<pk>[^/.]+)/versions/$ [name='file-versions']
+api/ files/ ^files/(?P<pk>[^/.]+)/versions\.(?P<format>[a-z0-9]+)/?$ [name='file-versions']
+api/ files/ [name='api-root']
+api/ files/ <drf_format_suffix:format> [name='api-root']
+api/ files/ upload/ [name='api_upload_file']
+api/ files/ delete/<int:file_id>/ [name='delete_file']
+api/ files/ direct/<int:file_id>/ [name='direct_file_download']
+api/ files/ get-file-content/<str:file_id>/ [name='get_file_content']
+api/ files/ pdf-media/<path:file_path> [name='serve_pdf_file']
+api/ files/ web/
+api/ wiki/
+api/ notifications/
+api/ workspace/
+pdf/<int:id>/content/ [name='pdf_content']
+^static/(?P<path>.*)$
+^media/(?P<path>.*)$
+direct/media/<path:path> [name='direct_media_file']
+pdf-finder/ [name='pdf_finder']
+pdf/<path:path> [name='pdf_path_direct']
+pdf-static/<path:path> [name='pdf_static_direct']
+The current path, api/files/get/project_files/2025/05/19/AAAAExempel_pa_ritningar_1Q444W0.pdf, didn’t match any of these.
+
+You’re seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.
