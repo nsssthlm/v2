@@ -13,11 +13,27 @@ class DirectoryViewSet(viewsets.ModelViewSet):
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']
     
-    # Lägg till destroy-metod för att kunna ta bort alla mappar också
+    # Förbättrad destroy-metod för att rekursivt ta bort mappar och filer
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        # Rekursiv funktion för att radera undermappar och filer
+        def delete_directory_recursively(directory):
+            # Radera alla undermappar rekursivt först
+            for subdir in directory.subdirectories.all():
+                delete_directory_recursively(subdir)
+            
+            # Ta bort alla filer i mappen
+            from .models import File
+            File.objects.filter(directory=directory).delete()
+            
+            # Ta bort mappen själv
+            directory.delete()
+        
+        # Anropa den rekursiva funktionen på den önskade mappen
+        delete_directory_recursively(instance)
+        
+        return Response({"message": "Mappen och alla dess innehåll har raderats."}, status=status.HTTP_200_OK)
     
     def get_permissions(self):
         """

@@ -203,7 +203,24 @@ const FolderPageNew = () => {
       console.log("Försöker radera mapp:", slug);
       
       // Anropa API för att radera mappen och alla dess underliggande innehåll
-      const response = await axios.delete(`${API_BASE_URL}/files/directories/${slug}/`);
+      // Vi måste få mapp-ID genom slug
+      let directoryId;
+      
+      try {
+        // Hämta mappens ID först
+        const dirResponse = await axios.get(`${API_BASE_URL}/files/directories/?slug=${slug}`);
+        if (dirResponse.data.results && dirResponse.data.results.length > 0) {
+          directoryId = dirResponse.data.results[0].id;
+        } else {
+          throw new Error('Kunde inte hitta mappen');
+        }
+      } catch (error) {
+        console.error('Fel vid hämtning av mapp-ID:', error);
+        throw new Error('Kunde inte hitta mappens ID');
+      }
+      
+      // Nu när vi har ID, kan vi radera mappen
+      const response = await axios.delete(`${API_BASE_URL}/files/directories/${directoryId}/`);
       console.log("Svar från radering av mapp:", response.data);
       
       // Visa meddelande om lyckad radering
@@ -444,6 +461,32 @@ const FolderPageNew = () => {
           filename={selectedPdf.name}
         />
       )}
+      
+      {/* Delete Folder Confirmation Dialog */}
+      <Modal open={deleteFolderDialogOpen} onClose={() => setDeleteFolderDialogOpen(false)}>
+        <ModalDialog variant="outlined" role="alertdialog">
+          <DialogTitle>
+            <Typography level="h4" color="danger">Ta bort mapp</Typography>
+          </DialogTitle>
+          <ModalClose />
+          <DialogContent>
+            <Typography>
+              Är du säker på att du vill ta bort mappen "{folderData?.name}" och allt dess innehåll?
+            </Typography>
+            <Typography level="body-sm" color="danger" sx={{ mt: 1 }}>
+              Detta kommer radera alla filer och undermappar. Denna åtgärd kan inte ångras.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="soft" color="neutral" onClick={() => setDeleteFolderDialogOpen(false)}>
+              Avbryt
+            </Button>
+            <Button variant="solid" color="danger" onClick={handleDeleteFolder}>
+              Ja, ta bort
+            </Button>
+          </DialogActions>
+        </ModalDialog>
+      </Modal>
     </Box>
   );
 };
