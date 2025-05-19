@@ -113,9 +113,9 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         
         // Använd fil-ID för att hämta direkt från API
         if (fileId) {
-          // Skapa en direkt API URL
-          const apiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/`;
-          console.log('Använder direkt API URL:', apiUrl);
+          // Skapa en direkt API URL med projektID
+          const apiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/?project_id=${effectiveProjectId}`;
+          console.log('Använder direkt API URL med projektID:', apiUrl);
           
           try {
             // Konfigurera options för PDF.js
