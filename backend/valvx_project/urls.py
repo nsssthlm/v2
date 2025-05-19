@@ -129,4 +129,7 @@ def pdf_file_finder(request):
     return JsonResponse({'files': matching_files}, safe=False)
 
 # Lägg till PDF-sökning i URL-patterns
-urlpatterns.append(path('pdf-finder/', pdf_file_finder, name='pdf_finder'))
+urlpatterns.append(path('pdf-finder/', pdf_finder, name='pdf_finder'))
+
+# Lägg till API-hantering för filer
+urlpatterns.append(path('api/files/', include('files.urls')))file_finder, name='pdf_finder'))
