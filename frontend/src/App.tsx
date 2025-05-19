@@ -23,7 +23,7 @@ import CalendarPage from './pages/dashboard/CalendarPage';
 
 // Folder pages
 import FolderListPage from './pages/folders/FolderListPage';
-import BasicFolderView from './pages/folders/BasicFolderView';
+import FolderPage from './pages/folders/FolderPage';
 
 // PDF hantering
 import PDFViewerPage from './pages/PDFViewerPage';
@@ -122,7 +122,7 @@ function App() {
                   
                   {/* Folder routes */}
                   <Route path="folders" element={<FolderListPage />} />
-                  <Route path="folders/:slug" element={<BasicFolderView />} />
+                  <Route path="folders/:slug" element={<FolderPage />} />
                   
                   {/* Nya dedikerade PDF-viewer sidor */}
                   <Route path="pdf-viewer" element={<PDFViewerPage />} />
