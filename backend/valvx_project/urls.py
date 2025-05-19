@@ -78,5 +78,13 @@ def serve_media_file(request, path):
     except Exception as e:
         raise Http404(f"Error accessing file: {str(e)}")
 
-# Lägg till en dedikerad URL-pattern för media-filer
+# Lägg till en dedikerad URL-pattern för media-filer - utan trailing slash för att undvika 301-redirect
 urlpatterns.append(path('direct/media/<path:path>', serve_media_file, name='direct_media_file'))
+
+# Lägg till även en direct-path för PDFer som används ofta
+from django.views.static import serve as static_serve
+urlpatterns.append(path('pdf/<path:path>', lambda request, path: static_serve(
+    request, 
+    path=f"project_files/{path}", 
+    document_root=settings.MEDIA_ROOT
+), name='pdf_direct'))
