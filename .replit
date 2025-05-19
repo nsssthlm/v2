@@ -5,7 +5,7 @@ channel = "stable-24_05"
 packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib", "jq"]
 
 [workflows]
-runButton = "backend-new"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -26,6 +26,7 @@ args = "frontend"
 
 [[workflows.workflow]]
 name = "backend"
+
 author = "agent"
 
 [[workflows.workflow.tasks]]
@@ -35,6 +36,7 @@ waitForPort = 8001
 
 [[workflows.workflow]]
 name = "pdf-manager"
+
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -49,15 +51,6 @@ author = "agent"
 task = "shell.exec"
 args = "cd frontend && npm run dev"
 waitForPort = 5000
-
-[[workflows.workflow]]
-name = "backend-new"
-author = 42734228
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python manage.py runserver 0.0.0.0:8002"
 
 [deployment]
 run = ["sh", "-c", "cd frontend && npm install @mui/joy @emotion/react @emotion/styled @mui/material react-router-dom axios && npm install -g vite && vite --port 5000 && cd ../backend && pip install django djangorestframework django-cors-headers djangorestframework-simplejwt dj-database-url pillow && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
@@ -89,7 +82,3 @@ externalPort = 8000
 [[ports]]
 localPort = 8001
 externalPort = 3000
-
-[[ports]]
-localPort = 8002
-externalPort = 3002

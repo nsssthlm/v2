@@ -1,20 +1,10 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { CacheProvider } from '@emotion/react';
-import createCache from '@emotion/cache';
-
-// Skapa en ny cache för att undvika konflikter
-const cache = createCache({
-  key: 'valvx',
-  prepend: true // Viktigt för att säkerställa att våra stilar har högre prioritet
-});
+import './index.css'; // Importera våra anpassade stilar
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <CacheProvider value={cache}>
-      <App />
-    </CacheProvider>
+    <App />
   </React.StrictMode>,
 );

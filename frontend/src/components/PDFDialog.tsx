@@ -13,39 +13,46 @@ import {
   Avatar
 } from '@mui/joy';
 import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import UploadIcon from '@mui/icons-material/Upload';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PDFJSViewer from './PDFJSViewer';
 
 interface PDFDialogProps {
   open: boolean;
   onClose: () => void;
   pdfUrl: string;
-  filename?: string;
+  filename: string;
 }
 
-const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogProps) => {
+// Enkel PDF-visare i dialogruta
+const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
   const [activeTab, setActiveTab] = useState<string>('detaljer');
   const [currentZoom, setCurrentZoom] = useState(100);
-  const [pageCount, setPageCount] = useState<number | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
-
-  // Nollställ laddningstillståndet när URL ändras
+  const [error, setError] = useState<boolean>(false);
+  
+  // Enkel state för renderingen, de mesta hanteras nu i PDFJSViewer-komponenten  
   useEffect(() => {
-    setLoading(true);
+    setLoading(false);
+    setError(false);
   }, [pdfUrl]);
-
-  // Zooma in/ut-funktioner
+  
+  // Navigeringsfunktioner
   const zoomIn = () => {
     setCurrentZoom(prev => Math.min(prev + 10, 200));
   };
-
+  
   const zoomOut = () => {
     setCurrentZoom(prev => Math.max(prev - 10, 50));
   };
 
-  // Sidbläddringsfunktioner
   const goToNextPage = () => {
-    if (pageCount && currentPage < pageCount) {
+    if (numPages && currentPage < numPages) {
       setCurrentPage(prev => prev + 1);
     }
   };
@@ -53,6 +60,12 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
   const goToPrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  const handleDownload = () => {
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank');
     }
   };
 
@@ -72,7 +85,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-          {/* Toppmeny */}
+          {/* Header */}
           <Sheet 
             variant="plain"
             sx={{ 
@@ -95,14 +108,12 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
               </IconButton>
               <Typography level="title-sm" sx={{ fontWeight: 'bold', mr: 2 }}>{filename}</Typography>
             </Box>
-
+            
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {/* Kontroller för sidnavigering och zoom */}
+              {/* Page navigation & Zoom controls - alla lika breda knappar i grönt */}
               <Button
                 size="sm"
                 variant="plain"
-                onClick={goToPrevPage}
-                disabled={currentPage <= 1}
                 sx={{ 
                   bgcolor: '#1976d2', 
                   color: 'white',
@@ -116,7 +127,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
               >
                 ←
               </Button>
-
+              
               <Button
                 size="sm"
                 variant="plain"
@@ -130,14 +141,12 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                   whiteSpace: 'nowrap'
                 }}
               >
-                Sida {currentPage} {pageCount ? `av ${pageCount}` : ''}
+                Sida 1 av 5
               </Button>
-
+              
               <Button
                 size="sm"
                 variant="plain"
-                onClick={goToNextPage}
-                disabled={!pageCount || currentPage >= pageCount}
                 sx={{ 
                   bgcolor: '#1976d2', 
                   color: 'white',
@@ -151,11 +160,10 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
               >
                 →
               </Button>
-
+              
               <Button
                 size="sm"
                 variant="plain"
-                onClick={zoomOut}
                 sx={{ 
                   bgcolor: '#1976d2', 
                   color: 'white',
@@ -168,7 +176,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
               >
                 -
               </Button>
-
+              
               <Button
                 size="sm"
                 variant="plain"
@@ -182,13 +190,12 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                   minWidth: '50px'
                 }}
               >
-                {currentZoom}%
+                100%
               </Button>
-
+              
               <Button
                 size="sm"
                 variant="plain"
-                onClick={zoomIn}
                 sx={{ 
                   bgcolor: '#1976d2', 
                   color: 'white',
@@ -201,12 +208,63 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
               >
                 +
               </Button>
+              
+              {/* Action buttons - samma storlek och stil */}
+              <Button
+                size="sm"
+                variant="plain"
+                startDecorator={<BookmarkBorderIcon />}
+                sx={{ 
+                  bgcolor: '#1976d2', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#1565c0' },
+                  borderRadius: 'sm',
+                  height: '35px',
+                  px: 1.5,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Versioner
+              </Button>
+              
+              <Button
+                size="sm"
+                variant="plain"
+                sx={{ 
+                  bgcolor: '#1976d2', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#1565c0' },
+                  borderRadius: 'sm',
+                  height: '35px',
+                  px: 1.5,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Markera område
+              </Button>
+              
+              <Button
+                size="sm"
+                variant="plain"
+                startDecorator={<UploadIcon />}
+                sx={{ 
+                  bgcolor: '#1976d2', 
+                  color: 'white',
+                  '&:hover': { bgcolor: '#1565c0' },
+                  borderRadius: 'sm',
+                  height: '35px',
+                  px: 1.5,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Ny version
+              </Button>
             </Box>
           </Sheet>
-
-          {/* Huvudinnehåll */}
+          
+          {/* Main content */}
           <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-            {/* PDF-visare */}
+            {/* PDF Viewer med en grön vertikal linje på vänster sida */}
             <Box 
               sx={{ 
                 flex: 1, 
@@ -231,7 +289,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                   position: 'relative'
                 }}
               >
-                {/* Version badge */}
+                {/* "Nuvarande version" badge som i exemplet */}
                 <Box
                   sx={{
                     position: 'absolute',
@@ -247,10 +305,10 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                     fontWeight: 'bold'
                   }}
                 >
-                  Aktuell version
+                  Nuvarande version
                 </Box>
-
-                {/* PDF-visningskomponent */}
+                
+                {/* Visa PDF:en med vår nya komponent */}
                 <Box 
                   sx={{ 
                     width: '100%', 
@@ -263,11 +321,11 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                 >
                   <PDFJSViewer 
                     pdfUrl={pdfUrl} 
-                    filename={filename}
+                    filename={filename} 
                   />
                 </Box>
-
-                {/* Sidmarkör */}
+                
+                {/* Gröna sidramen för designen som matchar bild 2 */}
                 <Box
                   sx={{
                     position: 'absolute',
@@ -279,9 +337,32 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                   }}
                 />
               </Box>
+              
+              {/* Progress bar at bottom */}
+              <Box 
+                sx={{ 
+                  position: 'absolute', 
+                  bottom: 10, 
+                  left: '50%', 
+                  transform: 'translateX(-50%)',
+                  width: '80%',
+                  height: 4,
+                  bgcolor: '#4b4b4b',
+                  borderRadius: 2,
+                  overflow: 'hidden'
+                }}
+              >
+                <Box 
+                  sx={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    bgcolor: '#1976d2'
+                  }}
+                />
+              </Box>
             </Box>
-
-            {/* Sidofält */}
+            
+            {/* Sidebar */}
             <Sheet 
               variant="outlined"
               sx={{
@@ -293,7 +374,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                 borderRight: 'none',
               }}
             >
-              {/* Flikar */}
+              {/* Tabs */}
               <Tabs 
                 value={activeTab}
                 onChange={(_, value) => setActiveTab(value as string)}
@@ -304,42 +385,68 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                   <Tab value="kommentar">Kommentar</Tab>
                 </TabList>
               </Tabs>
-
-              {/* Flikinnehåll */}
+              
+              {/* Tab content */}
               <Box sx={{ p: 2, overflow: 'auto', flex: 1 }}>
                 {activeTab === 'detaljer' && (
                   <>
-                    <Typography level="title-md" sx={{ mb: 2 }}>Dokumentdetaljer</Typography>
-
+                    <Typography level="title-md" sx={{ mb: 2 }}>PDF Anteckning</Typography>
+                    
                     <Box sx={{ mb: 4 }}>
                       <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                        Filnamn
-                      </Typography>
-                      <Typography level="body-sm">{filename}</Typography>
-                    </Box>
-
-                    <Box sx={{ mb: 4 }}>
-                      <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                        Uppladdad av
+                        Skapad av
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar 
                           size="sm" 
                           sx={{ bgcolor: 'primary.400' }}
                         />
-                        <Typography level="body-sm">Användare</Typography>
+                        <Box>
+                          <Typography level="body-sm">user@example.com</Typography>
+                          <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
+                            2025-05-16
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
-
+                    
                     <Box sx={{ mb: 4 }}>
                       <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                        Uppladdningsdatum
+                        Deadline
                       </Typography>
-                      <Typography level="body-sm">{new Date().toLocaleDateString('sv-SE')}</Typography>
+                      <Typography level="body-sm">22 maj 2025</Typography>
+                    </Box>
+                    
+                    <Box sx={{ mb: 4 }}>
+                      <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                        Granskningspaket
+                      </Typography>
+                      <Typography level="body-sm">K - Granskning BH Hus 3-4</Typography>
+                    </Box>
+                    
+                    <Box sx={{ mb: 4 }}>
+                      <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                        Typ
+                      </Typography>
+                      <Typography level="body-sm">Gransknings kommentar</Typography>
+                    </Box>
+                    
+                    <Box sx={{ mb: 4 }}>
+                      <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                        Aktivitet
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        color="neutral"
+                        fullWidth
+                        sx={{ mt: 1 }}
+                      >
+                        VERSIONER
+                      </Button>
                     </Box>
                   </>
                 )}
-
+                
                 {activeTab === 'historik' && (
                   <>
                     <Typography level="title-md" sx={{ mb: 2 }}>Versionshistorik</Typography>
@@ -348,7 +455,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename = 'Dokument' }: PDFDialogPr
                     </Typography>
                   </>
                 )}
-
+                
                 {activeTab === 'kommentar' && (
                   <>
                     <Typography level="title-md" sx={{ mb: 2 }}>Kommentarer</Typography>

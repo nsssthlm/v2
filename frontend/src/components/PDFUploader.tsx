@@ -46,17 +46,11 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
       formData.append('file', file);
       formData.append('description', description);
       
-      // Skicka med information om i vilken mapp filen ska sparas
-      const directorySlug = 'test1-44'; // Statisk standard-mapp
-      let uploadUrl = `/api/files/upload/?directory_slug=${directorySlug}`;
-      
-      // Använd mapp-ID om det finns
       if (folderId) {
         formData.append('directory', folderId.toString());
-        uploadUrl = `/api/files/upload/?directory_id=${folderId}`;
       }
 
-      const response = await fetch(uploadUrl, {
+      const response = await fetch(`/api/files/upload/?directory_slug=test1-44`, {
         method: 'POST',
         body: formData,
       });
@@ -65,34 +59,13 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         const data = await response.json();
         console.log('Uppladdning lyckades:', data);
         
-        // Stäng uppladdningsdialogrutan
+        // Skapa en temporär lokal URL för direkt förhandsgranskning
+        const fileURL = URL.createObjectURL(file);
+        
+        // Öppna den uppladdade PDF:en direkt i ett nytt fönster
+        window.open(fileURL, '_blank');
+        
         handleClose();
-        
-        // Öppna PDF-filen direkt i vår inbyggda PDF-visare
-        if (data.direct_url || data.file_url) {
-          // Hämta information om vilken mapp vi är i
-          let currentFolderName = 'Dokument';
-          let currentProjectName = '';
-          
-          if (data.directory) {
-            currentFolderName = `Mapp ${data.directory}`;
-          }
-          
-          if (data.project) {
-            currentProjectName = `Projekt ${data.project}`;
-          }
-          
-          openPDFDialog({
-            pdfUrl: data.direct_url || data.file_url,
-            filename: data.name || file.name,
-            fileId: data.id,
-            folderId: data.directory || null,
-            folderName: currentFolderName,
-            projectName: currentProjectName
-          });
-        }
-        
-        // Anropa callback om tillhandahållen
         if (onUploadSuccess) {
           onUploadSuccess();
         }
