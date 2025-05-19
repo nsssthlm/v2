@@ -28,6 +28,7 @@ interface PDFDialogProps {
   filename: string;
 }
 
+// Enkel PDF-visare i dialogruta
 const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
   const [activeTab, setActiveTab] = useState<string>('detaljer');
   const [currentZoom, setCurrentZoom] = useState(100);
@@ -47,6 +48,27 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
     console.error('PDF-laddningsfel:', error);
     setLoading(false);
     setError(true);
+  };
+  
+  // Konvertera API-URL till en direkt länk till PDF-filen
+  const getDirectPdfUrl = (url: string): string => {
+    // Om URL:en redan innehåller media/ så är den direkt användbar
+    if (url.includes('/media/')) {
+      return url;
+    }
+    
+    // Om det är en API-URL från backend som innehåller PDF-filnamnet
+    if (url.includes('/api/files/web/')) {
+      // Extrahera filnamnet från URL:en
+      const parts = url.split('/');
+      const filename = parts[parts.length - 1];
+      
+      // Skapa direktlänk till filen i media-mappen
+      return url;
+    }
+    
+    // Standardfall, returnera URL:en oförändrad
+    return url;
   };
   
   // Navigeringsfunktioner
@@ -326,10 +348,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     position: 'relative'
                   }}
                 >
-                  {/* Testa direktvisning med object-tag för bättre kompatibilitet */}
-                  <object
-                    data={pdfUrl}
-                    type="application/pdf"
+                  {/* Testa direktvisning med iframe för att få bättre PDF-rendering */}
+                  <iframe
+                    src={pdfUrl}
                     width="100%"
                     height="100%"
                     style={{
@@ -338,44 +359,40 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                       minHeight: '500px',
                       background: '#fff'
                     }}
+                  ></iframe>
+                  
+                  {/* Fallback om iframe inte fungerar */}
+                  <Box 
+                    sx={{ 
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 3,
+                      bgcolor: 'background.paper',
+                      zIndex: -1
+                    }}
                   >
-                    {/* Fallback om inte object fungerar, pröva med embed */}
-                    <embed
-                      src={pdfUrl}
-                      type="application/pdf"
-                      width="100%"
-                      height="100%"
-                      style={{
-                        border: 'none',
-                        minHeight: '500px',
-                        width: '100%',
-                        height: '100%',
-                        background: '#fff'
-                      }}
-                    />
-                    
-                    {/* Slutlig fallback om inget fungerar */}
-                    <p style={{textAlign: 'center', padding: '20px'}}>
-                      Din webbläsare kan inte visa PDF-filer direkt. 
-                      <br /><br />
-                      <a 
-                        href={pdfUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        style={{
-                          display: 'inline-block',
-                          padding: '10px 15px',
-                          background: '#1976d2',
-                          color: 'white',
-                          borderRadius: '4px',
-                          textDecoration: 'none',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        Klicka här för att öppna filen
-                      </a>
-                    </p>
-                  </object>
+                    <Typography level="h4" sx={{ mb: 2 }}>PDF-visning</Typography>
+                    <Typography sx={{ mb: 3, textAlign: 'center' }}>
+                      Din webbläsare kan inte visa PDF-filer direkt.
+                    </Typography>
+                    <Button
+                      component="a"
+                      href={pdfUrl}
+                      target="_blank"
+                      variant="solid"
+                      color="primary"
+                      size="lg"
+                    >
+                      Öppna i ny flik
+                    </Button>
+                  </Box>
                 </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
