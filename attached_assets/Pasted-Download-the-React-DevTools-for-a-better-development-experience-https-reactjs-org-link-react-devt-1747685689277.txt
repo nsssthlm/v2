@@ -1,0 +1,196 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-CAZREADN.js?v=dc9a4f35:3485 You are loading @emotion/react when it is already loaded. Running multiple instances may cause problems. This can happen if multiple versions are used, or if multiple builds of the same version are used.
+(anonymous) @ chunk-CAZREADN.js?v=dc9a4f35:3485Understand this warning
+ProjectContext.tsx:133 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+ProjectContext.tsx:133 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+directoryService.ts:69 Hämtar mappdata från API för projekt: 3
+ProjectContext.tsx:62 Försöker hämta projekt från databasen...
+directoryService.ts:69 Hämtar mappdata från API för projekt: 3
+ProjectContext.tsx:62 Försöker hämta projekt från databasen...
+Sidebar.tsx:536 Fel vid hämtning av mappar: TypeError: directoriesData.map is not a function
+    at loadSidebarItems (Sidebar.tsx:525:65)
+loadSidebarItems @ Sidebar.tsx:536
+await in loadSidebarItems
+(anonymous) @ Sidebar.tsx:543
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19432
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=dc9a4f35:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18718
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+ProjectContext.tsx:90 Inga projekt hittades i databasen, använder standardprojekt
+fetchAllProjects @ ProjectContext.tsx:90
+await in fetchAllProjects
+(anonymous) @ ProjectContext.tsx:98
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19432
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=dc9a4f35:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18718
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this warning
+ModernFolderPage.tsx:228 Uncaught TypeError: Cannot read properties of undefined (reading 'length')
+    at ModernFolderPage (ModernFolderPage.tsx:228:31)
+    at renderWithHooks (chunk-276SZO74.js?v=dc9a4f35:11548:26)
+    at updateFunctionComponent (chunk-276SZO74.js?v=dc9a4f35:14582:28)
+    at beginWork (chunk-276SZO74.js?v=dc9a4f35:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-276SZO74.js?v=dc9a4f35:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-276SZO74.js?v=dc9a4f35:3699:24)
+    at invokeGuardedCallback (chunk-276SZO74.js?v=dc9a4f35:3733:39)
+    at beginWork$1 (chunk-276SZO74.js?v=dc9a4f35:19765:15)
+    at performUnitOfWork (chunk-276SZO74.js?v=dc9a4f35:19198:20)
+    at workLoopSync (chunk-276SZO74.js?v=dc9a4f35:19137:13)
+ModernFolderPage @ ModernFolderPage.tsx:228
+renderWithHooks @ chunk-276SZO74.js?v=dc9a4f35:11548
+updateFunctionComponent @ chunk-276SZO74.js?v=dc9a4f35:14582
+beginWork @ chunk-276SZO74.js?v=dc9a4f35:15924
+callCallback2 @ chunk-276SZO74.js?v=dc9a4f35:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=dc9a4f35:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=dc9a4f35:3733
+beginWork$1 @ chunk-276SZO74.js?v=dc9a4f35:19765
+performUnitOfWork @ chunk-276SZO74.js?v=dc9a4f35:19198
+workLoopSync @ chunk-276SZO74.js?v=dc9a4f35:19137
+renderRootSync @ chunk-276SZO74.js?v=dc9a4f35:19116
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18678
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+ModernFolderPage.tsx:228 Uncaught TypeError: Cannot read properties of undefined (reading 'length')
+    at ModernFolderPage (ModernFolderPage.tsx:228:31)
+    at renderWithHooks (chunk-276SZO74.js?v=dc9a4f35:11548:26)
+    at updateFunctionComponent (chunk-276SZO74.js?v=dc9a4f35:14582:28)
+    at beginWork (chunk-276SZO74.js?v=dc9a4f35:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-276SZO74.js?v=dc9a4f35:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-276SZO74.js?v=dc9a4f35:3699:24)
+    at invokeGuardedCallback (chunk-276SZO74.js?v=dc9a4f35:3733:39)
+    at beginWork$1 (chunk-276SZO74.js?v=dc9a4f35:19765:15)
+    at performUnitOfWork (chunk-276SZO74.js?v=dc9a4f35:19198:20)
+    at workLoopSync (chunk-276SZO74.js?v=dc9a4f35:19137:13)
+ModernFolderPage @ ModernFolderPage.tsx:228
+renderWithHooks @ chunk-276SZO74.js?v=dc9a4f35:11548
+updateFunctionComponent @ chunk-276SZO74.js?v=dc9a4f35:14582
+beginWork @ chunk-276SZO74.js?v=dc9a4f35:15924
+callCallback2 @ chunk-276SZO74.js?v=dc9a4f35:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=dc9a4f35:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=dc9a4f35:3733
+beginWork$1 @ chunk-276SZO74.js?v=dc9a4f35:19765
+performUnitOfWork @ chunk-276SZO74.js?v=dc9a4f35:19198
+workLoopSync @ chunk-276SZO74.js?v=dc9a4f35:19137
+renderRootSync @ chunk-276SZO74.js?v=dc9a4f35:19116
+recoverFromConcurrentError @ chunk-276SZO74.js?v=dc9a4f35:18736
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18684
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+chunk-276SZO74.js?v=dc9a4f35:14032 The above error occurred in the <ModernFolderPage> component:
+
+    at ModernFolderPage (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/src/pages/folders/ModernFolderPage.tsx?t=1747685644893:32:25)
+    at RenderedRoute (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=dc9a4f35:5449:26)
+    at Outlet (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=dc9a4f35:6116:26)
+    at div
+    at https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-M7KEQE7L.js?v=dc9a4f35:685:45
+    at Box3 (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:1592:19)
+    at main
+    at https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-M7KEQE7L.js?v=dc9a4f35:685:45
+    at Box3 (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:1592:19)
+    at div
+    at https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-M7KEQE7L.js?v=dc9a4f35:685:45
+    at Box3 (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:1592:19)
+    at div
+    at https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-M7KEQE7L.js?v=dc9a4f35:685:45
+    at Box3 (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:1592:19)
+    at Layout
+    at RenderedRoute (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=dc9a4f35:5449:26)
+    at Routes (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=dc9a4f35:6182:3)
+    at Router (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=dc9a4f35:6125:13)
+    at BrowserRouter (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=dc9a4f35:9111:3)
+    at PDFDialogProvider (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/src/contexts/PDFDialogContext.tsx:24:37)
+    at ProjectProvider (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/src/contexts/ProjectContext.tsx?t=1747685566586:41:35)
+    at DefaultPropsProvider (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:2806:3)
+    at RtlProvider (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:2788:5)
+    at ThemeProvider (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:2744:5)
+    at ThemeProvider2 (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:2853:5)
+    at CssVarsProvider (https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/node_modules/.vite/deps/chunk-NFZQIIGW.js?v=dc9a4f35:3204:7)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-276SZO74.js?v=dc9a4f35:14032
+update.callback @ chunk-276SZO74.js?v=dc9a4f35:14052
+callCallback @ chunk-276SZO74.js?v=dc9a4f35:11248
+commitUpdateQueue @ chunk-276SZO74.js?v=dc9a4f35:11265
+commitLayoutEffectOnFiber @ chunk-276SZO74.js?v=dc9a4f35:17093
+commitLayoutMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:17980
+commitLayoutEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:17969
+commitLayoutEffects @ chunk-276SZO74.js?v=dc9a4f35:17920
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19353
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=dc9a4f35:18760
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18718
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+chunk-276SZO74.js?v=dc9a4f35:19413 Uncaught TypeError: Cannot read properties of undefined (reading 'length')
+    at ModernFolderPage (ModernFolderPage.tsx:228:31)
+    at renderWithHooks (chunk-276SZO74.js?v=dc9a4f35:11548:26)
+    at updateFunctionComponent (chunk-276SZO74.js?v=dc9a4f35:14582:28)
+    at beginWork (chunk-276SZO74.js?v=dc9a4f35:15924:22)
+    at beginWork$1 (chunk-276SZO74.js?v=dc9a4f35:19753:22)
+    at performUnitOfWork (chunk-276SZO74.js?v=dc9a4f35:19198:20)
+    at workLoopSync (chunk-276SZO74.js?v=dc9a4f35:19137:13)
+    at renderRootSync (chunk-276SZO74.js?v=dc9a4f35:19116:15)
+    at recoverFromConcurrentError (chunk-276SZO74.js?v=dc9a4f35:18736:28)
+    at performConcurrentWorkOnRoot (chunk-276SZO74.js?v=dc9a4f35:18684:30)
+ModernFolderPage @ ModernFolderPage.tsx:228
+renderWithHooks @ chunk-276SZO74.js?v=dc9a4f35:11548
+updateFunctionComponent @ chunk-276SZO74.js?v=dc9a4f35:14582
+beginWork @ chunk-276SZO74.js?v=dc9a4f35:15924
+beginWork$1 @ chunk-276SZO74.js?v=dc9a4f35:19753
+performUnitOfWork @ chunk-276SZO74.js?v=dc9a4f35:19198
+workLoopSync @ chunk-276SZO74.js?v=dc9a4f35:19137
+renderRootSync @ chunk-276SZO74.js?v=dc9a4f35:19116
+recoverFromConcurrentError @ chunk-276SZO74.js?v=dc9a4f35:18736
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18684
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+Sidebar.tsx:536 Fel vid hämtning av mappar: TypeError: directoriesData.map is not a function
+    at loadSidebarItems (Sidebar.tsx:525:65)
+loadSidebarItems @ Sidebar.tsx:536
+await in loadSidebarItems
+(anonymous) @ Sidebar.tsx:543
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=dc9a4f35:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=dc9a4f35:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=dc9a4f35:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19432
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=dc9a4f35:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18718
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+ProjectContext.tsx:90 Inga projekt hittades i databasen, använder standardprojekt

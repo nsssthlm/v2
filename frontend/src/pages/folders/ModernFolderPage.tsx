@@ -225,7 +225,7 @@ const ModernFolderPage = () => {
           <Box sx={{ mb: 4 }}>
             <Typography level="h3" sx={{ mb: 2 }}>PDF Dokument</Typography>
             
-            {folderData.files.length === 0 ? (
+            {!folderData.files || folderData.files.length === 0 ? (
               <Typography level="body-sm" sx={{ fontStyle: 'italic' }}>
                 Inga dokument finns i denna mapp.
               </Typography>
