@@ -424,10 +424,8 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
     }
   };
 
-  const { currentProject } = useProject(); // Hämta aktuellt projekt från context
-
-  // Använd projekt-ID för att bygga korrekta URL:er
-  const projectId = currentProject?.id || '1';
+  // Använd activeProjectId som redan är deklarerad ovan för URL-er
+  console.log('Använder aktivt projektID:', activeProjectId);
   console.log('Current Project:', {
     id: currentProject?.id,
     name: currentProject?.name,
