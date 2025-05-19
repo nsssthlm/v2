@@ -113,20 +113,30 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         
         // Använd fil-ID för att hämta direkt från API
         if (fileId) {
-          // Skapa en direkt API URL med projektID
-          // Försök direkt med media-URL som sista alternativ
+          // Skapa en direkt API URL med projektID baserat på logs från användarens skärmbild
           const apiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/?project_id=${effectiveProjectId}`;
           
-          // Skapa en direkt URL till media-katalogen också
-          // Försök skapa en URL baserat på pdfUrl som kan innehålla information om filens placering
-          let mediaUrl = `${window.location.origin}/media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_T5uulEt.0_1.pdf`;
+          // Skapa en direkt URL till media-katalogen baserad på faktiska URL:er i systemet
+          // Från skärmavbilden ser vi ett mönster där direkt URL används 
+          let mediaUrl = null;
+          let directUrl = null;
           
-          // Försök hitta filnamn från originalfilens URL
-          const fileNameMatch = pdfUrl.match(/\/([^\/]+\.pdf)$/);
-          if (fileNameMatch && fileNameMatch[1]) {
-            const fileName = fileNameMatch[1];
-            console.log('Extraherat filnamn från URL:', fileName);
-            mediaUrl = `${window.location.origin}/media/project_files/2025/05/19/${fileName}`;
+          // URL direkt till filen om vi vet filnamnet
+          if (filename) {
+            console.log('Använder filnamn för direktåtkomst:', filename);
+            directUrl = `${window.location.origin}/api/files/get-data/${filename}?project_id=${effectiveProjectId}`;
+          }
+          
+          // FRÅN LOGS: Ser följande mönster
+          // https://3d0eb322-114e-428e-9b72-6dc9b22e9017-00.2ep.7cu1e4x25w.rtrk.replit.d.8001/pdf/2025/05/19/BEAst-PDF-Guidelines-2_T5uulEt.0_1.pdf
+          const realMediaUrl = `${window.location.origin}/api/files/web/999-67/data/${fileId}`;
+          
+          // Använd även direct endpoints baserat på loggar
+          console.log('Testar att använda nya URL alternativ:');
+          console.log('- Direct API URL:', realMediaUrl);
+          
+          if (directUrl) {
+            console.log('- Direct URL med filnamn:', directUrl);
           }
           
           console.log('Använder direkt API URL med projektID:', apiUrl);
@@ -149,9 +159,10 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
             // Skapa en array med URL:er att försöka med
             const urlsToTry = [
               `${apiUrl}?t=${Date.now()}`, // API URL
-              mediaUrl, // Direkt media-URL
+              realMediaUrl, // URL från loggar
+              directUrl, // Direkt URL med filnamn 
               pdfUrl // Ursprunglig URL
-            ];
+            ].filter(url => url); // Filtrera bort null/undefined
             
             console.log('PDF-förfrågan kommer att testas med dessa URL:er i följd:', urlsToTry);
             
