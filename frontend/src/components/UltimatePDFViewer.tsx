@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/joy';
 import { DIRECT_API_URL } from '../config';
 
+// Demo PDF URL för testning lokalt - exempel på en öppen PDF som bör fungera i de flesta miljöer
+export const DEMO_PDF_URL = "https://cdn.mozilla.net/pdfjs/tracemonkey.pdf";
+
 interface UltimatePDFViewerProps {
   pdfUrl: string;
   onLoad?: () => void;

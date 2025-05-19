@@ -28,6 +28,7 @@ import PDFViewerPage from './pages/PDFViewerPage';
 import SimplePDFPage from './pages/SimplePDFPage';
 import SimpleDirectPDFPage from './pages/SimpleDirectPDFPage';
 import PDFTestPage from './components/PDFTestPage';
+import DemoPDFView from './pages/DemoPDFView';
 
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
@@ -71,6 +72,7 @@ function App() {
                 <Route path="simple-pdf" element={<SimplePDFPage />} />
                 <Route path="direct-pdf" element={<SimpleDirectPDFPage />} />
                 <Route path="pdf-test" element={<PDFTestPage />} />
+                <Route path="demo-pdf" element={<DemoPDFView />} />
                 
                 {/* Vault routes */}
                 <Route path="vault">
