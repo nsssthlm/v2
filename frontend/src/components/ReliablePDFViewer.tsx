@@ -12,18 +12,11 @@ import {
   CircularProgress
 } from '@mui/joy';
 
-// Import Lucide icons
-import { 
-  ChevronLeft, 
-  ChevronRight,
-  ZoomIn, 
-  ZoomOut,
-  X,
-  Upload,
-  ExternalLink,
-  FileDown,
-  RefreshCw
-} from "lucide-react";
+// Import MUI icons istället för Lucide-ikoner (för att undvika kompatibilitetsproblem)
+import RefreshIcon from '@mui/icons-material/Refresh';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface ReliablePDFViewerProps {
   fileId?: string | number;
@@ -188,7 +181,7 @@ const ReliablePDFViewer = ({
             onClick={onClose}
             sx={{ mr: 1 }}
           >
-            <X size={18} />
+            <CloseIcon fontSize="small" />
           </IconButton>
           <Typography level="title-lg">{filename}</Typography>
         </Box>
@@ -199,7 +192,7 @@ const ReliablePDFViewer = ({
             size="sm"
             variant="plain"
             color="neutral"
-            startDecorator={<RefreshCw size={16} />}
+            startDecorator={<RefreshIcon fontSize="small" />}
             onClick={reloadPdf}
           >
             Ladda om
@@ -209,7 +202,7 @@ const ReliablePDFViewer = ({
             size="sm"
             variant="plain"
             color="primary"
-            startDecorator={<ExternalLink size={16} />}
+            startDecorator={<OpenInNewIcon fontSize="small" />}
             onClick={openInNewTab}
           >
             Öppna i ny flik
@@ -219,7 +212,7 @@ const ReliablePDFViewer = ({
             size="sm"
             variant="plain"
             color="primary"
-            startDecorator={<FileDown size={16} />}
+            startDecorator={<FileDownloadIcon fontSize="small" />}
             onClick={downloadPdf}
           >
             Ladda ner
@@ -285,7 +278,7 @@ const ReliablePDFViewer = ({
                   onClick={reloadPdf}
                   variant="soft"
                   color="neutral"
-                  startDecorator={<RefreshCw size={16} />}
+                  startDecorator={<RefreshIcon fontSize="small" />}
                 >
                   Försök igen
                 </Button>
@@ -294,7 +287,7 @@ const ReliablePDFViewer = ({
                   onClick={openInNewTab}
                   variant="solid"
                   color="primary"
-                  startDecorator={<ExternalLink size={16} />}
+                  startDecorator={<OpenInNewIcon fontSize="small" />}
                 >
                   Öppna i ny flik
                 </Button>

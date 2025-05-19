@@ -9,7 +9,7 @@ interface ReliablePDFDialogProps {
   filename?: string;
   fileId?: string | number;
   projectId?: number | null;
-  folderId?: string | number | null;
+  folderId?: number | null;
 }
 
 /**
@@ -54,7 +54,7 @@ const ReliablePDFDialog: React.FC<ReliablePDFDialogProps> = ({
           filename={filename}
           onClose={onClose}
           projectId={projectId}
-          folderId={folderId}
+          folderId={typeof folderId === 'string' ? parseInt(folderId, 10) : folderId}
         />
       </ModalDialog>
     </Modal>
