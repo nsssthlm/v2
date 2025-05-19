@@ -54,7 +54,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
 
   // Använd projektID från props om det finns, annars från context, och säkerställ att det är en sträng
   const activeProjectId = (projectId?.toString() || currentProject?.id?.toString() || null);
-  
+
   console.log('PDF Debug:', {
     providedProjectId: projectId,
     contextProjectId: currentProject?.id,
@@ -72,7 +72,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
 
     // Logga original-URL:en för diagnostik
     console.log('PDF original URL:', pdfUrl);
-    
+
     // Om URL:en redan innehåller vår proxy-bas, använd den direkt
     if (pdfUrl.includes('/proxy/8001')) {
       console.log('Använder redan proxad URL:', pdfUrl);
