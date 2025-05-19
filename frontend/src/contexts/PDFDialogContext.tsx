@@ -8,12 +8,13 @@ interface PDFDialogState {
   filename?: string;
   fileId?: string | number;
   folderId?: number | null;
+  projectId?: number | string | null;
 }
 
 // Interface för context värdet
 interface PDFDialogContextType {
   dialogState: PDFDialogState;
-  openPDFDialog: (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null }) => void;
+  openPDFDialog: (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null; projectId?: number | string | null }) => void;
   closePDFDialog: () => void;
 }
 
@@ -32,8 +33,8 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
   const [dialogState, setDialogState] = useState<PDFDialogState>(initialDialogState);
 
   // Öppna dialogen med de angivna parametrarna
-  const openPDFDialog = (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null }) => {
-    console.log('Öppnar PDF:', params.pdfUrl, params.filename);
+  const openPDFDialog = (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null; projectId?: number | string | null }) => {
+    console.log('Öppnar PDF:', params.pdfUrl, params.filename, 'projektID:', params.projectId, 'mappID:', params.folderId);
     
     // Optimera URL:en för att garantera att PDF-filen kan visas korrekt
     let optimizedUrl = params.pdfUrl;
@@ -64,7 +65,8 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
       pdfUrl: optimizedUrl,
       filename: params.filename,
       fileId: params.fileId,
-      folderId: params.folderId
+      folderId: params.folderId,
+      projectId: params.projectId
     });
   };
 
@@ -82,6 +84,8 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
           onClose={closePDFDialog}
           pdfUrl={dialogState.pdfUrl}
           filename={dialogState.filename || 'PDF-dokument'}
+          projectId={dialogState.projectId}
+          folderId={dialogState.folderId}
         />
       )}
     </PDFDialogContext.Provider>

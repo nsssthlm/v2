@@ -23,12 +23,17 @@ interface DirectPDFDialogProps {
   onClose: () => void;
   pdfUrl: string;
   filename: string;
+  projectId?: number | string | null;
+  folderId?: number | string | null;
 }
 
-const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl, filename }) => {
+const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl, filename, projectId, folderId }) => {
   // Använd blå färg
   const BlueColor = '#1976d2';
   const hoverBlueColor = '#1565c0';
+  
+  // Logga information om mapp och projekt för felsökning
+  console.log('PDF Dialog öppnas med projektId:', projectId, 'och mappId:', folderId);
   
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
