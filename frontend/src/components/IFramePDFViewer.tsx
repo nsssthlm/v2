@@ -46,6 +46,58 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
     setError('Failed to load PDF. The file may not exist or you may not have permission to view it.');
   };
 
+  // Prepare URL with authentication token
+  const token = localStorage.getItem('access_token');
+  const finalUrl = pdfUrl.includes('?') 
+    ? `${pdfUrl}&token=${token}` 
+    : `${pdfUrl}?token=${token}`;
+    
+  // Create an object URL for direct file access
+  const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
+  
+  // Fetch the PDF file and create an object URL for direct access
+  React.useEffect(() => {
+    const fetchPdf = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch the PDF file with authentication
+        const response = await fetch(finalUrl, {
+          headers: {
+            'Accept': 'application/pdf',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load PDF: ${response.status} ${response.statusText}`);
+        }
+        
+        // Get the PDF as a blob
+        const pdfBlob = await response.blob();
+        
+        // Create an object URL from the blob
+        const url = URL.createObjectURL(pdfBlob);
+        setObjectUrl(url);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching PDF:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load PDF');
+        setLoading(false);
+      }
+    };
+    
+    fetchPdf();
+    
+    // Clean up the object URL when the component unmounts
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [pdfUrl, token, finalUrl]);
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -110,10 +162,10 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
               </Typography>
             </Box>
           </Box>
-        ) : (
+        ) : objectUrl ? (
           <iframe
             ref={iframeRef}
-            src={pdfUrl}
+            src={objectUrl}
             style={{
               width: '100%',
               height: '100%',
@@ -123,7 +175,7 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
             onError={handleIframeError}
             title={fileName}
           />
-        )}
+        ) : null}
       </Box>
     </Box>
   );
