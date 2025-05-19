@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -15,12 +16,15 @@ import {
   Divider,
   Alert
 } from '@mui/joy';
-import { loginUser } from '../../utils/authUtils';
+import { useAuth } from '../../contexts/AuthContext';
 
 // URL till skogsbilden i public-mappen
 const forestImageUrl = '/images/swedish-forest.webp';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login, isLoggedIn, user, refreshSession } = useAuth();
+  
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,24 +37,37 @@ const LoginPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [inviteCode, setInviteCode] = useState('');
+  
+  // Kör endast en gång vid mount
+  useEffect(() => {
+    // Vi uppdaterar autentiseringsstatus en gång när komponenten renderas
+    refreshSession();
+  }, []); // Tom beroendematris körs bara en gång vid mount
+  
+  // Om användaren redan är inloggad, navigera till dashboard
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/dashboard');
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     
-    // Använd loginUser från utils/authUtils
-    const result = loginUser(username, password);
+    // Använd login från AuthContext
+    const result = login(username, password);
     
     setTimeout(() => {
       setIsLoading(false);
       
       if (result.success) {
         // Visa info om inloggad användare
-        console.log(`Inloggad som ${result.user?.username} med rollen ${result.user?.role}`);
+        console.log(`Inloggad som ${user?.username} med rollen ${user?.role}`);
         
-        // Redirect till dashboard/hem efter inloggning
-        window.location.href = '/dashboard';
+        // Använd React Router för att navigera vilket bevarar sessionsinformation
+        navigate('/dashboard');
       } else {
         // Visa felmeddelande
         setError(result.message || 'Inloggningen misslyckades');
