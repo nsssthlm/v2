@@ -23,11 +23,6 @@ import CalendarPage from './pages/dashboard/CalendarPage';
 import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
 
-// PDF hantering
-import PDFViewerPage from './pages/PDFViewerPage';
-import SimplePDFPage from './pages/SimplePDFPage';
-import SimpleDirectPDFPage from './pages/SimpleDirectPDFPage';
-
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
 
@@ -64,11 +59,6 @@ function App() {
                 {/* Folder routes */}
                 <Route path="folders" element={<FolderListPage />} />
                 <Route path="folders/:slug" element={<FolderPageNew />} />
-                
-                {/* Nya dedikerade PDF-viewer sidor */}
-                <Route path="pdf-viewer" element={<PDFViewerPage />} />
-                <Route path="simple-pdf" element={<SimplePDFPage />} />
-                <Route path="direct-pdf" element={<SimpleDirectPDFPage />} />
                 
                 {/* Vault routes */}
                 <Route path="vault">

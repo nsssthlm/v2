@@ -39,7 +39,7 @@ urlpatterns = [
 ]
 
 # Registrera PDF API routes
-urlpatterns += register_pdf_api_routes()
+register_pdf_api_routes(urlpatterns)
 
 # Add static and media URLs - i utvecklingsläge tillåter vi direkt åtkomst till alla filer
 # Detta är nödvändigt för att PDF-filer ska kunna visas direkt från servern
