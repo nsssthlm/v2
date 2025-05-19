@@ -41,17 +41,36 @@ urlpatterns = [
 # Registrera PDF API routes
 register_pdf_api_routes(urlpatterns)
 
-# Flytta media URLs högst upp för att säkerställa att de inte fångas av andra routes
-# Detta är nödvändigt för att PDF-filer ska kunna visas direkt från servern
-# OBS: Dessa måste vara före de andra URL-patterns för att undvika konflikter
-# Lägg till ett nytt media-pattern först i listan
-new_urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# Lägg till resten av url-patterns efter media-patterns
-new_urlpatterns.extend(urlpatterns)
-# Ersätt urlpatterns med den nya ordningen
-urlpatterns = new_urlpatterns
-# Lägg till static-url patterns 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# Ta bort eventuella tidigare static patterns för att undvika dubbletter
+# Definiera om urlpatterns för att säkerställa rätt ordning
+if settings.DEBUG:
+    # För utvecklingsläge, hantera media-filer direkt via Django
+    # Detta gör att vi kan servera PDF-filer direkt via /media/ URL:er
+    media_urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    static_urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    
+    # Viktigt: Lägg media patterns först i listan före alla Django-views
+    # Detta gör att /media/ fångas upp direkt och skickas till filsystemet
+    urlpatterns = media_urlpatterns + urlpatterns + static_urlpatterns
+    
+    # Lägg till extra loggning för att spåra media-förfrågningar i utvecklingsläge
+    from django.views.decorators.cache import never_cache
+    from django.contrib.staticfiles.views import serve
+    
+    @never_cache
+    def logged_media_serve(request, path, document_root=None, **kwargs):
+        """Wrapper runt Django's static serve som loggar alla förfrågningar"""
+        import logging
+        logger = logging.getLogger('django')
+        logger.info(f"Media request: {path} (from {document_root})")
+        return serve(request, path, document_root=document_root, **kwargs)
+    
+    # Lägg till en direkt URL för media-filer som loggar alla förfrågningar
+    from django.urls import re_path
+    urlpatterns += [
+        re_path(r'^media-debug/(?P<path>.*)$', logged_media_serve, 
+                {'document_root': settings.MEDIA_ROOT}, name='media_debug'),
+    ]
 
 # Lägg till en dedikerad view för att servera media-filer med korrekt CORS och headers
 from django.http import FileResponse

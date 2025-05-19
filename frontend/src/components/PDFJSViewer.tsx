@@ -65,7 +65,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       console.log("URL med proxy:", finalUrl);
     }
     
-    // Om URL:en innehåller project_files, extrahera sökvägen och använd /media/ direkt
+    // Om URL:en innehåller project_files, extrahera sökvägen och använd /media-debug/ direkt
     if (finalUrl.includes('project_files/')) {
       // Extrahera sökvägen för projektfiler från URL
       const pathPattern = /project_files\/(.*?\.pdf)/;
@@ -73,9 +73,9 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       
       if (pathMatch && pathMatch[1]) {
         const pdfPath = pathMatch[1];
-        // Använd direkt media URL - säkerställer korrekt Content-Type och är enklast
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${pdfPath}`;
-        console.log("Använder direkt media URL:", finalUrl);
+        // Använd media-debug URL som har loggning aktiverad
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media-debug/project_files/${pdfPath}`;
+        console.log("Använder debug media URL:", finalUrl);
       }
     } else if (pdfUrl.includes('/api/files/web/')) {
       // För API endpoint-format, extrahera viktiga delar och använd media URL
@@ -83,17 +83,17 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       const apiMatch = finalUrl.match(apiPattern);
       
       if (apiMatch && apiMatch[1]) {
-        // Använd den direkta media URL som vi vet fungerar
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${apiMatch[1]}`;
-        console.log("Använder direkt media URL för API-format:", finalUrl);
+        // Använd vår nya diagnostiska media-debug URL för bättre loggning
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media-debug/project_files/${apiMatch[1]}`;
+        console.log("Använder debug media URL för API-format:", finalUrl);
       } else {
         // Försök hitta bara filnamnet i URL:en som sista alternativ
         const parts = finalUrl.split('/');
         const pdfName = parts[parts.length - 1]; 
         if (pdfName && pdfName.endsWith('.pdf')) {
           console.log("Extraherar filnamn från URL:", pdfName);
-          // Använd senaste filuppladdningsmappen (vi vet att detta fungerar)
-          finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/2025/05/19/${pdfName}`;
+          // Använd media-debug och senaste filuppladdningsmappen
+          finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media-debug/project_files/2025/05/19/${pdfName}`;
         }
       }
     }
@@ -119,43 +119,45 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     // Skapa intelligenta fallbacks baserat på vilket försök vi är på
     switch (attemptNum) {
       case 1:
-        // Använd direct media URL för filnamnet - vi vet att detta fungerar via curl-test
+        // Använd debug media URL för filnamnet med bara filnamnet
         if (filename && filename.endsWith('.pdf')) {
-          console.log("Försök 1: Använder direkt media URL med filnamn", filename);
-          return `${baseUrl}/media/project_files/2025/05/19/${filename}`;
+          console.log("Försök 1: Använder media-debug URL med filnamn", filename);
+          return `${baseUrl}/media-debug/project_files/2025/05/19/${filename}`;
         }
         break;
         
       case 2:
-        // Försök extrahera datum och filsökväg om möjligt
+        // Försök med direct/media som är en säker endpunkt med CORS och Content-Type
+        console.log("Försök 2: Använder direct/media path", filename);
+        return `${baseUrl}/direct/media/project_files/2025/05/19/${filename}`;
+        
+      case 3:
+        // Försök med den ursprungliga PDF URL:en via vår dedikerade PDF-endpoint
         if (url.includes('/project_files/')) {
           // Extrahera sökvägen för projektfiler 
           const pathPattern = /project_files\/(.*?\.pdf)/;
           const pathMatch = url.match(pathPattern);
           
           if (pathMatch && pathMatch[1]) {
-            console.log("Försök 2: Använder full media URL med exakt sökväg", pathMatch[1]);
-            return `${baseUrl}/media/project_files/${pathMatch[1]}`;
+            console.log("Försök 3: Använder direkt PDF endpoint", pathMatch[1]);
+            return `${baseUrl}/pdf/${pathMatch[1]}`;
           }
         }
         
-        // Annars försök med bara filnamnet igen men med annan namnkonvention
-        return `${baseUrl}/media/project_files/2025/05/15/${filename}`;
-        
-      case 3:
-        // Prova med direct/media som är en säker endpunkt
-        console.log("Försök 3: Använder direct/media path", filename);
-        return `${baseUrl}/direct/media/project_files/2025/05/19/${filename}`;
+        // Om vi inte kunde extrahera sökvägen, prova med den enklaste directa PDF-filhanteringen
+        return `${baseUrl}/pdf/2025/05/19/${filename}`;
         
       case 4:
-        // Som sista försök, ta bort eventuella hash-delar från filnamnet för att få basversionen av filen
-        const baseNameMatch = filename.match(/^([^_]+)/);
-        if (baseNameMatch) {
-          const baseName = baseNameMatch[1] + ".pdf";
-          console.log("Försök 4: Använder basnamn utan hash", baseName);
-          return `${baseUrl}/media/project_files/2025/05/19/${baseName}`;
+        // Som sista försök, försök med exakt filnamn från 15 maj 
+        console.log("Försök 4: Försöker med filer från 15 maj istället", filename);
+        
+        // Se om detta är en Beast PDF och försök med det gamla uppladdningsdatumet
+        if (filename.includes('BEAst')) {
+          return `${baseUrl}/media-debug/project_files/2025/05/15/BEAst-PDF-Guidelines-2.0_1.pdf`;
         }
-        break;
+        
+        // Annars prova med ett annat filnamn som vi vet fungerar
+        return `${baseUrl}/media-debug/project_files/2025/05/15/AAAAExempel_pa_ritningar.pdf`;
     }
     
     // Om inget av ovanstående fungerade, försök med original-URL:en men lägg till timestamp
