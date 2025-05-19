@@ -44,10 +44,18 @@ const LoginPage = () => {
     refreshSession();
   }, []); // Tom beroendematris körs bara en gång vid mount
   
-  // Om användaren redan är inloggad, navigera till dashboard
+  // Om användaren redan är inloggad, navigera till dashboard eller till den sidans som var målet
   useEffect(() => {
     if (isLoggedIn) {
-      navigate('/dashboard');
+      // Kontrollera om det finns en sparad omdirigeringsväg efter inloggningen
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        console.log("Omdirigerar efter inloggning till:", redirectPath);
+        sessionStorage.removeItem('redirectAfterLogin'); // Rensa efter användning
+        navigate(redirectPath);
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [isLoggedIn, navigate]);
 
@@ -66,8 +74,16 @@ const LoginPage = () => {
         // Visa info om inloggad användare
         console.log(`Inloggad som ${user?.username} med rollen ${user?.role}`);
         
-        // Använd React Router för att navigera vilket bevarar sessionsinformation
-        navigate('/dashboard');
+        // Kontrollera om det finns en sparad omdirigeringsväg efter inloggningen
+        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+        if (redirectPath) {
+          console.log("Omdirigerar efter inloggning till:", redirectPath);
+          sessionStorage.removeItem('redirectAfterLogin'); // Rensa efter användning
+          navigate(redirectPath);
+        } else {
+          // Använd React Router för att navigera vilket bevarar sessionsinformation
+          navigate('/dashboard');
+        }
       } else {
         // Visa felmeddelande
         setError(result.message || 'Inloggningen misslyckades');

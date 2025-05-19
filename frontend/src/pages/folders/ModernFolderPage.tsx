@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, IconButton, Tooltip } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
@@ -8,6 +8,7 @@ import UltimatePDFDialog from '../../components/UltimatePDFDialog';
 import PDFUploader from '../../components/PDFUploader';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useProject } from '../../contexts/ProjectContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -41,18 +42,53 @@ interface FolderData {
  */
 const ModernFolderPage = () => {
   const { slug = '' } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { isLoggedIn, refreshSession } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   
   // PDF-visning
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
   
   // Projektkontexten för nuvarande användare
   const projectContext = useProject();
+  
+  // Kontrollera och återställ autentisering vid sidladdning
+  useEffect(() => {
+    const checkAndRestoreAuth = () => {
+      // Kontrollera om vi har tokens i sessionStorage (backup)
+      const allTokensStr = sessionStorage.getItem('all_auth_tokens');
+      
+      if (allTokensStr) {
+        try {
+          console.log("Återställer autentiseringsuppgifter från sessionStorage...");
+          const allTokens = JSON.parse(allTokensStr);
+          
+          // Återställ alla tokens till localStorage
+          if (allTokens.jwt_token) localStorage.setItem('jwt_token', allTokens.jwt_token);
+          if (allTokens.auth_token) localStorage.setItem('auth_token', allTokens.auth_token);
+          if (allTokens.token) localStorage.setItem('token', allTokens.token);
+          if (allTokens.csrftoken) localStorage.setItem('csrftoken', allTokens.csrftoken);
+          if (allTokens.currentUser) localStorage.setItem('currentUser', allTokens.currentUser);
+          
+          // Uppdatera autentiseringskontexten
+          refreshSession();
+        } catch (e) {
+          console.error("Fel vid återställning av autentiseringsuppgifter:", e);
+        }
+      }
+      
+      // Markera att vi har kontrollerat autentiseringen
+      setAuthChecked(true);
+    };
+    
+    checkAndRestoreAuth();
+  }, [refreshSession]);
   
   // Hantera klick på PDF-filer - öppna i vår nya UltimatePDFDialog
   const handlePdfClick = (fileUrl: string, fileName: string, fileId: string) => {
@@ -125,10 +161,19 @@ const ModernFolderPage = () => {
   };
 
   useEffect(() => {
-    if (slug) {
-      fetchFolderData();
+    if (slug && authChecked) {
+      if (isLoggedIn) {
+        console.log("Användare inloggad, hämtar mappdata för:", slug);
+        fetchFolderData();
+      } else {
+        console.log("Användare inte inloggad, omdirigerar till login");
+        // Spara måldestination i sessionStorage
+        sessionStorage.setItem('redirectAfterLogin', `/folders/${slug}`);
+        // Omdirigera till login
+        navigate('/login');
+      }
     }
-  }, [slug]);
+  }, [slug, isLoggedIn, authChecked, navigate]);
 
   const handleUploadSuccess = () => {
     fetchFolderData();
