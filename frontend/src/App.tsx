@@ -27,7 +27,7 @@ import FolderListPage from './pages/folders/FolderListPage';
 import LoginPage from './pages/auth/LoginPage';
 
 // Other pages
-import { default as ComingSoonPage } from './pages/ComingSoonPage';
+import ComingSoonPage from './pages/ComingSoonPage';
 
 // Fristående PDF-visare
 import DirectPDFView from './pages/pdf/DirectPDFView';
@@ -90,12 +90,6 @@ function App() {
   );
 }
 
-// Simple component to show for routes not yet implemented
-const ComingSoonPage = ({ title }: { title: string }) => (
-  <div style={{ padding: '20px' }}>
-    <h1>{title}</h1>
-    <p>Denna sida är under utveckling och kommer snart.</p>
-  </div>
-);
+// Vi använder nu den importerade ComingSoonPage-komponenten från './pages/ComingSoonPage'
 
 export default App;
