@@ -521,13 +521,20 @@ const Sidebar = () => {
         // Använd projektets ID för att filtrera mappar
         const directoriesData = await directoryService.getSidebarDirectories(currentProject.id);
         
+        // Kontrollera om data är en array innan vi försöker använda map
+        if (!directoriesData || !Array.isArray(directoriesData)) {
+          console.warn('Data från API är inte en array:', directoriesData);
+          setFilesystemNodes([]);
+          return;
+        }
+        
         // Konvertera från API-format till SidebarFileNode-format
         const sidebarNodes: SidebarFileNode[] = directoriesData.map(dir => ({
-          id: dir.id.toString(),  // Konvertera till string-format
-          name: dir.name,
-          type: dir.type as 'folder' | 'file',
+          id: dir.id?.toString() || `temp-${Math.random()}`,  // Konvertera till string-format, med fallback
+          name: dir.name || 'Namnlös mapp',
+          type: (dir.type as 'folder' | 'file') || 'folder',
           parent_id: dir.parent ? dir.parent.toString() : null,
-          db_id: dir.id,
+          db_id: dir.id || 0,
           slug: dir.slug || undefined
         }));
         
