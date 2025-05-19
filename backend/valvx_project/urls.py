@@ -80,60 +80,116 @@ def serve_media_file(request, path):
     except Exception as e:
         raise Http404(f"Error accessing file: {str(e)}")
 
-# Lägg till en dedikerad URL-pattern för media-filer - utan trailing slash för att undvika 301-redirect
+# Lägg till en dedikerad URL-pattern för media-filer
+from django.views.decorators.csrf import csrf_exempt
+
 urlpatterns.append(path('direct/media/<path:path>', serve_media_file, name='direct_media_file'))
 
-# Lägg till även en direct-path för PDFer som används ofta
-from django.views.static import serve as static_serve
-urlpatterns.append(path('pdf-direct/', serve_media_file, name='pdf_direct'))
-
-# Skapa en särskild filnamnshämtare för PDF-filer - för att lösa 404-problem
-def pdf_file_finder(request):
-    """Hittar PDF-filer baserat på delar av filnamnet"""
+# Funktioner för hantering av PDF-filer
+def direct_serve_pdf(request, file_path):
+    """Serverar en PDF-fil direkt med rätt Content-Type header och CORS-inställningar"""
     import os
+    
+    try:
+        if not os.path.exists(file_path):
+            raise Http404(f"PDF-fil hittades inte: {file_path}")
+            
+        response = FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{os.path.basename(file_path)}"'
+        response['Access-Control-Allow-Origin'] = '*'
+        
+        # Ta bort headers som kan störa visning i iframe
+        if 'X-Frame-Options' in response:
+            del response['X-Frame-Options']
+            
+        return response
+    except Exception as e:
+        return JsonResponse({'error': f'Fel vid filöppning: {str(e)}'}, status=500)
+
+# Förbättrad PDF-finder funktion
+@csrf_exempt
+def pdf_file_finder(request):
+    """Hittar PDF-filer baserat på delar av filnamnet med direkt streaming"""
+    import os
+    import glob
     
     # Hämta sökparameter (filnamn eller del av filnamn)
     filename_part = request.GET.get('filename', '')
     if not filename_part or not filename_part.endswith('.pdf'):
         return JsonResponse({'error': 'Invalid or missing filename parameter'}, status=400)
     
-    # Leta i alla viktiga PDF-kataloger
+    # Leta i alla viktiga PDF-kataloger 
     media_root = settings.MEDIA_ROOT
     project_files_dir = os.path.join(media_root, 'project_files')
     
+    # Sök med glob för bättre prestanda
+    search_patterns = [
+        os.path.join(project_files_dir, '**', f'*{filename_part}*'),  # Sök i alla undermappar
+        os.path.join(media_root, '**', f'*{filename_part}*')          # Sök i hela media
+    ]
+    
     # Samla alla matchande filer
     matching_files = []
-    for root, dirs, files in os.walk(project_files_dir):
-        for file in files:
-            if filename_part in file and file.endswith('.pdf'):
-                rel_path = os.path.relpath(os.path.join(root, file), media_root)
+    for pattern in search_patterns:
+        for filepath in glob.glob(pattern, recursive=True):
+            if filepath.lower().endswith('.pdf'):
+                rel_path = os.path.relpath(filepath, media_root)
                 matching_files.append({
-                    'filename': file,
+                    'filename': os.path.basename(filepath),
                     'path': rel_path,
                     'url': f'/media/{rel_path}',
-                    'direct_url': f'/pdf/{os.path.relpath(os.path.join(root, file), project_files_dir)}'
+                    'filepath': filepath
                 })
     
+    # Logga sökningen för debugging
+    print(f"PDF-sökning: {filename_part}, hittade {len(matching_files)} filer")
+    
+    # Direkt streaming mode
     if request.GET.get('stream', 'false').lower() == 'true' and matching_files:
-        # Om stream=true, servera första matchande fil direkt
-        filepath = os.path.join(media_root, matching_files[0]['path'])
-        try:
-            response = FileResponse(open(filepath, 'rb'), content_type='application/pdf')
-            response['Content-Disposition'] = f'inline; filename="{os.path.basename(filepath)}"'
-            return response
-        except Exception as e:
-            return JsonResponse({'error': f'Error streaming file: {str(e)}'}, status=500)
+        filepath = matching_files[0]['filepath']
+        return direct_serve_pdf(request, filepath)
     
     return JsonResponse({'files': matching_files}, safe=False)
 
+# Explicit PDF-access funktion
+def serve_pdf_file(request, path):
+    import os
+    
+    # Leta i alla möjliga kataloger efter PDF-filen
+    possible_paths = []
+    
+    # Standardsökväg
+    media_root = settings.MEDIA_ROOT
+    project_files_dir = os.path.join(media_root, 'project_files')
+    standard_path = os.path.join(project_files_dir, path)
+    possible_paths.append(standard_path)
+    
+    # Alternativ sökväg direkt under media
+    alternative_path = os.path.join(media_root, path)
+    possible_paths.append(alternative_path)
+    
+    # Prova alla sökvägar
+    for file_path in possible_paths:
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return direct_serve_pdf(request, file_path)
+    
+    # Om vi når hit hittades ingen fil
+    return JsonResponse({
+        'error': 'PDF file not found',
+        'path': path,
+        'searched_paths': possible_paths
+    }, status=404)
 
-
-# Lägg till PDF-sökning i URL-patterns
+# Lägg till PDF-söknings-URL
 urlpatterns.append(path('pdf-finder/', pdf_file_finder, name='pdf_finder'))
 
 # Direkt åtkomst till PDF via path
-urlpatterns.append(path('pdf/<path:path>', lambda request, path: static_serve(
+urlpatterns.append(path('pdf/<path:path>', serve_pdf_file, name='pdf_path_direct'))
+
+# Backupfunktion med vanlig static serve som fallback
+from django.views.static import serve as static_serve
+urlpatterns.append(path('pdf-static/<path:path>', lambda request, path: static_serve(
     request, 
     path=f"project_files/{path}", 
     document_root=settings.MEDIA_ROOT
-), name='pdf_path_direct'))
+), name='pdf_static_direct'))

@@ -51,54 +51,58 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     // Om ingen URL, returnera tom sträng
     if (!pdfUrl) return '';
     
-    // Hantera backend URL:er för Replit-miljön
+    // Få basens URL för proxys och direkta anrop
+    const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
     let finalUrl = pdfUrl;
     
-    console.log('Bearbetar PDF URL:', pdfUrl);
+    // Logga original-URL:en för diagnostik
+    console.log('PDF original URL:', pdfUrl);
     
-    // Ersätt alla lokala URL:er (0.0.0.0:8001) med Replit proxy URL
+    // Ersätt alla lokala URL:er med proxy URL som kan nås från klienten
     if (pdfUrl.includes('0.0.0.0:8001')) {
-      finalUrl = pdfUrl.replace(
-        'http://0.0.0.0:8001', 
-        `${window.location.protocol}//${window.location.host}/proxy/3000`
-      );
-      console.log("URL med proxy:", finalUrl);
+      finalUrl = pdfUrl.replace('http://0.0.0.0:8001', baseUrl);
+      console.log("Proxied URL:", finalUrl);
     }
+
+    // Extrahera filnamnet oavsett URL-format
+    const parts = finalUrl.split('/');
+    const fileName = parts[parts.length - 1]?.split('?')[0]; // Ta bort eventuella queryparameter
     
-    // Om URL:en innehåller project_files, extrahera sökvägen för vår nya PDF-endpoint
+    // Strategi 1: Om URL:en innehåller project_files med datum, använd den direkta PDF-endpointen
     if (finalUrl.includes('project_files/')) {
-      // Extrahera datumdelen (YYYY/MM/DD) och filnamnet för vår nya PDF-endpoint
-      const dateAndPathPattern = /project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
+      const dateAndPathPattern = /project_files\/(\d{4}\/\d{2}\/\d{2}\/[^?&]+\.pdf)/;
       const dateAndPathMatch = finalUrl.match(dateAndPathPattern);
       
       if (dateAndPathMatch && dateAndPathMatch[1]) {
-        const dateAndPath = dateAndPathMatch[1];
-        // Använd vår nya direkta pdf-endpoint för att garantera korrekt Content-Type
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${dateAndPath}`;
-        console.log("Använder ny PDF-endpoint:", finalUrl);
+        // Använd direkta PDF-endpointen
+        finalUrl = `${baseUrl}/pdf/${dateAndPathMatch[1]}`;
+        console.log("1. Använder direkt PDF-endpoint:", finalUrl);
       }
-    } else if (pdfUrl.includes('/api/files/web/')) {
-      // För API endpoint-format, extrahera viktiga delar
-      const apiPattern = /\/api\/files\/web\/.*?\/data\/project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
+    } 
+    // Strategi 2: Om URL:en kommer från API-endpoint, extrahera sökvägen därifrån
+    else if (finalUrl.includes('/api/files/web/')) {
+      const apiPattern = /\/api\/files\/web\/.*?\/data\/project_files\/(\d{4}\/\d{2}\/\d{2}\/[^?&]+\.pdf)/;
       const apiMatch = finalUrl.match(apiPattern);
       
       if (apiMatch && apiMatch[1]) {
-        // Använd den dedikerade PDF-API:n som säkerställer korrekt Content-Type
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${apiMatch[1]}`;
-        console.log("Använder direkt PDF-endpoint för API-format:", finalUrl);
-      } else {
-        // Försök hitta filnamnet i URL:en
-        const parts = finalUrl.split('/');
-        const pdfName = parts[parts.length - 1]; 
-        if (pdfName && pdfName.endsWith('.pdf')) {
-          console.log("Provar med filnamn direkt:", pdfName);
-          // Använd pdf-finder API:n för att hitta rätt fil baserat på namn
-          finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf-finder/?filename=${pdfName}&stream=true`;
-        }
+        finalUrl = `${baseUrl}/pdf/${apiMatch[1]}`;
+        console.log("2. Använder PDF-endpoint från API:", finalUrl);
+      } 
+      // Om inget matchande mönster men vi har ett filnamn, använd pdf-finder med filnamnet
+      else if (fileName && fileName.endsWith('.pdf')) {
+        // Först prova direkt med den säkra PDF-findern
+        finalUrl = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
+        console.log("3. Använder pdf-finder med filnamn:", finalUrl);
       }
     }
+    // Strategi 3: Om URL:en är en direkt länk till en PDF men inte innehåller project_files
+    else if (pdfUrl.endsWith('.pdf')) {
+      // För att säkerställa korrekt Content-Type, prova PDF-findern först
+      finalUrl = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
+      console.log("4. Använder pdf-finder för direkt länk:", finalUrl);
+    }
     
-    // Lägg till en tidsstämpelparameter för att undvika cachning om inte stream=true redan finns
+    // Lägg till cachebuster om det inte redan finns stream-parameter
     if (!finalUrl.includes('stream=true')) {
       finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
     }
@@ -108,59 +112,69 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
 
   // Funktion för att skapa alternativa URL:er om den ursprungliga misslyckas
   const createAlternativeUrl = (url: string, attemptNum: number): string => {
-    // Plocka bort timestamp-parametern om den finns
+    // Plocka bort timestamp-parametern
     const cleanUrl = url.split('?')[0];
     
-    // Dela upp URL:en
+    // Extrahera filnamnet
     const urlParts = cleanUrl.split('/');
     const filename = urlParts[urlParts.length - 1];
     
-    // Använd alltid säkra HTTPS-proxyn med rätt format
+    // Bas-URL för alla requests
     const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
     
-    // Skapa intelligenta fallbacks baserat på vilket försök vi är på
+    // Skapa olika fallback-strategier baserat på vilken försöksordning vi är på
     switch (attemptNum) {
       case 1:
-        // Försök använda den direkta fil-findern för att lokalisera PDF:en med en direkt stream
+        // Först: Prova direkt med pdf-finder API som hittar filen baserat på namn
         if (filename && filename.endsWith('.pdf')) {
-          console.log("Försök 1: Använder pdf-finder med direkt stream", filename);
+          console.log("Fallback 1: Använder pdf-finder med exact match", filename);
           return `${baseUrl}/pdf-finder/?filename=${filename}&stream=true`;
         }
         break;
         
       case 2:
-        // Försök med project_files i URL:en
-        if (url.includes('/project_files/')) {
-          // Extrahera datum (YYYY/MM/DD) och sökväg
-          let datePattern = /project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
-          let dateMatch = url.match(datePattern);
-          if (dateMatch && dateMatch[1]) {
-            console.log("Försök 2: Använder direkt projekt-PDF-sökväg", dateMatch[1]);
-            return `${baseUrl}/pdf/${dateMatch[1]}`;
-          }
+        // Sedan: Försök extrahera datum/sökväg från URL:en
+        const datePattern = /(\d{4}\/\d{2}\/\d{2}\/[^?/]+\.pdf)/;
+        const dateMatch = url.match(datePattern);
+        if (dateMatch && dateMatch[1]) {
+          console.log("Fallback 2: Använder exakt sökväg med datum", dateMatch[1]);
+          return `${baseUrl}/pdf/${dateMatch[1]}`;
         }
         
-        // Om vi inte kunde extrahera datum, fallback till att prova vanlig media-URL
-        return `${baseUrl}/media/project_files/2025/05/19/${filename}`;
+        // Om ingen träff, prova vanliga media-URL med dagens datum
+        const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+        return `${baseUrl}/media/project_files/${today}/${filename}`;
         
       case 3:
-        // Prova med direct/media som är en säker endpunkt
-        console.log("Försök 3: Använder direct/media path", filename);
-        return `${baseUrl}/direct/media/project_files/2025/05/19/${filename}`;
+        // Tredje alternativ: Prova direct/media som direktserverar filen
+        console.log("Fallback 3: Använder direct media API", filename);
+        if (url.includes('/project_files/')) {
+          // Försök extrahera hela sökvägen efter project_files/
+          const projectMatch = url.match(/project_files\/(.+\.pdf)/);
+          if (projectMatch && projectMatch[1]) {
+            return `${baseUrl}/direct/media/project_files/${projectMatch[1]}`;
+          }
+        }
+        // Om vi inte kan hitta projekt-sökvägen, prova med dagens datum
+        const today2 = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+        return `${baseUrl}/direct/media/project_files/${today2}/${filename}`;
         
       case 4:
-        // Som sista försök, ta bort eventuella hash-delar från filnamnet
-        const baseNameMatch = filename.match(/^([^_]+)/);
+        // Sista utvägen: Prova att söka efter basnamnet utan eventuella hash-tillägg
+        const baseNamePattern = /^([^_]+)/;
+        const baseNameMatch = filename.match(baseNamePattern);
         if (baseNameMatch) {
-          const baseName = baseNameMatch[1] + ".pdf";
-          console.log("Försök 4: Använder basnamn utan hash", baseName);
-          return `${baseUrl}/pdf-finder/?filename=${baseName}&stream=true`;
+          const baseName = baseNameMatch[1];
+          console.log("Fallback 4: Använder basnamn utan suffix", baseName);
+          // Testa både med och utan .pdf
+          const nameWithExt = baseName.endsWith('.pdf') ? baseName : `${baseName}.pdf`;
+          return `${baseUrl}/pdf-finder/?filename=${nameWithExt}&stream=true`;
         }
         break;
     }
     
-    // Om inget av ovanstående fungerade, försök med original-URL:en men lägg till timestamp
-    return `${url.split('?')[0]}?t=${Date.now()}`;
+    // Om inget fungerade, lägg till timestamp på originalURL
+    return `${url.split('?')[0]}?nocache=${Date.now()}`;
   };
 
   // Använd en separat effekt för att hämta PDF-filen som en arraybuffer
