@@ -1,0 +1,25 @@
+Öppnar PDF: http://0.0.0.0:8001/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf BEAst-PDF-Guidelines-2.0 (1)
+FolderPageNew.tsx:287 Använda direkt PDF URL via Replit proxy
+FolderPageNew.tsx:290 Använder final PDF URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+PDFJSViewer.tsx:25 PDF Debug: {providedProjectId: undefined, contextProjectId: '10', activeProjectId: '10', currentProject: {…}}
+PDFJSViewer.tsx:33 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+PDFJSViewer.tsx:25 PDF Debug: {providedProjectId: undefined, contextProjectId: '10', activeProjectId: '10', currentProject: {…}}
+PDFJSViewer.tsx:33 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+IFramePDFViewer.tsx:95 Using iFrame with URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+IFramePDFViewer.tsx:95 Using iFrame with URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+IFramePDFViewer.tsx:62 Fetching PDF directly as blob: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+IFramePDFViewer.tsx:62 Fetching PDF directly as blob: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+IFramePDFViewer.tsx:95 Using iFrame with URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+IFramePDFViewer.tsx:95 Using iFrame with URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_dINVNrR.0_1.pdf
+contentScriptProxy.js:40 Uncaught SecurityError: Failed to read the 'sessionStorage' property from 'Window': The document is sandboxed and lacks the 'allow-same-origin' flag.Understand this error
+contentScript.js:49 Uncaught SecurityError: Failed to read the 'sessionStorage' property from 'Window': The document is sandboxed and lacks the 'allow-same-origin' flag.Understand this error
+IFramePDFViewer.tsx:72 Created direct object URL for PDF: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/11e644fa-fa53-4273-b57a-def76bf70e6d
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/11e644fa-fa53-4273-b57a-def76bf70e6d
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/11e644fa-fa53-4273-b57a-def76bf70e6d
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/11e644fa-fa53-4273-b57a-def76bf70e6d
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/11e644fa-fa53-4273-b57a-def76bf70e6d
+IFramePDFViewer.tsx:72 Created direct object URL for PDF: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/7ff03ec9-ab12-4ed5-aff9-3371ec50c3e0
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/7ff03ec9-ab12-4ed5-aff9-3371ec50c3e0
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/7ff03ec9-ab12-4ed5-aff9-3371ec50c3e0
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/7ff03ec9-ab12-4ed5-aff9-3371ec50c3e0
+IFramePDFViewer.tsx:95 Using iFrame with URL: blob:https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/7ff03ec9-ab12-4ed5-aff9-3371ec50c3e0
