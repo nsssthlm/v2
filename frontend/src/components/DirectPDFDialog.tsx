@@ -114,8 +114,23 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         // Använd fil-ID för att hämta direkt från API
         if (fileId) {
           // Skapa en direkt API URL med projektID
+          // Försök direkt med media-URL som sista alternativ
           const apiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/?project_id=${effectiveProjectId}`;
+          
+          // Skapa en direkt URL till media-katalogen också
+          // Försök skapa en URL baserat på pdfUrl som kan innehålla information om filens placering
+          let mediaUrl = `${window.location.origin}/media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_T5uulEt.0_1.pdf`;
+          
+          // Försök hitta filnamn från originalfilens URL
+          const fileNameMatch = pdfUrl.match(/\/([^\/]+\.pdf)$/);
+          if (fileNameMatch && fileNameMatch[1]) {
+            const fileName = fileNameMatch[1];
+            console.log('Extraherat filnamn från URL:', fileName);
+            mediaUrl = `${window.location.origin}/media/project_files/2025/05/19/${fileName}`;
+          }
+          
           console.log('Använder direkt API URL med projektID:', apiUrl);
+          console.log('Alternativ direkt media URL:', mediaUrl);
           
           try {
             // Konfigurera options för PDF.js
@@ -131,20 +146,50 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
               };
             }
             
-            // Hämta PDF-dokument via PDF.js
-            const pdfTask = pdfjsLib.getDocument({
-              url: `${apiUrl}?t=${Date.now()}`, // Lägg till timestamp för att undvika cache
-              ...options
-            });
+            // Skapa en array med URL:er att försöka med
+            const urlsToTry = [
+              `${apiUrl}?t=${Date.now()}`, // API URL
+              mediaUrl, // Direkt media-URL
+              pdfUrl // Ursprunglig URL
+            ];
             
-            const pdf = await pdfTask.promise;
-            setPdfDocument(pdf);
-            setNumPages(pdf.numPages);
-            setCurrentPage(1);
-            setLoading(false);
-            return;
+            console.log('PDF-förfrågan kommer att testas med dessa URL:er i följd:', urlsToTry);
+            
+            // Försök med varje URL i tur och ordning
+            let loadError = null;
+            let loadedPdf = null;
+            
+            for (const url of urlsToTry) {
+              try {
+                console.log('Försöker ladda PDF från URL:', url);
+                const pdfTask = pdfjsLib.getDocument({
+                  url,
+                  ...options
+                });
+                
+                loadedPdf = await pdfTask.promise;
+                console.log('PDF laddad framgångsrikt från:', url);
+                break; // Avsluta loopen om vi lyckades ladda PDF:en
+              } catch (err) {
+                console.warn(`Kunde inte ladda PDF från ${url}:`, err);
+                loadError = err;
+                // Fortsätt med nästa URL
+              }
+            }
+            
+            // Om vi lyckades ladda en PDF, uppdatera state
+            if (loadedPdf) {
+              setPdfDocument(loadedPdf);
+              setNumPages(loadedPdf.numPages);
+              setCurrentPage(1);
+              setLoading(false);
+              return; // Avsluta tidigt om laddningen lyckades
+            } 
+            
+            // Om vi når hit så misslyckades alla försök
+            throw loadError || new Error('Kunde inte ladda PDF från någon av de försökta URL:erna');
           } catch (apiError) {
-            console.error('Kunde inte hämta PDF via API:', apiError);
+            console.error('Kunde inte hämta PDF via någon av de tillgängliga metoderna:', apiError);
           }
         }
         
