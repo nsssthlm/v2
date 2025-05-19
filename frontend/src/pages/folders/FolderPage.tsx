@@ -56,14 +56,13 @@ const FolderPage = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentProjectId = urlParams.get('project') || null;
     
-    // Använd API-URL direkt från backend för bästa kompatibilitet
-    // Denna URL pekar direkt till backend-filen med raw-parameter för att få filen direkt
-    const directApiUrl = `${API_BASE_URL}/files/get-file-content/${fileId}`;
-    console.log("Använder direkt API-URL för fil:", directApiUrl);
+    // Använd originala URL:en direkt
+    // Detta är full URL:en till PDF-filen som returneras från API:et
+    console.log("Använder direkt URL för PDF:", fileUrl);
     
     // Öppna PDF i vår dialogruta med projektID och mappID för korrekt kontext
     openPDFDialog({
-      pdfUrl: directApiUrl,
+      pdfUrl: fileUrl,
       filename: fileName,
       fileId: fileId,
       folderId: slug ? parseInt(slug) : null,

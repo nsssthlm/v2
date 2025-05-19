@@ -38,6 +38,7 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
     
     // Optimera URL:en för att garantera att PDF-filen kan visas korrekt
     let optimizedUrl = params.pdfUrl;
+    console.log('Öppnar PDF:', optimizedUrl, params.filename);
     
     // Anpassa för Replit-miljön om nödvändigt
     if (window.location.hostname.includes('replit')) {
@@ -47,17 +48,10 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
           'http://0.0.0.0:8001', 
           `${window.location.protocol}//${window.location.host}/proxy/3000`
         );
+        console.log('Använda direkt PDF URL via Replit proxy');
       }
       
-      // Om det är en PDF-fil, använd vår säkra PDF-finder för att garantera korrekt visning
-      const urlParts = optimizedUrl.split('/');
-      const fileName = urlParts[urlParts.length - 1]?.split('?')[0]; // Ta bort eventuella parametrar
-      
-      if (fileName && fileName.endsWith('.pdf')) {
-        const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
-        optimizedUrl = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
-        console.log('Använder optimerad PDF-visning via pdf-finder:', fileName);
-      }
+      console.log('Använder final PDF URL:', optimizedUrl);
     }
     
     setDialogState({

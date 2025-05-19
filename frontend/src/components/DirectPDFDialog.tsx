@@ -53,17 +53,29 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         setLoading(true);
         setError(null);
         
-        // Kontrollera om vi har ett fil-ID i URL:en
-        const fileId = pdfUrl.split('/').pop();
         console.log('PDF original URL:', pdfUrl);
         
-        // Använd vår nya direkta API-endpoint för att hämta PDF-innehåll
-        const baseUrl = `${window.location.protocol}//${window.location.host}/api`;
-        const directPdfUrl = `${baseUrl}/files/get-file-content/${fileId}?t=${Date.now()}`;
-        console.log('Använder ny PDF content endpoint:', directPdfUrl);
+        // Använd den ursprungliga URL:en som kommer från API:et
+        // Vi behöver inte modifiera den eftersom backend redan ger oss korrekt URL
+        let formattedUrl = pdfUrl;
         
-        // Ladda dokumentet med vår direkta PDF-content URL
-        const loadingTask = pdfjsLib.getDocument(directPdfUrl);
+        // Säkerställ att URL:en innehåller protokollet (http/https)
+        if (!formattedUrl.startsWith('http')) {
+          if (formattedUrl.startsWith('/')) {
+            // Relativ URL, lägg till basdomänen
+            formattedUrl = `${window.location.origin}${formattedUrl}`;
+          } else {
+            // Lägg till protokoll och domän
+            formattedUrl = `${window.location.origin}/${formattedUrl}`;
+          }
+        }
+        
+        // Lägg till timestamp för att förhindra caching-problem
+        formattedUrl = `${formattedUrl}${formattedUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        console.log('Använder formaterad PDF URL:', formattedUrl);
+        
+        // Ladda dokumentet direkt
+        const loadingTask = pdfjsLib.getDocument(formattedUrl);
         const pdf = await loadingTask.promise;
         
         setPdfDocument(pdf);
