@@ -55,56 +55,45 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         
         console.log('PDF original URL:', pdfUrl);
         
-        // Hämta direkt innehåll från backend-API:et med explicit API-anrop
-        console.log('Försöker hämta PDF från:', pdfUrl);
-        
-        // Först, extrahera fil-ID om tillgängligt
+        // Försök hitta fil-ID från URL-delar
         let fileId = null;
+        let fetchUrl = pdfUrl;
         
-        // Metod 1: Extrahera från filnamn i format 'namn-XX.pdf'
-        const filenameMatch = filename.match(/.*-(\d+)(\.pdf)?/);
-        if (filenameMatch && filenameMatch[1]) {
-          fileId = filenameMatch[1];
-          console.log('Extraherat fil-ID från filnamn:', fileId);
-        }
-        
-        // Metod 2: Extrahera från URL-sökvägen
-        if (!fileId && typeof pdfUrl === 'string') {
-          // Vanligt format: /project_files/2025/05/19/AAAAExempel_pa_ritningar_mA6S8Ds.pdf
-          const fileMatch = pdfUrl.match(/\/([^\/]+)\.pdf/);
-          if (fileMatch && fileMatch[1]) {
-            console.log('Filnamn extraherat från URL:', fileMatch[1]);
-            
-            // Sök efter ett ID-format i filnamnet
-            const idMatch = fileMatch[1].match(/-(\d+)$/);
-            if (idMatch && idMatch[1]) {
-              fileId = idMatch[1];
-              console.log('Extraherat fil-ID från URL-filnamn:', fileId);
-            }
-          }
-          
-          // Alternativt sök efter fil-ID i URL-strukturen (t.ex. /files/71/)
-          if (!fileId) {
-            const urlIdMatch = pdfUrl.match(/\/files\/(\d+)\//);
-            if (urlIdMatch && urlIdMatch[1]) {
-              fileId = urlIdMatch[1];
-              console.log('Extraherat fil-ID från URL-struktur:', fileId);
+        // Extrahera fil-ID från URL-path
+        if (pdfUrl.includes('/web/')) {
+          // Format: /api/files/web/test-ID/data/
+          const matches = pdfUrl.match(/\/web\/([^\/]+)\/data\//);
+          if (matches && matches[1]) {
+            const parts = matches[1].split('-');
+            if (parts.length > 1) {
+              fileId = parts[parts.length - 1];
+              console.log('Extraherat fil-ID från URL path:', fileId);
             }
           }
         }
         
-        // Använd file ID för att hämta direkt från API:et
+        // Extrahera från filnamn om vi inte hittade ID från URL
+        if (!fileId && filename) {
+          const filenameMatch = filename.match(/.*-(\d+)(\.pdf)?$/i);
+          if (filenameMatch && filenameMatch[1]) {
+            fileId = filenameMatch[1];
+            console.log('Extraherat fil-ID från filnamn:', fileId);
+          }
+        }
+        
+        // Använd fil-ID för att hämta direkt från API
         if (fileId) {
-          // Använd den mest pålitliga metoden - direkt API-anrop via ID
-          const directApiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/`;
-          console.log('Använder direkt API URL via fil-ID:', directApiUrl);
+          // Skapa en direkt API URL
+          const apiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/`;
+          console.log('Använder direkt API URL:', apiUrl);
           
           try {
-            // Skapa URL med cache-busting
-            const finalUrl = `${directApiUrl}?t=${Date.now()}`;
+            // Konfigurera options för PDF.js
+            const options: any = {
+              withCredentials: true
+            };
             
-            // Ställ in JWT-token för autentisering om tillgänglig
-            const options: any = {};
+            // Lägg till JWT token om tillgänglig
             const token = localStorage.getItem('jwt_token');
             if (token) {
               options.httpHeaders = {
@@ -112,50 +101,32 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
               };
             }
             
-            // Gör direkt anrop till backend API:et
-            const directTask = pdfjsLib.getDocument({
-              url: finalUrl,
-              ...options,
-              withCredentials: true
+            // Hämta PDF-dokument via PDF.js
+            const pdfTask = pdfjsLib.getDocument({
+              url: `${apiUrl}?t=${Date.now()}`, // Lägg till timestamp för att undvika cache
+              ...options
             });
             
-            const pdf = await directTask.promise;
+            const pdf = await pdfTask.promise;
             setPdfDocument(pdf);
             setNumPages(pdf.numPages);
             setCurrentPage(1);
             setLoading(false);
-            return; // Avsluta om API-anropet lyckas
+            return;
           } catch (apiError) {
-            console.error('Misslyckades att hämta PDF via direkt API:', apiError);
-            // Fortsätt till nästa metod
+            console.error('Kunde inte hämta PDF via API:', apiError);
           }
         }
         
-        // Om vi inte har fil-ID eller om direkt API-anrop misslyckades, försök med relativ URL
-        let apiUrl = pdfUrl;
+        // Om vi inte kunde hämta via API, försök direkt med URL
+        console.log('Försöker med direkt URL:', fetchUrl);
         
-        // Säkerställ att URL:en innehåller protokollet (http/https)
-        if (!apiUrl.startsWith('http')) {
-          if (apiUrl.startsWith('/')) {
-            // Relativ URL, lägg till basdomänen
-            apiUrl = `${window.location.origin}${apiUrl}`;
-          } else {
-            // Lägg till protokoll och domän
-            apiUrl = `${window.location.origin}/${apiUrl}`;
-          }
+        // Hantera 0.0.0.0:8001 URL:er i Replit-miljön
+        if (fetchUrl.includes('0.0.0.0:8001')) {
+          const urlPath = new URL(fetchUrl).pathname;
+          fetchUrl = `${window.location.origin}${urlPath}`;
+          console.log('Konverterad URL för Replit-miljö:', fetchUrl);
         }
-        
-        // Hantera 0.0.0.0:8001 URL:er
-        if (apiUrl.includes('0.0.0.0:8001')) {
-          // Konvertera till lokal URL
-          const urlPath = new URL(apiUrl).pathname;
-          apiUrl = `${window.location.origin}${urlPath}`;
-          console.log('Konverterade 0.0.0.0 URL till:', apiUrl);
-        }
-        
-        // Lägg till timestamp för att förhindra caching-problem
-        apiUrl = `${apiUrl}${apiUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        console.log('Använder formaterad URL för PDF:', apiUrl);
         
         // Ställ in JWT-token för autentisering om tillgänglig
         const options: any = {};
