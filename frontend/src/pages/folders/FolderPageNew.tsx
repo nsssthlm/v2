@@ -24,8 +24,6 @@ import AddIcon from '@mui/icons-material/Add';
 import FolderIcon from '@mui/icons-material/Folder';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
-import PDFDialog from '../../components/PDFDialog';
-import BasicPDFViewer from '../../components/BasicPDFViewer';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -120,15 +118,8 @@ const FolderPageNew = () => {
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   
-  // PDF Dialog state
-  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
-  const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
-  
-  // Funktion för att öppna PDF i dialogrutan
-  const openPdfDialog = (url: string, name: string) => {
-    setSelectedPdf({ url, name });
-    setPdfDialogOpen(true);
-  };
+  // Uppladdning
+  const [uploadDialogDummyState, setUploadDialogDummyState] = useState(false);
   
   // Delete folder dialog state
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
@@ -370,10 +361,13 @@ const FolderPageNew = () => {
           sx={{ width: 300 }}
         />
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <BasicPDFViewer 
-            folderId={slug}
-            onUploadSuccess={handleUploadSuccess}
-          />
+          <Button
+            size="sm"
+            color="primary"
+            onClick={() => setUploadDialogOpen(true)}
+          >
+            Ladda upp fil
+          </Button>
           <Button 
             size="sm"
             variant="soft"
@@ -440,15 +434,7 @@ const FolderPageNew = () => {
         onSuccess={handleUploadSuccess}
       />
       
-      {/* PDF Viewer Dialog */}
-      {selectedPdf && (
-        <PDFDialog
-          open={pdfDialogOpen}
-          onClose={() => setPdfDialogOpen(false)}
-          pdfUrl={selectedPdf.url}
-          filename={selectedPdf.name}
-        />
-      )}
+      {/* Placeholder for future components */}
       
       {/* Delete Folder Confirmation Dialog */}
       <Modal open={deleteFolderDialogOpen} onClose={() => setDeleteFolderDialogOpen(false)}>
