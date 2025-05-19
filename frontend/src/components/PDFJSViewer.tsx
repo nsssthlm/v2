@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/joy";
 import { useProject } from "../contexts/ProjectContext";
-import ObjectPDFViewer from "./ObjectPDFViewer";
+import DirectPDFViewer from "./DirectPDFViewer";
 
 interface PDFJSViewerProps {
   pdfUrl: string;
@@ -17,6 +17,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
   folderId,
 }) => {
   const { currentProject } = useProject();
+  const [optimizedUrl, setOptimizedUrl] = useState<string>(pdfUrl);
   
   // Use project ID from props or context
   const activeProjectId = 
@@ -32,9 +33,33 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
   // Log the original URL for debugging
   console.log("PDF original URL:", pdfUrl);
 
-  // For Replit preview environment, keep the original URL which contains /proxy/3000/
-  // This is the URL that actually works in the preview environment
-  const finalUrl = pdfUrl;
+  useEffect(() => {
+    // Försök att optimera PDF URL för bättre kompatibilitet
+    if (pdfUrl) {
+      // Extract actual filename for direct access
+      const fileName = pdfUrl.split('/').pop();
+      
+      if (fileName && fileName.endsWith('.pdf')) {
+        // Try the direct API first for better compatibility
+        const directPdfUrl = `/api/pdf-direct/${fileName}`;
+        setOptimizedUrl(directPdfUrl);
+      } else {
+        // Fallback to original URL
+        setOptimizedUrl(pdfUrl);
+      }
+    }
+  }, [pdfUrl]);
+
+  // For Replit preview environment, we need the full URL with proxy
+  // Check if we're in a Replit environment
+  const isReplitEnv = window.location.hostname.includes('replit');
+  
+  // Adjust URL for Replit environment
+  let finalUrl = optimizedUrl;
+  if (isReplitEnv && !optimizedUrl.includes('/proxy/')) {
+    // Keep original URL since it might already have the proxy path
+    finalUrl = pdfUrl;
+  }
 
   return (
     <Box sx={{ 
@@ -43,7 +68,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
       display: "flex",
       flexDirection: "column"
     }}>
-      <ObjectPDFViewer
+      <DirectPDFViewer
         pdfUrl={finalUrl}
         fileName={filename}
         onClose={() => {}} // Empty function since we're not using the close button in this context

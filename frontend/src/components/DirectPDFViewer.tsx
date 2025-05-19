@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, CircularProgress } from '@mui/joy';
-import { FullscreenOutlined, Refresh } from '@mui/icons-material';
-import axios from 'axios';
+import { FullscreenOutlined, Refresh, PictureAsPdf } from '@mui/icons-material';
 
 interface DirectPDFViewerProps {
   pdfUrl: string;
@@ -10,8 +9,8 @@ interface DirectPDFViewerProps {
 }
 
 /**
- * A simpler PDF viewer that uses a direct object embedding approach
- * This provides the highest compatibility across browsers and environments
+ * Direkt PDF-visare som använder en kombination av iframe och objekttaggar
+ * med flera fallback-alternativ för maximal kompatibilitet
  */
 const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
   pdfUrl,
@@ -20,108 +19,104 @@ const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
-
-  // Fetch the PDF directly to avoid CORS issues
-  useEffect(() => {
-    const fetchPdf = async () => {
-      try {
-        console.log('Fetching PDF directly:', pdfUrl);
-        setLoading(true);
-        setError(null);
-        
-        // Get backend auth token from localStorage if available
-        const token = localStorage.getItem('token') || '';
-        
-        const response = await axios.get(pdfUrl, { 
-          responseType: 'blob',
-          withCredentials: true,
-          headers: {
-            'Authorization': token ? `Bearer ${token}` : ''
-          }
-        });
-        
-        // Convert blob to data URL for embedding
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const reader = new FileReader();
-        
-        reader.onload = () => {
-          const dataUrl = reader.result as string;
-          setPdfDataUrl(dataUrl);
-          setLoading(false);
-        };
-        
-        reader.onerror = () => {
-          console.error('Error reading PDF blob');
-          setError('Error converting PDF for display');
-          setLoading(false);
-        };
-        
-        reader.readAsDataURL(blob);
-      } catch (err) {
-        console.error('Error fetching PDF:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load PDF');
-        setLoading(false);
-      }
-    };
-
-    fetchPdf();
-  }, [pdfUrl]);
-
-  // Function to retry loading
-  const retryLoading = () => {
-    setPdfDataUrl(null);
-    setError(null);
+  const [key, setKey] = useState<number>(Date.now());
+  const [viewMode, setViewMode] = useState<'object' | 'iframe' | 'embed'>('object');
+  
+  // Extrahera filnamnet från URL:en om det finns
+  const extractedFileName = pdfUrl.split('/').pop() || fileName;
+  
+  // Skapa direkt URL för PDF-fil baserat på filnamn
+  const directPdfUrl = `/api/pdf-direct/${extractedFileName}`;
+  
+  // Används för att forcera omrendering
+  const refreshViewer = () => {
     setLoading(true);
-    
-    // Re-trigger the useEffect
-    const fetchPdf = async () => {
-      try {
-        console.log('Retrying PDF fetch:', pdfUrl);
-        
-        // Get backend auth token from localStorage if available
-        const token = localStorage.getItem('token') || '';
-        
-        const response = await axios.get(pdfUrl, { 
-          responseType: 'blob',
-          withCredentials: true,
-          headers: {
-            'Authorization': token ? `Bearer ${token}` : ''
-          }
-        });
-        
-        // Convert blob to data URL for embedding
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const reader = new FileReader();
-        
-        reader.onload = () => {
-          const dataUrl = reader.result as string;
-          setPdfDataUrl(dataUrl);
-          setLoading(false);
-        };
-        
-        reader.onerror = () => {
-          console.error('Error reading PDF blob');
-          setError('Error converting PDF for display');
-          setLoading(false);
-        };
-        
-        reader.readAsDataURL(blob);
-      } catch (err) {
-        console.error('Error fetching PDF:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load PDF');
-        setLoading(false);
-      }
-    };
-    
-    fetchPdf();
+    setError(null);
+    setKey(Date.now());
   };
-
-  // Open in new tab function
+  
+  // Växla mellan olika visningslägen om ett misslyckas
+  const toggleViewMode = () => {
+    if (viewMode === 'object') {
+      setViewMode('iframe');
+    } else if (viewMode === 'iframe') {
+      setViewMode('embed');
+    } else {
+      setViewMode('object');
+    }
+    refreshViewer();
+  };
+  
+  // Öppna i ny flik
   const openInNewTab = () => {
-    window.open(pdfUrl, '_blank');
+    window.open(directPdfUrl, '_blank');
   };
-
+  
+  // Hantera laddningsfel
+  const handleError = () => {
+    setError(`PDF-filen kunde inte visas i ${viewMode}-läge.`);
+    setLoading(false);
+  };
+  
+  // När PDF:en har laddats
+  const handleLoad = () => {
+    setLoading(false);
+    setError(null);
+  };
+  
+  // Rendera PDF-visaren baserat på valt läge
+  const renderPdfViewer = () => {
+    switch (viewMode) {
+      case 'object':
+        return (
+          <object
+            key={key}
+            data={directPdfUrl}
+            type="application/pdf"
+            width="100%"
+            height="100%"
+            style={{ display: loading ? 'none' : 'block' }}
+            onLoad={handleLoad}
+            onError={handleError}
+          >
+            <p>Din webbläsare stödjer inte inbäddade PDF-filer.</p>
+            <Button onClick={toggleViewMode} variant="soft" color="primary">
+              Prova annat visningsläge
+            </Button>
+          </object>
+        );
+        
+      case 'iframe':
+        return (
+          <iframe
+            key={key}
+            src={directPdfUrl}
+            width="100%"
+            height="100%"
+            style={{ border: 'none', display: loading ? 'none' : 'block' }}
+            title={fileName}
+            onLoad={handleLoad}
+            onError={handleError}
+          />
+        );
+        
+      case 'embed':
+        return (
+          <embed
+            key={key}
+            src={directPdfUrl}
+            type="application/pdf"
+            width="100%"
+            height="100%"
+            style={{ display: loading ? 'none' : 'block' }}
+          />
+        );
+        
+      default:
+        return null;
+    }
+  };
+  
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -152,6 +147,15 @@ const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
         
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button 
+            onClick={toggleViewMode} 
+            variant="outlined"
+            size="sm"
+            startDecorator={<PictureAsPdf fontSize="small" />}
+          >
+            Byt visningsläge
+          </Button>
+          
+          <Button 
             onClick={openInNewTab} 
             variant="outlined"
             size="sm"
@@ -161,7 +165,7 @@ const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
           </Button>
           
           <Button 
-            onClick={retryLoading} 
+            onClick={refreshViewer} 
             variant="outlined"
             size="sm"
             startDecorator={<Refresh fontSize="small" />}
@@ -193,9 +197,15 @@ const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
             position: 'absolute', 
             top: '50%', 
             left: '50%', 
-            transform: 'translate(-50%, -50%)'
+            transform: 'translate(-50%, -50%)',
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2
           }}>
             <CircularProgress />
+            <Typography level="body-sm">Laddar PDF...</Typography>
           </Box>
         )}
         
@@ -212,38 +222,33 @@ const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
             <Typography level="title-lg" color="danger">
               Kunde inte ladda PDF
             </Typography>
+            
             <Typography level="body-md" sx={{ mb: 2 }}>
-              {error || 'Det gick inte att visa dokumentet direkt i applikationen.'}
+              {error}
             </Typography>
-            <Button 
-              onClick={openInNewTab}
-              variant="solid"
-              color="primary"
-              startDecorator={<FullscreenOutlined />}
-            >
-              Öppna i ny flik
-            </Button>
+            
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button 
+                onClick={toggleViewMode}
+                variant="solid"
+                color="primary"
+              >
+                Prova annat visningsläge
+              </Button>
+              
+              <Button 
+                onClick={openInNewTab}
+                variant="outlined"
+                color="neutral"
+                startDecorator={<FullscreenOutlined />}
+              >
+                Öppna i ny flik
+              </Button>
+            </Box>
           </Box>
         )}
         
-        {pdfDataUrl && !error && !loading && (
-          <Box sx={{ 
-            height: '100%', 
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start'
-          }}>
-            <embed
-              src={pdfDataUrl}
-              type="application/pdf"
-              style={{ 
-                width: '100%', 
-                height: '100%'
-              }}
-            />
-          </Box>
-        )}
+        {renderPdfViewer()}
       </Box>
     </Box>
   );

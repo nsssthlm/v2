@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, CircularProgress } from '@mui/joy';
-import { FullscreenOutlined, Refresh } from '@mui/icons-material';
+import { FullscreenOutlined, Refresh, PictureAsPdf } from '@mui/icons-material';
 
 interface ObjectPDFViewerProps {
   pdfUrl: string;
@@ -20,6 +20,58 @@ const ObjectPDFViewer: React.FC<ObjectPDFViewerProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [objectKey, setObjectKey] = useState(Date.now()); // Used to force refresh
+  const [pdfContentType, setPdfContentType] = useState(false);
+  const [finalUrl, setFinalUrl] = useState<string>(pdfUrl);
+
+  // Verify the PDF is accessible and has the right content type
+  useEffect(() => {
+    // Don't check if we have an error already
+    if (error) return;
+
+    const checkPdfContentType = async () => {
+      try {
+        // Perform a HEAD request to check headers
+        const response = await fetch(pdfUrl, { method: 'HEAD' });
+        
+        // Check if the response was successful and has PDF content type
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          console.log(`Content-Type for ${pdfUrl}:`, contentType);
+          
+          if (contentType && contentType.includes('application/pdf')) {
+            setPdfContentType(true);
+            setFinalUrl(pdfUrl);
+          } else {
+            // Try alternative URL by extracting the filename
+            const pdfFilename = pdfUrl.split('/').pop();
+            if (pdfFilename && pdfFilename.endsWith('.pdf')) {
+              setFinalUrl(`/api/pdf-direct/${pdfFilename}`);
+              console.log(`Trying alternative PDF URL: /api/pdf-direct/${pdfFilename}`);
+            } else {
+              setError('PDF-filen har inte korrekt innehållstyp. Prova att öppna i ny flik.');
+            }
+          }
+        } else {
+          // Try alternative URL if the response wasn't successful
+          const pdfFilename = pdfUrl.split('/').pop();
+          if (pdfFilename && pdfFilename.endsWith('.pdf')) {
+            setFinalUrl(`/api/pdf-direct/${pdfFilename}`);
+            console.log(`Trying alternative PDF URL: /api/pdf-direct/${pdfFilename}`);
+          } else {
+            setError(`PDF-filen kunde inte hämtas (${response.status})`);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking PDF content type:', err);
+        // Don't set error yet, let the object tag try
+      } finally {
+        // We do not set loading=false here because we want
+        // the object tag to have a chance to load the PDF
+      }
+    };
+
+    checkPdfContentType();
+  }, [pdfUrl, error]);
 
   // Function to handle when PDF loads
   const handleLoad = () => {
@@ -36,12 +88,13 @@ const ObjectPDFViewer: React.FC<ObjectPDFViewerProps> = ({
   const reloadPdf = () => {
     setLoading(true);
     setError(null);
+    setPdfContentType(false);
     setObjectKey(Date.now()); // This forces the object to reload
   };
 
   // Open in new tab function
   const openInNewTab = () => {
-    window.open(pdfUrl, '_blank');
+    window.open(finalUrl, '_blank');
   };
 
   return (
@@ -151,7 +204,7 @@ const ObjectPDFViewer: React.FC<ObjectPDFViewerProps> = ({
         
         <object 
           key={objectKey}
-          data={pdfUrl} 
+          data={finalUrl} 
           type="application/pdf" 
           width="100%" 
           height="100%"
@@ -164,7 +217,7 @@ const ObjectPDFViewer: React.FC<ObjectPDFViewerProps> = ({
         >
           <p>Din webbläsare stödjer inte inbäddade PDF-filer.</p>
           <p>
-            <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+            <a href={finalUrl} target="_blank" rel="noopener noreferrer">
               Klicka här för att öppna PDF-filen i en ny flik.
             </a>
           </p>
@@ -173,7 +226,7 @@ const ObjectPDFViewer: React.FC<ObjectPDFViewerProps> = ({
         {/* Embedded iframe fallback if object tag fails to load */}
         {error && (
           <iframe
-            src={pdfUrl}
+            src={finalUrl}
             width="100%"
             height="100%"
             style={{ 
