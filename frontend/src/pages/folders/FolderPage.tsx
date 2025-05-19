@@ -244,13 +244,22 @@ const FolderPage: React.FC = () => {
 
   // Använd vanliga a-taggar istället för Link för att säkerställa fullständig sidladdning
   const renderFolderLink = (targetSlug: string, name: string) => {
-    // Konstruera länken så att den garanterat orsakar en fullständig sidladdning
+    // Lägg till en tid-parameter för att försäkra att sidan alltid laddas om
+    const timestamp = Date.now();
+    
+    // Konstruera länken med tid-parameter och target="_top" för att garantera fullständig sidladdning
     return (
       <a 
-        href={`/folders/${targetSlug}`} 
+        href={`/folders/${targetSlug}?t=${timestamp}`} 
         style={{ 
           textDecoration: 'none',
           color: 'inherit'
+        }}
+        target="_top" // Detta tvingar en fullständig sidladdning
+        onClick={(e) => {
+          e.preventDefault();
+          // Använd window.location.href för att garantera fullständig sidladdning
+          window.location.href = `/folders/${targetSlug}?t=${timestamp}`;
         }}
       >
         {name}
