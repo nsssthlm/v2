@@ -1,114 +1,249 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, CircularProgress } from '@mui/joy';
+import { FullscreenOutlined, Refresh } from '@mui/icons-material';
+import axios from 'axios';
 
 interface DirectPDFViewerProps {
   pdfUrl: string;
   fileName?: string;
-  projectId?: string | number | null;
   onClose?: () => void;
 }
 
+/**
+ * A simpler PDF viewer that uses a direct object embedding approach
+ * This provides the highest compatibility across browsers and environments
+ */
 const DirectPDFViewer: React.FC<DirectPDFViewerProps> = ({
   pdfUrl,
   fileName = 'Document',
-  projectId = null,
   onClose
 }) => {
   const [loading, setLoading] = useState(true);
-  
-  // Instead of trying to modify the URL, we'll use the "Open in new tab" approach
-  // This preserves the original URL which seems to be the only one that works
-  const getDirectUrl = (url: string): string => {
-    // For Replit environment, use the direct URL that was passed
-    // We need to convert the URL from proxy format to direct format
+  const [error, setError] = useState<string | null>(null);
+  const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
+
+  // Fetch the PDF directly to avoid CORS issues
+  useEffect(() => {
+    const fetchPdf = async () => {
+      try {
+        console.log('Fetching PDF directly:', pdfUrl);
+        setLoading(true);
+        setError(null);
+        
+        // Get backend auth token from localStorage if available
+        const token = localStorage.getItem('token') || '';
+        
+        const response = await axios.get(pdfUrl, { 
+          responseType: 'blob',
+          withCredentials: true,
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+        
+        // Convert blob to data URL for embedding
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const reader = new FileReader();
+        
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          setPdfDataUrl(dataUrl);
+          setLoading(false);
+        };
+        
+        reader.onerror = () => {
+          console.error('Error reading PDF blob');
+          setError('Error converting PDF for display');
+          setLoading(false);
+        };
+        
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error('Error fetching PDF:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load PDF');
+        setLoading(false);
+      }
+    };
+
+    fetchPdf();
+  }, [pdfUrl]);
+
+  // Function to retry loading
+  const retryLoading = () => {
+    setPdfDataUrl(null);
+    setError(null);
+    setLoading(true);
     
-    // Extract the original backend URL without the Replit proxy part
-    if (url.includes('proxy/3000/api')) {
-      const originalUrl = url.split('proxy/3000')[1];
-      console.log('Original URL extracted:', originalUrl);
-      
-      // If the URL is for the API, return it as is
-      return originalUrl;
-    }
+    // Re-trigger the useEffect
+    const fetchPdf = async () => {
+      try {
+        console.log('Retrying PDF fetch:', pdfUrl);
+        
+        // Get backend auth token from localStorage if available
+        const token = localStorage.getItem('token') || '';
+        
+        const response = await axios.get(pdfUrl, { 
+          responseType: 'blob',
+          withCredentials: true,
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+        
+        // Convert blob to data URL for embedding
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const reader = new FileReader();
+        
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          setPdfDataUrl(dataUrl);
+          setLoading(false);
+        };
+        
+        reader.onerror = () => {
+          console.error('Error reading PDF blob');
+          setError('Error converting PDF for display');
+          setLoading(false);
+        };
+        
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error('Error fetching PDF:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load PDF');
+        setLoading(false);
+      }
+    };
     
-    // Just return the original URL if we can't transform it
-    return url;
+    fetchPdf();
   };
-  
-  // Get a direct backend URL
-  const directUrl = getDirectUrl(pdfUrl);
-  console.log('Using direct backend URL:', directUrl);
-  
-  // Handle when iframe loads
-  const handleLoad = () => {
-    setLoading(false);
+
+  // Open in new tab function
+  const openInNewTab = () => {
+    window.open(pdfUrl, '_blank');
   };
-  
+
   return (
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column', 
       height: '100%', 
-      width: '100%' 
+      width: '100%', 
+      bgcolor: 'background.paper',
+      borderRadius: 'sm',
+      overflow: 'hidden'
     }}>
+      {/* Header */}
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        padding: 2,
+        p: 1,
         borderBottom: '1px solid',
         borderColor: 'divider'
       }}>
-        <Typography level="h4">{fileName}</Typography>
-        <Box>
+        <Typography level="title-md" sx={{ 
+          flexGrow: 1, 
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}>
+          {fileName}
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 1 }}>
           <Button 
-            component="a" 
-            href={directUrl} 
-            target="_blank" 
-            variant="outlined" 
-            sx={{ mr: 1 }}
+            onClick={openInNewTab} 
+            variant="outlined"
+            size="sm"
+            startDecorator={<FullscreenOutlined fontSize="small" />}
           >
-            Open in New Tab
+            Öppna i ny flik
           </Button>
+          
+          <Button 
+            onClick={retryLoading} 
+            variant="outlined"
+            size="sm"
+            startDecorator={<Refresh fontSize="small" />}
+          >
+            Ladda om
+          </Button>
+          
           {onClose && (
-            <Button onClick={onClose} variant="plain">
-              Close
+            <Button 
+              onClick={onClose} 
+              variant="plain"
+              size="sm"
+            >
+              Stäng
             </Button>
           )}
         </Box>
       </Box>
-      
+
+      {/* PDF Viewer Area */}
       <Box sx={{ 
         flex: 1, 
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'auto',
+        bgcolor: 'grey.100'
       }}>
         {loading && (
           <Box sx={{ 
             position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2
+            top: '50%', 
+            left: '50%', 
+            transform: 'translate(-50%, -50%)'
           }}>
             <CircularProgress />
           </Box>
         )}
         
-        <iframe
-          src={directUrl}
-          style={{
-            width: '100%',
+        {error && (
+          <Box sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
             height: '100%',
-            border: 'none',
-          }}
-          onLoad={handleLoad}
-          title={fileName}
-        />
+            p: 3,
+            gap: 2
+          }}>
+            <Typography level="title-lg" color="danger">
+              Kunde inte ladda PDF
+            </Typography>
+            <Typography level="body-md" sx={{ mb: 2 }}>
+              {error || 'Det gick inte att visa dokumentet direkt i applikationen.'}
+            </Typography>
+            <Button 
+              onClick={openInNewTab}
+              variant="solid"
+              color="primary"
+              startDecorator={<FullscreenOutlined />}
+            >
+              Öppna i ny flik
+            </Button>
+          </Box>
+        )}
+        
+        {pdfDataUrl && !error && !loading && (
+          <Box sx={{ 
+            height: '100%', 
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start'
+          }}>
+            <embed
+              src={pdfDataUrl}
+              type="application/pdf"
+              style={{ 
+                width: '100%', 
+                height: '100%'
+              }}
+            />
+          </Box>
+        )}
       </Box>
     </Box>
   );
