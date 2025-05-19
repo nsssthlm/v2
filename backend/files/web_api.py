@@ -12,6 +12,35 @@ def directory_data(request, slug):
     """
     API-endpoint för att tillhandahålla data för en specifik mapp till frontend.
     """
+    # Kontrollera om detta är en direktnedladdningsbegäran
+    direct_param = request.query_params.get('direct', None)
+    
+    # Om direct=true, hämta filen direkt och returnera den som nedladdning
+    if direct_param and direct_param.lower() == 'true':
+        # Kontrollera om filnamn angetts
+        filename = request.query_params.get('filename', None)
+        if filename:
+            try:
+                # Hämta filen från databasen
+                file_obj = File.objects.get(name=filename, directory__slug=slug)
+                
+                # Returnera filen som PDF
+                from django.http import FileResponse
+                response = FileResponse(
+                    file_obj.file, 
+                    content_type='application/pdf',
+                    as_attachment=False
+                )
+                
+                response['Content-Disposition'] = f'inline; filename="{file_obj.name}.pdf"'
+                response['X-Frame-Options'] = 'ALLOWALL'
+                return response
+            except File.DoesNotExist:
+                return Response({"error": "Filen hittades inte"}, status=404)
+            except Exception as e:
+                return Response({"error": str(e)}, status=500)
+    
+    # Standardlogik för att hämta mappdata
     directory = get_object_or_404(Directory, slug=slug)
     
     # Hämta föräldermappen om sådan finns
@@ -54,6 +83,32 @@ def directory_data(request, slug):
     
     return Response(data)
     
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def direct_file_download(request, file_id):
+    """
+    API-endpoint för att direkt hämta filinnehåll via ID
+    """
+    try:
+        # Hämta filen från databasen
+        file_obj = get_object_or_404(File, id=file_id)
+        
+        # Returnera filen som PDF
+        from django.http import FileResponse
+        response = FileResponse(
+            file_obj.file, 
+            content_type='application/pdf',
+            as_attachment=False
+        )
+        
+        # Sätt headers för korrekt visning i iframe
+        response['Content-Disposition'] = f'inline; filename="{file_obj.name}.pdf"'
+        response['X-Frame-Options'] = 'ALLOWALL'
+        
+        return response
+    except Exception as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
 def delete_file(request, file_id):

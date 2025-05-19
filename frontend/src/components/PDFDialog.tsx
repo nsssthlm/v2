@@ -343,7 +343,7 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                   }}
                 >
                   <SimplePDFViewer 
-                    pdfUrl={pdfUrl} 
+                    pdfUrl={getDirectPdfUrl(pdfUrl)} 
                     filename={filename} 
                   />
                 </Box>

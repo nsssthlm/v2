@@ -20,6 +20,9 @@ urlpatterns = [
     # API för att radera en fil
     path('delete/<int:file_id>/', web_api.delete_file, name='delete_file'),
     
+    # Direktåtkomst till fil via ID
+    path('direct/<int:file_id>/', web_api.direct_file_download, name='direct_file_download'),
+    
     # Webb-routes för mappspecifika sidor
     path('web/', include([
         # Lista alla mappar
