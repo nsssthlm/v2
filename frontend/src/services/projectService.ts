@@ -44,12 +44,12 @@ const projectService = {
     try {
       const headers = getStandardHeaders();
       
-      console.log('Skapar projekt med URL:', `${API_BASE_URL}/custom/projects/`);
+      console.log('Skapar projekt med URL:', `${API_BASE_URL}/custom/create-project`);
       console.log('Projekdata:', projectData);
       console.log('Headers:', headers);
       
-      // Använd rätt API-endpoint för Django backend - observera / på slutet
-      const response = await axios.post(`${API_BASE_URL}/custom/projects/`, projectData, {
+      // Använd rätt API-endpoint för Django backend
+      const response = await axios.post(`${API_BASE_URL}/custom/create-project`, projectData, {
         headers
       });
       
