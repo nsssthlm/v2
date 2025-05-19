@@ -57,8 +57,12 @@ const TopMenu: React.FC = () => {
   };
   
   const handleProjectSelect = (project: Project) => {
+    console.log('Byter till projekt:', project);
     setCurrentProject(project);
     handleProjectMenuClose();
+    
+    // Sätt en sessionStorage-flagga som vi kan kontrollera för att veta vilket projekt att ladda
+    sessionStorage.setItem('selectedProjectId', project.id);
     
     // Ladda om sidan när man byter projekt för att säkerställa att rätt innehåll visas
     // och för att förhindra att innehåll från föregående projekt visas

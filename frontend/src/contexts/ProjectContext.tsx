@@ -75,11 +75,24 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
             console.log('Hämtade projekt från databasen:', formattedProjects);
             setProjects(formattedProjects);
             
-            // Även uppdatera currentProject om det behövs
-            if (currentProject && currentProject.id) {
+            // Uppdatera currentProject baserat på selectedProjectId
+            const selectedProjectId = sessionStorage.getItem('selectedProjectId');
+            if (selectedProjectId) {
+              const selectedProject = formattedProjects.find(p => p.id === selectedProjectId);
+              if (selectedProject) {
+                console.log('Sätter aktivt projekt till:', selectedProject);
+                setCurrentProjectState(selectedProject);
+              }
+            } 
+            // Annars behåll nuvarande projekt om det finns i listan
+            else if (currentProject && currentProject.id) {
               const currentInDb = formattedProjects.find(p => p.id === currentProject.id);
               if (currentInDb) {
                 setCurrentProjectState(currentInDb);
+              } else {
+                // Fallback till senast skapade projektet om nuvarande inte hittades
+                const latestProject = [...formattedProjects].sort((a, b) => parseInt(b.id) - parseInt(a.id))[0];
+                setCurrentProjectState(latestProject);
               }
             }
           }
@@ -94,30 +107,39 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     fetchAllProjects();
   }, []);
 
-  // Ladda aktuellt projekt från sessionStorage om det finns och är ett giltigt projekt
+  // Ladda aktuellt projekt baserat på selectedProjectId från sessionStorage om det finns
   const [currentProject, setCurrentProjectState] = useState<Project>(() => {
+    // Kontrollera om det finns ett valt projektid i sessionStorage
+    const selectedProjectId = sessionStorage.getItem('selectedProjectId');
+    
+    if (selectedProjectId) {
+      // Försök hitta projektet i vår lista av projekt
+      const selectedProject = projects.find(p => p.id === selectedProjectId);
+      if (selectedProject) {
+        console.log('Använder valt projekt från sessionStorage:', selectedProject);
+        return selectedProject;
+      }
+    }
+    
+    // Annars försök ladda senaste valda projekt
     const savedCurrentProject = sessionStorage.getItem('currentProject');
     if (savedCurrentProject) {
       try {
         const parsed = JSON.parse(savedCurrentProject);
-        // Kontrollera att det är ett giltigt projekt som finns i vår lista
-        // men använd den laddade projektlistan (projects) istället för defaultProjects
-        // så att nya projekt också hittas
-        const currentProjects = JSON.parse(sessionStorage.getItem('projects') || '[]');
-        const allProjects = Array.isArray(currentProjects) && currentProjects.length > 0 
-          ? currentProjects 
-          : defaultProjects;
-          
-        const validProject = allProjects.find(p => p.id === parsed.id);
+        const validProject = projects.find(p => p.id === parsed.id);
         if (validProject) {
+          console.log('Använder senast sparade projekt:', validProject);
           return validProject;
         }
       } catch (e) {
         console.error('Kunde inte tolka sparat projekt', e);
       }
     }
-    // Använd första projektet som standard
-    const firstProject = projects?.[0] || defaultProjects[0];
+    
+    // Använd första projektet som standard eller senast skapade projektet
+    const sortedProjects = [...projects].sort((a, b) => parseInt(b.id) - parseInt(a.id));
+    const firstProject = sortedProjects[0] || defaultProjects[0];
+    console.log('Använder standardprojekt:', firstProject);
     return firstProject;
   });
 
