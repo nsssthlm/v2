@@ -3,6 +3,9 @@
 // Basadress för API-anrop
 export const API_BASE_URL = 'http://0.0.0.0:8001';
 
+// Direktlänkar för PDF-visning
+export const DIRECT_API_URL = 'http://0.0.0.0:8001';
+
 // API-sökvägar
 export const API_PATHS = {
   LOGIN: '/api/token/',

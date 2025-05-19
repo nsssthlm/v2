@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/joy';
+import { DIRECT_API_URL } from '../config';
 
 interface UltimatePDFViewerProps {
   pdfUrl: string;
@@ -28,7 +29,7 @@ const UltimatePDFViewer = ({
   const getDirectUrl = () => {
     // Fullständig URL om det är en media-URL
     if (pdfUrl.startsWith('/media/')) {
-      return `http://0.0.0.0:8001${pdfUrl}`;
+      return `${DIRECT_API_URL}${pdfUrl}`;
     }
     return pdfUrl;
   };

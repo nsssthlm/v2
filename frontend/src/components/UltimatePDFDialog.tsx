@@ -50,7 +50,7 @@ export default function UltimatePDFDialog({
     
     // Hantera direkta media-URL:er
     if (pdfUrl.startsWith('/media/')) {
-      return pdfUrl;
+      return `${DIRECT_API_URL}${pdfUrl}`;
     }
     
     // Bevara absoluta URL:er som börjar med http eller https
@@ -215,3 +215,4 @@ export default function UltimatePDFDialog({
 
 // Importera useMemo för att memoizera URL-behandlingen
 import { useMemo } from 'react';
+import { DIRECT_API_URL } from '../config';
