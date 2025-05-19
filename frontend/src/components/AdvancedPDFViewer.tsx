@@ -10,8 +10,11 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 
-// Configure PDF.js worker with local file to avoid CORS issues
-pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
+// Configure PDF.js worker with exact matching version to avoid mismatches
+// We need to get the version from the loaded PDF.js library
+const pdfJsVersion = pdfjs.version;
+console.log('Using PDF.js version:', pdfJsVersion);
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfJsVersion}/build/pdf.worker.min.js`;
 
 interface AdvancedPDFViewerProps {
   pdfUrl: string;
