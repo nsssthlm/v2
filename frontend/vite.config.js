@@ -31,6 +31,16 @@ export default defineConfig({
       "/api": {
         target: "http://0.0.0.0:8001",
         changeOrigin: true,
+        configure: (proxy, options) => {
+          // Lägg till förbättrad felhantering för proxy
+          proxy.on('error', (err, req, res) => {
+            console.log('Proxy error:', err);
+            res.writeHead(500, {
+              'Content-Type': 'text/plain',
+            });
+            res.end('Proxy error: kunde inte ansluta till backend');
+          });
+        },
       },
     },
     allowedHosts: [

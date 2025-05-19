@@ -2,10 +2,10 @@ modules = ["python-3.11", "nodejs-20", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib", "jq", "psmisc", "systemd", "rsync", "nettools", "nano", "openssh", "htop-vim"]
+packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib", "jq", "psmisc", "systemd", "rsync", "nettools", "nano", "openssh", "htop-vim", "lsof"]
 
 [workflows]
-runButton = "Project"
+runButton = "backend-new"
 
 [[workflows.workflow]]
 name = "Project"
@@ -26,7 +26,6 @@ args = "frontend"
 
 [[workflows.workflow]]
 name = "backend"
-
 author = "agent"
 
 [[workflows.workflow.tasks]]
@@ -36,7 +35,6 @@ waitForPort = 8001
 
 [[workflows.workflow]]
 name = "pdf-manager"
-
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -51,6 +49,15 @@ author = "agent"
 task = "shell.exec"
 args = "cd frontend && npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "backend-new"
+author = 42387517
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python manage.py runserver 0.0.0.0:8001"
 
 [deployment]
 run = ["sh", "-c", "cd frontend && npm install @mui/joy @emotion/react @emotion/styled @mui/material react-router-dom axios && npm install -g vite && vite --port 5000 && cd ../backend && pip install django djangorestframework django-cors-headers djangorestframework-simplejwt dj-database-url pillow && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

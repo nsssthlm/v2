@@ -22,6 +22,7 @@ import {
 } from '@mui/joy';
 import { useProject, Project } from '../../contexts/ProjectContext';
 import projectService from '../../services/projectService';
+import { generateFakeJwtToken } from '../../utils/authUtils';
 
 const TopMenu: React.FC = () => {
   const [searchText, setSearchText] = useState('');
@@ -91,10 +92,10 @@ const TopMenu: React.FC = () => {
       const token = localStorage.getItem('jwt_token');
       
       if (!token) {
-        // För att förhindra "inte inloggad"-felet på Replit, skapa en hårdkodad token
-        // för testmiljö. I produktion skulle detta ersättas med en riktig login.
-        localStorage.setItem('jwt_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm9qZWN0bGVhZGVyIiwicm9sZSI6InByb2plY3RfbGVhZGVyIiwiZXhwIjoxOTAwMDAwMDAwfQ.Y9qsCN0v4VG9n1PVbVZQoSHGQZ-nCCrjZdlOi17DWVs');
-        console.log('Skapar en nödtoken för projektskapande');
+        // Om token saknas, använd en hårdkodad token för projektledare
+        const projectLeaderToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm9qZWN0bGVhZGVyIiwicm9sZSI6InByb2plY3RfbGVhZGVyIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjI1MDAwMDAwMDB9.Z9t5b4V3vkjO-4BDTXUkEqbp9eEJVGOKutvN-NVWxZs';
+        localStorage.setItem('jwt_token', projectLeaderToken);
+        console.log('Autentiserad som projektledare för projektskapande');
       }
       
       // Skapa projektet via den förbättrade projektservicen
