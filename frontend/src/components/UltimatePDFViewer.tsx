@@ -1,357 +1,333 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Sheet, 
-  CircularProgress
-} from '@mui/joy';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, CircularProgress, Typography, Button } from '@mui/joy';
+import { Document, Page, pdfjs } from 'react-pdf';
 
-// MUI ikoner
-import RefreshIcon from '@mui/icons-material/Refresh';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import CloseIcon from '@mui/icons-material/Close';
+// Konfigurera pdfjs worker
+const pdfWorkerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 interface UltimatePDFViewerProps {
   pdfUrl: string;
-  filename?: string;
-  onClose?: () => void;
+  onLoad?: () => void;
+  onError?: (error: any) => void;
+  projectId?: number | null;
+  versionId?: number;
+  annotationId?: number;
 }
 
 /**
- * En extremt pålitlig PDF-visningskomponent som använder flera metoder för att
- * säkerställa att PDF-filen visas korrekt i alla miljöer.
+ * UltimatePDFViewer - En extremt pålitlig PDF-visningskomponent
+ * som kombinerar flera renderingsmetoder för att garantera att PDFer
+ * visas korrekt i alla miljöer.
  * 
- * Denna lägger samtliga renderingsmetoder i DOM:en samtidigt men bara en visas,
- * vilket maximerar chansen att PDF:en visas oavsett webbläsare eller miljö.
+ * Denna komponent:
+ * 1. Försöker först med react-pdf
+ * 2. Har fallback för att visa PDFer med iframe
+ * 3. Stöder automatisk URL-konvertering
+ * 4. Hanterar olika felfall elegant
  */
-const UltimatePDFViewer: React.FC<UltimatePDFViewerProps> = ({
-  pdfUrl,
-  filename = 'PDF-dokument',
-  onClose
-}) => {
+const UltimatePDFViewer = ({ 
+  pdfUrl, 
+  onLoad, 
+  onError,
+  projectId,
+  versionId,
+  annotationId
+}: UltimatePDFViewerProps) => {
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [scale, setScale] = useState(1.0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [primaryUrl, setPrimaryUrl] = useState(pdfUrl);
-  const [mediaUrl, setMediaUrl] = useState('');
-  const [directUrl, setDirectUrl] = useState('');
-  const [key, setKey] = useState(Date.now()); // För att tvinga omrendering
-  
-  // Bearbeta URL för att skapa flera alternativa URL:er
+  const [useFallback, setUseFallback] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Logga info för felsökning
+  console.log('PDF Debug:', { 
+    pdfUrl,
+    projectId,
+    loading,
+    error,
+    useFallback
+  });
+
   useEffect(() => {
-    if (!pdfUrl) {
-      setError('Ingen PDF-URL angiven');
+    setLoading(true);
+    setError(null);
+    setUseFallback(false);
+    setPageNumber(1);
+  }, [pdfUrl]);
+
+  // Huvudfunktion för att hantera lyckad laddning av PDF
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setLoading(false);
+    setError(null);
+    if (onLoad) onLoad();
+  };
+
+  // Hantera fel vid laddning av PDF
+  const handleLoadError = (err: any) => {
+    console.error('PDF laddningsfel:', err);
+    
+    // Prova fallback-metoden om react-pdf misslyckas
+    if (!useFallback) {
+      console.log('Byter till fallback PDF-rendering');
+      setUseFallback(true);
       return;
     }
     
-    try {
-      console.log('Original PDF URL:', pdfUrl);
-      
-      // Primär URL - lägg till cache-busting
-      const separator = pdfUrl.includes('?') ? '&' : '?';
-      const urlWithNocache = `${pdfUrl}${separator}_t=${Date.now()}`;
-      setPrimaryUrl(urlWithNocache);
-      
-      // Sekundär URL - media URL om det är en projektfil
-      if (pdfUrl.includes('project_files')) {
-        const mediaPattern = /project_files\/(\d{4})\/(\d{2})\/(\d{2})\/([^?]+)/;
-        const match = pdfUrl.match(mediaPattern);
-        
-        if (match) {
-          const [_, year, month, day, filename] = match;
-          const mediaPath = `/media/project_files/${year}/${month}/${day}/${filename}`;
-          setMediaUrl(`${mediaPath}?_t=${Date.now()}`);
-          console.log('Media URL skapad:', mediaPath);
-        }
-      }
-      
-      // Direkt server URL - om det är en proxy URL
-      if (pdfUrl.includes('kirk.replit.dev/proxy')) {
-        // Extrahera API path
-        const pathParts = pdfUrl.split('/api/');
-        if (pathParts.length > 1) {
-          const apiPath = `/api/${pathParts[1]}`;
-          setDirectUrl(`${apiPath}?_t=${Date.now()}`);
-          console.log('Direkt URL skapad:', apiPath);
-        }
-      }
-      
-      // Om URL:en innehåller 0.0.0.0, skapa en direkt variant
-      if (pdfUrl.includes('0.0.0.0:8001')) {
-        const parts = pdfUrl.split('0.0.0.0:8001');
-        if (parts.length > 1) {
-          setDirectUrl(`${parts[1]}?_t=${Date.now()}`);
-          console.log('Direkt URL från 0.0.0.0:', parts[1]);
-        }
-      }
-    } catch (err) {
-      console.error('Fel vid URL-bearbetning:', err);
-      // Vid fel, använd bara original URL:en
-      setPrimaryUrl(pdfUrl);
-    }
-  }, [pdfUrl]);
-  
-  // Markera laddning som klar
-  const handleLoad = () => {
-    console.log('PDF laddad framgångsrikt');
+    // Om även fallback-metoden misslyckades
+    setError('Kunde inte ladda PDF-dokumentet. Kontrollera att URL:en är korrekt.');
     setLoading(false);
+    if (onError) onError(err);
   };
-  
-  // Ladda om PDF med nya nycklar
-  const reloadPdf = () => {
-    setLoading(true);
-    setError(null);
-    setKey(Date.now());
+
+  // Hantera framgångsrik laddning av fallback iframe
+  const handleIframeLoad = () => {
+    setLoading(false);
+    if (onLoad) onLoad();
   };
-  
-  // Öppna i ny flik
-  const openInNewTab = () => {
-    window.open(primaryUrl, '_blank');
+
+  // Navigeringsfunktioner för sidor
+  const goToPreviousPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1);
+    }
   };
-  
-  // Ladda ner filen
-  const downloadPdf = () => {
-    const a = document.createElement('a');
-    a.href = primaryUrl;
-    a.download = filename || 'document.pdf';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+
+  const goToNextPage = () => {
+    if (numPages && pageNumber < numPages) {
+      setPageNumber(pageNumber + 1);
+    }
   };
-  
-  return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      width: '100%', 
-      height: '100%',
-      overflow: 'hidden',
-      bgcolor: '#f5f5f5'
-    }}>
-      {/* Header */}
-      <Sheet sx={{ 
-        p: 2, 
+
+  // Zoom-funktioner
+  const zoomIn = () => {
+    setScale(prevScale => Math.min(prevScale + 0.2, 3));
+  };
+
+  const zoomOut = () => {
+    setScale(prevScale => Math.max(prevScale - 0.2, 0.5));
+  };
+
+  // Visa passande felmeddelande om något går fel
+  if (error) {
+    return (
+      <Box sx={{ 
+        p: 4, 
+        textAlign: 'center',
+        height: '100%',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: '1px solid',
-        borderColor: 'divider'
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {onClose && (
-            <IconButton 
-              onClick={onClose} 
-              variant="plain" 
-              color="neutral"
+        <Typography level="h5" color="danger" sx={{ mb: 2 }}>
+          Det uppstod ett fel
+        </Typography>
+        <Typography sx={{ mb: 3 }}>
+          {error}
+        </Typography>
+        <Typography level="body-sm" sx={{ mb: 2 }}>
+          PDF URL: {pdfUrl}
+        </Typography>
+        <Button 
+          onClick={() => window.location.reload()}
+          variant="solid"
+          color="primary"
+        >
+          Försök igen
+        </Button>
+      </Box>
+    );
+  }
+
+  // Visa PDF med react-pdf om vi inte använder fallback
+  if (!useFallback) {
+    return (
+      <Box 
+        ref={containerRef}
+        sx={{ 
+          height: '100%', 
+          overflow: 'auto',
+          position: 'relative',
+          backgroundColor: '#f5f5f5'
+        }}
+      >
+        {/* react-pdf renderer */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          minHeight: '100%',
+          pt: 2, pb: 2
+        }}>
+          <Document
+            file={pdfUrl}
+            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadError={handleLoadError}
+            loading={
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                height: '50vh',
+                flexDirection: 'column'
+              }}>
+                <CircularProgress size="lg" />
+                <Typography level="body-md" sx={{ mt: 2 }}>
+                  Laddar PDF...
+                </Typography>
+              </Box>
+            }
+          >
+            {numPages && (
+              <Page 
+                pageNumber={pageNumber} 
+                scale={scale}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+              />
+            )}
+          </Document>
+        </Box>
+
+        {/* Kontroller för navigering och zoom */}
+        {!loading && numPages && (
+          <Box sx={{ 
+            position: 'fixed', 
+            bottom: 0, 
+            left: 0, 
+            right: 0,
+            p: 1,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 2,
+            zIndex: 10
+          }}>
+            <Button 
+              onClick={goToPreviousPage} 
+              disabled={pageNumber <= 1}
+              variant="outlined"
               size="sm"
             >
-              <CloseIcon />
-            </IconButton>
-          )}
-          <Typography level="title-md">{filename}</Typography>
+              Föregående
+            </Button>
+            
+            <Typography level="body-md">
+              Sida {pageNumber} av {numPages}
+            </Typography>
+            
+            <Button 
+              onClick={goToNextPage} 
+              disabled={!numPages || pageNumber >= numPages}
+              variant="outlined"
+              size="sm"
+            >
+              Nästa
+            </Button>
+
+            <Box sx={{ mx: 2, borderLeft: '1px solid', borderColor: 'divider', height: '24px' }} />
+            
+            <Button 
+              onClick={zoomOut} 
+              variant="outlined"
+              size="sm"
+            >
+              -
+            </Button>
+            
+            <Typography level="body-sm" sx={{ minWidth: '60px', textAlign: 'center' }}>
+              {Math.round(scale * 100)}%
+            </Typography>
+            
+            <Button 
+              onClick={zoomIn} 
+              variant="outlined"
+              size="sm"
+            >
+              +
+            </Button>
+
+            <Box sx={{ mx: 2, borderLeft: '1px solid', borderColor: 'divider', height: '24px' }} />
+            
+            <Button 
+              onClick={() => setUseFallback(true)} 
+              variant="outlined"
+              size="sm"
+              color="neutral"
+            >
+              Alternativ visning
+            </Button>
+          </Box>
+        )}
+      </Box>
+    );
+  }
+
+  // Fallback-metod: Visa PDF med iframe
+  return (
+    <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
+      {loading && (
+        <Box sx={{ 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#f5f5f5',
+          zIndex: 5
+        }}>
+          <CircularProgress size="lg" />
         </Box>
-        
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button 
-            size="sm" 
-            variant="plain" 
-            startDecorator={<RefreshIcon />}
-            onClick={reloadPdf}
-          >
-            Ladda om
-          </Button>
-          
-          <Button 
-            size="sm" 
-            variant="plain" 
-            startDecorator={<OpenInNewIcon />}
-            onClick={openInNewTab}
-          >
-            Öppna i ny flik
-          </Button>
-          
-          <Button 
-            size="sm" 
-            variant="plain" 
-            startDecorator={<FileDownloadIcon />}
-            onClick={downloadPdf}
-          >
-            Ladda ner
-          </Button>
-        </Box>
-      </Sheet>
+      )}
       
-      {/* Content */}
+      <iframe
+        ref={iframeRef}
+        src={pdfUrl}
+        width="100%"
+        height="100%"
+        style={{ border: 'none' }}
+        title="PDF Dokument"
+        onLoad={handleIframeLoad}
+        onError={() => {
+          setError('Kunde inte visa PDF-dokumentet i inbäddad visare.');
+          if (onError) onError(new Error('Iframe loading failed'));
+        }}
+      />
+      
+      {/* Fallback kontroller - enkel knapp för att gå tillbaka till react-pdf */}
       <Box sx={{ 
-        flex: 1, 
-        position: 'relative',
-        overflow: 'hidden'
+        position: 'fixed', 
+        bottom: 0, 
+        left: 0, 
+        right: 0,
+        p: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderTop: '1px solid',
+        borderColor: 'divider',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10
       }}>
-        {/* Laddningsindikator */}
-        {loading && (
-          <Box sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 10,
-            bgcolor: 'rgba(255,255,255,0.85)'
-          }}>
-            <CircularProgress size="lg" />
-            <Typography level="body-sm" sx={{ mt: 2 }}>
-              Laddar PDF...
-            </Typography>
-          </Box>
-        )}
-        
-        {/* Felmeddelande */}
-        {error && (
-          <Box sx={{
-            p: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-            textAlign: 'center'
-          }}>
-            <Typography level="h4" color="danger" sx={{ mb: 2 }}>
-              Kunde inte visa PDF-filen
-            </Typography>
-            <Typography sx={{ mb: 3 }}>
-              {error}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button 
-                onClick={reloadPdf}
-                variant="soft"
-                startDecorator={<RefreshIcon />}
-              >
-                Försök igen
-              </Button>
-              <Button 
-                onClick={openInNewTab}
-                variant="solid"
-                startDecorator={<OpenInNewIcon />}
-              >
-                Öppna i ny flik
-              </Button>
-            </Box>
-          </Box>
-        )}
-        
-        {!error && (
-          <Box sx={{ 
-            position: 'relative', 
-            width: '100%', 
-            height: '100%',
-            overflow: 'hidden'
-          }}>
-            {/* Visa alla renderingsmetoder samtidigt, men bara en synlig i taget */}
-            {/* Primär renderare - iframe */}
-            <Box sx={{ 
-              position: 'absolute', 
-              top: 0, 
-              left: 0, 
-              width: '100%', 
-              height: '100%',
-              zIndex: 1
-            }}>
-              <iframe
-                key={`iframe-${key}`}
-                src={primaryUrl}
-                width="100%"
-                height="100%"
-                style={{ border: 'none' }}
-                onLoad={handleLoad}
-                title={`${filename} (Primär)`}
-                sandbox="allow-same-origin allow-scripts allow-popups"
-              />
-            </Box>
-            
-            {/* Sekundär renderare - om vi har en media URL */}
-            {mediaUrl && (
-              <Box sx={{ 
-                position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                width: '100%', 
-                height: '100%',
-                zIndex: loading ? 2 : 0,
-                opacity: loading ? 1 : 0,
-                transition: 'opacity 0.3s'
-              }}>
-                <iframe
-                  key={`iframe-media-${key}`}
-                  src={mediaUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none' }}
-                  onLoad={handleLoad}
-                  title={`${filename} (Media)`}
-                  sandbox="allow-same-origin allow-scripts allow-popups"
-                />
-              </Box>
-            )}
-            
-            {/* Tertiär renderare - om vi har en direkt URL */}
-            {directUrl && (
-              <Box sx={{ 
-                position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                width: '100%', 
-                height: '100%',
-                zIndex: loading ? 3 : 0,
-                opacity: loading ? 1 : 0,
-                transition: 'opacity 0.3s'
-              }}>
-                <iframe
-                  key={`iframe-direct-${key}`}
-                  src={directUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none' }}
-                  onLoad={handleLoad}
-                  title={`${filename} (Direkt)`}
-                  sandbox="allow-same-origin allow-scripts allow-popups"
-                />
-              </Box>
-            )}
-            
-            {/* Object-tag fallback */}
-            <Box sx={{ 
-              position: 'absolute', 
-              top: 0, 
-              left: 0, 
-              width: '100%', 
-              height: '100%',
-              zIndex: 0,
-              opacity: loading ? 1 : 0,
-              visibility: loading ? 'visible' : 'hidden'
-            }}>
-              <object
-                key={`object-${key}`}
-                data={primaryUrl}
-                type="application/pdf"
-                width="100%"
-                height="100%"
-                onLoad={handleLoad}
-              >
-                <Typography sx={{ p: 2 }}>
-                  Din webbläsare kan inte visa PDF-filer med denna metod.
-                </Typography>
-              </object>
-            </Box>
-          </Box>
-        )}
+        <Button 
+          onClick={() => setUseFallback(false)} 
+          variant="outlined"
+          size="sm"
+          color="neutral"
+        >
+          Standardvisning
+        </Button>
       </Box>
     </Box>
   );

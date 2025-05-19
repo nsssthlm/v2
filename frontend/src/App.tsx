@@ -20,7 +20,7 @@ import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 import CalendarPage from './pages/dashboard/CalendarPage';
 
 // Folder pages
-import FolderPageNew from './pages/folders/FolderPageNew';
+import ModernFolderPage from './pages/folders/ModernFolderPage';
 import FolderListPage from './pages/folders/FolderListPage';
 
 // PDF hantering
@@ -64,7 +64,7 @@ function App() {
                 
                 {/* Folder routes */}
                 <Route path="folders" element={<FolderListPage />} />
-                <Route path="folders/:slug" element={<FolderPageNew />} />
+                <Route path="folders/:slug" element={<ModernFolderPage />} />
                 
                 {/* Nya dedikerade PDF-viewer sidor */}
                 <Route path="pdf-viewer" element={<PDFViewerPage />} />
