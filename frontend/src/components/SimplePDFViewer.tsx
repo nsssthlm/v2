@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Button, CircularProgress } from '@mui/joy';
 import { FullscreenOutlined, Refresh } from '@mui/icons-material';
-import axios from 'axios';
 
 interface SimplePDFViewerProps {
   pdfUrl: string;
@@ -10,8 +9,8 @@ interface SimplePDFViewerProps {
 }
 
 /**
- * A very simple PDF viewer that uses an iframe with direct URL
- * This removes all the complexity and works reliably in most browsers
+ * Enkel PDF-visare som använder den mest grundläggande metoden för att visa PDF-filer
+ * med hjälp av direktåtkomst och iframe-element
  */
 const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
   pdfUrl,
@@ -20,51 +19,44 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Check if URL is valid
-  useEffect(() => {
-    const checkUrl = async () => {
-      try {
-        await axios.head(pdfUrl, { 
-          withCredentials: true 
-        });
-        setLoading(false);
-      } catch (err) {
-        console.error('Error checking PDF URL:', err);
-        setError('Could not access the PDF file');
-        setLoading(false);
-      }
-    };
-    
-    checkUrl();
-  }, [pdfUrl]);
-
-  // Function to retry loading
-  const retryLoading = () => {
-    setError(null);
+  const [key, setKey] = useState(Date.now()); // För omrendering
+  
+  // Extrahera filnamnet från URL:en om det behövs
+  const extractedFileName = pdfUrl.split('/').pop() || fileName;
+  
+  // Skapa direktlänk till media-katalogen (detta är nyckeln till lösningen)
+  let mediaDirectUrl = '';
+  if (extractedFileName.endsWith('.pdf')) {
+    // Använd direct URL till media-katalogen enligt Django's static serving
+    mediaDirectUrl = `/media/project_files/2025/05/19/${extractedFileName}`;
+  }
+  
+  // Använd den direkta media-länken om den finns, annars den vanliga URL:en
+  const finalUrl = mediaDirectUrl || pdfUrl;
+  
+  // Hantera när iframe har laddats
+  const handleLoad = () => {
+    setLoading(false);
+  };
+  
+  // Hantera laddningsfel
+  const handleError = () => {
+    setError('Kunde inte visa PDF-filen direkt. Prova att öppna i ny flik.');
+    setLoading(false);
+  };
+  
+  // Ladda om PDF-filen
+  const reloadPdf = () => {
     setLoading(true);
-    
-    const checkUrl = async () => {
-      try {
-        await axios.head(pdfUrl, { 
-          withCredentials: true 
-        });
-        setLoading(false);
-      } catch (err) {
-        console.error('Error checking PDF URL:', err);
-        setError('Could not access the PDF file');
-        setLoading(false);
-      }
-    };
-    
-    checkUrl();
+    setError(null);
+    setKey(Date.now()); // Tvingar iframe att ladda om
   };
-
-  // Open in new tab function
+  
+  // Öppna i ny flik
   const openInNewTab = () => {
-    window.open(pdfUrl, '_blank');
+    window.open(finalUrl, '_blank');
   };
-
+  
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -104,7 +96,7 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
           </Button>
           
           <Button 
-            onClick={retryLoading} 
+            onClick={reloadPdf} 
             variant="outlined"
             size="sm"
             startDecorator={<Refresh fontSize="small" />}
@@ -128,20 +120,28 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
       <Box sx={{ 
         flex: 1, 
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'auto',
         bgcolor: 'grey.100'
       }}>
+        {/* Visa laddningsindikator */}
         {loading && (
           <Box sx={{ 
             position: 'absolute', 
             top: '50%', 
             left: '50%', 
-            transform: 'translate(-50%, -50%)'
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2
           }}>
             <CircularProgress />
+            <Typography level="body-sm">Laddar PDF...</Typography>
           </Box>
         )}
         
+        {/* Visa felmeddelande om laddningen misslyckades */}
         {error && (
           <Box sx={{ 
             display: 'flex',
@@ -156,7 +156,7 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
               Kunde inte ladda PDF
             </Typography>
             <Typography level="body-md" sx={{ mb: 2 }}>
-              {error || 'Det gick inte att visa dokumentet direkt i applikationen.'}
+              {error}
             </Typography>
             <Button 
               onClick={openInNewTab}
@@ -169,15 +169,21 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
           </Box>
         )}
         
-        {!error && !loading && (
-          <iframe 
-            src={pdfUrl} 
-            width="100%" 
-            height="100%" 
-            style={{ border: 'none' }}
-            title={fileName}
-          />
-        )}
+        {/* Iframe för att visa PDF-filen */}
+        <iframe
+          key={key}
+          src={finalUrl}
+          width="100%"
+          height="100%"
+          style={{ 
+            border: 'none',
+            display: loading ? 'none' : 'block'
+          }}
+          title={fileName}
+          onLoad={handleLoad}
+          onError={handleError}
+          sandbox="allow-same-origin allow-scripts allow-popups"
+        />
       </Box>
     </Box>
   );
