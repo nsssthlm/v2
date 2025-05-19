@@ -39,6 +39,10 @@ interface ProjectContextType {
   projects: Project[];
   addProject: (project: Project) => void;
   loading: boolean;
+  
+  // Lägg till properties för projekt-IDs som behövs i components
+  contextProjectId?: string;
+  activeProjectId?: string;
 }
 
 // Skapa kontexten
@@ -148,11 +152,11 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     sessionStorage.setItem('currentProject', JSON.stringify(project));
     sessionStorage.setItem('selectedProjectId', project.id);
 
-    // När projektet byts, rensa tidigare innehåll och uppdatera URL:en
-    if (window.location.pathname.includes('/folders/')) {
-      console.log('Byter projekt, navigerar till start');
-      window.location.href = '/';
-    }
+    // Endast meddela projekbyte via konsolen - vi navigerar inte automatiskt till startsidan längre
+    console.log('Projekt har bytts till:', project.name);
+    
+    // Eventuellt kan vi använda React Router för navigering om det behövs i framtiden
+    // navigate('/')
   };
 
   // Lägg till ett nytt projekt till projektkontexten
@@ -167,13 +171,15 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     console.log('Nytt projekt tillagt:', project);
   };
 
-  // Kontextens värde
+  // Kontextens värde med ID-properties som behövs i komponenter
   const value = {
     currentProject,
     setCurrentProject,
     projects,
     addProject,
-    loading
+    loading,
+    contextProjectId: currentProject?.id,
+    activeProjectId: currentProject?.id
   };
 
   return (
