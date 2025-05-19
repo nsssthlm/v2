@@ -45,12 +45,13 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('description', description);
+      formData.append('name', file.name.replace('.pdf', ''));
       
-      if (folderId) {
-        formData.append('directory', folderId.toString());
-      }
-
-      const response = await fetch(`/api/files/upload/?directory_slug=test1-44`, {
+      // Lägg till felhantering och loggning för att spåra parametrar
+      console.log(`Laddar upp fil till mapp: ${folderId}`);
+      
+      // Använd den givna folderId (mapp-slug) för att säkerställa att filen uppladdas i rätt mapp
+      const response = await fetch(`/api/files/upload/?directory_slug=${folderId}`, {
         method: 'POST',
         body: formData,
       });
@@ -59,18 +60,17 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         const data = await response.json();
         console.log('Uppladdning lyckades:', data);
         
-        // Skapa en temporär lokal URL för direkt förhandsgranskning
-        const fileURL = URL.createObjectURL(file);
-        
-        // Öppna den uppladdade PDF:en direkt i ett nytt fönster
-        window.open(fileURL, '_blank');
+        // Visa en bättre användarupplevelse vid lyckad uppladdning
+        alert('Filen har laddats upp framgångsrikt!');
         
         handleClose();
         if (onUploadSuccess) {
           onUploadSuccess();
         }
       } else {
-        console.error('Uppladdning misslyckades');
+        const errorData = await response.json().catch(() => ({ detail: 'Ett okänt fel uppstod' }));
+        console.error('Uppladdning misslyckades:', errorData);
+        alert(`Uppladdning misslyckades: ${errorData.detail || 'Ett okänt fel uppstod'}`);
       }
     } catch (error) {
       console.error('Fel vid uppladdning:', error);
