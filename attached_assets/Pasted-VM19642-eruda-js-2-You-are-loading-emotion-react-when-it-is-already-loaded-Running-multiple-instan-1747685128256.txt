@@ -1,0 +1,17 @@
+VM19642 eruda.js:2 You are loading @emotion/react when it is already loaded. Running multiple instances may cause problems. This can happen if multiple versions are used, or if multiple builds of the same version are used.
+Mt.forEach.n.<computed> @ VM19642 eruda.js:2
+(anonymous) @ VM19693 chunk-CAZREADN.js:3485Understand this warning
+VM19642 eruda.js:2 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+VM19642 eruda.js:2 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+PDFUploader.tsx:51 Laddar upp fil till mapp: fred1-70
+PDFUploader.tsx:61 Uppladdning lyckades: {detail: 'Filen har laddats upp.', file_id: 102, name: 'AAAAExempel på ritningar', url: 'http://0.0.0.0:8001/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_MG33E4B.pdf'}
+ModernFolderPage.tsx:59 Öppnar PDF: http://0.0.0.0:8001/api/files/web/fred1-70/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_MG33E4B.pdf AAAAExempel på ritningar
+ModernFolderPage.tsx:75 Använder direkt media-URL: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_MG33E4B.pdf
+ModernFolderPage.tsx:84 Final PDF URL för visning: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_MG33E4B.pdf
+UltimatePDFViewer.tsx:33 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_MG33E4B.pdf', projectId: null, loading: true, error: null}
+UltimatePDFViewer.tsx:33 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_MG33E4B.pdf', projectId: null, loading: true, error: null}
+ModernFolderPage.tsx:59 Öppnar PDF: http://0.0.0.0:8001/api/files/web/fred1-70/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf AAAAExempel på ritningar
+ModernFolderPage.tsx:75 Använder direkt media-URL: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf
+ModernFolderPage.tsx:84 Final PDF URL för visning: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf
+UltimatePDFViewer.tsx:33 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: true, error: null}
+UltimatePDFViewer.tsx:33 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: true, error: null}

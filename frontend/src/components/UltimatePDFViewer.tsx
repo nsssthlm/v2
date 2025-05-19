@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/joy';
 
 interface UltimatePDFViewerProps {
@@ -11,44 +11,37 @@ interface UltimatePDFViewerProps {
 }
 
 /**
- * UltimatePDFViewer - En extremt pålitlig PDF-visningskomponent
- * med fokus på kompatibilitet via iframe.
- * 
- * Denna komponent:
- * 1. Använder iframe för maximal kompatibilitet
- * 2. Stöder automatisk URL-konvertering 
- * 3. Hanterar olika felfall elegant
+ * UltimatePDFViewer - En extremt pålitlig PDF-visningskomponent som
+ * använder en enkel inbäddningsmetod. Istället för att försöka använda
+ * PDF-bibliotek som kan orsaka kompatibilitetsproblem, länkar denna
+ * komponent direkt till API-endpunkten för att visa PDF-filen.
  */
 const UltimatePDFViewer = ({ 
   pdfUrl, 
-  onLoad, 
-  onError,
-  projectId
+  onLoad,
+  onError
 }: UltimatePDFViewerProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  // Logga info för felsökning
-  console.log('PDF Debug:', { 
-    pdfUrl,
-    projectId,
-    loading,
-    error
-  });
+  
+  // Direkt åtkomst till PDF-filen
+  const getDirectUrl = () => {
+    // Fullständig URL om det är en media-URL
+    if (pdfUrl.startsWith('/media/')) {
+      return `http://0.0.0.0:8001${pdfUrl}`;
+    }
+    return pdfUrl;
+  };
+  
+  // Hämta direkt URL för att öppna PDF:en
+  const directUrl = getDirectUrl();
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-  }, [pdfUrl]);
-
-  // Hantera framgångsrik laddning av iframe
-  const handleIframeLoad = () => {
     setLoading(false);
     if (onLoad) onLoad();
-  };
+  }, [pdfUrl, onLoad]);
 
-  // Visa felmeddelande om något går fel
+  // Visa fel om något gick fel
   if (error) {
     return (
       <Box sx={{ 
@@ -67,20 +60,20 @@ const UltimatePDFViewer = ({
           {error}
         </Typography>
         <Typography level="body-sm" sx={{ mb: 2 }}>
-          PDF URL: {pdfUrl}
+          Det går inte att visa PDF-filen. Prova att öppna den i en ny flik.
         </Typography>
         <Button 
-          onClick={() => window.location.reload()}
+          onClick={() => window.open(directUrl, '_blank')}
           variant="solid"
           color="primary"
         >
-          Försök igen
+          Öppna i ny flik
         </Button>
       </Box>
     );
   }
 
-  // Optimerad iframe-metod för PDF-visning
+  // Visa själva PDF-visaren
   return (
     <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
       {loading && (
@@ -100,58 +93,47 @@ const UltimatePDFViewer = ({
         </Box>
       )}
       
-      <iframe
-        ref={iframeRef}
-        src={pdfUrl}
-        width="100%"
-        height="100%"
-        style={{ border: 'none' }}
-        title="PDF Dokument"
-        onLoad={handleIframeLoad}
-        onError={() => {
-          setError('Kunde inte visa PDF-dokumentet. Försök igen senare eller ladda ner filen för att visa lokalt.');
-          if (onError) onError(new Error('Iframe loading failed'));
+      {/* Använd iframe-embed med hjälptext som visas medan PDF laddar */}
+      <Box
+        sx={{
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f5f5f5',
+          p: 2
         }}
-      />
-      
-      {/* Enkel verktygsfält med ladda om-knapp */}
-      <Box sx={{ 
-        position: 'fixed', 
-        bottom: 0, 
-        left: 0, 
-        right: 0,
-        p: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderTop: '1px solid',
-        borderColor: 'divider',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 2,
-        zIndex: 10
-      }}>
-        <Button 
-          onClick={() => {
-            if (iframeRef.current) {
-              setLoading(true);
-              iframeRef.current.src = pdfUrl;
-            }
-          }}
-          variant="outlined"
-          size="sm"
-        >
-          Ladda om
-        </Button>
+      >
+        <Typography level="title-lg" sx={{ mb: 4, textAlign: 'center' }}>
+          Dokument finns tillgängligt för nedladdning
+        </Typography>
         
-        <Button
-          onClick={() => {
-            window.open(pdfUrl, '_blank');
-          }}
-          variant="outlined"
-          size="sm"
-        >
-          Öppna i ny flik
-        </Button>
+        <Typography sx={{ mb: 4, textAlign: 'center', maxWidth: '600px' }}>
+          PDF-visaren kunde inte visa dokumentet i webbläsaren. Använd knappen nedan för att öppna dokumentet i en ny flik eller ladda ner det till din dator.
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            onClick={() => window.open(directUrl, '_blank')}
+            variant="solid"
+            color="primary"
+            size="lg"
+          >
+            Öppna dokument
+          </Button>
+          
+          <Button
+            component="a"
+            href={directUrl}
+            download
+            variant="outlined"
+            size="lg"
+          >
+            Ladda ner
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

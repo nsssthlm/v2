@@ -1,39 +1,32 @@
-// Konfiguration som används i både utveckling och produktion
+// API och konfigurationsvariabler för applikationen
 
-// Funktion för att avgöra om vi kör i deployad miljö
-export const isProduction = (): boolean => {
-  const hostname = window.location.hostname;
-  return !hostname.includes('replit.dev') && hostname.includes('.replit.app');
+// Basadress för API-anrop
+export const API_BASE_URL = 'http://0.0.0.0:8001';
+
+// API-sökvägar
+export const API_PATHS = {
+  LOGIN: '/api/token/',
+  REFRESH_TOKEN: '/api/token/refresh/',
+  PROJECTS: '/api/custom/projects/',
+  FILES: '/api/files/',
+  DIRECTORIES: '/api/files/directories/',
+  WEB_FILES: '/api/files/web/'
 };
 
-// Base API URL - använder alltid relativ URL för att fungera med Vite proxy och i produktionsmiljö
-export const API_BASE_URL = '/api';
+// Maximalt antal objekt per sida för pagination
+export const ITEMS_PER_PAGE = 10;
 
-// API URL för direkt anslutning - anpassas utifrån miljö
-export const DIRECT_API_URL = '/api';
-
-// JWT token helpers - förbättrad för att hantera autentisering konsekvent i alla miljöer
-export const getAuthHeader = () => {
-  let token = localStorage.getItem('jwt_token');
-  
-  // Säkerställ att en token alltid finns i testmiljön
-  if (!token) {
-    // Använd projektledartoken som är fördefinierad i backend
-    const defaultToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm9qZWN0bGVhZGVyIiwicm9sZSI6InByb2plY3RfbGVhZGVyIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjI1MDAwMDAwMDB9.Z9t5b4V3vkjO-4BDTXUkEqbp9eEJVGOKutvN-NVWxZs';
-    localStorage.setItem('jwt_token', defaultToken);
-    token = defaultToken;
-    console.log('Autentisering: Använder default token för att säkerställa API-åtkomst');
-  }
-  
-  return { 'Authorization': `Bearer ${token}` };
+// Standardparametrar för PDF-visning
+export const PDF_VIEWER_CONFIG = {
+  SCALE: 1.0,
+  ROTATION: 0,
+  DEFAULT_PAGE: 1
 };
 
-// Standard headers för API-anrop
-export const getStandardHeaders = () => {
-  return {
-    'Content-Type': 'application/json',
-    ...getAuthHeader()
-  };
+// Tillåtna filtyper för uppladdning
+export const ALLOWED_FILE_TYPES = {
+  DOCUMENTS: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'],
+  IMAGES: ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'],
+  AUTOCAD: ['.dwg', '.dxf'],
+  BIM: ['.rvt', '.ifc']
 };
-
-// Andra konfigurationsvariabler kan läggas till här
