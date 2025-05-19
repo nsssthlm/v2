@@ -3,6 +3,8 @@ import { Box, Typography, CircularProgress } from '@mui/joy';
 import * as pdfjsLib from 'pdfjs-dist';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import axios from 'axios';
+import { useProject } from '../contexts/ProjectContext'; // Import ProjectContext
+
 
 // Konfigurera arbetaren för PDF.js med lokal arbetare istället för CDN
 // Detta säkerställer att vi använder rätt version och inte är beroende av extern CDN
@@ -30,7 +32,7 @@ const isExternalUrl = (url: string) => {
 // Hjälpfunktion för att validera en PDF arraybuffer
 const isPdfArrayBuffer = (buffer: ArrayBuffer): boolean => {
   if (!buffer || buffer.byteLength < 5) return false;
-  
+
   // PDF filer börjar alltid med %PDF
   const signatureBytes = new Uint8Array(buffer, 0, 5);
   const signature = String.fromCharCode.apply(null, Array.from(signatureBytes));
@@ -45,19 +47,21 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
   const [pdfBytes, setPdfBytes] = useState<ArrayBuffer | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [finalUrl, setFinalUrl] = useState<string>('');
+  const { currentProject } = useProject(); // Hämta aktuellt projekt från context
 
   // Bearbeta URL till ett format som kan visas med PDF.js
   const processedUrl = React.useMemo(() => {
     // Om ingen URL, returnera tom sträng
     if (!pdfUrl) return '';
-    
+
     // Få basens URL för proxys och direkta anrop
     const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
     let finalUrl = pdfUrl;
-    
+
     // Logga original-URL:en för diagnostik
     console.log('PDF original URL:', pdfUrl);
-    
+
     // Ersätt alla lokala URL:er med proxy URL som kan nås från klienten
     if (pdfUrl.includes('0.0.0.0:8001')) {
       finalUrl = pdfUrl.replace('http://0.0.0.0:8001', baseUrl);
@@ -67,12 +71,12 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     // Extrahera filnamnet oavsett URL-format
     const parts = finalUrl.split('/');
     const fileName = parts[parts.length - 1]?.split('?')[0]; // Ta bort eventuella queryparameter
-    
+
     // Strategi 1: Om URL:en innehåller project_files med datum, använd den direkta PDF-endpointen
     if (finalUrl.includes('project_files/')) {
       const dateAndPathPattern = /project_files\/(\d{4}\/\d{2}\/\d{2}\/[^?&]+\.pdf)/;
       const dateAndPathMatch = finalUrl.match(dateAndPathPattern);
-      
+
       if (dateAndPathMatch && dateAndPathMatch[1]) {
         // Använd direkta PDF-endpointen
         finalUrl = `${baseUrl}/pdf/${dateAndPathMatch[1]}`;
@@ -83,7 +87,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     else if (finalUrl.includes('/api/files/web/')) {
       const apiPattern = /\/api\/files\/web\/.*?\/data\/project_files\/(\d{4}\/\d{2}\/\d{2}\/[^?&]+\.pdf)/;
       const apiMatch = finalUrl.match(apiPattern);
-      
+
       if (apiMatch && apiMatch[1]) {
         finalUrl = `${baseUrl}/pdf/${apiMatch[1]}`;
         console.log("2. Använder PDF-endpoint från API:", finalUrl);
@@ -101,12 +105,12 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       finalUrl = `${baseUrl}/pdf-finder/?filename=${fileName}&stream=true`;
       console.log("4. Använder pdf-finder för direkt länk:", finalUrl);
     }
-    
+
     // Lägg till cachebuster om det inte redan finns stream-parameter
     if (!finalUrl.includes('stream=true')) {
       finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
     }
-    
+
     return finalUrl;
   }, [pdfUrl]);
 
@@ -114,14 +118,14 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
   const createAlternativeUrl = (url: string, attemptNum: number): string => {
     // Plocka bort timestamp-parametern
     const cleanUrl = url.split('?')[0];
-    
+
     // Extrahera filnamnet
     const urlParts = cleanUrl.split('/');
     const filename = urlParts[urlParts.length - 1];
-    
+
     // Bas-URL för alla requests
     const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
-    
+
     // Skapa olika fallback-strategier baserat på vilken försöksordning vi är på
     switch (attemptNum) {
       case 1:
@@ -131,7 +135,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
           return `${baseUrl}/pdf-finder/?filename=${filename}&stream=true`;
         }
         break;
-        
+
       case 2:
         // Sedan: Försök extrahera datum/sökväg från URL:en
         const datePattern = /(\d{4}\/\d{2}\/\d{2}\/[^?/]+\.pdf)/;
@@ -140,11 +144,11 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
           console.log("Fallback 2: Använder exakt sökväg med datum", dateMatch[1]);
           return `${baseUrl}/pdf/${dateMatch[1]}`;
         }
-        
+
         // Om ingen träff, prova vanliga media-URL med dagens datum
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
         return `${baseUrl}/media/project_files/${today}/${filename}`;
-        
+
       case 3:
         // Tredje alternativ: Prova direct/media som direktserverar filen
         console.log("Fallback 3: Använder direct media API", filename);
@@ -158,7 +162,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         // Om vi inte kan hitta projekt-sökvägen, prova med dagens datum
         const today2 = new Date().toISOString().split('T')[0].replace(/-/g, '/');
         return `${baseUrl}/direct/media/project_files/${today2}/${filename}`;
-        
+
       case 4:
         // Sista utvägen: Prova att söka efter basnamnet utan eventuella hash-tillägg
         const baseNamePattern = /^([^_]+)/;
@@ -172,7 +176,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         }
         break;
     }
-    
+
     // Om inget fungerade, lägg till timestamp på originalURL
     return `${url.split('?')[0]}?nocache=${Date.now()}`;
   };
@@ -182,12 +186,12 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     let isMounted = true;
     let attemptCount = 0;
     const maxAttempts = 4; // Ökat antal försök 
-    
+
     const fetchPdf = async (url: string, alternativeAttempt = false) => {
       if (!isMounted || attemptCount >= maxAttempts) return;
-      
+
       attemptCount++;
-      
+
       try {
         if (attemptCount === 1) {
           setIsLoading(true);
@@ -196,7 +200,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         } else {
           console.log(`Försök ${attemptCount}/${maxAttempts}: ${alternativeAttempt ? 'Alternativ' : 'Direkt'} URL:`, url);
         }
-        
+
         // Använd fetch API för bättre hantering av binärfiler
         const fetchResponse = await fetch(url, {
           method: 'GET',
@@ -206,26 +210,26 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
           // Undvik cache för säkerhetsskull
           cache: 'no-store'
         });
-        
+
         if (!fetchResponse.ok) {
           console.warn(`Servern svarade med ${fetchResponse.status} (${fetchResponse.statusText}) för URL: ${url}`);
           throw new Error(`Servern svarade med ${fetchResponse.status}`);
         }
-        
+
         const contentType = fetchResponse.headers.get('content-type');
         console.log(`Mottagen Content-Type: ${contentType} för URL: ${url}`);
-        
+
         if (!contentType?.includes('application/pdf')) {
           console.warn('Servern returnerade oväntad Content-Type:', contentType);
         }
-        
+
         // Läs in binärdatan som arraybuffer
         const buffer = await fetchResponse.arrayBuffer();
-        
+
         if (!buffer || buffer.byteLength < 10) {
           throw new Error('För lite data returnerades');
         }
-        
+
         // Kontrollera om vi fick PDF-data
         if (isPdfArrayBuffer(buffer)) {
           console.log(`PDF hämtad framgångsrikt, storlek: ${buffer.byteLength} bytes från URL: ${url}`);
@@ -238,11 +242,11 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         }
       } catch (err) {
         console.error(`Fel vid hämtning av PDF (försök ${attemptCount}/${maxAttempts}):`, err);
-        
+
         if (attemptCount < maxAttempts) {
           // Använd vår smarta generering av alternativa URL:er baserat på vilket försök vi är på
           const alternativeUrl = createAlternativeUrl(processedUrl, attemptCount);
-          
+
           // Om vi genererade en ny URL, prova den
           if (alternativeUrl !== url) {
             console.log(`Provar alternativ URL (${attemptCount}):`, alternativeUrl);
@@ -261,9 +265,9 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         }
       }
     };
-    
+
     fetchPdf(processedUrl);
-    
+
     return () => {
       isMounted = false;
     };
@@ -273,23 +277,23 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
   useEffect(() => {
     let pdfDoc: pdfjsLib.PDFDocumentProxy | null = null;
     let isMounted = true;
-    
+
     const renderPdf = async () => {
       if (!pdfBytes || !canvasRef.current) return;
-      
+
       try {
         // Ladda dokumentet med PDF.js från arraybuffer
         console.log('Laddar PDF-dokument från arraybuffer');
         pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
-        
+
         if (!isMounted) return;
-        
+
         setNumPages(pdfDoc.numPages);
         await renderPage(pdfDoc, 1);
         setIsLoading(false);
       } catch (err) {
         console.error('Fel vid rendering av PDF:', err);
-        
+
         if (isMounted) {
           // Visa detaljerat felmeddelande
           const errorMessage = err instanceof Error ? err.message : 'Okänt fel vid PDF-rendering';
@@ -298,34 +302,34 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         }
       }
     };
-    
+
     const renderPage = async (pdf: pdfjsLib.PDFDocumentProxy, pageNum: number) => {
       if (!canvasRef.current) return;
-      
+
       try {
         const page = await pdf.getPage(pageNum);
-        
+
         const viewport = page.getViewport({ scale: 1.0 });
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
-        
+
         if (!context) {
           throw new Error('Kunde inte skapa canvas-kontext');
         }
-        
+
         // Anpassa canvas-storleken till viewporten
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        
+
         // Om container finns, justera skalan för att passa i containern
         if (containerRef.current) {
           const containerWidth = containerRef.current.clientWidth;
           const scale = containerWidth / viewport.width;
           const scaledViewport = page.getViewport({ scale });
-          
+
           canvas.height = scaledViewport.height;
           canvas.width = scaledViewport.width;
-          
+
           await page.render({
             canvasContext: context,
             viewport: scaledViewport
@@ -336,7 +340,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
             viewport
           }).promise;
         }
-        
+
         setCurrentPage(pageNum);
       } catch (err) {
         console.error('Fel vid rendering av PDF-sida:', err);
@@ -345,11 +349,11 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         }
       }
     };
-    
+
     if (pdfBytes) {
       renderPdf();
     }
-    
+
     return () => {
       isMounted = false;
       if (pdfDoc) {
@@ -358,11 +362,11 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       }
     };
   }, [pdfBytes]);
-  
+
   // Lyssna på storleksändringar i containern
   useEffect(() => {
     if (!containerRef.current || !pdfBytes) return;
-    
+
     const resizeObserver = new ResizeObserver(() => {
       // Uppdatera rendering när containerstorleken ändras
       if (numPages > 0 && !isLoading) {
@@ -375,37 +379,37 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
             console.error('Fel vid omladdning efter storleksändring:', err);
           }
         };
-        
+
         loadPdf();
       }
     });
-    
+
     resizeObserver.observe(containerRef.current);
-    
+
     return () => {
       resizeObserver.disconnect();
     };
   }, [numPages, isLoading, currentPage, pdfBytes]);
-  
+
   const renderPage = async (pdf: pdfjsLib.PDFDocumentProxy, pageNum: number) => {
     if (!canvasRef.current || !containerRef.current) return;
-    
+
     try {
       const page = await pdf.getPage(pageNum);
-      
+
       const containerWidth = containerRef.current.clientWidth;
       const viewport = page.getViewport({ scale: 1.0 });
       const scale = containerWidth / viewport.width;
       const scaledViewport = page.getViewport({ scale });
-      
+
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
-      
+
       if (!context) return;
-      
+
       canvas.height = scaledViewport.height;
       canvas.width = scaledViewport.width;
-      
+
       await page.render({
         canvasContext: context,
         viewport: scaledViewport
@@ -484,7 +488,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
           width: '100%'
         }}>
           <canvas ref={canvasRef} style={{ maxWidth: '100%' }} />
-          
+
           {numPages > 1 && (
             <Box sx={{ 
               mt: 2, 
