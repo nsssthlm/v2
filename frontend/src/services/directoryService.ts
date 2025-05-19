@@ -182,17 +182,45 @@ const directoryService = {
       
       // Försök med API-anropet
       try {
-        // Vi använder bara den primära metoden nu för att minska komplexiteten
-        const response = await axios.post(`${API_BASE_URL}/files/directories/`, dirData);
-        console.log('Mapp skapad via API:', response.data);
-        return response.data;
+        // Hämta CSRF-token från cookies
+        const getCookie = (name: string) => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift();
+          return undefined;
+        };
+        
+        const csrfToken = getCookie('csrftoken');
+        console.log('CSRF-token för mappskapande:', csrfToken);
+        
+        // Använd fetch med credentials och CSRF-token för att säkerställa att autentiseringen fungerar
+        console.log('Skapar mapp med URL:', `${API_BASE_URL}/api/files/directories/`);
+        
+        const response = await fetch(`${API_BASE_URL}/api/files/directories/`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
+          },
+          body: JSON.stringify(dirData)
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Mappskapande misslyckades med status:', response.status, errorText);
+          throw new Error(`Kunde inte skapa mappen: ${response.status} ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Mapp skapad via API:', data);
+        return data;
       } catch (error: any) {
         console.error('Fel vid kommunikation med backend-API:', error);
         
         // Felmeddelande för användaren
-        if (error.response) {
-          console.error('API svarade med fel:', error.response.data);
-        }
+        console.error('API svarade med fel:', error.message || 'Okänt fel');
         
         // Returnera förkastningen för att hantera i UI
         throw error;
