@@ -100,72 +100,15 @@ const FileSystemNode = ({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          // Klick på mappen öppnar mappens innehåll (navigerar till mappens sida)
+          // Klick på mappen öppnar mappens innehåll med enkel och direkt navigering
           if (isFolder && node.slug) {
-            try {
-              // EXTREMT VIKTIG SÄKERHETSKOPIERING AV AUTENTISERINGSUPPGIFTER
-              
-              // 1. Säkerhetskopiera alla tokens
-              const jwtToken = localStorage.getItem('jwt_token');
-              const authToken = localStorage.getItem('auth_token');
-              const token = localStorage.getItem('token');
-              const csrfToken = localStorage.getItem('csrftoken');
-              const currentUser = localStorage.getItem('currentUser');
-              
-              // 2. Sätt dessa värden i sessionStorage också
-              if (jwtToken) sessionStorage.setItem('jwt_token', jwtToken);
-              if (authToken) sessionStorage.setItem('auth_token', authToken);
-              if (token) sessionStorage.setItem('token', token);
-              if (csrfToken) sessionStorage.setItem('csrftoken', csrfToken);
-              if (currentUser) sessionStorage.setItem('currentUser', currentUser);
-              
-              // 3. Spara ytterligare backup i sessionStorage med särskilda nycklar
-              if (jwtToken) sessionStorage.setItem('backup_jwt_token', jwtToken);
-              if (currentUser) sessionStorage.setItem('backup_currentUser', currentUser);
-              
-              // 4. Ställ in cookies för ytterligare säkerhet
-              if (jwtToken) document.cookie = `jwt_token=${jwtToken}; path=/`;
-              if (csrfToken) document.cookie = `csrftoken=${csrfToken}; path=/`;
-              
-              // 5. Spara sökvägen vi navigerar till
-              const url = `/folders/${node.slug}?t=${Date.now()}`;
-              sessionStorage.setItem('lastFolderPath', url);
-              
-              // NYTT: Istället för att använda window.location, lägg en referens i "window"
-              // som React-appen kan läsa för att utföra navigeringen
-              (window as any).pendingNavigation = url;
-              
-              // Utlös en anpassad händelse för att signalera att navigering behövs
-              window.dispatchEvent(new CustomEvent('folderNavigationRequested', { 
-                detail: { url: url } 
-              }));
-              
-              // Om inget fångar händelsen, fall tillbaka till traditionell navigering
-              // men med en kort fördröjning för att ge React Router en chans
-              setTimeout(() => {
-                if ((window as any).pendingNavigation === url) {
-                  // Ingen annan komponent fångade händelsen, använd felsäker
-                  // localStorage-synkning innan navigering
-                  const allTokens = {
-                    jwt_token: jwtToken,
-                    auth_token: authToken,
-                    token: token,
-                    csrftoken: csrfToken,
-                    currentUser: currentUser
-                  };
-                  
-                  // Spara alla tokens till localStorage en sista gång
-                  sessionStorage.setItem('all_auth_tokens', JSON.stringify(allTokens));
-                  
-                  // Använd window.location som sista utväg
-                  window.location.href = url;
-                }
-              }, 50);
-            } catch (error) {
-              console.error("Fel vid mappnavigering:", error);
-              // Om något går fel, fall tillbaka till enkel navigering
-              window.location.href = `/folders/${node.slug}?t=${Date.now()}`;
-            }
+            console.log("Klick på mapp:", node.name, "med slug:", node.slug);
+            // Skapa en URL med tidsstämpel för att förhindra caching
+            const timestamp = Date.now();
+            const url = `/folders/${node.slug}?t=${timestamp}`;
+            
+            // Använd direkt window.location.href för garanterad helsida uppdatering
+            window.location.href = url;
           }
         }}
         onMouseOver={(e) => {

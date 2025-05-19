@@ -244,26 +244,28 @@ const FolderPage: React.FC = () => {
 
   // Använd vanliga a-taggar istället för Link för att säkerställa fullständig sidladdning
   const renderFolderLink = (targetSlug: string, name: string) => {
-    // Lägg till en tid-parameter för att försäkra att sidan alltid laddas om
-    const timestamp = Date.now();
-    
-    // Konstruera länken med tid-parameter och target="_top" för att garantera fullständig sidladdning
+    // Konstruera en vanlig HTML-länk som garanterat orsakar en fullständig sidladdning
     return (
-      <a 
-        href={`/folders/${targetSlug}?t=${timestamp}`} 
-        style={{ 
-          textDecoration: 'none',
-          color: 'inherit'
-        }}
-        target="_top" // Detta tvingar en fullständig sidladdning
+      <Box 
+        component="a"
+        href={`/folders/${targetSlug}?t=${Date.now()}`}
         onClick={(e) => {
           e.preventDefault();
-          // Använd window.location.href för att garantera fullständig sidladdning
-          window.location.href = `/folders/${targetSlug}?t=${timestamp}`;
+          const url = `/folders/${targetSlug}?t=${Date.now()}`;
+          console.log("Navigerar till:", url);
+          window.location.href = url; // Använd window.location.href för garanterad helsidaomstart
+        }}
+        sx={{ 
+          textDecoration: 'none',
+          color: 'inherit',
+          cursor: 'pointer',
+          fontWeight: 'medium',
+          display: 'inline-flex',
+          alignItems: 'center'
         }}
       >
         {name}
-      </a>
+      </Box>
     );
   };
 
