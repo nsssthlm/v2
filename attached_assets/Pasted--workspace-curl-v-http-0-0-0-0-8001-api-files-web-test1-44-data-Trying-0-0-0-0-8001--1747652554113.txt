@@ -1,0 +1,24 @@
+~/workspace$ curl -v "http://0.0.0.0:8001/api/files/web/test1-44/data/"
+*   Trying 0.0.0.0:8001...
+* Connected to 0.0.0.0 (0.0.0.0) port 8001
+* using HTTP/1.x
+> GET /api/files/web/test1-44/data/ HTTP/1.1
+> Host: 0.0.0.0:8001
+> User-Agent: curl/8.11.1
+> Accept: */*
+> 
+* Request completely sent off
+< HTTP/1.1 200 OK
+< Date: Mon, 19 May 2025 11:02:25 GMT
+< Server: WSGIServer/0.2 CPython/3.11.10
+< Content-Type: application/json
+< Vary: Accept, origin
+< Allow: OPTIONS, GET
+< X-Frame-Options: SAMEORIGIN
+< Content-Length: 2565
+< X-Content-Type-Options: nosniff
+< Referrer-Policy: same-origin
+< Cross-Origin-Opener-Policy: same-origin
+< 
+{"id":44,"name":"Test1","slug":"test1-44","description":null,"page_title":"Test1","subfolders":[],"files":[{"id":13,"name":"AAAAExempel på ritningar111111111111111111","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/16/AAAAExempel_pa_ritningar.pdf","content_type":"application/pdf","uploaded_at":"2025-05-16T08:46:43.227921Z"},{"id":24,"name":"AAAAExempel på ritningar","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/17/AAAAExempel_pa_ritningar.pdf","content_type":"application/pdf","uploaded_at":"2025-05-17T23:44:33.090778Z"},{"id":25,"name":"BEAst-PDF-Guidelines-2.0 (1)test","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/17/BEAst-PDF-Guidelines-2.0_1.pdf","content_type":"application/pdf","uploaded_at":"2025-05-17T23:49:25.694017Z"},{"id":26,"name":"BEAst-PDF-Guidelines-2.0 (1)ssss","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/17/BEAst-PDF-Guidelines-2_nhLKJmc.0_1.pdf","content_type":"application/pdf","uploaded_at":"2025-05-17T23:52:54.565532Z"},{"id":27,"name":"AAAAExempel på ritningarssssss","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/18/AAAAExempel_pa_ritningar.pdf","content_type":"application/pdf","uploaded_at":"2025-05-18T00:07:09.040267Z"},{"id":28,"name":"AAAAExempel på ritningaraaaaaaaaaaaa","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/18/AAAAExempel_pa_ritningar_2WNm4U7.pdf","content_type":"application/pdf","uploaded_at":"2025-05-18T00:23:07.323599Z"},{"id":29,"name":"AAAAExempel på ritningarasdasdasdasdas","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/18/AAAAExempel_pa_ritningar_mX6o2iV.pdf","content_type":"application/pdf","uploaded_at":"2025-05-18T00:24:59.108313Z"},{"id":30,"name":"BEAst-PDF-Guidelines-2.0 (1)123","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/18/BEAst-PDF-Guidelines-2.0_1.pdf","content_type":"application/pdf","uploaded_at":"20* Connection #0 to host 0.0.0.0 left intact
+25-05-18T00:29:39.705286Z"},{"id":31,"name":"BEAst-PDF-Guidelines-2.0 (1)","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/18/BEAst-PDF-Guidelines-2_V4PiVxw.0_1.pdf","content_type":"application/pdf","uploaded_at":"2025-05-18T00:31:00.523011Z"},{"id":32,"name":"AAAAExempel på ritningar","file":"http://0.0.0.0:8001/api/files/web/test1-44/data/project_files/2025/05/18/AAAAExempel_pa_ritningar_VXReOZg.pdf","content_type":"application/pdf","uploaded_at":"2025-05-18T00:33:05.135821Z"}]}~/workspace$ 
