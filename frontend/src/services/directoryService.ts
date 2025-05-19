@@ -64,16 +64,8 @@ const directoryService = {
         return cachedData.data;
       }
       
-      // Skapa en array med dummydata för att undvika UI-fel när API inte svarar
-      const fallbackData = [
-        {
-          id: 1,
-          name: "Dokument",
-          type: "folder",
-          parent: null,
-          slug: "dokument"
-        }
-      ];
+      // Skapa en tom array istället för dummydata, enligt användarens önskemål ska inga standardmappar visas
+      const fallbackData = [];
       
       // Försök med vanlig proxy-anslutning
       try {
