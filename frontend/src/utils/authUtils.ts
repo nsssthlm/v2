@@ -26,11 +26,46 @@ const users: User[] = [
   }
 ];
 
+// Funktion för att generera en enkel JWT-token för frontend-testning
+// OBS: Detta är endast för testning och ska aldrig användas i produktion
+export const generateFakeJwtToken = (user: User): string => {
+  // Skapa ett enkelt header-objekt
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT'
+  };
+  
+  // Skapa payload med användardata och utgångstid
+  const payload = {
+    sub: user.username,
+    role: user.role,
+    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 timmar
+    iat: Math.floor(Date.now() / 1000)
+  };
+  
+  // Base64-enkoda header och payload
+  const headerBase64 = btoa(JSON.stringify(header));
+  const payloadBase64 = btoa(JSON.stringify(payload));
+  
+  // Skapa en signatur (i ett riktigt system skulle detta använda en hemlig nyckel)
+  // Här simulerar vi bara en signatur
+  const signature = btoa(`${headerBase64}.${payloadBase64}.secret`);
+  
+  // Returnera den fullständiga token
+  return `${headerBase64}.${payloadBase64}.${signature}`;
+};
+
 // Logga in användare
 export const loginUser = (username: string, password: string): { success: boolean; user?: User; message?: string } => {
   const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
   
   if (user) {
+    // Simulera en JWT token för autentisering (i ett riktigt system skulle detta genereras av servern)
+    const fakeJwtToken = generateFakeJwtToken(user);
+    
+    // Spara token i localStorage för att kunna användas vid API-anrop
+    localStorage.setItem('jwt_token', fakeJwtToken);
+    
     // Spara användarinformation i session storage för att hålla sessionen levande
     sessionStorage.setItem('currentUser', JSON.stringify({ 
       username: user.username,
