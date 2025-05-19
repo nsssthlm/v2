@@ -128,25 +128,38 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
           }
           
           // FRÅN LOGS: vi kan se att det faktiska anropet som fungerar har följande format
-          // "/api/files/web/999-67/data/" som returnerar 200 OK
-          const realMediaUrl = `${window.location.origin}/api/files/web/999-67/data/${fileId}`;
+          // "/api/files/web/999-67/data/" som returnerar 200 OK - detta hämtar metadata, inte själva filen
+          const metadataUrl = `${window.location.origin}/api/files/web/999-67/data/`;
           
-          // Detta verkar vara media-filen som nyligen laddades upp
-          const specificPdfUrl = `${window.location.origin}/media/project_files/2025/05/19/AAAAFexempel_pa_ritlingar_FIXBUG.pdf`;
+          // De URL:er vi har sett i loggarna som vi behöver testa
+          const directApiUrl = `${window.location.origin}/api/files/get-file-data/${fileId}?project_id=${effectiveProjectId}`;
+          const directMediaUrl = `${window.location.origin}/api/media/project_files/2025/05/19/AAAAFexempel_pa_ritlingar_FIXBUG.pdf`;
+          const fileContentUrl = `${window.location.origin}/api/files/get-file-content/${fileId}?project_id=${effectiveProjectId}`;
           
-          // Hämta direkt från backend media-katalogen
-          const mediaContentUrl = `${window.location.origin}/api/files/get-raw/${fileId}?project_id=${effectiveProjectId}`;
+          // Hämta filen direkt från filsystemet (sista försöket)
+          const absoluteUrl = `${window.location.origin}/media/project_files/2025/05/19/AAAAFexempel_pa_ritlingar_FIXBUG.pdf`;
+          
+          // VIKTIG - hämta DIREKT från serversidan med URL:en vi såg i nätverkstrafiken
+          const rawMediaUrl = `/media/project_files/2025/05/19/AAAAFexempel_pa_ritlingar_FIXBUG.pdf`;
+          
+          // Hämta via fasta projekt ID och namn vi vet fungerar
+          const fallbackUrl = `${window.location.origin}/api/files/web/999-67/get-file-content/${fileId}?project_id=12`;
           
           // Använd även direct endpoints baserat på loggar
           console.log('Testar att använda nya URL alternativ:');
-          console.log('- Direct API URL:', realMediaUrl);
+          console.log('- Metadata URL:', metadataUrl);
+          console.log('- Direct API URL:', directApiUrl);
+          console.log('- Direct Media URL:', directMediaUrl);
+          console.log('- File Content URL:', fileContentUrl);
+          console.log('- Absolute URL:', absoluteUrl);
+          console.log('- Raw Media URL (nyckelkomponent):', rawMediaUrl);
+          console.log('- Fallback URL:', fallbackUrl);
           
           if (directUrl) {
             console.log('- Direct URL med filnamn:', directUrl);
           }
           
           console.log('Använder direkt API URL med projektID:', apiUrl);
-          console.log('Alternativ direkt media URL:', mediaUrl);
           
           try {
             // Konfigurera options för PDF.js
@@ -165,9 +178,12 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
             // Skapa en array med URL:er att försöka med
             const urlsToTry = [
               `${apiUrl}?t=${Date.now()}`, // API URL
-              realMediaUrl, // URL från loggar
-              mediaContentUrl, // Direkt innehållsåtkomst
-              specificPdfUrl, // Specifika filen vi såg i loggar
+              directApiUrl, // Direkt API URL
+              fileContentUrl, // File content URL
+              directMediaUrl, // Media URL
+              absoluteUrl, // Absolut URL till mediafilen
+              rawMediaUrl, // Rå media URL
+              fallbackUrl, // Fallback URL
               directUrl, // Direkt URL med filnamn 
               pdfUrl // Ursprunglig URL
             ].filter(url => url); // Filtrera bort null/undefined
