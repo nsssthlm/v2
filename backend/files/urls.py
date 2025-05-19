@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import web_api
 from . import views
+from . import upload_api
 
 # API router för RESTful endpoints
 router = DefaultRouter()
@@ -12,6 +13,9 @@ router.register('files', views.FileViewSet)
 urlpatterns = [
     # API-routes
     path('', include(router.urls)),
+
+    # Filuppladdnings-endpoint - Viktig för att ladda upp PDF-filer
+    path('upload/', upload_api.upload_file, name='upload_file_api'),
 
     # Direktåtkomst till PDF-fil via sökväg i media-katalogen
     path('pdf-media/<path:path>', web_api.serve_pdf_file, name='serve_pdf_file'),
