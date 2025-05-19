@@ -102,8 +102,32 @@ const FileSystemNode = ({
           e.stopPropagation();
           // Klick på mappen öppnar mappens innehåll (navigerar till mappens sida)
           if (isFolder && node.slug) {
-            // Använd React Router istället för window.location för bättre hantering av SPA-navigering
-            window.location.href = `/folders/${node.slug}?t=${Date.now()}`; // Lägger till tidsstämpel för att tvinga omladdning
+            // För att bevara autentisering, hämta token från localStorage/sessionStorage
+            const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            
+            // Om token finns, spara den tillfälligt före navigering
+            if (authToken) {
+              const tokenExpiry = localStorage.getItem('tokenExpiry') || sessionStorage.getItem('tokenExpiry');
+              
+              // Ställ in en cookie med token för att bevara session
+              document.cookie = `tempAuthToken=${authToken}; path=/`;
+              if (tokenExpiry) {
+                document.cookie = `tempTokenExpiry=${tokenExpiry}; path=/`;
+              }
+              
+              // Använd React Router istället för window.location för bättre SPA-hantering
+              // Men eftersom vi har problem med det, måste vi lägga till extra kontroller
+              const url = `/folders/${node.slug}?t=${Date.now()}`;
+              
+              // Spara den aktuella sidan i sessionStorage
+              sessionStorage.setItem('lastFolderPath', url);
+              
+              // Navigera med JavaScript men bevara autentiseringen
+              window.location.href = url;
+            } else {
+              // Om ingen token finns, använd vanlig navigering
+              window.location.href = `/folders/${node.slug}?t=${Date.now()}`;
+            }
           }
         }}
         onMouseOver={(e) => {
