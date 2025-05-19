@@ -52,9 +52,15 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
   const [finalUrl, setFinalUrl] = useState<string>('');
   const { currentProject } = useProject(); // Hämta aktuellt projekt från context
 
-  // Använd projektID från props om det finns, annars från context
-  const activeProjectId = projectId || (currentProject?.id ? currentProject.id : null);
-  console.log('Använder projektID:', activeProjectId, 'från', projectId ? 'props' : 'context');
+  // Använd projektID från props om det finns, annars från context, och säkerställ att det är en sträng
+  const activeProjectId = (projectId?.toString() || currentProject?.id?.toString() || null);
+  
+  console.log('PDF Debug:', {
+    providedProjectId: projectId,
+    contextProjectId: currentProject?.id,
+    activeProjectId: activeProjectId,
+    currentProject: currentProject
+  });
 
   // Bearbeta URL till ett format som kan visas med PDF.js
   const processedUrl = React.useMemo(() => {
