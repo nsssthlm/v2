@@ -18,21 +18,61 @@ const projectService = {
   // Hämta alla projekt
   getAllProjects: async (): Promise<Project[]> => {
     try {
+      console.log('Försöker hämta projekt från API');
       const headers = getAuthHeader();
       
-      const response = await axios.get(`${API_BASE_URL}/custom/projects`, { 
-        headers 
-      });
+      // Försöker först med anpassad endpoint
+      try {
+        const response = await axios.get(`${API_BASE_URL}/custom/projects`, { 
+          headers,
+          timeout: 5000 // Sätt en timeout på 5 sekunder
+        });
+        
+        if (response.data && Array.isArray(response.data)) {
+          console.log('Hittade projekt via API:', response.data);
+          
+          // Mappa om API-data till frontend-format
+          const projects = response.data.map((item: any) => ({
+            id: item.id.toString(),
+            name: item.name,
+            description: item.description || '',
+            endDate: item.end_date || item.endDate || ''
+          }));
+          
+          return projects;
+        }
+      } catch (apiError) {
+        console.warn('Kunde inte hämta projekt från primär API-endpoint:', apiError);
+      }
       
-      // Mappa om API-data till frontend-format
-      const projects = Array.isArray(response.data) ? response.data.map((item: any) => ({
-        id: item.id.toString(),
-        name: item.name,
-        description: item.description || '',
-        endDate: item.end_date || item.endDate || ''
-      })) : [];
+      // Försök med alternativ endpoint (core/project)
+      try {
+        const altResponse = await axios.get(`${API_BASE_URL}/core/projects/`, { 
+          headers,
+          timeout: 5000
+        });
+        
+        if (altResponse.data && (Array.isArray(altResponse.data) || altResponse.data.results)) {
+          const projectsData = Array.isArray(altResponse.data) ? altResponse.data : altResponse.data.results;
+          console.log('Hittade projekt via alternativ API:', projectsData);
+          
+          // Mappa om API-data till frontend-format
+          const projects = projectsData.map((item: any) => ({
+            id: item.id.toString(),
+            name: item.name,
+            description: item.description || '',
+            endDate: item.end_date || item.endDate || ''
+          }));
+          
+          return projects;
+        }
+      } catch (altError) {
+        console.warn('Kunde inte hämta projekt från alternativ API-endpoint:', altError);
+      }
       
-      return projects;
+      // Om inget av ovanstående fungerar, returnera tom array
+      console.warn('Inga API-endpoints svarar, returnerar tom array');
+      return [];
     } catch (error) {
       console.error('Fel vid hämtning av projekt:', error);
       return [];
