@@ -76,10 +76,24 @@ export const loginUser = (username: string, password: string): { success: boolea
 
 // Kontrollera om användaren är inloggad
 export const isAuthenticated = (): boolean => {
-  // Kontrollera både localStorage och sessionStorage för att vara säker
-  return localStorage.getItem('currentUser') !== null || 
-         sessionStorage.getItem('currentUser') !== null ||
-         localStorage.getItem('jwt_token') !== null;
+  // Kontrollera alla möjliga lagringsplatser för inloggningsinformation
+  const checks = [
+    // User data
+    localStorage.getItem('currentUser') !== null,
+    sessionStorage.getItem('currentUser') !== null,
+    
+    // Tokens in different locations
+    localStorage.getItem('jwt_token') !== null,
+    localStorage.getItem('auth_token') !== null,
+    localStorage.getItem('token') !== null,
+    sessionStorage.getItem('jwt_token') !== null,
+    sessionStorage.getItem('auth_token') !== null,
+    sessionStorage.getItem('token') !== null,
+    sessionStorage.getItem('current_token') !== null
+  ];
+  
+  // Om någon av kontrollerna visar inloggad, returnera true
+  return checks.some(check => check === true);
 };
 
 // Hämta nuvarande inloggad användare
