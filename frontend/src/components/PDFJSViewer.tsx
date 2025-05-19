@@ -8,6 +8,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 interface PDFJSViewerProps {
   pdfUrl: string;
   filename?: string;
+  onError?: (message: string) => void;
 }
 
 const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename = 'dokument' }) => {
