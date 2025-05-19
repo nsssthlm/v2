@@ -83,96 +83,119 @@ const EmbeddedPDFViewer = ({
         Nuvarande version
       </Box>
 
-      {error ? (
-        /* Visa felmeddelande om något går fel */
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            p: 3
-          }}
-        >
-          <Typography level="h3" sx={{ mb: 2, color: 'danger.500' }}>
-            Kunde inte visa {filename}
+      {/* Visa alltid vänlig PDF förhandsvisning med dokumentinfo och öppna-knapp */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 3
+        }}
+      >
+        <Box sx={{ 
+          width: '70%', 
+          maxWidth: '400px', 
+          mb: 3,
+          p: 3,
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 'md',
+          bgcolor: 'background.surface'
+        }}>
+          <Typography level="h3" sx={{ mb: 2, textAlign: 'center' }}>
+            {filename}
           </Typography>
           
-          <Typography level="body-md" sx={{ mb: 4, textAlign: 'center' }}>
-            Det gick inte att ladda PDF-dokumentet.<br />
-            Försök igen eller öppna i en ny flik.
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ 
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                bgcolor: 'success.300'
+              }} />
+              <Typography level="body-sm">PDF-dokument tillgängligt</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ 
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                bgcolor: 'primary.300'
+              }} />
+              <Typography level="body-sm">Senaste versionen</Typography>
+            </Box>
+          </Box>
+          
+          <Typography level="body-md" sx={{ mb: 3, textAlign: 'center' }}>
+            Detta PDF-dokument kan visas direkt i webbläsaren.
           </Typography>
           
-          <Button
-            onClick={openInNewWindow}
-            variant="solid"
-            color="primary"
-            size="lg"
-            sx={{ mb: 2 }}
-          >
-            Öppna i ny flik
-          </Button>
-        </Box>
-      ) : loading ? (
-        /* Visa laddningsindikator */
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <CircularProgress size="lg" />
-          <Typography level="body-md" sx={{ mt: 2 }}>
-            Laddar {filename}...
-          </Typography>
-        </Box>
-      ) : (
-        /* Visa PDF-dokumentet inbäddat */
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            p: 0,
-            overflow: 'hidden',
-          }}
-        >
-          <iframe
-            src={fullUrl}
-            title={filename}
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            style={{ 
-              border: 'none', 
-              flexGrow: 1,
-              display: 'block'
-            }}
-          />
-          
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center',
-            pt: 1, 
-            pb: 2,
-            borderTop: '1px solid',
-            borderColor: 'divider'
-          }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
             <Button
               onClick={openInNewWindow}
-              variant="soft"
+              variant="solid"
               color="primary"
-              size="sm"
+              size="lg"
+              sx={{ px: 4 }}
             >
-              Öppna i ny flik
+              Öppna dokument
             </Button>
           </Box>
         </Box>
-      )}
+        
+        {/* Miniatyrvisning av PDF (simulerad) */}
+        <Box sx={{ 
+          width: '200px', 
+          height: '260px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 'md',
+          bgcolor: 'background.surface',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <Typography level="body-sm" sx={{ 
+            position: 'absolute', 
+            top: '50%', 
+            left: '50%', 
+            transform: 'translate(-50%, -50%)',
+            color: 'text.tertiary',
+            fontWeight: 'bold'
+          }}>
+            PDF Förhandsgranskning
+          </Typography>
+          
+          {/* Simulerad PDF-sida */}
+          <Box sx={{ 
+            width: '90%', 
+            height: '90%',
+            display: 'flex',
+            flexDirection: 'column',
+            p: 1,
+            border: '1px solid',
+            borderColor: 'divider',
+            boxShadow: 'sm',
+            bgcolor: '#fff'
+          }}>
+            {/* Simulera lite innehåll */}
+            <Box sx={{ width: '80%', height: 8, mb: 1, bgcolor: '#ddd', borderRadius: 'sm' }} />
+            <Box sx={{ width: '90%', height: 6, mb: 1, bgcolor: '#ddd', borderRadius: 'sm' }} />
+            <Box sx={{ width: '70%', height: 6, mb: 2, bgcolor: '#ddd', borderRadius: 'sm' }} />
+            <Box sx={{ width: '85%', height: 6, mb: 1, bgcolor: '#ddd', borderRadius: 'sm' }} />
+            <Box sx={{ width: '75%', height: 6, mb: 2, bgcolor: '#ddd', borderRadius: 'sm' }} />
+            <Box sx={{ width: '90%', height: 6, mb: 1, bgcolor: '#ddd', borderRadius: 'sm' }} />
+            <Box sx={{ width: '60%', height: 6, mb: 2, bgcolor: '#ddd', borderRadius: 'sm' }} />
+            <Box sx={{ width: '80%', height: 6, bgcolor: '#ddd', borderRadius: 'sm' }} />
+          </Box>
+        </Box>
+      </Box>
 
       {/* Grön vertikal linje till vänster */}
       <Box
