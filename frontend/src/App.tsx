@@ -25,6 +25,7 @@ import FolderListPage from './pages/folders/FolderListPage';
 
 // PDF hantering
 import PDFViewerPage from './pages/PDFViewerPage';
+import SimplePDFPage from './pages/SimplePDFPage';
 
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
@@ -63,8 +64,9 @@ function App() {
                 <Route path="folders" element={<FolderListPage />} />
                 <Route path="folders/:slug" element={<FolderPageNew />} />
                 
-                {/* Ny dedikerad PDF-viewer sida */}
+                {/* Nya dedikerade PDF-viewer sidor */}
                 <Route path="pdf-viewer" element={<PDFViewerPage />} />
+                <Route path="simple-pdf" element={<SimplePDFPage />} />
                 
                 {/* Vault routes */}
                 <Route path="vault">
