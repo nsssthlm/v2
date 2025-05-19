@@ -122,8 +122,36 @@ const TopMenu: React.FC = () => {
       setNewProjectModalOpen(false);
       setNewProject({ name: '', description: '', endDate: '' });
       
-      // Ladda om sidan för att visa det nya projektet
-      window.location.reload();
+      // Skapa en standardmapp för det nya projektet för att undvika 500-fel
+      try {
+        const createFolderResponse = await fetch('/api/files/directories/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: 'Standard',
+            project: result.id,
+            parent: null,
+            type: 'folder',
+            is_sidebar_item: true,
+          }),
+        });
+        
+        if (!createFolderResponse.ok) {
+          console.warn('Kunde inte skapa standardmapp för projektet, men fortsätter ändå.');
+        } else {
+          console.log('Standardmapp skapad för det nya projektet');
+        }
+      } catch (folderError) {
+        console.warn('Fel vid skapande av standardmapp:', folderError);
+      }
+      
+      // Fördröj omladdningen något för att ge tid för backend att uppdatera
+      setTimeout(() => {
+        // Ladda om sidan för att visa det nya projektet
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Kunde inte skapa nytt projekt:', error);
       alert('Kunde inte skapa nytt projekt. Försök igen senare.');
