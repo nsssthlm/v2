@@ -1,0 +1,117 @@
+STACK – STRUKTUR OCH ANSVAR
+🔹 Frontend (React / Vite)
+Syfte: UI, användarflöde, PDF-visning, projekt- och mappnavigation
+Teknikval:
+
+React + TypeScript
+
+Vite
+
+MUI Joy UI-komponenter
+
+Axios (för all API-kommunikation)
+
+React Router (projektrouting, mappnavigering)
+
+pdf.js (för inline PDF-visning)
+
+JWT-bearer token i varje request
+
+Frontend ska aldrig:
+
+Gissa URL:er
+
+Manipulera filnamn
+
+Försöka skapa routinglogik som backend ansvarar för
+
+🔹 Backend (Django + DRF)
+Syfte: Datahantering, autentisering, rättigheter, struktur, API-servande
+Teknikval:
+
+Django 4–5
+
+Django REST Framework
+
+djangorestframework-simplejwt (för JWT-autentisering)
+
+PostgreSQL som databas
+
+Django’s FileField och upload_to-logik
+
+Custom permissions (t.ex. IsProjectMember)
+
+Versioneringsmodell för PDF:er
+
+Mönster att följa:
+
+Varje mapp (FileNode) har project_id
+
+Varje PDF (PDFDocument) har project_id + file_node_id
+
+Varje fil sparas med upload_to=f'project_{project_id}/folder_{folder_id}/'
+
+Varje fil nås via @xframe_options_exempt-skyddad API-endpoint /api/pdf/<id>/content/
+
+🔹 Databasmodell (PostgreSQL via Django ORM)
+Nyckelmodeller:
+
+Project
+
+id, name, description, users (many-to-many)
+
+FileNode (mappar)
+
+id, name, parent_id, type='folder', project_id
+
+PDFDocument
+
+id, title, description, file, version, project_id, file_node_id, uploaded_by
+
+FileVersion
+
+file_node_id, version, file, size, created_by
+
+Nyckelrelationer:
+
+PDFDocument.file_node → FileNode.id
+
+FileNode.project → Project.id
+
+Project.users → User.id (via M2M)
+
+🔹 API-design (DRF)
+Måste finnas:
+
+GET /api/projects/ → lista projekt du är medlem i
+
+GET /api/files/directories/?project=... → lista mappar i projekt
+
+GET /api/pdf/list/<folder_id>/ → lista PDF:er i mapp
+
+POST /api/pdf/upload/ → ladda upp PDF till en mapp
+
+GET /api/pdf/<id>/content/ → hämta PDF-innehåll (auth skyddad)
+
+(valfritt: GET /api/pdf/<id>/annotations/)
+
+Autentisering:
+
+JWT-token i headern: Authorization: Bearer <token>
+
+Frontend lagrar token lokalt och lägger till automatiskt via Axios interceptor
+
+🔐 Säkerhetskrav & policy
+Åtgärd	Skyddsmekanism
+Ladda PDF	Kontrollera request.user ∈ project.users
+Navigera mappar	Visa endast FileNode.project = user.project
+Öppna fil	Endast via /api/pdf/<id>/content/
+Visa url	Backend ansvarar – frontend ska bara visa
+Åtkomstkontroll	Via custom permission class eller i varje vy
+
+🧩 Sammanfattat ansvar
+Lager	Ansvarar för
+Frontend	Visa data, hämta från API, inte gissa något
+Backend	Full kontroll på struktur, åtkomst och URL:er
+Databas	Spegla projekt/mapp/fil-struktur, skydd via relationer
+API-design	Tydliga endpoints för varje behov, aldrig blanda concerns
