@@ -41,6 +41,10 @@ urlpatterns = [
 # Registrera PDF API routes
 urlpatterns += register_pdf_api_routes()
 
+# Direktåtkomst till PDF via filnamn
+from api.pdf_direct import direct_pdf_view
+urlpatterns.append(path('api/pdf-direct/<str:pdf_filename>', direct_pdf_view, name='pdf_direct_view'))
+
 # Add static and media URLs - i utvecklingsläge tillåter vi direkt åtkomst till alla filer
 # Detta är nödvändigt för att PDF-filer ska kunna visas direkt från servern
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

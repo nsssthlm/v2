@@ -12,7 +12,10 @@ const PDFTestPage: React.FC = () => {
     '/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf',
     '/api/files/web/testhhhhhhh-68/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_f8q2wVX.pdf',
     '/api/files/web/karlatornet-31/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf',
-    '/pdf/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf'
+    '/pdf/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf',
+    // Ny förenklad direktåtkomst - använd bara filnamnet
+    '/api/pdf-direct/BEAst-PDF-Guidelines-2.0_1.pdf',
+    '/api/pdf-direct/AAAAExempel_pa_ritningar.pdf'
   ];
   const examplePath = examplePaths[0];
   
@@ -98,6 +101,22 @@ const PDFTestPage: React.FC = () => {
             onClick={(e) => { e.preventDefault(); handleUseExample(3); }}
           >
             Exempel 4: Alternativ sökväg
+          </Button>
+          
+          <Button 
+            color="success" 
+            variant="outlined" 
+            onClick={(e) => { e.preventDefault(); handleUseExample(4); }}
+          >
+            Exempel 5: Direkt PDF (rekommenderas)
+          </Button>
+          
+          <Button 
+            color="success" 
+            variant="outlined" 
+            onClick={(e) => { e.preventDefault(); handleUseExample(5); }}
+          >
+            Exempel 6: Direkt Ritningsfil
           </Button>
         </Box>
       </Box>
