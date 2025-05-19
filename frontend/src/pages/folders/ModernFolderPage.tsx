@@ -130,6 +130,8 @@ const ModernFolderPage = () => {
     setLoading(true);
     setError(null);
     
+    console.log('FETCH MAP DATA: Börjar hämta mappdata för slug:', slug);
+    
     try {
       // Kontrollera om vi har giltig data i cachen
       const now = Date.now();
@@ -137,13 +139,24 @@ const ModernFolderPage = () => {
       
       if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRY)) {
         // Om data finns i cache och inte är för gammal, använd den
+        console.log('FETCH MAP DATA: Använder cachedata för', slug, cachedData.data);
         setFolderData(cachedData.data);
         setLoading(false);
         return;
       }
       
-      // Hämta data från API
-      const response = await axios.get(`${API_BASE_URL}/files/web/${slug}/data/`);
+      console.log('FETCH MAP DATA: Anropar API för', slug);
+      
+      // Hämta data från API med autentiseringstoken
+      const token = localStorage.getItem('jwt_token') || '';
+      const response = await axios.get(`${API_BASE_URL}/files/web/${slug}/data/`, {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('FETCH MAP DATA: Fick svar från API för', slug, response.data);
       
       // Spara resultatet i cache
       folderDataCache[slug] = {
@@ -152,6 +165,7 @@ const ModernFolderPage = () => {
       };
       
       setFolderData(response.data);
+      console.log('FETCH MAP DATA: Inställt folderData', response.data);
     } catch (err: any) {
       console.error('Fel vid hämtning av mappdata:', err);
       setError(err.message || 'Ett fel uppstod vid hämtning av mappdata');
@@ -160,20 +174,44 @@ const ModernFolderPage = () => {
     }
   };
 
+  // Viktigt att använda useCallback för att undvika om-renderingar
+  const slugWithoutQueryParams = slug.split('?')[0];
+  
+  // Använd alltid samma referens för fetchFolderDataCallback
   useEffect(() => {
-    if (slug && authChecked) {
+    if (slugWithoutQueryParams && authChecked) {
       if (isLoggedIn) {
-        console.log("Användare inloggad, hämtar mappdata för:", slug);
-        fetchFolderData();
+        console.log("Användare inloggad, hämtar mappdata för:", slugWithoutQueryParams);
+        // Tvinga fram en direkt hämtning utan cache
+        setError(null);
+        setLoading(true);
+        
+        // Direkthämtning av data
+        axios.get(`${API_BASE_URL}/files/web/${slugWithoutQueryParams}/data/`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwt_token') || ''}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          console.log("DIREKT MAPPDATA:", response.data);
+          setFolderData(response.data);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Fel vid direkthämtning:", err);
+          setError("Kunde inte hämta mappdata: " + (err.message || "Okänt fel"));
+          setLoading(false);
+        });
       } else {
         console.log("Användare inte inloggad, omdirigerar till login");
         // Spara måldestination i sessionStorage
-        sessionStorage.setItem('redirectAfterLogin', `/folders/${slug}`);
+        sessionStorage.setItem('redirectAfterLogin', `/folders/${slugWithoutQueryParams}`);
         // Omdirigera till login
         navigate('/login');
       }
     }
-  }, [slug, isLoggedIn, authChecked, navigate]);
+  }, [slugWithoutQueryParams, isLoggedIn, authChecked, navigate]);
 
   const handleUploadSuccess = () => {
     fetchFolderData();
