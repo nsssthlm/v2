@@ -63,17 +63,30 @@ const TopMenu: React.FC = () => {
     setCurrentProject(project);
     handleProjectMenuClose();
     
-    // Sätt en sessionStorage-flagga som vi kan kontrollera för att veta vilket projekt att ladda
+    // Spara valet i both localStorage och sessionStorage för att förhindra utloggning
+    localStorage.setItem('selectedProjectId', project.id);
     sessionStorage.setItem('selectedProjectId', project.id);
     
-    // Ladda om sidan när man byter projekt för att säkerställa att rätt innehåll visas
-    // och för att förhindra att innehåll från föregående projekt visas
+    // Synkronisera autentiseringsinformation mellan localStorage och sessionStorage
+    const authToken = localStorage.getItem('jwt_token') || 
+                      localStorage.getItem('auth_token') || 
+                      localStorage.getItem('token');
+                      
+    if (authToken) {
+      sessionStorage.setItem('current_token', authToken);
+    }
+    
+    // Använd React Router för att navigera utan att ladda om hela sidan
+    // Detta förhindrar att användaren blir utloggad vid projektbyte
     if (window.location.pathname.includes('/folders/')) {
-      // Om vi är på en mappsida, gå tillbaka till startsidan
-      window.location.href = '/';
+      // Om vi är på en mappsida, navigera till startsidan med history API
+      window.history.pushState({}, '', '/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
     } else {
-      // Ladda annars om hela sidan för att uppdatera mapparna i sidebaren
-      window.location.reload();
+      // Uppdatera bara UI:t med aktuell mappdata utan att ladda om sidan
+      // Nödvändig pushState för att utlösa omladdning av rätt komponenter
+      window.history.pushState({}, '', window.location.pathname);
+      window.dispatchEvent(new PopStateEvent('popstate'));
     }
   };
   

@@ -71,13 +71,21 @@ const UploadDialog: React.FC<UploadDialogProps> = ({ open, onClose, folderSlug, 
     formData.append('description', description);
     
     try {
-      await axios.post(`${API_BASE_URL}/files/upload/`, formData, {
+      console.log('Laddar upp fil till mapp:', folderSlug);
+      // Hämta CSRF-token
+      const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+      
+      console.log('CSRF-token:', csrfToken);
+      
+      await axios.post(`/api/files/web/${folderSlug}/upload/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'X-CSRFToken': csrfToken || '',
         },
-        params: {
-          directory_slug: folderSlug
-        }
+        withCredentials: true,
       });
       
       setSuccess(true);
