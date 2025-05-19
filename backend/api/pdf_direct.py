@@ -3,11 +3,13 @@ Direkt PDF-hantering för enkel åtkomst utan krångliga URL-strukturer
 """
 import os
 import glob
+import mimetypes
 from django.http import HttpResponse, Http404, FileResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.middleware.common import CommonMiddleware
 
 @api_view(['GET', 'HEAD', 'OPTIONS'])
 @permission_classes([AllowAny])

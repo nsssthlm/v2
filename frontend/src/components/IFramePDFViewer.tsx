@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Button, CircularProgress } from '@mui/joy';
-import { FullscreenOutlined } from '@mui/icons-material';
-import axios from 'axios';
+import { FullscreenOutlined, Refresh } from '@mui/icons-material';
 
 interface IFramePDFViewerProps {
   pdfUrl: string;
@@ -10,8 +9,8 @@ interface IFramePDFViewerProps {
 }
 
 /**
- * A PDF viewer that uses an iframe to display PDFs
- * This approach works better with cross-origin policies
+ * En enkel PDF-visare som använder iframe för bättre kompatibilitet 
+ * med Replit-miljön och andra plattformar
  */
 const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
   pdfUrl,
@@ -20,79 +19,42 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [iframeKey, setIframeKey] = useState(Date.now());
-  
-  // Function to validate URL before trying to display it
-  useEffect(() => {
-    const checkUrl = async () => {
-      try {
-        // Just check if the URL is accessible, don't download the whole file
-        await axios.head(pdfUrl, { withCredentials: true });
-        setLoading(false);
-      } catch (err) {
-        console.error('Error accessing PDF URL:', err);
-        setError('Could not access the PDF file. It may be blocked by CORS policy or not exist.');
-        setLoading(false);
-      }
-    };
-    
-    checkUrl();
-  }, [pdfUrl]);
+  const [key, setKey] = useState(Date.now()); // För att forcera omrendering
 
-  // Open in new tab function
-  const openInNewTab = () => {
-    window.open(pdfUrl, '_blank');
+  // Extrahera filnamnet från URL om det behövs
+  const extractedFileName = pdfUrl.split('/').pop() || fileName;
+  
+  // Skapa en alternativ direkt URL för bättre kompatibilitet
+  let directUrl = '';
+  if (extractedFileName.endsWith('.pdf')) {
+    directUrl = `/api/pdf-direct/${extractedFileName}`;
+  }
+  
+  // Om vi har en alternativ direktvg, använd den, annars används ursprunglig URL
+  const finalUrl = directUrl || pdfUrl;
+
+  // Hantera laddning klar-händelse
+  const handleLoad = () => {
+    setLoading(false);
   };
 
-  // Function to reload the iframe
-  const reloadIframe = () => {
+  // Hantera felaktiga URL:er eller laddningsfel
+  const handleError = () => {
+    setError('PDF kunde inte visas. Vänligen försök öppna den i ny flik.');
+    setLoading(false);
+  };
+
+  // Ladda om PDF-filen
+  const reloadPdf = () => {
     setLoading(true);
     setError(null);
-    setIframeKey(Date.now()); // This forces the iframe to reload
-    setTimeout(() => setLoading(false), 1000); // Give it time to load
+    setKey(Date.now()); // Tvingar iframe att ladda om
   };
 
-  // Create a direct download link for the PDF to use in the iframe
-  const [finalUrl, setFinalUrl] = useState(pdfUrl);
-  
-  // Fetch the PDF as blob and create a direct object URL for the iframe
-  useEffect(() => {
-    const fetchPdfAsBlob = async () => {
-      try {
-        console.log('Fetching PDF directly as blob:', pdfUrl);
-        const response = await axios.get(pdfUrl, { 
-          responseType: 'blob',
-          withCredentials: true
-        });
-        
-        // Convert blob to object URL
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const objectUrl = URL.createObjectURL(blob);
-        
-        console.log('Created direct object URL for PDF:', objectUrl);
-        setFinalUrl(objectUrl);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching PDF:', err);
-        setError('Could not download the PDF file');
-        setLoading(false);
-      }
-    };
-    
-    // Only fetch if we're using the original URL
-    if (pdfUrl === finalUrl) {
-      fetchPdfAsBlob();
-    }
-    
-    // Clean up object URL on unmount
-    return () => {
-      if (finalUrl !== pdfUrl) {
-        URL.revokeObjectURL(finalUrl);
-      }
-    };
-  }, [pdfUrl]);
-  
-  console.log('Using iFrame with URL:', finalUrl);
+  // Öppna i ny flik
+  const openInNewTab = () => {
+    window.open(finalUrl, '_blank');
+  };
 
   return (
     <Box sx={{ 
@@ -101,7 +63,7 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
       height: '100%', 
       width: '100%', 
       bgcolor: 'background.paper',
-      borderRadius: 'md',
+      borderRadius: 'sm',
       overflow: 'hidden'
     }}>
       {/* Header */}
@@ -133,9 +95,10 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
           </Button>
           
           <Button 
-            onClick={reloadIframe} 
+            onClick={reloadPdf} 
             variant="outlined"
             size="sm"
+            startDecorator={<Refresh fontSize="small" />}
           >
             Ladda om
           </Button>
@@ -156,21 +119,28 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
       <Box sx={{ 
         flex: 1, 
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'auto',
         bgcolor: 'grey.100'
       }}>
+        {/* Visa laddningsindikator */}
         {loading && (
           <Box sx={{ 
             position: 'absolute', 
             top: '50%', 
             left: '50%', 
             transform: 'translate(-50%, -50%)',
-            zIndex: 10
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2
           }}>
             <CircularProgress />
+            <Typography level="body-sm">Laddar PDF...</Typography>
           </Box>
         )}
         
+        {/* Visa felmeddelande om laddningen misslyckades */}
         {error && (
           <Box sx={{ 
             display: 'flex',
@@ -198,25 +168,20 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
           </Box>
         )}
         
-        {!error && (
-          <iframe
-            key={iframeKey}
-            src={finalUrl}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              border: 'none',
-              display: 'block'
-            }}
-            title={fileName}
-            sandbox="allow-scripts"
-            onLoad={() => setLoading(false)}
-            onError={() => {
-              setError('Failed to load PDF in iframe');
-              setLoading(false);
-            }}
-          />
-        )}
+        {/* Iframe för att visa PDF-filen */}
+        <iframe
+          key={key}
+          src={finalUrl}
+          width="100%"
+          height="100%"
+          style={{ 
+            border: 'none',
+            display: loading ? 'none' : 'block'
+          }}
+          title={fileName}
+          onLoad={handleLoad}
+          onError={handleError}
+        />
       </Box>
     </Box>
   );
