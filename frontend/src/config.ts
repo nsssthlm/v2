@@ -6,6 +6,25 @@ export const API_BASE_URL = 'http://0.0.0.0:8001';
 // Direktlänkar för PDF-visning
 export const DIRECT_API_URL = 'http://0.0.0.0:8001';
 
+// Hämta standardheaders för API-anrop
+export const getStandardHeaders = () => {
+  return {
+    'Content-Type': 'application/json',
+  };
+};
+
+// Hämta autentiseringsheaders för säkra API-anrop
+export const getAuthHeader = () => {
+  // Försök hämta token från localStorage
+  const token = localStorage.getItem('token');
+  
+  // Retunera headers med eller utan auth-token
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 // API-sökvägar
 export const API_PATHS = {
   LOGIN: '/api/token/',
