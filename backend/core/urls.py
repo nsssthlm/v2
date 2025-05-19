@@ -15,6 +15,7 @@ urlpatterns = [
     # Main API endpoints
     path('', include(router.urls)),
 
-    # Anpassad vy för att skapa projekt utan autentisering (för utveckling)
+    # Anpassade vyer för att hantera projekt utan autentisering (för utveckling)
     path('custom/create-project', custom_views.create_project, name='create-project'),
+    path('custom/projects', custom_views.get_all_projects, name='get-all-projects'),
 ]

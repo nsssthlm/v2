@@ -59,6 +59,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     const fetchAllProjects = async () => {
       try {
         // Hämta projekt från backend-API via vår custom endpoint
+        console.log('Försöker hämta projekt från databasen...');
         const response = await fetch('/api/custom/projects');
         if (response.ok) {
           const projectsData = await response.json();
