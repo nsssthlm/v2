@@ -270,30 +270,27 @@ const FolderPageNew = () => {
   const handlePdfClick = (fileUrl: string, fileName: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName);
     
-    // Konvertera API-URL till media-URL för att få direkt åtkomst till filen
-    let mediaUrl = fileUrl;
+    // Konvertera alla URL:er till Replit-anpassade URL:er
+    let finalUrl = fileUrl;
     
-    // Om URL:en innehåller /api/files/web/ och project_files, extrahera media-delen
-    if (fileUrl.includes('/api/files/web/') && fileUrl.includes('project_files/')) {
-      // Extrahera sökvägen från project_files och framåt
-      const pathMatch = fileUrl.match(/project_files\/.*\.pdf/);
-      if (pathMatch) {
-        // Skapa direkt länk till media-filen
-        const mediaPath = pathMatch[0];
-        mediaUrl = `${window.location.protocol}//${window.location.host}/media/${mediaPath}`;
-      } else {
-        // Fallback: använd original URL
-        console.warn("Kunde inte extrahera media-path från URL:", fileUrl);
-      }
-    } else if (fileUrl.includes('/media/')) {
-      // Om URL:en redan är en media-URL, använd den som den är
-      mediaUrl = fileUrl;
+    // Ersätt alla lokala URL:er (http://0.0.0.0:8001/) med Replit proxy URL
+    if (fileUrl.includes('0.0.0.0:8001')) {
+      // Ersätt med Replit proxy URL
+      finalUrl = fileUrl.replace(
+        'http://0.0.0.0:8001', 
+        'https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000'
+      );
     }
     
-    console.log("Använder media PDF URL:", mediaUrl);
+    // Om URL:en innehåller "api/files/web" och ".pdf", se till att API-anropet hanteras korrekt
+    if (finalUrl.includes('/api/files/web/') && finalUrl.includes('.pdf')) {
+      console.log("Använda direkt PDF URL via Replit proxy");
+    }
+    
+    console.log("Använder final PDF URL:", finalUrl);
     
     // Öppna PDF i dialogrutan med direkt media-länk
-    setSelectedPdf({ url: mediaUrl, name: fileName });
+    setSelectedPdf({ url: finalUrl, name: fileName });
     setPdfDialogOpen(true);
   };
 
