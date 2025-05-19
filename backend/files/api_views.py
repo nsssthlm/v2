@@ -18,6 +18,8 @@ def serve_project_file(request, project_id, path_info):
     
     URL pattern: /api/files/web/{project-slug}/{path-to-file}
     Example: /api/files/web/karlatornet-31/data/project_files/2025/05/19/example.pdf
+    
+    Media URL pattern: /media/project_files/YYYY/MM/DD/filename.pdf
     """
     # Handle CORS preflight requests
     if request.method == 'OPTIONS':

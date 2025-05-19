@@ -1,0 +1,15 @@
+Öppnar PDF: http://0.0.0.0:8001/api/files/web/karlatornet1-46/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf AAAAExempel på ritningar
+FolderPageNew.tsx:287 Använda direkt PDF URL via Replit proxy
+FolderPageNew.tsx:290 Använder final PDF URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet1-46/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '1', activeProjectId: '1', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet1-46/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '1', activeProjectId: '1', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet1-46/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+StraightPDFViewer.tsx:33 Försöker visa PDF från: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+StraightPDFViewer.tsx:33 Försöker visa PDF från: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '1', activeProjectId: '1', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet1-46/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '1', activeProjectId: '1', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet1-46/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+StraightPDFViewer.tsx:33 Försöker visa PDF från: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf
+StraightPDFViewer.tsx:33 Försöker visa PDF från: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_A42349S.pdf

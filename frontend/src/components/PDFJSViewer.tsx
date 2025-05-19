@@ -36,30 +36,29 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
   useEffect(() => {
     // Försök att optimera PDF URL för bättre kompatibilitet
     if (pdfUrl) {
-      // Extract actual filename for direct access
+      // Extract filename and date pattern from URL
       const fileName = pdfUrl.split('/').pop();
+      const dateMatch = pdfUrl.match(/(\d{4})\/(\d{2})\/(\d{2})/);
       
-      if (fileName && fileName.endsWith('.pdf')) {
-        // Try the direct API first for better compatibility
-        const directPdfUrl = `/api/pdf-direct/${fileName}`;
+      if (fileName && fileName.endsWith('.pdf') && dateMatch) {
+        // Convert to direct media URL for better compatibility
+        const mediaUrl = `/media/project_files/${dateMatch[1]}/${dateMatch[2]}/${dateMatch[3]}/${fileName}`;
+        console.log("PDF URL direkt från media:", mediaUrl);
+        setOptimizedUrl(mediaUrl);
+      } else if (fileName && fileName.endsWith('.pdf')) {
+        // Fallback to direct API
+        const directPdfUrl = `/media/project_files/${fileName}`;
         setOptimizedUrl(directPdfUrl);
       } else {
-        // Fallback to original URL
+        // Fallback to original URL as last resort
         setOptimizedUrl(pdfUrl);
       }
     }
   }, [pdfUrl]);
 
-  // For Replit preview environment, we need the full URL with proxy
-  // Check if we're in a Replit environment
-  const isReplitEnv = window.location.hostname.includes('replit');
-  
-  // Adjust URL for Replit environment
-  let finalUrl = optimizedUrl;
-  if (isReplitEnv && !optimizedUrl.includes('/proxy/')) {
-    // Keep original URL since it might already have the proxy path
-    finalUrl = pdfUrl;
-  }
+  // Use optimized URL directly since we're now preferring media URLs which work in both environments
+  // Media URLs are properly configured in Django settings to serve files directly
+  const finalUrl = optimizedUrl;
 
   return (
     <Box sx={{ 
