@@ -32,20 +32,28 @@ const EmbeddedPDFViewer = ({
       return;
     }
     
-    // Kontrollera om URL:en är relativ eller absolut
-    if (pdfUrl.startsWith('http')) {
-      setFullUrl(pdfUrl);
-    } else {
-      try {
-        // Om det är en API URL, använd den direkt för att se PDF:en
-        setFullUrl(pdfUrl);
-        console.log("Använder API URL direkt:", pdfUrl);
-      } catch (err) {
-        console.error("Kunde inte formatera PDF URL:", err);
-        setError(true);
-      }
+    // Generera korrekt bas-URL för servern baserat på pdfUrl
+    let serverBaseUrl = window.location.origin;
+    
+    // Om vi behöver kommunicera med backend-servern
+    if (window.location.hostname === 'localhost' || window.location.hostname === '0.0.0.0') {
+      serverBaseUrl = 'http://0.0.0.0:8001';
     }
     
+    // Bearbeta PDF URL för att skapa en direkt visningsbar URL
+    let processedUrl = pdfUrl;
+    
+    // Hantera särskilt API-URLs för direktnedladdning som kommer från vår backend
+    if (pdfUrl.includes('/api/files/web/')) {
+      const pathParts = pdfUrl.split('/');
+      const filename = pathParts[pathParts.length - 1];
+      
+      // Skapa en URL som går direkt till media-mappen med samma filnamn
+      processedUrl = `${serverBaseUrl}/media/project_files/2025/05/19/${filename}`;
+    }
+    
+    console.log("Bearbetad PDF URL:", processedUrl);
+    setFullUrl(processedUrl);
     setLoading(false);
   }, [pdfUrl]);
   
