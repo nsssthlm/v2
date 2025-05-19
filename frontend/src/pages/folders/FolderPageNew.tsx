@@ -123,6 +123,12 @@ const FolderPageNew = () => {
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
   
+  // Funktion för att öppna PDF i dialogrutan
+  const openPdfDialog = (url: string, name: string) => {
+    setSelectedPdf({ url, name });
+    setPdfDialogOpen(true);
+  };
+  
   // Delete folder dialog state
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
 
@@ -313,11 +319,9 @@ const FolderPageNew = () => {
     
     console.log("Använder full URL:", fullUrl);
     
-    setPdfDialogData({
-      open: true,
-      pdfUrl: fullUrl, // Använd den bearbetade URL:en direkt
-      title: fileName
-    });
+    // Öppna PDF i dialogrutan
+    setSelectedPdf({ url: fullUrl, name: fileName });
+    setPdfDialogOpen(true);
   };
 
   if (loading) {

@@ -326,9 +326,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     position: 'relative'
                   }}
                 >
-                  {/* Direkt inbäddad PDF med embed-tag som funkar bättre i vissa miljöer */}
-                  <embed
-                    src={pdfUrl}
+                  {/* Testa direktvisning med object-tag för bättre kompatibilitet */}
+                  <object
+                    data={pdfUrl}
                     type="application/pdf"
                     width="100%"
                     height="100%"
@@ -338,38 +338,44 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                       minHeight: '500px',
                       background: '#fff'
                     }}
-                  />
-                  
-                  {/* Reservlösning om embed inte fungerar */}
-                  <Box sx={{ 
-                    position: 'absolute', 
-                    top: '50%', 
-                    left: '50%', 
-                    transform: 'translate(-50%, -50%)',
-                    bgcolor: 'rgba(255,255,255,0.9)',
-                    p: 2,
-                    borderRadius: 'md',
-                    display: 'none',
-                    className: 'pdf-fallback'
-                  }}>
-                    <Typography>Kunde inte visa PDF-filer direkt. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen</a></Typography>
-                  </Box>
-                  
-                  {/* Script för att kontrollera om PDF kan visas */}
-                  <iframe 
-                    style={{ display: 'none' }} 
-                    onLoad={() => {
-                      const fallbackEl = document.querySelector('.pdf-fallback') as HTMLElement;
-                      if (fallbackEl) {
-                        setTimeout(() => {
-                          const embedEl = document.querySelector('embed[type="application/pdf"]') as HTMLElement;
-                          if (embedEl && embedEl.clientHeight < 50) {
-                            fallbackEl.style.display = 'block';
-                          }
-                        }, 1000);
-                      }
-                    }}
-                  />
+                  >
+                    {/* Fallback om inte object fungerar, pröva med embed */}
+                    <embed
+                      src={pdfUrl}
+                      type="application/pdf"
+                      width="100%"
+                      height="100%"
+                      style={{
+                        border: 'none',
+                        minHeight: '500px',
+                        width: '100%',
+                        height: '100%',
+                        background: '#fff'
+                      }}
+                    />
+                    
+                    {/* Slutlig fallback om inget fungerar */}
+                    <p style={{textAlign: 'center', padding: '20px'}}>
+                      Din webbläsare kan inte visa PDF-filer direkt. 
+                      <br /><br />
+                      <a 
+                        href={pdfUrl} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        style={{
+                          display: 'inline-block',
+                          padding: '10px 15px',
+                          background: '#1976d2',
+                          color: 'white',
+                          borderRadius: '4px',
+                          textDecoration: 'none',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        Klicka här för att öppna filen
+                      </a>
+                    </p>
+                  </object>
                 </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
