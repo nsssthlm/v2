@@ -166,6 +166,8 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
             const urlsToTry = [
               `${apiUrl}?t=${Date.now()}`, // API URL
               realMediaUrl, // URL från loggar
+              mediaContentUrl, // Direkt innehållsåtkomst
+              specificPdfUrl, // Specifika filen vi såg i loggar
               directUrl, // Direkt URL med filnamn 
               pdfUrl // Ursprunglig URL
             ].filter(url => url); // Filtrera bort null/undefined
