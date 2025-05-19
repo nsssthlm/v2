@@ -60,10 +60,18 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         const data = await response.json();
         console.log('Uppladdning lyckades:', data);
         
-        // Visa en bättre användarupplevelse vid lyckad uppladdning
-        alert('Filen har laddats upp framgångsrikt!');
-        
+        // Stäng först dialogrutan för uppladdning
         handleClose();
+        
+        // Visa direkt PDF:en i en dialogruta
+        openPDFDialog({
+          pdfUrl: data.file_url || data.url || `/media/${data.filepath}`,
+          filename: file.name,
+          fileId: data.id,
+          folderId: folderId as number | null,
+          projectId: data.project || null
+        });
+        
         if (onUploadSuccess) {
           onUploadSuccess();
         }
@@ -74,6 +82,7 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
       }
     } catch (error) {
       console.error('Fel vid uppladdning:', error);
+      alert('Ett fel uppstod vid uppladdning. Försök igen senare.');
     } finally {
       setUploading(false);
     }
