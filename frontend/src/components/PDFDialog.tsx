@@ -18,7 +18,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import SimplePDFViewer from './SimplePDFViewer';
+import PDFJSViewer from './PDFJSViewer';
 
 interface PDFDialogProps {
   open: boolean;
@@ -36,34 +36,11 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   
-  // PDF-laddningsfunktioner
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
+  // Enkel state för renderingen, de mesta hanteras nu i PDFJSViewer-komponenten  
+  useEffect(() => {
     setLoading(false);
     setError(false);
-  };
-
-  const onDocumentLoadError = (error: Error) => {
-    console.error('PDF-laddningsfel:', error);
-    setLoading(false);
-    setError(true);
-  };
-  
-  // Konvertera API-URL till en direkt länk till PDF-filen
-  const getDirectPdfUrl = (url: string): string => {
-    // Om vi har en direkt URL, använd den som den är
-    if (!url) return '';
-    
-    // För API-länkar, gör dem direkta genom att lägga till ?direct=true
-    // Detta gör att Django-backend skickar filen direkt istället för JSON
-    if (url.includes('/api/files/web/')) {
-      // Lägg till direct=true för att säga åt backend att skicka filen direkt
-      return `${url}${url.includes('?') ? '&' : '?'}direct=true`;
-    }
-    
-    // Standardfall, returnera URL:en oförändrad
-    return url;
-  };
+  }, [pdfUrl]);
   
   // Navigeringsfunktioner
   const zoomIn = () => {
@@ -342,8 +319,8 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     position: 'relative'
                   }}
                 >
-                  <SimplePDFViewer 
-                    pdfUrl={getDirectPdfUrl(pdfUrl)} 
+                  <PDFJSViewer 
+                    pdfUrl={pdfUrl} 
                     filename={filename} 
                   />
                 </Box>
