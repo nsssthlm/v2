@@ -301,7 +301,7 @@ const FolderPage = () => {
               onClose={() => setSelectedPdf(null)}
               pdfUrl={selectedPdf.url}
               filename={selectedPdf.name}
-              projectId={params.projectId || null}
+              projectId={null}
               folderId={null}
             />
           )}

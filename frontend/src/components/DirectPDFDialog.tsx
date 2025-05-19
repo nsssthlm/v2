@@ -55,8 +55,17 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         
         console.log('PDF original URL:', pdfUrl);
         
-        // Använd exakt URL från API:et (som i url-fältet från /api/pdf/list/-responsen)
+        // Identifiera vilken typ av URL vi har att göra med
         let apiUrl = pdfUrl;
+        console.log('Ursprunglig PDF URL:', apiUrl);
+        
+        // Specialhantering för 0.0.0.0 URL:er i Replit-miljön
+        if (apiUrl.includes('0.0.0.0:8001')) {
+          // I Replit behöver vi byta ut 0.0.0.0:8001 till rätt origin
+          const urlPath = new URL(apiUrl).pathname;
+          apiUrl = `${window.location.origin}${urlPath}`;
+          console.log('Konverterad URL för Replit-miljö:', apiUrl);
+        }
         
         // Säkerställ att URL:en innehåller protokollet (http/https)
         if (!apiUrl.startsWith('http')) {
@@ -69,15 +78,22 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
           }
         }
         
-        // Kontrollera om URL:en faktiskt pekar på API-endpointen (utan att försöka gissa)
-        if (!apiUrl.includes('/api/pdf/') && !apiUrl.includes('/api/files/get-file-content/')) {
-          // Om URL:en inte pekar på API:et, försök att extrahera ID från filnamnet
-          // och använd den korrekta API-endpointen
+        // Extrahera fil-ID om vi kan, som fallback
+        let fileId = null;
+        
+        // Försök att extrahera fil-ID från URL:en (matches 'project_files/2025/05/19/file-71.pdf')
+        let idFromUrl = pdfUrl.match(/\/(\d+)(\.pdf|\.PDF)/);
+        if (idFromUrl && idFromUrl[1]) {
+          fileId = idFromUrl[1];
+          console.log('Extraherat fil-ID från URL:', fileId);
+        }
+        
+        // Om vi inte kunde hitta ID från URL, försök med filnamnet
+        if (!fileId) {
           const filenameMatch = filename.match(/.*-(\d+)(\.pdf)?/);
           if (filenameMatch && filenameMatch[1]) {
-            const fileId = filenameMatch[1];
+            fileId = filenameMatch[1];
             console.log('Extraherat fil-ID från filnamn:', fileId);
-            apiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/`;
           }
         }
         
@@ -94,7 +110,36 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
           };
         }
         
-        // Skicka direkt till PDF.js utan att gissa eller konstruera URL
+        // Om vi har ett fil-ID, använd det som fallback om den direkta URL:en inte fungerar
+        if (fileId) {
+          // Skapa en absolut URL till vår direkta API-endpoint
+          const directApiUrl = `${window.location.origin}/api/files/get-file-content/${fileId}/`;
+          console.log('Fallback API URL baserad på fil-ID:', directApiUrl);
+          
+          try {
+            console.log('Försöker hämta PDF med fil-ID från API:', directApiUrl);
+            
+            // Försök ladda via API:et först (ofta snabbare och mer pålitligt)
+            const directTask = pdfjsLib.getDocument({
+              url: `${directApiUrl}?t=${Date.now()}`,
+              ...options,
+              withCredentials: true
+            });
+            
+            const pdf = await directTask.promise;
+            setPdfDocument(pdf);
+            setNumPages(pdf.numPages);
+            setCurrentPage(1);
+            setLoading(false);
+            return; // Avsluta tidigt om det lyckas
+          } catch (apiErr) {
+            console.warn('Kunde inte hämta PDF via API:', apiErr);
+            // Fortsätt med den ursprungliga URL:en som fallback
+          }
+        }
+        
+        // Om vi kommer hit, försök med den ursprungliga URL:en som fallback
+        console.log('Använder ursprunglig URL som fallback:', apiUrl);
         const loadingTask = pdfjsLib.getDocument({
           url: apiUrl,
           ...options,
