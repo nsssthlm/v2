@@ -5,6 +5,7 @@ from . import web_views
 from . import web_api
 from . import upload_api
 from . import api_views
+from . import csrf_views
 
 # API router för RESTful endpoints
 router = DefaultRouter()
@@ -14,6 +15,9 @@ router.register('files', views.FileViewSet)
 urlpatterns = [
     # API-routes
     path('', include(router.urls)),
+    
+    # CSRF endpoint för säker filuppladdning
+    path('csrf/', csrf_views.get_csrf_token, name='csrf'),
     
     # API för filuppladdning
     path('upload/', upload_api.upload_file, name='api_upload_file'),
