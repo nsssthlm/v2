@@ -10,7 +10,13 @@ import {
   Sheet,
   IconButton,
   Input,
-  Divider
+  Divider,
+  Modal,
+  ModalDialog,
+  ModalClose,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/joy';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -116,6 +122,9 @@ const FolderPageNew = () => {
   // PDF Dialog state
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string } | null>(null);
+  
+  // Delete folder dialog state
+  const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
 
   const fetchFolderData = async () => {
     setLoading(true);
@@ -185,6 +194,38 @@ const FolderPageNew = () => {
     } catch (err: any) {
       console.error('Fel vid radering av fil:', err);
       alert(`Kunde inte radera filen: ${err.message || 'Okänt fel'}`);
+    }
+  };
+  
+  // Hantera borttagning av mapp med undermappar och filer
+  const handleDeleteFolder = async () => {
+    try {
+      console.log("Försöker radera mapp:", slug);
+      
+      // Anropa API för att radera mappen och alla dess underliggande innehåll
+      const response = await axios.delete(`${API_BASE_URL}/files/directories/${slug}/`);
+      console.log("Svar från radering av mapp:", response.data);
+      
+      // Visa meddelande om lyckad radering
+      alert('Mappen och alla dess innehåll har raderats');
+      
+      // Rensa cachen
+      Object.keys(folderDataCache).forEach(key => {
+        if (key.startsWith(slug) || key === slug) {
+          delete folderDataCache[key];
+        }
+      });
+      
+      // Navigera tillbaka till överliggande mapp eller start
+      if (folderData?.parent_slug) {
+        window.location.href = `/folders/${folderData.parent_slug}`;
+      } else {
+        window.location.href = '/folders';
+      }
+    } catch (err: any) {
+      console.error('Fel vid radering av mapp:', err);
+      alert(`Kunde inte radera mappen: ${err.message || 'Okänt fel'}`);
+      setDeleteFolderDialogOpen(false);
     }
   };
   
@@ -332,7 +373,8 @@ const FolderPageNew = () => {
             size="sm"
             variant="soft"
             color="danger"
-            startDecorator={<FolderIcon />}
+            startDecorator={<DeleteIcon />}
+            onClick={() => setDeleteFolderDialogOpen(true)}
           >
             Ta bort mapp
           </Button>
