@@ -33,6 +33,16 @@ urlpatterns = [
     # Ny förbättrad endpoint för direkt åtkomst till projektfiler (PDF)
     path('web/<str:project_id>/data/<path:path_info>', api_views.serve_project_file, name='serve_project_file'),
     
+    # Specifik pattern för år/månad/dag format för projektfiler
+    path('web/<str:project_id>/data/project_files/<int:year>/<int:month>/<int:day>/<str:filename>', 
+         lambda request, project_id, year, month, day, filename: 
+         api_views.serve_project_file(
+             request, 
+             project_id, 
+             f"project_files/{year}/{month:02d}/{day:02d}/{filename}"
+         ), 
+         name='serve_project_file_by_date'),
+    
     # Webb-routes för mappspecifika sidor
     path('web/', include([
         # Lista alla mappar
