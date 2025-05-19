@@ -294,15 +294,15 @@ const FolderPage = () => {
             </Button>
           </Box>
           
-          {/* Använd PDF-dialogen istället för den enklare PDF-visaren */}
+          {/* Använd vår nya förbättrade PDF-visare */}
           {selectedPdf && selectedPdf.url && (
-            <DirectPDFDialog 
+            <DirectPDFViewer 
               open={!!selectedPdf}
               onClose={() => setSelectedPdf(null)}
               pdfUrl={selectedPdf.url}
               filename={selectedPdf.name}
-              projectId={null}
-              folderId={null}
+              projectId={activeProject ? activeProject.id : null}
+              folderId={slug}
             />
           )}
         </Box>
