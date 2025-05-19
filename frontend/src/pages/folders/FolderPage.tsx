@@ -50,7 +50,11 @@ const FolderPage = () => {
   
   // Hantera klick på PDF-filer - öppna i vår dialogruta
   const handlePdfClick = (fileUrl: string, fileName: string, fileId: string) => {
-    console.log("Öppnar PDF i dialog:", fileUrl, fileName);
+    console.log("Öppnar PDF i dialog:", fileUrl, fileName, "i mapp:", slug);
+    
+    // Hämta aktuellt projektID från URL:en
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentProjectId = urlParams.get('project') || null;
     
     // Se till att URL:en har http:// eller https:// prefixet 
     let fullUrl = fileUrl;
@@ -63,12 +67,13 @@ const FolderPage = () => {
       }
     }
     
-    // Öppna PDF i vår dialogruta
+    // Öppna PDF i vår dialogruta med projektID och mappID för korrekt kontext
     openPDFDialog({
       pdfUrl: fullUrl,
       filename: fileName,
       fileId: fileId,
-      folderId: slug ? parseInt(slug) : null
+      folderId: slug ? parseInt(slug) : null,
+      projectId: currentProjectId
     });
   };
 
