@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid, IconButton, Tooltip } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
-import DirectPDFViewer from '../../components/DirectPDFViewer';
+import SimplePDFViewer from '../../components/SimplePDFViewer';
 import { usePDFDialog } from '../../contexts/PDFDialogContext';
 import PDFUploader from '../../components/PDFUploader';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -51,23 +51,18 @@ const FolderPage = () => {
   
   // Hantera klick på PDF-filer - öppna i vår dialogruta
   const handlePdfClick = (fileUrl: string, fileName: string, fileId: string) => {
-    console.log("Öppnar PDF i dialog:", fileUrl, fileName, "i mapp:", slug);
+    console.log("Öppnar PDF i dialog:", fileUrl, fileName, "FileID:", fileId);
     
-    // Hämta aktuellt projektID från URL:en
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentProjectId = urlParams.get('project') || null;
+    // VIKTIG ÄNDRING: Vi använder den exakta URL-strukturen enligt instruktionerna
+    // Denna URL går direkt till API:et för att hämta PDF-innehåll
+    const pdfUrl = `/api/pdf/${fileId}/content/`;
+    console.log("Använder korrekt PDF API URL:", pdfUrl);
     
-    // Använd originala URL:en direkt
-    // Detta är full URL:en till PDF-filen som returneras från API:et
-    console.log("Använder direkt URL för PDF:", fileUrl);
-    
-    // Öppna PDF i vår dialogruta med projektID och mappID för korrekt kontext
-    openPDFDialog({
-      pdfUrl: fileUrl,
-      filename: fileName,
-      fileId: fileId,
-      folderId: slug ? parseInt(slug) : null,
-      projectId: currentProjectId
+    // Sätt selected PDF för att visa i vår SimplePDFViewer
+    setSelectedPdf({
+      url: pdfUrl,
+      name: fileName,
+      folderId: slug
     });
   };
 
@@ -294,15 +289,13 @@ const FolderPage = () => {
             </Button>
           </Box>
           
-          {/* Använd vår nya förbättrade PDF-visare */}
+          {/* Använd vår helt nya SimplePDFViewer som öppnar PDFs direkt från API:et */}
           {selectedPdf && selectedPdf.url && (
-            <DirectPDFViewer 
+            <SimplePDFViewer 
               open={!!selectedPdf}
               onClose={() => setSelectedPdf(null)}
               pdfUrl={selectedPdf.url}
               filename={selectedPdf.name}
-              projectId={activeProject ? activeProject.id : null}
-              folderId={slug}
             />
           )}
         </Box>
