@@ -33,15 +33,15 @@ const EmbeddedPDFViewer = ({
     if (pdfUrl.startsWith('http')) {
       setFullUrl(pdfUrl);
     } else {
-      // Om URL:en är relativ (från API) konvertera till full URL för direktvisning
-      const serverBaseUrl = window.location.origin;
-      console.log("Använder server URL:", serverBaseUrl);
-      
-      // Ersätt API-prefixet med media för att få rätt sökväg
-      const mediaUrl = pdfUrl.replace('/api/files/web/', '/media/');
-      const fullMediaUrl = `${serverBaseUrl}${mediaUrl}`;
-      console.log("Använder full URL:", fullMediaUrl);
-      setFullUrl(fullMediaUrl);
+      try {
+        // Om det är en API URL, använd den direkt istället för att konvertera
+        // Detta gör att vi skickar begäran till backend-API som kan hantera den korrekt
+        setFullUrl(pdfUrl);
+        console.log("Använder API URL direkt:", pdfUrl);
+      } catch (err) {
+        console.error("Kunde inte formatera PDF URL:", err);
+        setError(true);
+      }
     }
     
     setLoading(false);
