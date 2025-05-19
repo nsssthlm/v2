@@ -78,7 +78,11 @@ const projectService = {
   // Skapa en standardmapp för ett projekt
   createDefaultFolder: async (projectId: string): Promise<any> => {
     try {
-      const headers = getStandardHeaders();
+      // Använd explicit AuthHeader för att säkerställa att autentiseringen fungerar
+      const headers = {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      };
       
       // Förbättrad loggning för debugging
       console.log('Skapar standardmapp för projekt:', projectId);
@@ -87,7 +91,7 @@ const projectService = {
         name: 'Dokument',
         project: projectId,
         parent: null,
-        is_sidebar: true,
+        is_sidebar_item: true, // Använd korrekt fältnamn is_sidebar_item (inte is_sidebar)
       };
       
       const response = await axios.post(`${API_BASE_URL}/files/directories/`, folderData, {
