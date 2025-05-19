@@ -6,7 +6,9 @@ from django.urls import path, include
 from api.pdf import register_pdf_api_routes
 from django.conf import settings
 from django.conf.urls.static import static
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse, FileResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
+from django.views.static import serve as static_serve
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -83,8 +85,55 @@ urlpatterns.append(path('direct/media/<path:path>', serve_media_file, name='dire
 
 # Lägg till även en direct-path för PDFer som används ofta
 from django.views.static import serve as static_serve
+urlpatterns.append(path('pdf-direct/', serve_media_file, name='pdf_direct'))
+
+# Skapa en särskild filnamnshämtare för PDF-filer - för att lösa 404-problem
+def pdf_file_finder(request):
+    """Hittar PDF-filer baserat på delar av filnamnet"""
+    import os
+    
+    # Hämta sökparameter (filnamn eller del av filnamn)
+    filename_part = request.GET.get('filename', '')
+    if not filename_part or not filename_part.endswith('.pdf'):
+        return JsonResponse({'error': 'Invalid or missing filename parameter'}, status=400)
+    
+    # Leta i alla viktiga PDF-kataloger
+    media_root = settings.MEDIA_ROOT
+    project_files_dir = os.path.join(media_root, 'project_files')
+    
+    # Samla alla matchande filer
+    matching_files = []
+    for root, dirs, files in os.walk(project_files_dir):
+        for file in files:
+            if filename_part in file and file.endswith('.pdf'):
+                rel_path = os.path.relpath(os.path.join(root, file), media_root)
+                matching_files.append({
+                    'filename': file,
+                    'path': rel_path,
+                    'url': f'/media/{rel_path}',
+                    'direct_url': f'/pdf/{os.path.relpath(os.path.join(root, file), project_files_dir)}'
+                })
+    
+    if request.GET.get('stream', 'false').lower() == 'true' and matching_files:
+        # Om stream=true, servera första matchande fil direkt
+        filepath = os.path.join(media_root, matching_files[0]['path'])
+        try:
+            response = FileResponse(open(filepath, 'rb'), content_type='application/pdf')
+            response['Content-Disposition'] = f'inline; filename="{os.path.basename(filepath)}"'
+            return response
+        except Exception as e:
+            return JsonResponse({'error': f'Error streaming file: {str(e)}'}, status=500)
+    
+    return JsonResponse({'files': matching_files}, safe=False)
+
+
+
+# Lägg till PDF-sökning i URL-patterns
+urlpatterns.append(path('pdf-finder/', pdf_file_finder, name='pdf_finder'))
+
+# Direkt åtkomst till PDF via path
 urlpatterns.append(path('pdf/<path:path>', lambda request, path: static_serve(
     request, 
     path=f"project_files/{path}", 
     document_root=settings.MEDIA_ROOT
-), name='pdf_direct'))
+), name='pdf_path_direct'))

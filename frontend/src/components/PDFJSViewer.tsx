@@ -77,63 +77,90 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${dateAndPath}`;
         console.log("Använder ny PDF-endpoint:", finalUrl);
       }
+    } else if (pdfUrl.includes('/api/files/web/')) {
+      // För API endpoint-format, extrahera viktiga delar
+      const apiPattern = /\/api\/files\/web\/.*?\/data\/project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
+      const apiMatch = finalUrl.match(apiPattern);
+      
+      if (apiMatch && apiMatch[1]) {
+        // Använd den dedikerade PDF-API:n som säkerställer korrekt Content-Type
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${apiMatch[1]}`;
+        console.log("Använder direkt PDF-endpoint för API-format:", finalUrl);
+      } else {
+        // Försök hitta filnamnet i URL:en
+        const parts = finalUrl.split('/');
+        const pdfName = parts[parts.length - 1]; 
+        if (pdfName && pdfName.endsWith('.pdf')) {
+          console.log("Provar med filnamn direkt:", pdfName);
+          // Använd pdf-finder API:n för att hitta rätt fil baserat på namn
+          finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf-finder/?filename=${pdfName}&stream=true`;
+        }
+      }
     }
     
-    // Lägg till en tidsstämpelparameter för att undvika cachning
-    finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    // Lägg till en tidsstämpelparameter för att undvika cachning om inte stream=true redan finns
+    if (!finalUrl.includes('stream=true')) {
+      finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    }
     
     return finalUrl;
   }, [pdfUrl]);
 
   // Funktion för att skapa alternativa URL:er om den ursprungliga misslyckas
   const createAlternativeUrl = (url: string, attemptNum: number): string => {
-    // Om URL:en innehåller projektspecifika delar, skapa alternativa URL:er
-    if (url.includes('project_files/') && url.includes('.pdf')) {
-      // Plocka bort timestamp-parametern om den finns
-      const cleanUrl = url.split('?')[0];
-      
-      // Dela upp URL:en
-      const urlParts = cleanUrl.split('/');
-      const filename = urlParts[urlParts.length - 1];
-      
-      // Extrahera datum (YYYY/MM/DD) och sökväg för lättare hantering
-      let datePattern = /project_files\/(\d{4}\/\d{2}\/\d{2})\//;
-      let dateMatch = url.match(datePattern);
-      let datePath = dateMatch ? dateMatch[1] : '2025/05/19'; // Standard om datum saknas
-      
-      // Använd alltid säkra HTTPS-proxyn med rätt format
-      const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
-      
-      // Baserat på vilket försök vi är på, generera olika URL-format
-      switch (attemptNum) {
-        case 1:
-          // Använd vår nya direkta PDF-endpoint med exakt filnamn
-          return `${baseUrl}/pdf/${datePath}/${filename}`;
+    // Plocka bort timestamp-parametern om den finns
+    const cleanUrl = url.split('?')[0];
+    
+    // Dela upp URL:en
+    const urlParts = cleanUrl.split('/');
+    const filename = urlParts[urlParts.length - 1];
+    
+    // Använd alltid säkra HTTPS-proxyn med rätt format
+    const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
+    
+    // Skapa intelligenta fallbacks baserat på vilket försök vi är på
+    switch (attemptNum) {
+      case 1:
+        // Försök använda den direkta fil-findern för att lokalisera PDF:en med en direkt stream
+        if (filename && filename.endsWith('.pdf')) {
+          console.log("Försök 1: Använder pdf-finder med direkt stream", filename);
+          return `${baseUrl}/pdf-finder/?filename=${filename}&stream=true`;
+        }
+        break;
         
-        case 2:
-          // Försök med annat filformat - ta bort hash-delen från filnamnet
-          const baseNameMatch = filename.match(/^([^_]+)/);
-          if (baseNameMatch) {
-            const baseName = baseNameMatch[1];
-            return `${baseUrl}/pdf/${datePath}/${baseName}.pdf`;
+      case 2:
+        // Försök med project_files i URL:en
+        if (url.includes('/project_files/')) {
+          // Extrahera datum (YYYY/MM/DD) och sökväg
+          let datePattern = /project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
+          let dateMatch = url.match(datePattern);
+          if (dateMatch && dateMatch[1]) {
+            console.log("Försök 2: Använder direkt projekt-PDF-sökväg", dateMatch[1]);
+            return `${baseUrl}/pdf/${dateMatch[1]}`;
           }
-          break;
-          
-        case 3:
-          // Prova gamla media-URL:en som sista försök
-          return `${baseUrl}/media/project_files/${datePath}/${filename}`;
-          
-        case 4:
-          // Sista försöket - leta efter filnamet direkt
-          const yearMatch = filename.match(/^([^_]+)/);
-          if (yearMatch) {
-            const simpleFileName = yearMatch[1];
-            return `${baseUrl}/pdf/${datePath}/${simpleFileName}.pdf`;
-          }
-          break;
-      }
+        }
+        
+        // Om vi inte kunde extrahera datum, fallback till att prova vanlig media-URL
+        return `${baseUrl}/media/project_files/2025/05/19/${filename}`;
+        
+      case 3:
+        // Prova med direct/media som är en säker endpunkt
+        console.log("Försök 3: Använder direct/media path", filename);
+        return `${baseUrl}/direct/media/project_files/2025/05/19/${filename}`;
+        
+      case 4:
+        // Som sista försök, ta bort eventuella hash-delar från filnamnet
+        const baseNameMatch = filename.match(/^([^_]+)/);
+        if (baseNameMatch) {
+          const baseName = baseNameMatch[1] + ".pdf";
+          console.log("Försök 4: Använder basnamn utan hash", baseName);
+          return `${baseUrl}/pdf-finder/?filename=${baseName}&stream=true`;
+        }
+        break;
     }
-    return url;
+    
+    // Om inget av ovanstående fungerade, försök med original-URL:en men lägg till timestamp
+    return `${url.split('?')[0]}?t=${Date.now()}`;
   };
 
   // Använd en separat effekt för att hämta PDF-filen som en arraybuffer
