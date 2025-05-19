@@ -113,7 +113,7 @@ const EmbeddedPDFViewer = ({
           }}
         >
           <object
-            data={pdfUrl}
+            data={fullUrl}
             type="application/pdf"
             title={filename}
             width="100%"
@@ -124,7 +124,7 @@ const EmbeddedPDFViewer = ({
               minHeight: '500px'
             }}
           >
-            <p>Din webbläsare kan inte visa PDF-filer direkt. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen</a></p>
+            <p>Din webbläsare kan inte visa PDF-filer direkt. <a href={fullUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen</a></p>
           </object>
           
           <Box sx={{
