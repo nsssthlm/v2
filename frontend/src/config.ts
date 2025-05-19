@@ -26,15 +26,29 @@ export const getStandardHeaders = () => {
 
 // Hämta autentiseringsheaders för säkra API-anrop
 export const getAuthHeader = () => {
-  // Försök hämta token från localStorage
-  const token = localStorage.getItem('token');
+  // Försök hämta token från localStorage (föredragen för persistens mellan sessioner)
+  const token = localStorage.getItem('jwt_token') || 
+               localStorage.getItem('auth_token') || 
+               localStorage.getItem('token');
+  
   const csrfToken = getCsrfToken();
+  
+  // Spara/synka token till sessionStorage för att förhindra utloggning vid projektbyte
+  if (token && !sessionStorage.getItem('current_token')) {
+    sessionStorage.setItem('current_token', token);
+  }
+  
+  // Om det finns en token i sessionStorage men inte i localStorage, synka den
+  const sessionToken = sessionStorage.getItem('current_token');
+  if (sessionToken && !token) {
+    localStorage.setItem('jwt_token', sessionToken);
+  }
   
   // Returnera headers med autentiseringsinformation
   return {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(token || sessionToken ? { 'Authorization': `Bearer ${token || sessionToken}` } : {}),
     ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
   };
 };
