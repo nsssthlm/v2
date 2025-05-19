@@ -155,6 +155,19 @@ class DirectoryViewSet(viewsets.ModelViewSet):
         if type_filter:
             queryset = queryset.filter(type=type_filter)
 
+        # Lägg till explicit sortering för att undvika UnorderedObjectListWarning
+        ordering = self.request.query_params.get('ordering', 'name')
+        if ordering.startswith('-'):
+            ordering_field = ordering[1:]
+            if hasattr(Directory, ordering_field) or ordering_field in ['name', 'created_at', 'updated_at']:
+                queryset = queryset.order_by(ordering)
+        else:
+            if hasattr(Directory, ordering) or ordering in ['name', 'created_at', 'updated_at']:
+                queryset = queryset.order_by(ordering)
+            else:
+                # Använd namn som standard sortering
+                queryset = queryset.order_by('name')
+
         return queryset
 
     @action(detail=False, methods=['get'])
