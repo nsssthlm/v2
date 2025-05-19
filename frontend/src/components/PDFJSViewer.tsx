@@ -65,15 +65,15 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       console.log("URL med proxy:", finalUrl);
     }
     
-    // Om URL:en innehåller project_files, extrahera sökvägen för vår speciella PDF-endpoint
+    // Om URL:en innehåller project_files, extrahera sökvägen för vår säkra direct/media URL
     if (finalUrl.includes('project_files/')) {
       // Extrahera sökvägen från project_files och framåt
       const pathMatch = finalUrl.match(/project_files\/.*\.pdf/);
       if (pathMatch) {
         const pdfPath = pathMatch[0];
-        // Använd vår dedikerade PDF-endpoint som garanterar korrekt Content-Type
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/api/files/pdf-media/${pdfPath}`;
-        console.log("Använder dedikerad PDF-endpoint:", finalUrl);
+        // Använd vår dedikerade direct/media URL som garanterar korrekt Content-Type
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/direct/media/${pdfPath}`;
+        console.log("Använder direct media URL:", finalUrl);
       }
     }
     
@@ -99,22 +99,37 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       let dateMatch = url.match(datePattern);
       let datePath = dateMatch ? dateMatch[1] : '2025/05/19'; // Standard om datum saknas
       
+      // Använd replit-proxy för alla alternativa URL:er (aldrig direkta http://0.0.0.0 länkar)
+      const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
+      
       // Baserat på vilket försök vi är på, generera olika URL-format
-      if (attemptNum === 1) {
-        // Direkt media URL med samma filnamn
-        return `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${datePath}/${filename}`;
-      } 
-      else if (attemptNum === 2) {
-        // Försök med basnamnet utan hash, för när filnamnet kan ha fått annan hash
-        const baseNameMatch = filename.match(/^([^_]+)/);
-        if (baseNameMatch) {
-          const baseName = baseNameMatch[1];
-          return `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${datePath}/${baseName}.pdf`;
-        }
-      }
-      else if (attemptNum === 3) {
-        // Som en sista utväg, prova backend direkt utan proxy
-        return `http://0.0.0.0:8001/media/project_files/${datePath}/${filename}`;
+      switch (attemptNum) {
+        case 1:
+          // Direkt via media-URL med exakt filnamn
+          return `${baseUrl}/media/project_files/${datePath}/${filename}`;
+        
+        case 2:
+          // Försök med annat filformat - ta bort hash-delen från filnamnet
+          const baseNameMatch = filename.match(/^([^_]+)/);
+          if (baseNameMatch) {
+            const baseName = baseNameMatch[1];
+            return `${baseUrl}/media/project_files/${datePath}/${baseName}.pdf`;
+          }
+          break;
+          
+        case 3:
+          // Använd direct/media URL som fungerar säkert via proxyn
+          return `${baseUrl}/direct/media/project_files/${datePath}/${filename}`;
+          
+        case 4:
+          // Sista försöket - leta efter filnamet i katalogen utan hash-tillägg
+          const yearMatch = filename.match(/^([^_]+)/);
+          if (yearMatch) {
+            const simpleFileName = yearMatch[1];
+            // Använd vår dedikerade direct/media handler
+            return `${baseUrl}/direct/media/project_files/${datePath}/${simpleFileName}.pdf`;
+          }
+          break;
       }
     }
     return url;
