@@ -21,25 +21,35 @@ const projectService = {
       console.log('Försöker hämta projekt från API');
       const headers = getAuthHeader();
       
-      // Försöker först med anpassad endpoint
+      // Försöker först med korrekta API-endpointen
       try {
-        const response = await axios.get(`${API_BASE_URL}/custom/projects`, { 
-          headers,
-          timeout: 5000 // Sätt en timeout på 5 sekunder
+        // Använd fetch istället för axios för att garantera att sessionen skickas med
+        const response = await fetch(`${API_BASE_URL}/api/custom/projects`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          }
         });
         
-        if (response.data && Array.isArray(response.data)) {
-          console.log('Hittade projekt via API:', response.data);
-          
-          // Mappa om API-data till frontend-format
-          const projects = response.data.map((item: any) => ({
-            id: item.id.toString(),
-            name: item.name,
-            description: item.description || '',
-            endDate: item.end_date || item.endDate || ''
-          }));
-          
-          return projects;
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            console.log('Hittade projekt via API:', data);
+            
+            // Mappa om API-data till frontend-format
+            const projects = data.map((item: any) => ({
+              id: item.id.toString(),
+              name: item.name,
+              description: item.description || '',
+              endDate: item.end_date || item.endDate || ''
+            }));
+            
+            return projects;
+          }
+        } else {
+          console.warn('Kunde inte hämta projekt från primär API-endpoint:', response.status);
         }
       } catch (apiError) {
         console.warn('Kunde inte hämta projekt från primär API-endpoint:', apiError);
@@ -47,24 +57,33 @@ const projectService = {
       
       // Försök med alternativ endpoint (core/project)
       try {
-        const altResponse = await axios.get(`${API_BASE_URL}/core/projects/`, { 
-          headers,
-          timeout: 5000
+        const altResponse = await fetch(`${API_BASE_URL}/api/core/projects/`, { 
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          }
         });
         
-        if (altResponse.data && (Array.isArray(altResponse.data) || altResponse.data.results)) {
-          const projectsData = Array.isArray(altResponse.data) ? altResponse.data : altResponse.data.results;
-          console.log('Hittade projekt via alternativ API:', projectsData);
+        if (altResponse.ok) {
+          const altData = await altResponse.json();
+          const projectsData = Array.isArray(altData) ? altData : 
+                              (altData.results && Array.isArray(altData.results)) ? altData.results : null;
           
-          // Mappa om API-data till frontend-format
-          const projects = projectsData.map((item: any) => ({
-            id: item.id.toString(),
-            name: item.name,
-            description: item.description || '',
-            endDate: item.end_date || item.endDate || ''
-          }));
-          
-          return projects;
+          if (projectsData) {
+            console.log('Hittade projekt via alternativ API:', projectsData);
+            
+            // Mappa om API-data till frontend-format
+            const projects = projectsData.map((item: any) => ({
+              id: item.id.toString(),
+              name: item.name,
+              description: item.description || '',
+              endDate: item.end_date || item.endDate || ''
+            }));
+            
+            return projects;
+          }
         }
       } catch (altError) {
         console.warn('Kunde inte hämta projekt från alternativ API-endpoint:', altError);
