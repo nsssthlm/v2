@@ -270,14 +270,30 @@ const FolderPageNew = () => {
   const handlePdfClick = (fileUrl: string, fileName: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName);
     
-    // För uppladdade filer använder vi direkt API-URL för att få PDF-innehållet
-    // Detta säkerställer att vi får rätt innehåll oavsett miljö (Replit eller lokal)
-    const directUrl = fileUrl;
+    // Konvertera API-URL till media-URL för att få direkt åtkomst till filen
+    let mediaUrl = fileUrl;
     
-    console.log("Använder direkt PDF URL:", directUrl);
+    // Om URL:en innehåller /api/files/web/ och project_files, extrahera media-delen
+    if (fileUrl.includes('/api/files/web/') && fileUrl.includes('project_files/')) {
+      // Extrahera sökvägen från project_files och framåt
+      const pathMatch = fileUrl.match(/project_files\/.*\.pdf/);
+      if (pathMatch) {
+        // Skapa direkt länk till media-filen
+        const mediaPath = pathMatch[0];
+        mediaUrl = `${window.location.protocol}//${window.location.host}/media/${mediaPath}`;
+      } else {
+        // Fallback: använd original URL
+        console.warn("Kunde inte extrahera media-path från URL:", fileUrl);
+      }
+    } else if (fileUrl.includes('/media/')) {
+      // Om URL:en redan är en media-URL, använd den som den är
+      mediaUrl = fileUrl;
+    }
     
-    // Öppna PDF i dialogrutan med direktlänk till API:et
-    setSelectedPdf({ url: directUrl, name: fileName });
+    console.log("Använder media PDF URL:", mediaUrl);
+    
+    // Öppna PDF i dialogrutan med direkt media-länk
+    setSelectedPdf({ url: mediaUrl, name: fileName });
     setPdfDialogOpen(true);
   };
 
