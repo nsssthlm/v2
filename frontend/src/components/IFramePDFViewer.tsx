@@ -52,29 +52,46 @@ const IFramePDFViewer: React.FC<IFramePDFViewerProps> = ({
     setTimeout(() => setLoading(false), 1000); // Give it time to load
   };
 
-  // Split into base and query parameters to avoid CORS issues
-  const fixUrl = (url: string) => {
-    try {
-      // For URLs with proxies or special patterns for Replit
-      if (url.includes('/proxy/')) {
-        return url;
+  // Create a direct download link for the PDF to use in the iframe
+  const [finalUrl, setFinalUrl] = useState(pdfUrl);
+  
+  // Fetch the PDF as blob and create a direct object URL for the iframe
+  useEffect(() => {
+    const fetchPdfAsBlob = async () => {
+      try {
+        console.log('Fetching PDF directly as blob:', pdfUrl);
+        const response = await axios.get(pdfUrl, { 
+          responseType: 'blob',
+          withCredentials: true
+        });
+        
+        // Convert blob to object URL
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const objectUrl = URL.createObjectURL(blob);
+        
+        console.log('Created direct object URL for PDF:', objectUrl);
+        setFinalUrl(objectUrl);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching PDF:', err);
+        setError('Could not download the PDF file');
+        setLoading(false);
       }
-      
-      // For direct backend URLs
-      if (url.startsWith('http://0.0.0.0')) {
-        // Replace local IP with domain name
-        const hostname = window.location.hostname;
-        return url.replace('http://0.0.0.0:8001', `https://${hostname}/api`);
-      }
-      
-      return url;
-    } catch (e) {
-      console.error('Error processing URL:', e);
-      return url;
+    };
+    
+    // Only fetch if we're using the original URL
+    if (pdfUrl === finalUrl) {
+      fetchPdfAsBlob();
     }
-  };
-
-  const finalUrl = fixUrl(pdfUrl);
+    
+    // Clean up object URL on unmount
+    return () => {
+      if (finalUrl !== pdfUrl) {
+        URL.revokeObjectURL(finalUrl);
+      }
+    };
+  }, [pdfUrl]);
+  
   console.log('Using iFrame with URL:', finalUrl);
 
   return (
