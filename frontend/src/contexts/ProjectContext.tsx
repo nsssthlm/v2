@@ -116,9 +116,11 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     sessionStorage.setItem('currentProject', JSON.stringify(project));
     sessionStorage.setItem('selectedProjectId', project.id);
 
-    // Navigera till start om vi är i en mapp
+    // Uppdatera URL:en utan att ladda om sidan om vi är i en mapp
     if (window.location.pathname.includes('/folders/')) {
-      window.location.href = '/';
+      window.history.pushState({}, '', '/');
+      // Utlös en route-ändring event så React Router märker förändringen
+      window.dispatchEvent(new Event('popstate'));
     }
   };
 

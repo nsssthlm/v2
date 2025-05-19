@@ -5,7 +5,7 @@ channel = "stable-24_05"
 packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib", "jq", "psmisc", "systemd", "rsync", "nettools", "nano", "openssh", "htop-vim", "lsof"]
 
 [workflows]
-runButton = "fullstack"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"

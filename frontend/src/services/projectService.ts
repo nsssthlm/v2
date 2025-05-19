@@ -163,8 +163,8 @@ const projectService = {
   // Metod för att skapa mappar i projekt (ska endast användas när användaren explicit ber om det)
   createFolder: async (projectId: string, folderName: string, parentId: number | null = null, isSidebarItem: boolean = true): Promise<any> => {
     try {
-      // Hämta CSRF-token från cookies
-      const csrfToken = getCsrfToken();
+      // Hämta CSRF-token från cookies med hjälp av config-funktionen
+      const csrfToken = getStandardHeaders()['X-CSRFToken'];
       console.log('CSRF-token för mappskapande:', csrfToken);
       
       // Förbättrad loggning för debugging
