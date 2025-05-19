@@ -26,6 +26,9 @@ import FolderListPage from './pages/folders/FolderListPage';
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
 
+// Other pages
+import { default as ComingSoonPage } from './pages/ComingSoonPage';
+
 // Fristående PDF-visare
 import DirectPDFView from './pages/pdf/DirectPDFView';
 

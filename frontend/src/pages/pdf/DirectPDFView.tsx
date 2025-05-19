@@ -1,227 +1,266 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Button, CircularProgress, Stack, Typography } from '@mui/joy';
-import * as pdfjsLib from 'pdfjs-dist';
-import { PDFDocumentProxy } from 'pdfjs-dist';
-
-// Konfigurera PDF.js worker path
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url
-).toString();
-
 /**
  * DirectPDFView - Fristående PDF-visare
  * 
  * En helt fristående komponent som visar PDF-filer direkt från API genom URL:en
  * Nås via: /view-pdf/:id 
  */
-const DirectPDFView: React.FC = () => {
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Box, Typography, Button, CircularProgress, Sheet, Stack, IconButton } from '@mui/joy';
+import axios from 'axios';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+
+// Initiera PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+// Stilar för PDF-visaren
+const styles = {
+  pdfContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
+    height: '100vh',
+    overflow: 'auto',
+    backgroundColor: '#f5f5f5',
+  },
+  controlBar: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    width: '100%',
+    padding: '10px',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backdropFilter: 'blur(5px)',
+    borderBottom: '1px solid #e0e0e0',
+  },
+  pageControls: {
+    display: 'flex',
+    gap: '10px',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  document: {
+    maxWidth: '100%',
+    marginTop: '20px',
+  },
+  page: {
+    maxWidth: '100%',
+    marginBottom: '10px',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+    borderRadius: '4px',
+  },
+  errorContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '80vh',
+    padding: '20px',
+  },
+};
+
+interface PDFPageData {
+  pageNumber: number;
+  width: number;
+  height: number;
+}
+
+const DirectPDFView = () => {
+  // URL-parametrar 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [numPages, setNumPages] = useState<number>(0);
-  const [scale, setScale] = useState<number>(1.5);
-  const [loading, setLoading] = useState<boolean>(true);
+  
+  // State
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [scale, setScale] = useState<number>(1.0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filename, setFilename] = useState<string>('Dokument');
-
-  // Ladda PDF vid komponentmontering
+  const [pdfData, setPdfData] = useState<Blob | null>(null);
+  const [pdfInfo, setPdfInfo] = useState<{ filename: string; description: string } | null>(null);
+  const [pageData, setPageData] = useState<PDFPageData[]>([]);
+  
+  // Hämta PDF-data
   useEffect(() => {
-    if (!id) {
-      setError('Inget PDF-ID specificerat i URL:en');
-      setLoading(false);
-      return;
-    }
-
-    const loadPdf = async () => {
+    const fetchPDF = async () => {
+      if (!id) {
+        setError('Inget PDF-ID angavs i URL:en');
+        setIsLoading(false);
+        return;
+      }
+      
       try {
-        setLoading(true);
-        setError(null);
+        setIsLoading(true);
         
-        // Använd den exakta API-URL:en som du specificerat
-        const pdfUrl = `/api/pdf/${id}/content/`;
-        console.log('Laddar PDF direkt från:', pdfUrl);
+        // Hämta metadata först
+        const metadataResponse = await axios.get(`/api/pdf/${id}/info`);
+        const metadata = metadataResponse.data;
         
-        // Skapa token för autentisering om tillgänglig
-        const token = localStorage.getItem('jwt_token');
-        const options: any = {
-          url: pdfUrl,
-          withCredentials: true
-        };
-        
-        if (token) {
-          options.httpHeaders = {
-            'Authorization': `Bearer ${token}`
-          };
-        }
-        
-        // Ladda PDF-filen direkt med PDF.js
-        const loadingTask = pdfjsLib.getDocument(options);
-        const pdf = await loadingTask.promise;
-        
-        setPdfDocument(pdf);
-        setNumPages(pdf.numPages);
-        setCurrentPage(1);
-        
-        // Försök hämta filnamn från Content-Disposition headern
-        try {
-          const response = await fetch(pdfUrl, {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-            credentials: 'include'
+        if (metadata) {
+          setPdfInfo({
+            filename: metadata.filename || 'Dokument',
+            description: metadata.description || 'Ingen beskrivning tillgänglig'
           });
-          
-          const contentDisposition = response.headers.get('Content-Disposition');
-          if (contentDisposition) {
-            const matches = /filename="([^"]+)"/.exec(contentDisposition);
-            if (matches && matches[1]) {
-              setFilename(matches[1]);
-            }
-          }
-        } catch (e) {
-          console.warn('Kunde inte hämta filnamn:', e);
         }
         
-        setLoading(false);
-      } catch (error) {
-        console.error('Fel vid laddning av PDF:', error);
-        setError(`Kunde inte visa PDF-filen. ${(error as any).message || 'Ett okänt fel uppstod.'}`);
-        setLoading(false);
+        // Sedan hämta den faktiska PDF-filen
+        const response = await axios.get(`/api/pdf/${id}/content`, {
+          responseType: 'blob',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        });
+        
+        setPdfData(response.data);
+        setIsLoading(false);
+      } catch (err: any) {
+        console.error('Fel vid hämtning av PDF:', err);
+        
+        // Förbättrad felhantering
+        if (err.response) {
+          if (err.response.status === 404) {
+            setError(`PDF-filen med ID ${id} hittades inte.`);
+          } else if (err.response.status === 403) {
+            setError('Du har inte behörighet att se denna PDF-fil.');
+          } else {
+            setError(`Serverfel: ${err.response.status} ${err.response.statusText}`);
+          }
+        } else if (err.request) {
+          setError('Ingen respons från servern. Kontrollera din internetanslutning.');
+        } else {
+          setError(`Ett fel uppstod: ${err.message}`);
+        }
+        
+        setIsLoading(false);
       }
     };
     
-    loadPdf();
-    
-    // Städa upp när komponenten avmonteras
-    return () => {
-      if (pdfDocument) {
-        pdfDocument.destroy().catch(console.error);
-      }
-    };
+    fetchPDF();
   }, [id]);
-
-  // Rendera aktuell sida
-  useEffect(() => {
-    if (!pdfDocument || !canvasRef.current) return;
+  
+  // Hantera när dokumentet laddats
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setPageNumber(1);
     
-    const renderPage = async () => {
-      try {
-        const page = await pdfDocument.getPage(currentPage);
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        
-        // Anpassa vyportens storlek
-        const viewport = page.getViewport({ scale });
-        const context = canvas.getContext('2d');
-        if (!context) return;
-        
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        
-        // Rendera PDF-sidan
-        await page.render({
-          canvasContext: context,
-          viewport
-        }).promise;
-      } catch (e) {
-        console.error('Fel vid rendering av PDF-sida:', e);
-        setError('Kunde inte visa PDF-sidan.');
+    // Återställ siddata
+    setPageData([]);
+  };
+  
+  // Hantera när en sida laddats
+  const onPageLoadSuccess = (page: any) => {
+    const { pageNumber, width, height } = page;
+    
+    // Spara sidinfo
+    setPageData(prevData => {
+      const exists = prevData.some(p => p.pageNumber === pageNumber);
+      if (!exists) {
+        return [...prevData, { pageNumber, width, height }];
       }
-    };
-    
-    renderPage();
-  }, [pdfDocument, currentPage, scale]);
-
-  // Navigeringskontroller
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      return prevData;
+    });
+  };
+  
+  // Navigering
+  const goToPrevPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1);
     }
   };
-
+  
   const goToNextPage = () => {
-    if (currentPage < numPages) {
-      setCurrentPage(currentPage + 1);
+    if (numPages && pageNumber < numPages) {
+      setPageNumber(pageNumber + 1);
     }
   };
-
+  
+  // Zoom-funktioner
   const zoomIn = () => {
-    setScale(prevScale => Math.min(prevScale + 0.2, 3));
+    setScale(prevScale => Math.min(prevScale + 0.2, 3.0));
   };
-
+  
   const zoomOut = () => {
-    setScale(prevScale => Math.max(prevScale - 0.2, 0.6));
+    setScale(prevScale => Math.max(prevScale - 0.2, 0.5));
   };
-
+  
+  const resetZoom = () => {
+    setScale(1.0);
+  };
+  
+  // Hanterar fel som uppstår vid dokumentinläsning
+  const onDocumentLoadError = (error: Error) => {
+    console.error('Fel vid PDF-laddning:', error);
+    setError(`Kunde inte ladda PDF-dokumentet: ${error.message}`);
+    setIsLoading(false);
+  };
+  
+  // Hantera tillbaka-navigering
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+  
   return (
-    <Box sx={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', p: 2 }}>
-      {/* Sidhuvud */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography level="h4">
-          {filename}
-        </Typography>
-        <Button onClick={() => navigate(-1)}>Tillbaka</Button>
-      </Box>
-      
-      {/* Navigeringsfält */}
-      <Stack 
-        direction="row" 
-        spacing={2} 
-        sx={{ 
-          mb: 2, 
-          p: 1, 
-          bgcolor: 'background.level1', 
-          borderRadius: 'sm',
-          justifyContent: 'space-between' 
-        }}
+    <Box sx={styles.pdfContainer}>
+      {/* Kontrollpanel */}
+      <Sheet
+        variant="outlined"
+        sx={styles.controlBar}
       >
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
           <Button 
             variant="outlined" 
-            onClick={goToPreviousPage} 
-            disabled={currentPage <= 1 || loading}
+            color="neutral" 
+            onClick={handleGoBack}
           >
-            Föregående
+            Tillbaka
           </Button>
-          <Button 
-            variant="outlined" 
-            onClick={goToNextPage} 
-            disabled={currentPage >= numPages || loading}
-          >
-            Nästa
-          </Button>
-          <Typography sx={{ display: 'flex', alignItems: 'center', mx: 2 }}>
-            Sida {currentPage} av {numPages}
+          
+          <Typography level="title-md">
+            {pdfInfo?.filename || 'PDF-visare'}
           </Typography>
+          
+          <Box sx={styles.pageControls}>
+            <Button 
+              variant="plain" 
+              color="neutral" 
+              disabled={pageNumber <= 1} 
+              onClick={goToPrevPage}
+            >
+              Föregående
+            </Button>
+            
+            <Typography>
+              {pageNumber} / {numPages || '?'}
+            </Typography>
+            
+            <Button 
+              variant="plain" 
+              color="neutral" 
+              disabled={!numPages || pageNumber >= numPages} 
+              onClick={goToNextPage}
+            >
+              Nästa
+            </Button>
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Button size="sm" onClick={zoomOut} disabled={scale <= 0.5}>-</Button>
+            <Typography level="body-sm">{Math.round(scale * 100)}%</Typography>
+            <Button size="sm" onClick={zoomIn} disabled={scale >= 3.0}>+</Button>
+            <Button size="sm" variant="plain" onClick={resetZoom}>Återställ</Button>
+          </Box>
         </Stack>
-        
-        <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={zoomOut} disabled={loading}>
-            Zooma ut
-          </Button>
-          <Button variant="outlined" onClick={zoomIn} disabled={loading}>
-            Zooma in
-          </Button>
-        </Stack>
-      </Stack>
+      </Sheet>
       
-      {/* PDF-visningsområdet */}
-      <Box sx={{ 
-        flexGrow: 1, 
-        position: 'relative', 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        border: '1px solid #e0e0e0',
-        borderRadius: 1,
-        bgcolor: '#f5f5f5',
-        overflow: 'auto',
-        p: 2
-      }}>
-        {loading && (
-          <CircularProgress size="lg" />
+      {/* PDF-visare */}
+      <Box sx={{ padding: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        {isLoading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+            <CircularProgress />
+          </Box>
         )}
         
         {error && (
@@ -233,24 +272,38 @@ const DirectPDFView: React.FC = () => {
               {error}
             </Typography>
             <Button 
-              variant="solid" 
+              variant="outlined" 
               color="primary" 
-              onClick={() => window.location.reload()}
-              sx={{ mt: 2 }}
+              onClick={handleGoBack} 
+              sx={{ marginTop: 2 }}
             >
-              Försök igen
+              Tillbaka
             </Button>
           </Box>
         )}
         
-        <canvas 
-          ref={canvasRef} 
-          style={{ 
-            display: loading || error ? 'none' : 'block',
-            maxWidth: '100%',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-          }} 
-        />
+        {pdfData && !error && (
+          <Document
+            file={pdfData}
+            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadError={onDocumentLoadError}
+            loading={<CircularProgress />}
+            options={{
+              cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/',
+              cMapPacked: true,
+            }}
+          >
+            <Page
+              key={`page_${pageNumber}`}
+              pageNumber={pageNumber}
+              scale={scale}
+              onLoadSuccess={onPageLoadSuccess}
+              renderTextLayer={true}
+              renderAnnotationLayer={true}
+              loading={<CircularProgress />}
+            />
+          </Document>
+        )}
       </Box>
     </Box>
   );
