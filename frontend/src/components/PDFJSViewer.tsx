@@ -83,76 +83,109 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     return finalUrl;
   }, [pdfUrl]);
 
+  // Funktion för att skapa en alternativ URL om den första misslyckas
+  const createAlternativeUrl = (url: string): string => {
+    // Om URL:en innehåller en specifik filnamnsstruktur, skapa alternativa URL:er utan hash-delen
+    if (url.includes('project_files/') && url.includes('.pdf')) {
+      const parts = url.split('/');
+      const filename = parts[parts.length - 1];
+      
+      // Plocka bort timestamp-parametern om den finns
+      const cleanUrl = url.split('?')[0];
+      
+      // Matcha grundläggande filnamn utan hash (t.ex. BEAst-PDF-Guidelines-2 från BEAst-PDF-Guidelines-2_1r4W7o4.0_1.pdf)
+      const baseNameMatch = filename.match(/^([^_]+)/);
+      
+      if (baseNameMatch) {
+        const baseName = baseNameMatch[1];
+        // Ersätt filnamnet i sökvägen och returnera en URL direkt till /media/ istället för api-endpointen
+        const directory = cleanUrl.substring(0, cleanUrl.lastIndexOf('/'));
+        const directoryParts = directory.split('/');
+        const date = directoryParts.slice(-3).join('/'); // YYYY/MM/DD
+        
+        return `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${date}/${baseName}.pdf`;
+      }
+    }
+    return url;
+  };
+
   // Använd en separat effekt för att hämta PDF-filen som en arraybuffer
   useEffect(() => {
     let isMounted = true;
+    let attemptCount = 0;
+    const maxAttempts = 3;
     
-    const fetchPdf = async () => {
+    const fetchPdf = async (url: string) => {
+      if (!isMounted || attemptCount >= maxAttempts) return;
+      
+      attemptCount++;
       try {
         setIsLoading(true);
-        setError(null);
         
-        console.log('Hämtar PDF-data från URL:', processedUrl);
+        if (attemptCount > 1) {
+          console.log(`Försök ${attemptCount}/${maxAttempts} med alternativ URL:`, url);
+        } else {
+          console.log('Hämtar PDF-data från URL:', url);
+        }
         
-        // Använda axios med responseType arraybuffer för att säkerställa binärdata
-        const response = await axios.get(processedUrl, {
-          responseType: 'arraybuffer',
-          // Lägg till headers för att säkerställa att vi får en PDF tillbaka
+        // Använda fetch API istället för axios för bättre hantering av binärfiler
+        const fetchResponse = await fetch(url, {
+          method: 'GET',
           headers: {
             'Accept': 'application/pdf',
-            'Content-Type': 'application/pdf'
           }
         });
         
-        // Validera PDF-datan
-        const pdfData = response.data;
-        
-        if (!isPdfArrayBuffer(pdfData)) {
-          console.error('Ogiltig PDF-data mottagen:', pdfData);
-          throw new Error('Servern returnerade inte giltig PDF-data');
+        if (!fetchResponse.ok) {
+          console.warn(`Servern svarade med ${fetchResponse.status}: ${fetchResponse.statusText}`);
+          throw new Error(`Servern svarade med ${fetchResponse.status}`);
         }
         
-        console.log('PDF hämtad som arraybuffer, storlek:', pdfData.byteLength);
-        
-        if (isMounted) {
-          setPdfBytes(pdfData);
+        const contentType = fetchResponse.headers.get('content-type');
+        if (!contentType?.includes('application/pdf')) {
+          console.warn('Servern returnerade oväntad Content-Type:', contentType);
         }
-      } catch (err) {
-        console.error('Fel vid hämtning av PDF:', err);
         
-        // Försök med fetch som fallback
-        try {
-          console.log('Försöker med fetch som fallback');
-          const fetchResponse = await fetch(processedUrl);
-          const contentType = fetchResponse.headers.get('content-type');
-          
-          if (!contentType?.includes('application/pdf')) {
-            console.warn('Felaktig Content-Type:', contentType);
-          }
-          
-          const buffer = await fetchResponse.arrayBuffer();
-          
-          if (!isPdfArrayBuffer(buffer)) {
-            throw new Error('Servern returnerade inte giltig PDF-data (i fetch fallback)');
-          }
-          
+        // Läs in binärdatan som arraybuffer
+        const buffer = await fetchResponse.arrayBuffer();
+        
+        if (!buffer || buffer.byteLength < 10) {
+          throw new Error('För lite data returnerades');
+        }
+        
+        // Kontrollera om vi fick PDF-data
+        if (isPdfArrayBuffer(buffer)) {
+          console.log(`PDF hämtad framgångsrikt, storlek: ${buffer.byteLength} bytes`);
           if (isMounted) {
             setPdfBytes(buffer);
           }
-        } catch (fetchErr) {
-          console.error('Fetch fallback misslyckades:', fetchErr);
-          
+        } else {
+          throw new Error('Servern returnerade inte giltig PDF-data');
+        }
+      } catch (err) {
+        console.error(`Fel vid hämtning av PDF (försök ${attemptCount}/${maxAttempts}):`, err);
+        
+        if (attemptCount < maxAttempts) {
+          // Prova med ett alternativt URL-format
+          if (attemptCount === 1) {
+            // Prova med URL utan timestamp
+            const urlWithoutTimestamp = url.split('?')[0];
+            fetchPdf(urlWithoutTimestamp);
+          } else if (attemptCount === 2) {
+            // Prova med direkt media-URL
+            const alternativeUrl = createAlternativeUrl(url);
+            fetchPdf(alternativeUrl);
+          }
+        } else {
           if (isMounted) {
-            setError(fetchErr instanceof Error 
-              ? `Kunde inte ladda PDF: ${fetchErr.message}` 
-              : 'Kunde inte ladda PDF-filen');
+            setError(`Kunde inte ladda PDF: Försökte ${maxAttempts} gånger men misslyckades. Försök öppna i ny flik.`);
             setIsLoading(false);
           }
         }
       }
     };
     
-    fetchPdf();
+    fetchPdf(processedUrl);
     
     return () => {
       isMounted = false;
