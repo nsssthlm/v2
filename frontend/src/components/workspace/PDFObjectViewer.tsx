@@ -28,20 +28,20 @@ export default function PDFObjectViewer({ pdfUrl, title }: PDFObjectViewerProps)
     try {
       // Hantera URL-format
       let apiUrl = pdfUrl;
-      const baseApiUrl = '/api/';
+      const baseApiUrl = 'http://0.0.0.0:8001/api/';
 
       // Kontrollera och formatera URL:en korrekt
-      if (apiUrl.startsWith('/api/')) {
-        // URL:en har redan /api/ prefix - använd den direkt
-        console.log('URL already starts with /api/, using as is:', apiUrl);
+      if (apiUrl.startsWith('http')) {
+        // Använd URL:en direkt om den är absolut
+        console.log('Using absolute URL:', apiUrl);
+      } else if (apiUrl.startsWith('/api/')) {
+        // Lägg till base URL om det börjar med /api/
+        apiUrl = `http://0.0.0.0:8001${apiUrl}`;
+        console.log('Added base URL. New URL:', apiUrl);
       } else if (apiUrl.startsWith('workspace/')) {
-        // Om URL:en börjar med workspace/ (utan slash), lägg till /api/ prefix
+        // Om URL:en börjar med workspace/, lägg till full base URL
         apiUrl = baseApiUrl + apiUrl;
-        console.log('Added /api/ prefix. New URL:', apiUrl);
-      } else if (apiUrl.startsWith('/workspace/')) {
-        // Om URL:en börjar med /workspace/, ta bort / och lägg till /api/
-        apiUrl = baseApiUrl + apiUrl.substring(1);
-        console.log('Fixed URL format with /api/ prefix. New URL:', apiUrl);
+        console.log('Added full base URL. New URL:', apiUrl);
       }
 
       // Lägg till auth token till URL
