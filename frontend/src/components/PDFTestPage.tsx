@@ -7,8 +7,14 @@ const PDFTestPage: React.FC = () => {
   const [viewerVisible, setViewerVisible] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>('');
   
-  // Exempel på väg till en PDF-fil
-  const examplePath = '/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf';
+  // Exempel på olika vägar till PDF-filer
+  const examplePaths = [
+    '/api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf',
+    '/api/files/web/testhhhhhhh-68/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_f8q2wVX.pdf',
+    '/api/files/web/karlatornet-31/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf',
+    '/pdf/project_files/2025/05/19/BEAst-PDF-Guidelines-2.0_1.pdf'
+  ];
+  const examplePath = examplePaths[0];
   
   const handleViewPdf = () => {
     if (pdfUrl) {
@@ -16,9 +22,13 @@ const PDFTestPage: React.FC = () => {
     }
   };
   
-  const handleUseExample = () => {
-    setPdfUrl(examplePath);
-    setFilename('BEAst-PDF-Guidelines-2.0_1.pdf');
+  const handleUseExample = (index = 0) => {
+    const path = examplePaths[index] || examplePaths[0];
+    setPdfUrl(path);
+    
+    // Extrahera filnamnet från sökvägen
+    const fileName = path.split('/').pop() || 'document.pdf';
+    setFilename(fileName);
   };
   
   return (
@@ -48,7 +58,7 @@ const PDFTestPage: React.FC = () => {
           />
         </FormControl>
         
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button 
             color="primary" 
             variant="solid" 
@@ -61,9 +71,33 @@ const PDFTestPage: React.FC = () => {
           <Button 
             color="neutral" 
             variant="outlined" 
-            onClick={handleUseExample}
+            onClick={(e) => { e.preventDefault(); handleUseExample(0); }}
           >
-            Använd exempelfil
+            Exempel 1: BEAst Guidelines
+          </Button>
+          
+          <Button 
+            color="neutral" 
+            variant="outlined" 
+            onClick={(e) => { e.preventDefault(); handleUseExample(1); }}
+          >
+            Exempel 2: Ritningar
+          </Button>
+          
+          <Button 
+            color="neutral" 
+            variant="outlined" 
+            onClick={(e) => { e.preventDefault(); handleUseExample(2); }}
+          >
+            Exempel 3: Karlatornet
+          </Button>
+          
+          <Button 
+            color="neutral" 
+            variant="outlined" 
+            onClick={(e) => { e.preventDefault(); handleUseExample(3); }}
+          >
+            Exempel 4: Alternativ sökväg
           </Button>
         </Box>
       </Box>

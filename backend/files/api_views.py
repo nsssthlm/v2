@@ -58,13 +58,38 @@ def serve_project_file(request, project_id, path_info):
         # Option 3: In project_files directory
         potential_paths.append(os.path.join(media_root, 'project_files', path_info))
         
-        # Option 4: Look through all project_files folders
-        if path_info.endswith('.pdf'):
+        # Option 4: Special case for URLs with pattern /api/files/web/test555-65/data/project_files/2025/05/19/BEAst-PDF...
+        if path_info.endswith('.pdf') or 'project_files' in path_info:
+            # Extract project ID number from the path
+            project_num = None
+            if project_id and '-' in project_id:
+                parts = project_id.split('-')
+                if parts[-1].isdigit():
+                    project_num = parts[-1]
+            
+            # Hantera fall med både "data/project_files" och endast "project_files"
+            if 'project_files' in path_info:
+                if 'data/project_files' in path_info:
+                    # Extrahera delen efter "data/project_files/"
+                    parts = path_info.split('data/project_files/')
+                    if len(parts) > 1:
+                        year_path = parts[1]
+                        potential_paths.append(os.path.join(media_root, 'project_files', year_path))
+                else:
+                    # Hantera fall där bara "project_files" finns i sökvägen
+                    parts = path_info.split('project_files/')
+                    if len(parts) > 1:
+                        year_path = parts[1]
+                        potential_paths.append(os.path.join(media_root, 'project_files', year_path))
+            
+            # Sök efter filen i hela project_files-katalogen
             import glob
             filename = os.path.basename(path_info)
+            print(f"[PDF Debug] Söker efter fil med namn: {filename}")
             for pdf_file in glob.glob(os.path.join(media_root, 'project_files', '**', filename), recursive=True):
                 if os.path.isfile(pdf_file):
                     potential_paths.append(pdf_file)
+                    print(f"[PDF Debug] Hittade matchande fil: {pdf_file}")
         
         # Find the first matching file
         file_path = None

@@ -155,7 +155,10 @@ const ObjectPDFViewer: React.FC<ObjectPDFViewerProps> = ({
           type="application/pdf" 
           width="100%" 
           height="100%"
-          style={{ zIndex: 0 }}
+          style={{ 
+            zIndex: 0,
+            display: loading ? 'none' : 'block' 
+          }}
           onLoad={handleLoad}
           onError={handleError}
         >
@@ -166,6 +169,21 @@ const ObjectPDFViewer: React.FC<ObjectPDFViewerProps> = ({
             </a>
           </p>
         </object>
+        
+        {/* Embedded iframe fallback if object tag fails to load */}
+        {error && (
+          <iframe
+            src={pdfUrl}
+            width="100%"
+            height="100%"
+            style={{ 
+              border: 'none',
+              zIndex: 0
+            }}
+            title={fileName}
+            onLoad={() => setError(null)}
+          />
+        )}
       </Box>
     </Box>
   );
