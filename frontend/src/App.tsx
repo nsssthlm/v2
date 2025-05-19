@@ -22,8 +22,8 @@ import MeetingsPage from './pages/vault/meetings/MeetingsPage';
 import CalendarPage from './pages/dashboard/CalendarPage';
 
 // Folder pages
-import ModernFolderPage from './pages/folders/ModernFolderPage';
 import FolderListPage from './pages/folders/FolderListPage';
+import SimpleDirectoryView from './pages/folders/SimpleDirectoryView';
 
 // PDF hantering
 import PDFViewerPage from './pages/PDFViewerPage';
@@ -122,7 +122,7 @@ function App() {
                   
                   {/* Folder routes */}
                   <Route path="folders" element={<FolderListPage />} />
-                  <Route path="folders/:slug" element={<ModernFolderPage />} />
+                  <Route path="folders/:slug" element={<SimpleDirectoryView />} />
                   
                   {/* Nya dedikerade PDF-viewer sidor */}
                   <Route path="pdf-viewer" element={<PDFViewerPage />} />
