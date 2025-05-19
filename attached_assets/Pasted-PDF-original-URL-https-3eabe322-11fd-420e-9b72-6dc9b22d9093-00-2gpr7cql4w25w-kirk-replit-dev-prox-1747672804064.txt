@@ -1,0 +1,277 @@
+PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:123 1. Använder direkt länk till PDF-filen: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:518 Använder aktivt projektID: 3
+PDFJSViewer.tsx:519 Current Project: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg'}
+PDFJSViewer.tsx:526 Aktivt projektId: undefined
+PDFJSViewer.tsx:255 Första försök att hämta PDF-data från URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf?t=1747672764446
+PDFJSViewer.tsx:255 Första försök att hämta PDF-data från URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf?t=1747672764446
+PDFJSViewer.tsx:263 
+            
+            
+           GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf?t=1747672764446 net::ERR_ABORTED 404 (Not Found)
+fetchPdf @ PDFJSViewer.tsx:263
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=302c1db8:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=302c1db8:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=302c1db8:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=302c1db8:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf?t=1747672764446
+fetchPdf @ PDFJSViewer.tsx:275
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=302c1db8:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=302c1db8:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=302c1db8:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=302c1db8:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this warning
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 1/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+fetchPdf @ PDFJSViewer.tsx:320
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=302c1db8:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=302c1db8:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=302c1db8:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=302c1db8:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:178 Fallback 1: Använder pdf-finder med exact match AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (1): /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_v9oOzmT.pdf&stream=true
+PDFJSViewer.tsx:263 
+            
+            
+           GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf?t=1747672764446 net::ERR_ABORTED 404 (Not Found)
+fetchPdf @ PDFJSViewer.tsx:263
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf?t=1747672764446
+fetchPdf @ PDFJSViewer.tsx:275
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this warning
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 1/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+fetchPdf @ PDFJSViewer.tsx:320
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:178 Fallback 1: Använder pdf-finder med exact match AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (1): /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_v9oOzmT.pdf&stream=true
+PDFJSViewer.tsx:257 Försök 2/4: Alternativ URL: /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_v9oOzmT.pdf&stream=true
+PDFJSViewer.tsx:263 
+            
+            
+           GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/api/pdf-finder/?filename=AAAAExempel_pa_ritningar_v9oOzmT.pdf&stream=true 404 (Not Found)
+fetchPdf @ PDFJSViewer.tsx:263
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_v9oOzmT.pdf&stream=true
+fetchPdf @ PDFJSViewer.tsx:275
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this warning
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 2/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+fetchPdf @ PDFJSViewer.tsx:320
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:192 Fallback 2: Använder exakt sökväg med datum 2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (2): /api/pdf/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:257 Försök 3/4: Alternativ URL: /api/pdf/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:263 
+            
+            
+           GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/api/pdf/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf 404 (Not Found)
+fetchPdf @ PDFJSViewer.tsx:263
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: /api/pdf/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+fetchPdf @ PDFJSViewer.tsx:275
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this warning
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 3/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+fetchPdf @ PDFJSViewer.tsx:320
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:203 Fallback 3: Använder direct media API AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (3): /api/direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:257 Försök 4/4: Alternativ URL: /api/direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+PDFJSViewer.tsx:263 
+            
+            
+           GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/api/direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf 404 (Not Found)
+fetchPdf @ PDFJSViewer.tsx:263
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this error
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: /api/direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_v9oOzmT.pdf
+fetchPdf @ PDFJSViewer.tsx:275
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+fetchPdf @ PDFJSViewer.tsx:337
+await in fetchPdf
+(anonymous) @ PDFJSViewer.tsx:354
+commitHookEffectListMount @ chunk-276SZO74.js?v=302c1db8:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=302c1db8:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=302c1db8:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=302c1db8:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=302c1db8:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=302c1db8:19447
+commitRootImpl @ chunk-276SZO74.js?v=302c1db8:19416
+commitRoot @ chunk-276SZO74.js?v=302c1db8:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=302c1db8:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=302c1db8:9119
+(anonymous) @ chunk-276SZO74.js?v=302c1db8:18627Understand this warning
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 4/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)

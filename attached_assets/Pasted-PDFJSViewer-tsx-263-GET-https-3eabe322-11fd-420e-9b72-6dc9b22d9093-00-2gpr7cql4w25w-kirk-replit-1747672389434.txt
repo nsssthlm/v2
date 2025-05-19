@@ -1,0 +1,37 @@
+PDFJSViewer.tsx:263 
+ GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.d…ject_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf?t=1747672372052 404 (Not Found)
+
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.d…ject_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf?t=1747672372052
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 1/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+PDFJSViewer.tsx:178 Fallback 1: Använder pdf-finder med exact match AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (1): /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_WNDqKJa.pdf&stream=true
+PDFJSViewer.tsx:263 
+ GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.d…ject_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf?t=1747672372052 net::ERR_ABORTED 404 (Not Found)
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.d…ject_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf?t=1747672372052
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 1/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+PDFJSViewer.tsx:178 Fallback 1: Använder pdf-finder med exact match AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (1): /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_WNDqKJa.pdf&stream=true
+PDFJSViewer.tsx:257 Försök 2/4: Alternativ URL: /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_WNDqKJa.pdf&stream=true
+PDFJSViewer.tsx:263 
+ GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.d…/api/pdf-finder/?filename=AAAAExempel_pa_ritningar_WNDqKJa.pdf&stream=true 404 (Not Found)
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: /api/pdf-finder/?filename=AAAAExempel_pa_ritningar_WNDqKJa.pdf&stream=true
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 2/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+PDFJSViewer.tsx:192 Fallback 2: Använder exakt sökväg med datum 2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (2): /api/pdf/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:257 Försök 3/4: Alternativ URL: /api/pdf/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:263 
+ GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/api/pdf/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf 404 (Not Found)
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: /api/pdf/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 3/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
+PDFJSViewer.tsx:203 Fallback 3: Använder direct media API AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:332 Provar alternativ URL (3): /api/direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:257 Försök 4/4: Alternativ URL: /api/direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:263 
+ GET https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.d…direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf 404 (Not Found)
+PDFJSViewer.tsx:275 Servern svarade med 404 (Not Found) för URL: /api/direct/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_WNDqKJa.pdf
+PDFJSViewer.tsx:320 Fel vid hämtning av PDF (försök 4/4): Error: Servern svarade med 404
+    at fetchPdf (PDFJSViewer.tsx:287:15)
