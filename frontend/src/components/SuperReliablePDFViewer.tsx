@@ -48,18 +48,56 @@ const SuperReliablePDFViewer: React.FC<SuperReliablePDFViewerProps> = ({
       return;
     }
     
-    // Konvertera 0.0.0.0:8001 till localhost:8001 för bättre kompatibilitet
-    let processedUrl = pdfUrl;
-    if (processedUrl.includes('0.0.0.0:8001')) {
-      processedUrl = processedUrl.replace('0.0.0.0:8001', 'localhost:8001');
+    try {
+      // Logga originalurl för felsökning
+      console.log('Original PDF URL:', pdfUrl);
+      
+      // Steg 1: Konvertera proxy-URL till direktåtkomst
+      let processedUrl = pdfUrl;
+      
+      // Hantera Replit-proxy-URL (från frontend)
+      if (processedUrl.includes('kirk.replit.dev/proxy')) {
+        console.log('Detekterade Replit proxy URL, konverterar till direkt URL');
+        const pathParts = processedUrl.split('/api/files/web/');
+        if (pathParts.length > 1) {
+          processedUrl = `/api/files/web/${pathParts[1]}`;
+          console.log('Konverterad proxy URL till:', processedUrl);
+        }
+      }
+      
+      // Steg 2: Om URL innehåller 0.0.0.0:8001, ersätt med window.location.origin
+      if (processedUrl.includes('0.0.0.0:8001')) {
+        const apiPath = processedUrl.split('0.0.0.0:8001')[1];
+        processedUrl = `${window.location.origin}${apiPath}`;
+        console.log('Konverterad 0.0.0.0 URL till:', processedUrl);
+      }
+      
+      // Steg 3: Testa om det är en media-URL-mönster
+      if (processedUrl.includes('project_files')) {
+        const mediaUrlPattern = /project_files\/(\d{4})\/(\d{2})\/(\d{2})\/([^?]+)/;
+        const match = processedUrl.match(mediaUrlPattern);
+        
+        if (match) {
+          const [fullMatch, year, month, day, filename] = match;
+          const mediaUrl = `/media/project_files/${year}/${month}/${day}/${filename}`;
+          console.log('Detekterade mediastig, konverterar till:', mediaUrl);
+          
+          // Försökt använda media-URL först om det matchar mönstret
+          processedUrl = mediaUrl;
+        }
+      }
+      
+      // Steg 4: Lägg till cache-busting för att förhindra cachning
+      const separator = processedUrl.includes('?') ? '&' : '?';
+      processedUrl = `${processedUrl}${separator}_t=${Date.now()}`;
+      
+      console.log('Final bearbetad PDF URL:', processedUrl);
+      setFinalUrl(processedUrl);
+    } catch (err) {
+      console.error('Fel vid URL-bearbetning:', err);
+      // Fallback till original-URL vid fel
+      setFinalUrl(pdfUrl);
     }
-    
-    // Lägg till cache-busting för att förhindra cachning
-    const separator = processedUrl.includes('?') ? '&' : '?';
-    processedUrl = `${processedUrl}${separator}_t=${Date.now()}`;
-    
-    console.log('Bearbetar PDF URL:', processedUrl);
-    setFinalUrl(processedUrl);
   }, [pdfUrl]);
   
   // Hantera fel vid laddning
@@ -257,32 +295,42 @@ const SuperReliablePDFViewer: React.FC<SuperReliablePDFViewerProps> = ({
             
             {/* Metod 2: Object - Alternativ metod för vissa webbläsare */}
             {renderMethod === 'object' && (
-              <object
-                key={`object-${key}`}
-                data={finalUrl}
-                type="application/pdf"
-                width="100%"
-                height="100%"
-                onLoad={handleLoad}
-                onError={handleError}
-              >
-                <Typography>
-                  Din webbläsare kan inte visa PDF-filer med denna metod.
+              <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+                <Typography level="body-sm" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 5, bgcolor: 'rgba(255,255,255,0.8)', p: 1, borderRadius: 'sm' }}>
+                  Använder alternativ visningsmetod
                 </Typography>
-              </object>
+                <object
+                  key={`object-${key}`}
+                  data={finalUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                  onLoad={handleLoad}
+                  onError={handleError}
+                >
+                  <Typography sx={{ p: 2 }}>
+                    Din webbläsare kan inte visa PDF-filer med denna metod.
+                  </Typography>
+                </object>
+              </Box>
             )}
             
             {/* Metod 3: Embed - Äldre kompatibilitetsmetod */}
             {renderMethod === 'embed' && (
-              <embed
-                key={`embed-${key}`}
-                src={finalUrl}
-                type="application/pdf"
-                width="100%"
-                height="100%"
-                onLoad={handleLoad}
-                onError={handleError}
-              />
+              <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+                <Typography level="body-sm" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 5, bgcolor: 'rgba(255,255,255,0.8)', p: 1, borderRadius: 'sm' }}>
+                  Använder inbäddad visningsmetod
+                </Typography>
+                <embed
+                  key={`embed-${key}`}
+                  src={finalUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                  onLoad={handleLoad}
+                  onError={handleError}
+                />
+              </Box>
             )}
           </Box>
         )}

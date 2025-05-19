@@ -56,17 +56,33 @@ const FolderPage = () => {
   const handlePdfClick = (fileUrl: string, fileName: string, fileId: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName, "FileID:", fileId);
     
-    // Använd den direkta filsökvägen för bättre kompatibilitet
-    // Detta är den ursprungliga backend URL:en som fungerar bättre för vissa webbläsare
-    const pdfUrl = fileUrl;
+    // Skapa olika URL-varianter för att öka chansen att PDF:en visas korrekt
+    let pdfUrl = fileUrl;
+    
+    // Kontrollera om URL:en innehåller projektfilssökvägar - förbered då en direkt media-URL
+    if (fileUrl.includes('project_files')) {
+      // Försök extrahera datum och filnamn för att skapa en direkt mediasökväg
+      const mediaUrlPattern = /project_files\/(\d{4})\/(\d{2})\/(\d{2})\/([^?]+)/;
+      const match = fileUrl.match(mediaUrlPattern);
+      
+      if (match) {
+        const [fullMatch, year, month, day, filename] = match;
+        const directMediaUrl = `/media/project_files/${year}/${month}/${day}/${filename}`;
+        console.log("Använda direkt media-URL:", directMediaUrl);
+        pdfUrl = directMediaUrl;
+      }
+    }
+    
     console.log("Använder final PDF URL:", pdfUrl);
     
-    // Logga projektkontext för felsökning
+    // Logga projektkontext och aktuell slug för felsökning
     console.log("PDF Debug:", { 
+      contextProjectId: projectContext.contextProjectId,
+      activeProjectId: projectContext.activeProjectId,
       currentProject: projectContext.currentProject 
     });
     
-    // Sätt selected PDF för att visa i ReliablePDFDialog som har bättre stöd
+    // Sätt selected PDF för att visa i SuperReliablePDFDialog som har maximal kompatibilitet
     setSelectedPdf({
       url: pdfUrl,
       name: fileName,
