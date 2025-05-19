@@ -1,645 +1,619 @@
-import { useState, useEffect, useRef } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
-import axios from "axios";
-
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Sheet, 
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Modal,
+  ModalDialog,
+  Box,
+  Button,
+  Typography,
+  IconButton,
+  CircularProgress,
+  Sheet,
   Tabs,
   TabList,
   Tab,
-  Avatar,
-  CircularProgress
+  TabPanel,
+  Divider,
 } from '@mui/joy';
-
-// Import Lucide icons
-import { 
-  ChevronLeft, 
-  ChevronRight,
-  ZoomIn, 
-  ZoomOut,
-  X,
-  Upload,
-  ExternalLink,
-  FileDown 
-} from "lucide-react";
-
-// Konfigurera PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
-export interface PDFAnnotation {
-  id: string;
-  pdfVersionId?: number;
-  projectId?: number | null;
-  rect: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    pageNumber: number;
-  };
-  color: string;
-  comment: string;
-  status: 'new_comment' | 'action_required' | 'rejected' | 'new_review' | 'other_forum' | 'resolved';
-  createdBy: string;
-  createdAt: string;
-  assignedTo?: string;
-  taskId?: string;
-  deadline?: string;
-}
-
-export interface FileVersion {
-  id: string;
-  versionNumber: number;
-  filename: string;
-  fileUrl: string;
-  description: string;
-  uploaded: string;
-  uploadedBy: string;
-  commentCount?: number;
-}
+import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import DownloadIcon from '@mui/icons-material/Download';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import FolderIcon from '@mui/icons-material/Folder';
 
 interface EnhancedPDFViewerProps {
-  fileId?: string | number;
-  initialUrl?: string;
-  filename?: string;
-  onClose?: () => void;
-  projectId?: number | null;
-  useDatabase?: boolean;
-  file?: File | null;
-  versionId?: number;
-  pdfFile?: Blob | null;
-  highlightAnnotationId?: number;
-  annotationId?: number;
-  isDialogMode?: boolean;
-  folderId?: number | null;
+  folderId?: string | number;
+  onUploadSuccess?: () => void;
 }
 
-const EnhancedPDFViewer = ({
-  fileId,
-  initialUrl,
-  filename = 'PDF Dokument',
-  onClose,
-  projectId,
-  useDatabase = true,
-  file,
-  versionId,
-  pdfFile,
-  highlightAnnotationId,
-  annotationId,
-  isDialogMode = false,
-  folderId
-}: EnhancedPDFViewerProps) => {
-  const [activeTab, setActiveTab] = useState<string>('detaljer');
-  const [currentZoom, setCurrentZoom] = useState(100);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pdfSource, setPdfSource] = useState<string | ArrayBuffer | null>(null);
-  const [attemptedUrls, setAttemptedUrls] = useState<string[]>([]);
-  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+/**
+ * Förbättrad PDF-visare med fler funktioner som matchar designen i bilden
+ */
+const EnhancedPDFViewer: React.FC<EnhancedPDFViewerProps> = ({
+  folderId,
+  onUploadSuccess
+}) => {
+  // State
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [localPdfUrl, setLocalPdfUrl] = useState<string | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [fileDescription, setFileDescription] = useState('');
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [activeTab, setActiveTab] = useState(0);
   
-  // Referens till PDF container
-  const pdfContainerRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef<HTMLDivElement>(null);
+  // Refs
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
-  // Funktioner för navigering
+  // Rensa URL vid komponent-unmount
+  useEffect(() => {
+    return () => {
+      if (localPdfUrl) {
+        URL.revokeObjectURL(localPdfUrl);
+      }
+    };
+  }, []);
+  
+  // Hantera filtillägg
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (!file.type.includes('pdf')) {
+      setUploadError('Endast PDF-filer stöds');
+      return;
+    }
+    
+    // Rensa eventuell tidigare objektURL
+    if (localPdfUrl) {
+      URL.revokeObjectURL(localPdfUrl);
+    }
+    
+    // Skapa en lokal URL för filen
+    const fileObjectUrl = URL.createObjectURL(file);
+    setLocalPdfUrl(fileObjectUrl);
+    setSelectedFile(file);
+    setUploadError('');
+  };
+  
+  // Uppladdningslogik
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    
+    setIsUploading(true);
+    setUploadError('');
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('description', fileDescription);
+      formData.append('name', selectedFile.name.replace('.pdf', ''));
+      
+      const uploadUrl = folderId 
+        ? `/api/files/upload/?directory_slug=${folderId}` 
+        : '/api/files/upload/';
+      
+      console.log(`Laddar upp fil: ${selectedFile.name} (${selectedFile.size} bytes) till ${uploadUrl}`);
+      
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        console.log('Uppladdning lyckades!');
+        
+        // Visa PDF:en direkt, utan att hämta från servern
+        setIsUploadDialogOpen(false);
+        setIsPdfViewerOpen(true);
+        
+        if (onUploadSuccess) {
+          onUploadSuccess();
+        }
+      } else {
+        let errorMsg = 'Uppladdning misslyckades';
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.detail || errorData.message || errorMsg;
+        } catch (e) {
+          errorMsg = `Fel: ${response.status} ${response.statusText}`;
+        }
+        setUploadError(errorMsg);
+      }
+    } catch (err) {
+      console.error('Fel vid uppladdning:', err);
+      setUploadError('Kunde inte ansluta till servern');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
+  // Öppna/stäng funktioner
+  const openUploadDialog = () => {
+    setIsUploadDialogOpen(true);
+    resetForm();
+  };
+  
+  const closeUploadDialog = () => {
+    setIsUploadDialogOpen(false);
+    resetForm();
+  };
+  
+  const closePdfViewer = () => {
+    setIsPdfViewerOpen(false);
+  };
+  
+  // Zooma in/ut
   const zoomIn = () => {
-    setCurrentZoom(prev => Math.min(prev + 10, 200));
+    setZoomLevel(prev => Math.min(prev + 10, 200));
   };
   
   const zoomOut = () => {
-    setCurrentZoom(prev => Math.max(prev - 10, 50));
+    setZoomLevel(prev => Math.max(prev - 10, 50));
   };
   
-  const goToPrevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
-  
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  };
-
-  // Funktion för att öppna PDF i ny flik
-  const openInNewTab = () => {
-    if (pdfBlob) {
-      const url = URL.createObjectURL(pdfBlob);
-      window.open(url, '_blank');
-    } else if (pdfSource && typeof pdfSource === 'string') {
-      window.open(pdfSource, '_blank');
-    } else if (initialUrl) {
-      window.open(initialUrl, '_blank');
+  // Återställ formulär
+  const resetForm = () => {
+    // Rensa fil-input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
+    
+    // Rensa state
+    setSelectedFile(null);
+    setFileDescription('');
+    setUploadError('');
+    
+    // Behåll URL:en tills användaren stänger PDF-visaren
   };
-
-  // Ladda PDF från URL eller Blob
-  useEffect(() => {
-    const loadPdf = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // 1. Använd pdfFile prop om tillgänglig
-        if (pdfFile) {
-          console.log('Använder tillhandahållen pdfFile blob');
-          setPdfSource(pdfFile);
-          setPdfBlob(pdfFile);
-          return;
-        }
-        
-        // 2. Använd file prop om tillgänglig
-        if (file) {
-          console.log('Använder tillhandahållen file');
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            if (e.target?.result) {
-              setPdfSource(e.target.result);
-              setPdfBlob(file);
-            }
-          };
-          reader.readAsArrayBuffer(file);
-          return;
-        }
-        
-        // 3. Använd initialUrl
-        if (initialUrl) {
-          console.log('Försöker hämta PDF från URL:', initialUrl);
-          setAttemptedUrls(prev => [...prev, initialUrl]);
-          
-          // Försöker hämta via axios
-          const response = await axios.get(initialUrl, {
-            responseType: 'blob',
-            headers: {
-              'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            }
-          });
-          
-          if (response.status === 200) {
-            console.log('PDF hämtad, skapar blob URL');
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            setPdfSource(URL.createObjectURL(blob));
-            setPdfBlob(blob);
-            return;
-          }
-        }
-        
-        // 4. Försök med fileId om tillgängligt
-        if (fileId) {
-          console.log('Försöker hämta PDF via fileId:', fileId);
-          const apiUrl = `/api/files/get-file-content/${fileId}/`;
-          setAttemptedUrls(prev => [...prev, apiUrl]);
-          
-          try {
-            const response = await axios.get(apiUrl, {
-              responseType: 'blob',
-              headers: {
-                'Cache-Control': 'no-cache'
-              }
-            });
-            
-            if (response.status === 200) {
-              const blob = new Blob([response.data], { type: 'application/pdf' });
-              setPdfSource(URL.createObjectURL(blob));
-              setPdfBlob(blob);
-              return;
-            }
-          } catch (apiError) {
-            console.error('Kunde inte hämta PDF via fileId:', apiError);
-          }
-        }
-        
-        // Om vi når hit, har alla våra försök misslyckats
-        throw new Error('Kunde inte ladda PDF-dokumentet');
-      } catch (err) {
-        console.error('Fel vid laddning av PDF:', err);
-        setError(err instanceof Error ? err.message : 'Kunde inte ladda PDF-dokumentet');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadPdf();
-    
-    // Cleanup när komponenten avmonteras
-    return () => {
-      if (typeof pdfSource === 'string' && pdfSource.startsWith('blob:')) {
-        URL.revokeObjectURL(pdfSource);
-      }
-    };
-  }, [fileId, initialUrl, file, pdfFile]);
-
-  // Render fallback om det blev fel
-  const renderErrorFallback = () => (
-    <Box sx={{ 
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100%',
-      p: 3,
-      gap: 2
-    }}>
-      <Typography level="title-lg" color="danger">
-        Kunde inte ladda PDF
-      </Typography>
-      <Typography level="body-md" sx={{ mb: 2 }}>
-        {error || 'Det gick inte att visa dokumentet. Försök igen eller öppna i ny flik.'}
-      </Typography>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Button 
-          onClick={openInNewTab}
-          variant="solid"
-          color="primary"
-          startDecorator={<ExternalLink size={16} />}
-        >
-          Öppna i ny flik
-        </Button>
-        {initialUrl && (
-          <Button 
-            component="a"
-            href={initialUrl}
-            download={filename}
-            variant="outlined"
-            color="neutral"
-            startDecorator={<FileDown size={16} />}
-          >
-            Ladda ner
-          </Button>
-        )}
-      </Box>
-      {attemptedUrls.length > 0 && (
-        <Box sx={{ mt: 3, maxWidth: '100%', overflow: 'hidden' }}>
-          <Typography level="body-sm" color="neutral">
-            Försökte med följande källor:
-          </Typography>
-          <Box component="ul" sx={{ pl: 2, mt: 1, fontSize: '0.75rem', color: 'text.tertiary' }}>
-            {attemptedUrls.map((url, index) => (
-              <Box component="li" key={index} sx={{ wordBreak: 'break-all' }}>
-                {url}
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      )}
-    </Box>
-  );
-
+  
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-      {/* Header */}
-      <Sheet 
-        variant="outlined"
+    <>
+      {/* Uppladdningsknapp */}
+      <Button
+        variant="solid"
+        size="sm"
+        color="success"
+        startDecorator={<CloudUploadIcon />}
+        onClick={openUploadDialog}
         sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          p: 1,
-          px: 2,
-          borderTopLeftRadius: 'md',
-          borderTopRightRadius: 'md',
-          borderLeft: 'none',
-          borderRight: 'none',
-          borderTop: 'none'
+          bgcolor: '#4caf50', 
+          '&:hover': { bgcolor: '#3d8b40' },
+          height: '35px'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton 
-            variant="plain" 
-            color="neutral" 
-            onClick={onClose}
-            sx={{ mr: 1 }}
-          >
-            <X size={18} />
-          </IconButton>
-          <Typography level="title-lg">{filename}</Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Page navigation */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton 
-              size="sm" 
-              variant="soft" 
-              color="primary" 
-              onClick={goToPrevPage}
-              disabled={currentPage <= 1 || loading || error !== null}
-            >
-              <ChevronLeft size={16} />
-            </IconButton>
-            <Typography level="body-sm" sx={{ mx: 1 }}>
-              Sida {currentPage} av {totalPages || '-'}
-            </Typography>
-            <IconButton 
-              size="sm" 
-              variant="soft" 
-              color="primary" 
-              onClick={goToNextPage}
-              disabled={currentPage >= totalPages || loading || error !== null}
-            >
-              <ChevronRight size={16} />
-            </IconButton>
-          </Box>
-          
-          {/* Zoom control */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton 
-              size="sm" 
-              variant="soft" 
-              color="primary"
-              onClick={zoomOut}
-              disabled={loading || error !== null}
-            >
-              <ZoomOut size={16} />
-            </IconButton>
-            <Typography level="body-sm" sx={{ mx: 1 }}>
-              {currentZoom}%
-            </Typography>
-            <IconButton 
-              size="sm" 
-              variant="soft" 
-              color="primary"
-              onClick={zoomIn}
-              disabled={loading || error !== null}
-            >
-              <ZoomIn size={16} />
-            </IconButton>
-          </Box>
-          
-          {/* Action buttons */}
-          <Button
-            size="sm"
-            variant="soft"
-            color="primary"
-            startDecorator={<FileDown size={16} />}
-            onClick={openInNewTab}
-          >
-            Ladda ner
-          </Button>
-          
-          <Button
-            size="sm"
-            variant="soft"
-            color="primary"
-          >
-            Versioner
-          </Button>
-          
-          <Button
-            size="sm"
-            variant="soft"
-            color="primary"
-          >
-            Markera område
-          </Button>
-          
-          <Button
-            size="sm"
-            variant="soft"
-            color="primary"
-            startDecorator={<Upload size={16} />}
-          >
-            Ny version
-          </Button>
-        </Box>
-      </Sheet>
+        Ladda upp PDF
+      </Button>
       
-      {/* Main content */}
-      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* PDF Viewer */}
-        <Box 
-          sx={{ 
-            flex: 1, 
-            bgcolor: '#333',
+      {/* Uppladdningsdialog */}
+      <Modal open={isUploadDialogOpen} onClose={closeUploadDialog}>
+        <ModalDialog
+          aria-labelledby="upload-dialog-title"
+          sx={{ maxWidth: 500, p: 3 }}
+        >
+          <Typography id="upload-dialog-title" level="h4" mb={2}>
+            Ladda upp PDF
+          </Typography>
+          
+          <Box 
+            sx={{ 
+              border: '1px dashed',
+              borderColor: selectedFile ? 'success.500' : 'neutral.400',
+              borderRadius: '8px',
+              p: 3,
+              mb: 2,
+              textAlign: 'center',
+              bgcolor: selectedFile ? 'success.50' : 'neutral.50',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              '&:hover': {
+                borderColor: 'primary.400',
+                bgcolor: 'primary.50',
+              }
+            }}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {selectedFile ? (
+              <>
+                <InsertDriveFileIcon 
+                  sx={{ fontSize: 40, color: 'success.600', mb: 1 }} 
+                />
+                <Typography level="body-lg" fontWeight="bold">
+                  {selectedFile.name}
+                </Typography>
+                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                  {(selectedFile.size / 1024).toFixed(1)} KB
+                </Typography>
+                <Button 
+                  size="sm" 
+                  variant="soft" 
+                  color="danger" 
+                  sx={{ mt: 1 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetForm();
+                  }}
+                >
+                  Ta bort
+                </Button>
+              </>
+            ) : (
+              <>
+                <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.500', mb: 1 }} />
+                <Typography level="body-lg">
+                  Klicka för att välja PDF
+                </Typography>
+                <Typography level="body-sm" sx={{ color: 'text.secondary' }} mt={1}>
+                  eller dra och släpp din fil här
+                </Typography>
+              </>
+            )}
+            <input
+              type="file"
+              accept=".pdf,application/pdf"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileSelect}
+            />
+          </Box>
+          
+          <Box sx={{ mb: 3 }}>
+            <Typography level="body-sm" mb={1}>
+              Beskrivning (valfritt)
+            </Typography>
+            <input
+              type="text"
+              value={fileDescription}
+              onChange={(e) => setFileDescription(e.target.value)}
+              placeholder="Skriv en beskrivning av dokumentet"
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+              }}
+            />
+          </Box>
+          
+          {uploadError && (
+            <Box
+              sx={{
+                p: 2,
+                mb: 2,
+                bgcolor: 'error.softBg',
+                color: 'error.solidColor',
+                borderRadius: '4px',
+                fontSize: '14px'
+              }}
+            >
+              {uploadError}
+            </Box>
+          )}
+          
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 2 }}>
+            <Button
+              variant="plain"
+              color="neutral"
+              onClick={closeUploadDialog}
+              disabled={isUploading}
+            >
+              Avbryt
+            </Button>
+            <Button
+              variant="solid"
+              color="primary"
+              onClick={handleUpload}
+              loading={isUploading}
+              disabled={!selectedFile || isUploading}
+            >
+              {isUploading ? 'Laddar upp...' : 'Ladda upp'}
+            </Button>
+          </Box>
+        </ModalDialog>
+      </Modal>
+      
+      {/* PDF Viewer - i designen som du visade */}
+      <Modal 
+        open={isPdfViewerOpen} 
+        onClose={closePdfViewer}
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <ModalDialog
+          sx={{
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            width: '90vw',
+            height: '90vh',
+            p: 0,
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            overflow: 'hidden'
+            boxShadow: 'lg',
+            borderRadius: '8px',
           }}
-          ref={pdfContainerRef}
         >
-          {loading ? (
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              justifyContent: 'center', 
+          {/* Header */}
+          <Box 
+            sx={{ 
+              display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              height: '100%',
-              gap: 2
-            }}>
-              <CircularProgress size="lg" />
-              <Typography level="body-sm" sx={{ color: 'white' }}>
-                Laddar PDF...
+              p: 1,
+              bgcolor: 'background.body',
+              borderBottom: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <IconButton 
+                size="sm" 
+                variant="plain" 
+                color="neutral" 
+                onClick={closePdfViewer}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Typography level="title-md">
+                {selectedFile?.name || 'PDF Dokument'}
               </Typography>
             </Box>
-          ) : error ? (
-            renderErrorFallback()
-          ) : (
-            <Box 
-              sx={{ 
-                width: '100%', 
-                height: '100%', 
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                bgcolor: '#333',
-                overflow: 'auto',
-                position: 'relative',
-                p: 2
-              }}
-              ref={containerRef}
-            >
-              <Document
-                file={pdfSource}
-                onLoadSuccess={({ numPages }) => {
-                  console.log('PDF laddad framgångsrikt, antal sidor:', numPages);
-                  setTotalPages(numPages);
-                  setLoading(false);
-                }}
-                onLoadError={(error) => {
-                  console.error("Error loading PDF:", error);
-                  setError("Kunde inte ladda PDF: " + (error.message || 'Okänt fel'));
-                }}
-                loading={<CircularProgress />}
-              >
-                {totalPages > 0 && (
-                  <Box ref={pageRef}>
-                    <Page
-                      pageNumber={currentPage}
-                      scale={currentZoom / 100}
-                      renderTextLayer={true}
-                      renderAnnotationLayer={true}
-                      loading={
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                          <CircularProgress size="sm" />
-                        </Box>
-                      }
-                      error={
-                        <Typography level="body-sm" color="danger" sx={{ p: 2 }}>
-                          Kunde inte rendera sidan.
-                        </Typography>
-                      }
-                    />
-                  </Box>
-                )}
-              </Document>
+            
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <IconButton size="sm" variant="plain" color="neutral">
+                <ChevronLeftIcon />
+              </IconButton>
+              <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center' }}>
+                Sida 1 av {1}
+              </Typography>
+              <IconButton size="sm" variant="plain" color="neutral">
+                <ChevronRightIcon />
+              </IconButton>
               
-              {/* Blå sidramen för designen */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  width: '8px',
-                  backgroundColor: '#1976d2'
-                }}
-              />
+              <IconButton size="sm" variant="plain" color="neutral" onClick={zoomOut}>
+                <RemoveIcon />
+              </IconButton>
+              <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center', minWidth: '50px', justifyContent: 'center' }}>
+                {zoomLevel}%
+              </Typography>
+              <IconButton size="sm" variant="plain" color="neutral" onClick={zoomIn}>
+                <AddIcon />
+              </IconButton>
+              
+              <Button 
+                variant="soft" 
+                color="primary" 
+                size="sm"
+                startDecorator={<DownloadIcon />}
+              >
+                Ladda ner
+              </Button>
+              
+              <Button
+                variant="soft"
+                color="primary"
+                size="sm"
+              >
+                Versioner
+              </Button>
+              
+              <Button
+                variant="soft"
+                color="primary"
+                size="sm"
+              >
+                Markera område
+              </Button>
+              
+              <Button
+                variant="solid"
+                color="primary"
+                size="sm"
+              >
+                Ny version
+              </Button>
             </Box>
-          )}
+          </Box>
           
-          {/* Progress bar at bottom */}
-          {!loading && !error && totalPages > 0 && (
-            <Box 
-              sx={{ 
-                position: 'absolute', 
-                bottom: 10, 
-                left: '50%', 
-                transform: 'translateX(-50%)',
-                width: '80%',
-                height: 4,
-                bgcolor: '#4b4b4b',
-                borderRadius: 2,
-                overflow: 'hidden'
-              }}
-            >
+          {/* Main content */}
+          <Box sx={{ 
+            display: 'flex', 
+            flex: 1, 
+            position: 'relative', 
+            overflow: 'hidden',
+            bgcolor: '#f0f0f0' 
+          }}>
+            {/* PDF Viewer */}
+            <Box sx={{ 
+              flex: 1, 
+              position: 'relative', 
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
               <Box 
                 sx={{ 
-                  width: `${(currentPage / totalPages) * 100}%`, 
-                  height: '100%', 
-                  bgcolor: '#1976d2'
+                  position: 'absolute', 
+                  top: '8px', 
+                  left: '8px', 
+                  bgcolor: 'primary.solidBg',
+                  color: 'white',
+                  py: 0.5,
+                  px: 1,
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  zIndex: 10
                 }}
-              />
+              >
+                Nuvarande version
+              </Box>
+              
+              {localPdfUrl ? (
+                <Box sx={{ 
+                  position: 'relative', 
+                  height: '100%', 
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <iframe
+                    ref={iframeRef}
+                    src={localPdfUrl}
+                    style={{
+                      width: `${zoomLevel}%`,
+                      height: `${zoomLevel}%`,
+                      border: 'none',
+                      boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+                    }}
+                    title="PDF Dokument"
+                  />
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    width: '100%',
+                  }}
+                >
+                  <CircularProgress />
+                </Box>
+              )}
             </Box>
-          )}
-        </Box>
-        
-        {/* Sidebar */}
-        <Sheet 
-          variant="outlined"
-          sx={{
-            width: 320,
-            display: 'flex',
-            flexDirection: 'column',
-            borderTop: 'none',
-            borderBottom: 'none',
-            borderRight: 'none',
-          }}
-        >
-          {/* Tabs */}
-          <Tabs 
-            value={activeTab}
-            onChange={(_, value) => setActiveTab(value as string)}
-          >
-            <TabList sx={{ borderRadius: 0 }}>
-              <Tab value="detaljer">Detaljer</Tab>
-              <Tab value="historik">Historik</Tab>
-              <Tab value="kommentar">Kommentar</Tab>
-            </TabList>
-          </Tabs>
-          
-          {/* Tab content */}
-          <Box sx={{ p: 2, overflow: 'auto', flex: 1 }}>
-            {activeTab === 'detaljer' && (
-              <>
-                <Typography level="title-md" sx={{ mb: 2 }}>PDF Anteckning</Typography>
-                
-                <Box sx={{ mb: 4 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Skapad av
+            
+            {/* Right sidebar */}
+            <Sheet 
+              sx={{ 
+                width: '300px',
+                height: '100%',
+                overflow: 'auto',
+                borderLeft: '1px solid',
+                borderColor: 'divider',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <Tabs 
+                value={activeTab} 
+                onChange={(_, value) => setActiveTab(value as number)}
+                sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+              >
+                <TabList>
+                  <Tab>Detaljer</Tab>
+                  <Tab>Historik</Tab>
+                  <Tab>Kommentar</Tab>
+                </TabList>
+              </Tabs>
+              
+              <Box sx={{ p: 2, overflowY: 'auto', flex: 1 }}>
+                <TabPanel value={0} sx={{ p: 0 }}>
+                  <Typography level="title-md" sx={{ mb: 2 }}>
+                    PDF Anteckning
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar 
-                      size="sm" 
-                      sx={{ bgcolor: 'primary.400' }}
-                    />
-                    <Box>
-                      <Typography level="body-sm">user@example.com</Typography>
-                      <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
+                  
+                  <Box sx={{ mb: 3 }}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 1 }}>
+                      Skapad av
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box 
+                        sx={{ 
+                          width: 24, 
+                          height: 24, 
+                          borderRadius: '50%', 
+                          bgcolor: 'primary.500' 
+                        }} 
+                      />
+                      <Typography>user@example.com</Typography>
+                      <Typography level="body-sm" sx={{ ml: 'auto', color: 'text.secondary' }}>
                         2025-05-16
                       </Typography>
                     </Box>
                   </Box>
-                </Box>
+                  
+                  <Divider />
+                  
+                  <Box sx={{ my: 3 }}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 1 }}>
+                      Deadline
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography>22 maj 2025</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Divider />
+                  
+                  <Box sx={{ my: 3 }}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 1 }}>
+                      Granskningspaket
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography>K - Granskning BH Hus 3-4</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Divider />
+                  
+                  <Box sx={{ my: 3 }}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 1 }}>
+                      Typ
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography>Gransknings kommentar</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Divider />
+                  
+                  <Box sx={{ my: 3 }}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 1 }}>
+                      Aktivitet
+                    </Typography>
+                    <Button
+                      variant="soft"
+                      color="neutral"
+                      fullWidth
+                      sx={{ mt: 1 }}
+                    >
+                      VERSIONER
+                    </Button>
+                    
+                    <Box sx={{ mt: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: '8px' }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography level="body-md">Version 1</Typography>
+                        <Button size="sm" variant="outlined">Visa version</Button>
+                      </Box>
+                      <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                        user@example.com
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TabPanel>
                 
-                <Box sx={{ mb: 4 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Deadline
-                  </Typography>
-                  <Typography level="body-sm">22 maj 2025</Typography>
-                </Box>
+                <TabPanel value={1} sx={{ p: 0 }}>
+                  <Typography>Historik för dokumentet visas här.</Typography>
+                </TabPanel>
                 
-                <Box sx={{ mb: 4 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Granskningspaket
-                  </Typography>
-                  <Typography level="body-sm">K - Granskning BH Hus 3-4</Typography>
-                </Box>
-                
-                <Box sx={{ mb: 4 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Typ
-                  </Typography>
-                  <Typography level="body-sm">Gransknings kommentar</Typography>
-                </Box>
-                
-                <Box sx={{ mb: 4 }}>
-                  <Typography level="body-xs" sx={{ mb: 0.5, color: 'text.secondary' }}>
-                    Aktivitet
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    color="neutral"
-                    fullWidth
-                    sx={{ mt: 1 }}
-                  >
-                    VERSIONER
-                  </Button>
-                </Box>
-              </>
-            )}
-            
-            {activeTab === 'historik' && (
-              <>
-                <Typography level="title-md" sx={{ mb: 2 }}>Versionshistorik</Typography>
-                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                  Ingen versionshistorik tillgänglig för detta dokument.
-                </Typography>
-              </>
-            )}
-            
-            {activeTab === 'kommentar' && (
-              <>
-                <Typography level="title-md" sx={{ mb: 2 }}>Kommentarer</Typography>
-                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                  Inga kommentarer har lagts till än.
-                </Typography>
-              </>
-            )}
+                <TabPanel value={2} sx={{ p: 0 }}>
+                  <Typography>Kommentarer för dokumentet visas här.</Typography>
+                </TabPanel>
+              </Box>
+            </Sheet>
           </Box>
-        </Sheet>
-      </Box>
-    </Box>
+        </ModalDialog>
+      </Modal>
+    </>
   );
 };
 
