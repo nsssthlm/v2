@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid, IconButton, Tooltip } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
-import SimplePDFViewer from '../../components/SimplePDFViewer';
+import ReliablePDFDialog from '../../components/ReliablePDFDialog';
 import { usePDFDialog } from '../../contexts/PDFDialogContext';
 import PDFUploader from '../../components/PDFUploader';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -289,13 +289,14 @@ const FolderPage = () => {
             </Button>
           </Box>
           
-          {/* Använd vår helt nya SimplePDFViewer som öppnar PDFs direkt från API:et */}
+          {/* Använd vår förbättrade ReliablePDFViewer som löser PDF-visningsproblem */}
           {selectedPdf && selectedPdf.url && (
-            <SimplePDFViewer 
+            <ReliablePDFDialog 
               open={!!selectedPdf}
               onClose={() => setSelectedPdf(null)}
               pdfUrl={selectedPdf.url}
               filename={selectedPdf.name}
+              folderId={selectedPdf.folderId}
             />
           )}
         </Box>
