@@ -8,6 +8,41 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def get_all_projects(request):
+    """
+    Hämta alla projekt från databasen.
+    Används för att visa en lista över alla tillgängliga projekt.
+    """
+    try:
+        projects = Project.objects.all().order_by('-created_at')
+        
+        # Formatera projektdata
+        project_list = []
+        for project in projects:
+            # Hantera datum korrekt
+            start_date = project.start_date
+            if not isinstance(start_date, str):
+                start_date = start_date.isoformat()
+                
+            end_date = project.end_date
+            if end_date and not isinstance(end_date, str):
+                end_date = end_date.isoformat()
+                
+            project_list.append({
+                "id": project.id,
+                "name": project.name,
+                "description": project.description,
+                "start_date": start_date,
+                "end_date": end_date,
+                "is_active": project.is_active
+            })
+        
+        return JsonResponse(project_list, safe=False)
+        
+    except Exception as e:
+        logger.exception("Fel vid hämtning av projekt: %s", str(e))
+        return JsonResponse({"error": str(e)}, status=500)
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def create_project(request):

@@ -51,23 +51,47 @@ interface ProjectProviderProps {
 
 // ProjectProvider-komponenten som ger tillgång till kontexten
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
-  // Ladda projekt - använd sessionStorage om det finns sparade projekt
-  const [projects, setProjects] = useState<Project[]>(() => {
-    // Försök ladda projekt från sessionStorage
-    const savedProjects = sessionStorage.getItem('projects');
-    if (savedProjects) {
+  // Ladda projekt från databasen
+  const [projects, setProjects] = useState<Project[]>(defaultProjects);
+  
+  // Hämta alla projekt från databasen vid uppstart
+  useEffect(() => {
+    const fetchAllProjects = async () => {
       try {
-        const parsed = JSON.parse(savedProjects);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+        // Hämta projekt från backend-API via vår custom endpoint
+        const response = await fetch('/api/custom/projects');
+        if (response.ok) {
+          const projectsData = await response.json();
+          if (Array.isArray(projectsData) && projectsData.length > 0) {
+            // Formatera projekten enligt vår Project interface
+            const formattedProjects: Project[] = projectsData.map(p => ({
+              id: p.id.toString(),
+              name: p.name,
+              description: p.description || '',
+              endDate: p.end_date || ''
+            }));
+            
+            console.log('Hämtade projekt från databasen:', formattedProjects);
+            setProjects(formattedProjects);
+            
+            // Även uppdatera currentProject om det behövs
+            if (currentProject && currentProject.id) {
+              const currentInDb = formattedProjects.find(p => p.id === currentProject.id);
+              if (currentInDb) {
+                setCurrentProjectState(currentInDb);
+              }
+            }
+          }
+        } else {
+          console.error('Kunde inte hämta projekt från API:', response.statusText);
         }
-      } catch (e) {
-        console.error('Kunde inte tolka sparade projekt', e);
+      } catch (error) {
+        console.error('Fel vid hämtning av projekt:', error);
       }
-    }
-    // Fallback till defaultProjects om inget finns i sessionStorage
-    return defaultProjects;
-  });
+    };
+    
+    fetchAllProjects();
+  }, []);
 
   // Ladda aktuellt projekt från sessionStorage om det finns och är ett giltigt projekt
   const [currentProject, setCurrentProjectState] = useState<Project>(() => {
@@ -123,9 +147,6 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     // Lägg till projektet i listan
     const updatedProjects = [...projects, project];
     setProjects(updatedProjects);
-    
-    // Spara projekten i sessionStorage så de behålls vid siduppdatering
-    sessionStorage.setItem('projects', JSON.stringify(updatedProjects));
     
     // Byt automatiskt till det nya projektet
     setCurrentProject(project);
