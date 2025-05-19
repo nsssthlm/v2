@@ -45,11 +45,14 @@ const EmbeddedPDFViewer = ({
     
     // Hantera särskilt API-URLs för direktnedladdning som kommer från vår backend
     if (pdfUrl.includes('/api/files/web/')) {
-      const pathParts = pdfUrl.split('/');
-      const filename = pathParts[pathParts.length - 1];
+      // För vår specifika API-struktur, hämta direkt från API-endpunkten istället för media-mappen
+      processedUrl = pdfUrl;
       
-      // Skapa en URL som går direkt till media-mappen med samma filnamn
-      processedUrl = `${serverBaseUrl}/media/project_files/2025/05/19/${filename}`;
+      // För utveckling på Replit, säkerställ att vi använder rätt domän och protokoll
+      if (window.location.hostname.includes('replit')) {
+        const absoluteUrl = new URL(pdfUrl, window.location.origin);
+        processedUrl = absoluteUrl.toString();
+      }
     }
     
     console.log("Bearbetad PDF URL:", processedUrl);

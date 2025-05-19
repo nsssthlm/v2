@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -316,12 +316,31 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                 </Box>
                 
                 {/* Visa PDF:en med vår nya komponent */}
-                <EmbeddedPDFViewer
-                  pdfUrl={pdfUrl}
-                  filename={filename}
-                  height="100%"
-                  width="100%"
-                />
+                <Box 
+                  sx={{ 
+                    width: '100%', 
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    position: 'relative'
+                  }}
+                >
+                  <object
+                    data={pdfUrl}
+                    type="application/pdf"
+                    width="100%"
+                    height="100%"
+                    style={{
+                      border: 'none',
+                      flexGrow: 1,
+                      minHeight: '500px',
+                      background: '#fff'
+                    }}
+                  >
+                    <p>Din webbläsare kan inte visa PDF-filer direkt. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen</a></p>
+                  </object>
+                </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
                 <Box
