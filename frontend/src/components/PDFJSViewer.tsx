@@ -64,15 +64,20 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
 
   // Bearbeta URL till ett format som kan visas med PDF.js
   const processedUrl = React.useMemo(() => {
-    // Om ingen URL, returnera tom sträng
     if (!pdfUrl) return '';
 
     // Få basens URL för proxys och direkta anrop
-    const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/3000`;
+    const baseUrl = `${window.location.protocol}//${window.location.host}/proxy/8001`;
     let finalUrl = pdfUrl;
 
     // Logga original-URL:en för diagnostik
     console.log('PDF original URL:', pdfUrl);
+    
+    // Om URL:en redan innehåller vår proxy-bas, använd den direkt
+    if (pdfUrl.includes('/proxy/8001')) {
+      console.log('Använder redan proxad URL:', pdfUrl);
+      return pdfUrl;
+    }
 
     // Ersätt alla lokala URL:er med proxy URL som kan nås från klienten
     if (pdfUrl.includes('0.0.0.0:8001')) {
@@ -225,6 +230,14 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
 
         if (!fetchResponse.ok) {
           console.warn(`Servern svarade med ${fetchResponse.status} (${fetchResponse.statusText}) för URL: ${url}`);
+          if (fetchResponse.status === 404) {
+            // För 404, försök med direkt URL om vi använder proxy
+            if (url.includes('/proxy/8001')) {
+              const directUrl = url.replace('/proxy/8001', '');
+              console.log('Provar direkt URL:', directUrl);
+              return await fetchPdf(directUrl);
+            }
+          }
           throw new Error(`Servern svarade med ${fetchResponse.status}`);
         }
 
