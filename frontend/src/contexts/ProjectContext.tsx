@@ -53,7 +53,7 @@ interface ProjectProviderProps {
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
   // Ladda projekt från databasen
   const [projects, setProjects] = useState<Project[]>(defaultProjects);
-  
+
   // Hämta alla projekt från databasen vid uppstart
   useEffect(() => {
     const fetchAllProjects = async () => {
@@ -71,10 +71,10 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
               description: p.description || '',
               endDate: p.end_date || ''
             }));
-            
+
             console.log('Hämtade projekt från databasen:', formattedProjects);
             setProjects(formattedProjects);
-            
+
             // Uppdatera currentProject baserat på selectedProjectId
             const selectedProjectId = sessionStorage.getItem('selectedProjectId');
             if (selectedProjectId) {
@@ -103,7 +103,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         console.error('Fel vid hämtning av projekt:', error);
       }
     };
-    
+
     fetchAllProjects();
   }, []);
 
@@ -111,7 +111,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
   const [currentProject, setCurrentProjectState] = useState<Project>(() => {
     // Kontrollera om det finns ett valt projektid i sessionStorage
     const selectedProjectId = sessionStorage.getItem('selectedProjectId');
-    
+
     if (selectedProjectId) {
       // Försök hitta projektet i vår lista av projekt
       const selectedProject = projects.find(p => p.id === selectedProjectId);
@@ -120,7 +120,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         return selectedProject;
       }
     }
-    
+
     // Annars försök ladda senaste valda projekt
     const savedCurrentProject = sessionStorage.getItem('currentProject');
     if (savedCurrentProject) {
@@ -135,7 +135,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
         console.error('Kunde inte tolka sparat projekt', e);
       }
     }
-    
+
     // Använd första projektet som standard eller senast skapade projektet
     const sortedProjects = [...projects].sort((a, b) => parseInt(b.id) - parseInt(a.id));
     const firstProject = sortedProjects[0] || defaultProjects[0];
@@ -151,16 +151,15 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     setLoading(false);
   }, []);
 
-  // Spara aktuellt projekt till sessionStorage
   const setCurrentProject = (project: Project) => {
+    console.log('Sätter nytt projekt:', project);
     setCurrentProjectState(project);
     sessionStorage.setItem('currentProject', JSON.stringify(project));
-    
+    sessionStorage.setItem('selectedProjectId', project.id);
+
     // När projektet byts, rensa tidigare innehåll och uppdatera URL:en
-    // Detta löser problemet med att innehåll från tidigare projekt visas
     if (window.location.pathname.includes('/folders/')) {
-      // Om vi är inne på en folder-sida, gå tillbaka till startsidan 
-      // efter projektbyte för att undvika gammalt innehåll
+      console.log('Byter projekt, navigerar till start');
       window.location.href = '/';
     }
   };
@@ -170,10 +169,10 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
     // Lägg till projektet i listan
     const updatedProjects = [...projects, project];
     setProjects(updatedProjects);
-    
+
     // Byt automatiskt till det nya projektet
     setCurrentProject(project);
-    
+
     console.log('Nytt projekt tillagt:', project);
   };
 

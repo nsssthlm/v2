@@ -51,7 +51,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
   const containerRef = useRef<HTMLDivElement>(null);
   const [finalUrl, setFinalUrl] = useState<string>('');
   const { currentProject } = useProject(); // Hämta aktuellt projekt från context
-  
+
   // Använd projektID från props om det finns, annars från context
   const activeProjectId = projectId || (currentProject?.id ? parseInt(currentProject.id) : null);
 
@@ -423,6 +423,17 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename, projectId, 
       console.error('Fel vid rendering:', err);
     }
   };
+
+  const { currentProject } = useProject(); // Hämta aktuellt projekt från context
+
+  // Använd projekt-ID för att bygga korrekta URL:er
+  const projectId = currentProject?.id || '1';
+  console.log('Current Project:', {
+    id: currentProject?.id,
+    name: currentProject?.name,
+    description: currentProject?.description
+  });
+  console.log('Aktivt projektId:', projectId);
 
   return (
     <Box 
