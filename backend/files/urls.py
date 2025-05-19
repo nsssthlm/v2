@@ -4,6 +4,7 @@ from . import views
 from . import web_views
 from . import web_api
 from . import upload_api
+from . import api_views
 
 # API router för RESTful endpoints
 router = DefaultRouter()
@@ -28,6 +29,9 @@ urlpatterns = [
     
     # Direktåtkomst till PDF-fil via sökväg i media-katalogen (utan avslutande /)
     path('pdf-media/<path:file_path>', web_api.serve_pdf_file, name='serve_pdf_file'),
+    
+    # Ny förbättrad endpoint för direkt åtkomst till projektfiler (PDF)
+    path('web/<str:project_id>/data/<path:path_info>', api_views.serve_project_file, name='serve_project_file'),
     
     # Webb-routes för mappspecifika sidor
     path('web/', include([
