@@ -41,10 +41,17 @@ urlpatterns = [
 # Registrera PDF API routes
 register_pdf_api_routes(urlpatterns)
 
-# Add static and media URLs - i utvecklingsläge tillåter vi direkt åtkomst till alla filer
+# Flytta media URLs högst upp för att säkerställa att de inte fångas av andra routes
 # Detta är nödvändigt för att PDF-filer ska kunna visas direkt från servern
+# OBS: Dessa måste vara före de andra URL-patterns för att undvika konflikter
+# Lägg till ett nytt media-pattern först i listan
+new_urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Lägg till resten av url-patterns efter media-patterns
+new_urlpatterns.extend(urlpatterns)
+# Ersätt urlpatterns med den nya ordningen
+urlpatterns = new_urlpatterns
+# Lägg till static-url patterns 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Lägg till en dedikerad view för att servera media-filer med korrekt CORS och headers
 from django.http import FileResponse

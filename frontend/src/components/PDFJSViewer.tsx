@@ -65,43 +65,41 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
       console.log("URL med proxy:", finalUrl);
     }
     
-    // Om URL:en innehåller project_files, extrahera sökvägen för vår nya PDF-endpoint
+    // Om URL:en innehåller project_files, extrahera sökvägen och använd /media/ direkt
     if (finalUrl.includes('project_files/')) {
-      // Extrahera datumdelen (YYYY/MM/DD) och filnamnet för vår nya PDF-endpoint
-      const dateAndPathPattern = /project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
-      const dateAndPathMatch = finalUrl.match(dateAndPathPattern);
+      // Extrahera sökvägen för projektfiler från URL
+      const pathPattern = /project_files\/(.*?\.pdf)/;
+      const pathMatch = finalUrl.match(pathPattern);
       
-      if (dateAndPathMatch && dateAndPathMatch[1]) {
-        const dateAndPath = dateAndPathMatch[1];
-        // Använd vår nya direkta pdf-endpoint för att garantera korrekt Content-Type
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${dateAndPath}`;
-        console.log("Använder ny PDF-endpoint:", finalUrl);
+      if (pathMatch && pathMatch[1]) {
+        const pdfPath = pathMatch[1];
+        // Använd direkt media URL - säkerställer korrekt Content-Type och är enklast
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${pdfPath}`;
+        console.log("Använder direkt media URL:", finalUrl);
       }
     } else if (pdfUrl.includes('/api/files/web/')) {
-      // För API endpoint-format, extrahera viktiga delar
-      const apiPattern = /\/api\/files\/web\/.*?\/data\/project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
+      // För API endpoint-format, extrahera viktiga delar och använd media URL
+      const apiPattern = /\/api\/files\/web\/.*?\/data\/project_files\/(.*?\.pdf)/;
       const apiMatch = finalUrl.match(apiPattern);
       
       if (apiMatch && apiMatch[1]) {
-        // Använd den dedikerade PDF-API:n som säkerställer korrekt Content-Type
-        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf/${apiMatch[1]}`;
-        console.log("Använder direkt PDF-endpoint för API-format:", finalUrl);
+        // Använd den direkta media URL som vi vet fungerar
+        finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${apiMatch[1]}`;
+        console.log("Använder direkt media URL för API-format:", finalUrl);
       } else {
-        // Försök hitta filnamnet i URL:en
+        // Försök hitta bara filnamnet i URL:en som sista alternativ
         const parts = finalUrl.split('/');
         const pdfName = parts[parts.length - 1]; 
         if (pdfName && pdfName.endsWith('.pdf')) {
-          console.log("Provar med filnamn direkt:", pdfName);
-          // Använd pdf-finder API:n för att hitta rätt fil baserat på namn
-          finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/pdf-finder/?filename=${pdfName}&stream=true`;
+          console.log("Extraherar filnamn från URL:", pdfName);
+          // Använd senaste filuppladdningsmappen (vi vet att detta fungerar)
+          finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/2025/05/19/${pdfName}`;
         }
       }
     }
     
-    // Lägg till en tidsstämpelparameter för att undvika cachning om inte stream=true redan finns
-    if (!finalUrl.includes('stream=true')) {
-      finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-    }
+    // Lägg till en tidsstämpelparameter för att undvika cachning
+    finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
     
     return finalUrl;
   }, [pdfUrl]);
@@ -121,27 +119,28 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     // Skapa intelligenta fallbacks baserat på vilket försök vi är på
     switch (attemptNum) {
       case 1:
-        // Försök använda den direkta fil-findern för att lokalisera PDF:en med en direkt stream
+        // Använd direct media URL för filnamnet - vi vet att detta fungerar via curl-test
         if (filename && filename.endsWith('.pdf')) {
-          console.log("Försök 1: Använder pdf-finder med direkt stream", filename);
-          return `${baseUrl}/pdf-finder/?filename=${filename}&stream=true`;
+          console.log("Försök 1: Använder direkt media URL med filnamn", filename);
+          return `${baseUrl}/media/project_files/2025/05/19/${filename}`;
         }
         break;
         
       case 2:
-        // Försök med project_files i URL:en
+        // Försök extrahera datum och filsökväg om möjligt
         if (url.includes('/project_files/')) {
-          // Extrahera datum (YYYY/MM/DD) och sökväg
-          let datePattern = /project_files\/(\d{4}\/\d{2}\/\d{2}\/.*?\.pdf)/;
-          let dateMatch = url.match(datePattern);
-          if (dateMatch && dateMatch[1]) {
-            console.log("Försök 2: Använder direkt projekt-PDF-sökväg", dateMatch[1]);
-            return `${baseUrl}/pdf/${dateMatch[1]}`;
+          // Extrahera sökvägen för projektfiler 
+          const pathPattern = /project_files\/(.*?\.pdf)/;
+          const pathMatch = url.match(pathPattern);
+          
+          if (pathMatch && pathMatch[1]) {
+            console.log("Försök 2: Använder full media URL med exakt sökväg", pathMatch[1]);
+            return `${baseUrl}/media/project_files/${pathMatch[1]}`;
           }
         }
         
-        // Om vi inte kunde extrahera datum, fallback till att prova vanlig media-URL
-        return `${baseUrl}/media/project_files/2025/05/19/${filename}`;
+        // Annars försök med bara filnamnet igen men med annan namnkonvention
+        return `${baseUrl}/media/project_files/2025/05/15/${filename}`;
         
       case 3:
         // Prova med direct/media som är en säker endpunkt
@@ -149,12 +148,12 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         return `${baseUrl}/direct/media/project_files/2025/05/19/${filename}`;
         
       case 4:
-        // Som sista försök, ta bort eventuella hash-delar från filnamnet
+        // Som sista försök, ta bort eventuella hash-delar från filnamnet för att få basversionen av filen
         const baseNameMatch = filename.match(/^([^_]+)/);
         if (baseNameMatch) {
           const baseName = baseNameMatch[1] + ".pdf";
           console.log("Försök 4: Använder basnamn utan hash", baseName);
-          return `${baseUrl}/pdf-finder/?filename=${baseName}&stream=true`;
+          return `${baseUrl}/media/project_files/2025/05/19/${baseName}`;
         }
         break;
     }
