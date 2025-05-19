@@ -17,6 +17,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CloseIcon from '@mui/icons-material/Close';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 
 interface ReliablePDFViewerProps {
   fileId?: string | number;
@@ -44,6 +46,7 @@ const ReliablePDFViewer = ({
   const [error, setError] = useState<string | null>(null);
   const [finalUrl, setFinalUrl] = useState<string>('');
   const [key, setKey] = useState(Date.now()); // För att tvinga omrendering
+  const [fallbackMode, setFallbackMode] = useState(false); // Växla till alternativ renderingsmetod
 
   // Bearbeta URL:en för att maximera chansen att visa PDF:en korrekt
   useEffect(() => {
