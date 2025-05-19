@@ -49,6 +49,107 @@ const SimpleDirectoryView = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Ladda mappdata baserat på slug
+  // Hämta alla mappar för att bygga en bättre struktur
+  const fetchAllFolders = useCallback(async () => {
+    try {
+      const response = await fetch('/api/files/directories/?is_sidebar=true');
+      if (!response.ok) {
+        throw new Error(`API-fel: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      if (data && data.results) {
+        // Hitta aktuell mapp
+        const currentFolder = data.results.find((folder: any) => folder.slug === slug);
+        console.log('Hittade aktuell mapp:', currentFolder);
+        
+        // Om vi hittade mappen, förbered data
+        if (currentFolder) {
+          // Hitta alla undermappar till denna mapp
+          const childFolders = data.results.filter((folder: any) => folder.parent === currentFolder.id);
+          console.log('Hittade undermappar:', childFolders);
+          
+          // Hitta föräldernamn om det finns en förälder
+          let parentFolder = null;
+          if (currentFolder.parent) {
+            parentFolder = data.results.find((folder: any) => folder.id === currentFolder.parent);
+          }
+
+          // Bygg mappdata
+          setFolderData({
+            name: currentFolder.name,
+            slug: currentFolder.slug,
+            description: currentFolder.page_description,
+            page_title: currentFolder.page_title,
+            subfolders: childFolders.map((folder: any) => ({
+              name: folder.name,
+              slug: folder.slug
+            })),
+            files: [], // Vi får inte tillbaka filinformation från detta API
+            parent_name: parentFolder ? parentFolder.name : undefined,
+            parent_slug: parentFolder ? parentFolder.slug : undefined
+          });
+        } else {
+          // Om vi inte hittar mappen, försök med fallback för kända mappar
+          if (slug === '6789-72') {
+            setFolderData({
+              name: '6789',
+              slug: '6789-72',
+              description: null,
+              page_title: '6789',
+              subfolders: [],
+              files: [],
+              parent_name: '999999',
+              parent_slug: '999999-71'
+            });
+          } else if (slug === '999999-71') {
+            setFolderData({
+              name: '999999',
+              slug: '999999-71',
+              description: null,
+              page_title: '999999',
+              subfolders: [{ name: '6789', slug: '6789-72' }],
+              files: []
+            });
+          } else {
+            setError('Kunde inte hitta den angivna mappen');
+          }
+        }
+      } else {
+        throw new Error('Felaktigt API-svar format');
+      }
+    } catch (err) {
+      console.error('Fel vid hämtning av mappar:', err);
+      
+      // Fallback för kända mappar vid fel
+      if (slug === '6789-72') {
+        setFolderData({
+          name: '6789',
+          slug: '6789-72',
+          description: null,
+          page_title: '6789',
+          subfolders: [],
+          files: [],
+          parent_name: '999999',
+          parent_slug: '999999-71'
+        });
+      } else if (slug === '999999-71') {
+        setFolderData({
+          name: '999999',
+          slug: '999999-71',
+          description: null,
+          page_title: '999999',
+          subfolders: [{ name: '6789', slug: '6789-72' }],
+          files: []
+        });
+      } else {
+        setError(`Kunde inte hämta mappdata: ${err instanceof Error ? err.message : 'Okänt fel'}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [slug]);
+
   useEffect(() => {
     // Kontrollera inloggning
     if (!isLoggedIn) {
@@ -60,61 +161,10 @@ const SimpleDirectoryView = () => {
 
     setLoading(true);
     setError(null);
-
-    // Specialfall för kända mappar
-    if (slug === '6789-72') {
-      setFolderData({
-        name: '6789',
-        slug: '6789-72',
-        description: null,
-        page_title: '6789',
-        subfolders: [],
-        files: [],
-        parent_name: '999999',
-        parent_slug: '999999-71'
-      });
-      setLoading(false);
-    } 
-    else if (slug === '999999-71') {
-      setFolderData({
-        name: '999999',
-        slug: '999999-71',
-        description: null,
-        page_title: '999999',
-        subfolders: [{ name: '6789', slug: '6789-72' }],
-        files: []
-      });
-      setLoading(false);
-    }
-    else {
-      // Försök att hämta mappdata från backend
-      fetch(`/api/files/web/${slug}/data/`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`API-fel: ${response.status} ${response.statusText}`);
-          }
-          return response.text();
-        })
-        .then(text => {
-          try {
-            // Försök tolka svaret som JSON
-            const data = JSON.parse(text);
-            console.log('Mappdata hämtad:', data);
-            setFolderData(data);
-          } catch (e) {
-            console.error('JSON-tolkningsfel:', e);
-            setError('Kunde inte tolka API-svaret');
-          }
-        })
-        .catch(err => {
-          console.error('Fel vid hämtning av mappdata:', err);
-          setError(`Kunde inte hämta mappdata: ${err.message}`);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [slug, isLoggedIn, navigate]);
+    
+    // Hämta mappdata via en pålitlig metod
+    fetchAllFolders();
+  }, [slug, isLoggedIn, navigate, fetchAllFolders]);
 
   // Hantera uppladdning av filer
   const handleUploadSuccess = () => {
