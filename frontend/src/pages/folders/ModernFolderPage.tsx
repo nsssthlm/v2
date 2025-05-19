@@ -186,23 +186,19 @@ const ModernFolderPage = () => {
         setError(null);
         setLoading(true);
         
-        // Direkthämtning av data med förbättrad felhantering
-        axios.get(`${API_BASE_URL}/files/web/${slugWithoutQueryParams}/data/`, {
+        // Anropa backend API direkt utan att gå via frontend-servern
+        // Använd absolut URL för att undvika routingproblem
+        axios.get(`http://${window.location.hostname}:8001/api/files/web/${slugWithoutQueryParams}/data/`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('jwt_token') || ''}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
-          // Viktigt: Validera att svaret är i rätt format och inte en HTML-sida
+          // Validera att svaret är i rätt format
           validateStatus: status => status === 200,
           transformResponse: [(data) => {
-            // Om vi får HTML tillbaka istället för JSON, hantera det som ett fel
-            if (typeof data === 'string' && data.trim().startsWith('<!DOCTYPE html>')) {
-              console.error("Fel API-svar: Fick HTML istället för JSON");
-              throw new Error("Felaktigt API-svar: fick HTML istället för JSON");
-            }
-            
             try {
-              // Parse JSON-svaret
+              console.log("Rått API-svar från direktanrop:", data.substring(0, 100) + "...");
               return JSON.parse(data);
             } catch (e) {
               console.error("Kunde inte tolka API-svaret som JSON:", data.substring(0, 200) + "...");
