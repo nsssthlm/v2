@@ -15,43 +15,74 @@ class DirectoryViewSet(viewsets.ModelViewSet):
     
     # Förbättrad destroy-metod för att rekursivt ta bort mappar och filer
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        slug_to_delete = instance.slug  # Spara slug för att kunna visa i svaret
-        
-        # Hitta alla undermappar och filer direkt i databasen
-        def get_all_child_directories(directory_id):
-            child_dirs = Directory.objects.filter(parent_id=directory_id).values_list('id', flat=True)
-            all_dirs = list(child_dirs)
+        try:
+            # Hämta mappen som ska raderas
+            instance = self.get_object()
+            directory_id = instance.id
+            slug_to_delete = instance.slug  # Spara slug för att kunna visa i svaret
             
-            for child_id in child_dirs:
-                all_dirs.extend(get_all_child_directories(child_id))
+            # Debuginfo för att se vad vi raderar
+            print(f"Raderar mapp: {directory_id} ({slug_to_delete})")
+            
+            # Hitta alla undermappar rekursivt
+            def get_all_child_directories(parent_id):
+                child_dirs = Directory.objects.filter(parent_id=parent_id).values_list('id', flat=True)
+                all_dirs = list(child_dirs)
                 
-            return all_dirs
-        
-        # Hitta alla undermappar
-        child_directory_ids = get_all_child_directories(instance.id)
-        
-        # Radera alla filer i dessa mappar 
-        from .models import File
-        deleted_files = 0
-        for dir_id in child_directory_ids + [instance.id]:
-            deleted_files += File.objects.filter(directory_id=dir_id).delete()[0]
-        
-        # Radera alla undermappar
-        deleted_directories = Directory.objects.filter(id__in=child_directory_ids).delete()[0]
-        
-        # Radera slutligen huvudmappen
-        instance.delete()
-        
-        # Returnera detaljerad information om raderingen
-        return Response({
-            "message": f"Mappen '{slug_to_delete}' och allt dess innehåll har raderats",
-            "details": {
-                "deleted_directories": deleted_directories + 1,  # +1 för huvudmappen
-                "deleted_files": deleted_files,
-                "slug": slug_to_delete
-            }
-        }, status=status.HTTP_200_OK)
+                for child_id in child_dirs:
+                    child_subdirs = get_all_child_directories(child_id)
+                    if child_subdirs:
+                        all_dirs.extend(child_subdirs)
+                        
+                return all_dirs
+            
+            # Hitta alla undermappar
+            child_directory_ids = get_all_child_directories(directory_id)
+            print(f"Undermappar som ska raderas: {child_directory_ids}")
+            
+            # Radera alla filer i dessa mappar 
+            from .models import File
+            deleted_files = 0
+            
+            # Ta bort filer i huvudmappen
+            main_folder_files = File.objects.filter(directory_id=directory_id).delete()
+            deleted_files += main_folder_files[0] if main_folder_files[0] else 0
+            
+            # Ta bort filer i undermappar
+            for dir_id in child_directory_ids:
+                files_deleted = File.objects.filter(directory_id=dir_id).delete()
+                deleted_files += files_deleted[0] if files_deleted[0] else 0
+            
+            # Viktigt: Se till att avmarkera is_sidebar_item flaggan för alla mappar före radering
+            # Detta löser problemet med att raderade mappar fortfarande visas i sidomenyn
+            Directory.objects.filter(id=directory_id).update(is_sidebar_item=False)
+            if child_directory_ids:
+                Directory.objects.filter(id__in=child_directory_ids).update(is_sidebar_item=False)
+            
+            # Radera alla undermappar
+            deleted_directories = 0
+            if child_directory_ids:
+                delete_result = Directory.objects.filter(id__in=child_directory_ids).delete()
+                deleted_directories = delete_result[0] if delete_result[0] else 0
+            
+            # Radera slutligen huvudmappen
+            instance.delete()
+            
+            # Returnera detaljerad information om raderingen
+            return Response({
+                "message": f"Mappen '{slug_to_delete}' och allt dess innehåll har raderats",
+                "details": {
+                    "deleted_directories": deleted_directories + 1,  # +1 för huvudmappen
+                    "deleted_files": deleted_files,
+                    "slug": slug_to_delete,
+                    "id": directory_id
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            # Om något går fel, logga felet och returnera felmeddelande
+            print(f"Fel vid radering av mapp: {str(e)}")
+            return Response({"error": f"Kunde inte radera mappen: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def get_permissions(self):
         """
