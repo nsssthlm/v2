@@ -83,27 +83,38 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
     return finalUrl;
   }, [pdfUrl]);
 
-  // Funktion för att skapa en alternativ URL om den första misslyckas
-  const createAlternativeUrl = (url: string): string => {
-    // Om URL:en innehåller en specifik filnamnsstruktur, skapa alternativa URL:er utan hash-delen
+  // Funktion för att skapa alternativa URL:er om den ursprungliga misslyckas
+  const createAlternativeUrl = (url: string, attemptNum: number): string => {
+    // Om URL:en innehåller projektspecifika delar, skapa alternativa URL:er
     if (url.includes('project_files/') && url.includes('.pdf')) {
-      const parts = url.split('/');
-      const filename = parts[parts.length - 1];
-      
       // Plocka bort timestamp-parametern om den finns
       const cleanUrl = url.split('?')[0];
       
-      // Matcha grundläggande filnamn utan hash (t.ex. BEAst-PDF-Guidelines-2 från BEAst-PDF-Guidelines-2_1r4W7o4.0_1.pdf)
-      const baseNameMatch = filename.match(/^([^_]+)/);
+      // Dela upp URL:en
+      const urlParts = cleanUrl.split('/');
+      const filename = urlParts[urlParts.length - 1];
       
-      if (baseNameMatch) {
-        const baseName = baseNameMatch[1];
-        // Ersätt filnamnet i sökvägen och returnera en URL direkt till /media/ istället för api-endpointen
-        const directory = cleanUrl.substring(0, cleanUrl.lastIndexOf('/'));
-        const directoryParts = directory.split('/');
-        const date = directoryParts.slice(-3).join('/'); // YYYY/MM/DD
-        
-        return `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${date}/${baseName}.pdf`;
+      // Extrahera datum (YYYY/MM/DD) och sökväg för lättare hantering
+      let datePattern = /project_files\/(\d{4}\/\d{2}\/\d{2})\//;
+      let dateMatch = url.match(datePattern);
+      let datePath = dateMatch ? dateMatch[1] : '2025/05/19'; // Standard om datum saknas
+      
+      // Baserat på vilket försök vi är på, generera olika URL-format
+      if (attemptNum === 1) {
+        // Direkt media URL med samma filnamn
+        return `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${datePath}/${filename}`;
+      } 
+      else if (attemptNum === 2) {
+        // Försök med basnamnet utan hash, för när filnamnet kan ha fått annan hash
+        const baseNameMatch = filename.match(/^([^_]+)/);
+        if (baseNameMatch) {
+          const baseName = baseNameMatch[1];
+          return `${window.location.protocol}//${window.location.host}/proxy/3000/media/project_files/${datePath}/${baseName}.pdf`;
+        }
+      }
+      else if (attemptNum === 3) {
+        // Som en sista utväg, prova backend direkt utan proxy
+        return `http://0.0.0.0:8001/media/project_files/${datePath}/${filename}`;
       }
     }
     return url;
@@ -113,35 +124,40 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
   useEffect(() => {
     let isMounted = true;
     let attemptCount = 0;
-    const maxAttempts = 3;
+    const maxAttempts = 4; // Ökat antal försök 
     
-    const fetchPdf = async (url: string) => {
+    const fetchPdf = async (url: string, alternativeAttempt = false) => {
       if (!isMounted || attemptCount >= maxAttempts) return;
       
       attemptCount++;
+      
       try {
-        setIsLoading(true);
-        
-        if (attemptCount > 1) {
-          console.log(`Försök ${attemptCount}/${maxAttempts} med alternativ URL:`, url);
+        if (attemptCount === 1) {
+          setIsLoading(true);
+          setError(null);
+          console.log('Första försök att hämta PDF-data från URL:', url);
         } else {
-          console.log('Hämtar PDF-data från URL:', url);
+          console.log(`Försök ${attemptCount}/${maxAttempts}: ${alternativeAttempt ? 'Alternativ' : 'Direkt'} URL:`, url);
         }
         
-        // Använda fetch API istället för axios för bättre hantering av binärfiler
+        // Använd fetch API för bättre hantering av binärfiler
         const fetchResponse = await fetch(url, {
           method: 'GET',
           headers: {
             'Accept': 'application/pdf',
-          }
+          },
+          // Undvik cache för säkerhetsskull
+          cache: 'no-store'
         });
         
         if (!fetchResponse.ok) {
-          console.warn(`Servern svarade med ${fetchResponse.status}: ${fetchResponse.statusText}`);
+          console.warn(`Servern svarade med ${fetchResponse.status} (${fetchResponse.statusText}) för URL: ${url}`);
           throw new Error(`Servern svarade med ${fetchResponse.status}`);
         }
         
         const contentType = fetchResponse.headers.get('content-type');
+        console.log(`Mottagen Content-Type: ${contentType} för URL: ${url}`);
+        
         if (!contentType?.includes('application/pdf')) {
           console.warn('Servern returnerade oväntad Content-Type:', contentType);
         }
@@ -155,30 +171,34 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({ pdfUrl, filename }) => {
         
         // Kontrollera om vi fick PDF-data
         if (isPdfArrayBuffer(buffer)) {
-          console.log(`PDF hämtad framgångsrikt, storlek: ${buffer.byteLength} bytes`);
+          console.log(`PDF hämtad framgångsrikt, storlek: ${buffer.byteLength} bytes från URL: ${url}`);
           if (isMounted) {
             setPdfBytes(buffer);
           }
         } else {
+          console.error('Servern returnerade data som inte är PDF-format');
           throw new Error('Servern returnerade inte giltig PDF-data');
         }
       } catch (err) {
         console.error(`Fel vid hämtning av PDF (försök ${attemptCount}/${maxAttempts}):`, err);
         
         if (attemptCount < maxAttempts) {
-          // Prova med ett alternativt URL-format
-          if (attemptCount === 1) {
-            // Prova med URL utan timestamp
-            const urlWithoutTimestamp = url.split('?')[0];
-            fetchPdf(urlWithoutTimestamp);
-          } else if (attemptCount === 2) {
-            // Prova med direkt media-URL
-            const alternativeUrl = createAlternativeUrl(url);
-            fetchPdf(alternativeUrl);
+          // Använd vår smarta generering av alternativa URL:er baserat på vilket försök vi är på
+          const alternativeUrl = createAlternativeUrl(processedUrl, attemptCount);
+          
+          // Om vi genererade en ny URL, prova den
+          if (alternativeUrl !== url) {
+            console.log(`Provar alternativ URL (${attemptCount}):`, alternativeUrl);
+            fetchPdf(alternativeUrl, true);
+          } else {
+            // Annars prova utan parametrar som sista utväg
+            const cleanUrl = url.split('?')[0];
+            console.log(`Provar rengjord URL utan parametrar:`, cleanUrl);
+            fetchPdf(cleanUrl, true);
           }
         } else {
           if (isMounted) {
-            setError(`Kunde inte ladda PDF: Försökte ${maxAttempts} gånger men misslyckades. Försök öppna i ny flik.`);
+            setError(`Kunde inte ladda PDF: Försökte ${maxAttempts} gånger med olika URL-format men misslyckades. Försök öppna i ny flik.`);
             setIsLoading(false);
           }
         }
