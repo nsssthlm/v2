@@ -1,0 +1,152 @@
+Öppnar PDF: http://0.0.0.0:8001/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf BEAst-PDF-Guidelines-2.0 (1)
+FolderPageNew.tsx:287 Använda direkt PDF URL via Replit proxy
+FolderPageNew.tsx:290 Använder final PDF URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:40 Försöker visa PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:40 Försöker visa PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:60 Försöker hämta PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+PDFJSViewer.tsx:46 PDF URL direkt från media: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:60 Försöker hämta PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+PDFJSViewer.tsx:46 PDF URL direkt från media: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+PDFJSViewer.tsx:26 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:34 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:40 Försöker visa PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:40 Försöker visa PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:60 Försöker hämta PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:71 Fel innehållstyp: text/html från /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+fetchPdf @ StraightPDFViewer.tsx:71
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this warning
+StraightPDFViewer.tsx:60 Försöker hämta PDF från: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:71 Fel innehållstyp: text/html från /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+fetchPdf @ StraightPDFViewer.tsx:71
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=dc9a4f35:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=dc9a4f35:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=dc9a4f35:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this warning
+StraightPDFViewer.tsx:60 Försöker hämta PDF från: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:71 Fel innehållstyp: text/html från https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+fetchPdf @ StraightPDFViewer.tsx:71
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this warning
+StraightPDFViewer.tsx:88 Fel vid hämtning av PDF: Error: Kunde inte hämta PDF-filen från någon av de försökta URL:erna
+    at fetchPdf (StraightPDFViewer.tsx:85:17)
+fetchPdf @ StraightPDFViewer.tsx:88
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this error
+StraightPDFViewer.tsx:40 Försöker visa PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:40 Försöker visa PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:71 Fel innehållstyp: text/html från /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+fetchPdf @ StraightPDFViewer.tsx:71
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:19328
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this warning
+StraightPDFViewer.tsx:60 Försöker hämta PDF från: /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+StraightPDFViewer.tsx:71 Fel innehållstyp: text/html från https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+fetchPdf @ StraightPDFViewer.tsx:71
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=dc9a4f35:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=dc9a4f35:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=dc9a4f35:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this warning
+StraightPDFViewer.tsx:88 Fel vid hämtning av PDF: Error: Kunde inte hämta PDF-filen från någon av de försökta URL:erna
+    at fetchPdf (StraightPDFViewer.tsx:85:17)
+fetchPdf @ StraightPDFViewer.tsx:88
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+invokePassiveEffectMountInDEV @ chunk-276SZO74.js?v=dc9a4f35:18324
+invokeEffectsInDev @ chunk-276SZO74.js?v=dc9a4f35:19701
+commitDoubleInvokeEffectsInDEV @ chunk-276SZO74.js?v=dc9a4f35:19686
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19503
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this error
+StraightPDFViewer.tsx:71 Fel innehållstyp: text/html från /media/project_files/2025/05/19/BEAst-PDF-Guidelines-2_uU4khiQ.0_1.pdf
+fetchPdf @ StraightPDFViewer.tsx:71
+await in fetchPdf
+(anonymous) @ StraightPDFViewer.tsx:94
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:19328
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this warning
+StraightPDFViewer.tsx:88 Fel vid hämtning av PDF: Error: Kunde inte hämta PDF-filen från någon av de försökta URL:erna
+    at fetchPdf (StraightPDFViewer.tsx:85:17)
