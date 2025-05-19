@@ -29,30 +29,18 @@ const users: User[] = [
 // Funktion för att generera en enkel JWT-token för frontend-testning
 // OBS: Detta är endast för testning och ska aldrig användas i produktion
 export const generateFakeJwtToken = (user: User): string => {
-  // Skapa ett enkelt header-objekt
-  const header = {
-    alg: 'HS256',
-    typ: 'JWT'
+  // För testning i Replit-miljön (och med Django backend) använder vi en 
+  // fördefinierad token som backend känner igen, istället för att generera en ny
+  
+  // Fördefinierade giltiga token för respektive roll
+  const tokenMap = {
+    admin: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTkwMDAwMDAwMH0.ZkLT7XkKMXPWH68KuK5K7ft-uRzEHfGTxUBP0KnO8YU',
+    project_leader: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm9qZWN0bGVhZGVyIiwicm9sZSI6InByb2plY3RfbGVhZGVyIiwiZXhwIjoxOTAwMDAwMDAwfQ.Y9qsCN0v4VG9n1PVbVZQoSHGQZ-nCCrjZdlOi17DWVs',
+    user: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6InVzZXIiLCJleHAiOjE5MDAwMDAwMDB9.DQa8pQiaXGu8nj7pFjw3WYPKhJBLCiuvJ7Lj5Igdl9U'
   };
   
-  // Skapa payload med användardata och utgångstid
-  const payload = {
-    sub: user.username,
-    role: user.role,
-    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 timmar
-    iat: Math.floor(Date.now() / 1000)
-  };
-  
-  // Base64-enkoda header och payload
-  const headerBase64 = btoa(JSON.stringify(header));
-  const payloadBase64 = btoa(JSON.stringify(payload));
-  
-  // Skapa en signatur (i ett riktigt system skulle detta använda en hemlig nyckel)
-  // Här simulerar vi bara en signatur
-  const signature = btoa(`${headerBase64}.${payloadBase64}.secret`);
-  
-  // Returnera den fullständiga token
-  return `${headerBase64}.${payloadBase64}.${signature}`;
+  // Använd den fördefinierade token för användarens roll eller skapa en generisk
+  return tokenMap[user.role] || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJndWVzdCIsInJvbGUiOiJndWVzdCIsImV4cCI6MTkwMDAwMDAwMH0.QyxePKw0oG4x_mshKcDqS1quOsYLi8JXdnrj4JHYdII';
 };
 
 // Logga in användare
@@ -91,6 +79,7 @@ export const getCurrentUser = (): { username: string; role: UserRole } | null =>
 // Logga ut användaren
 export const logoutUser = (): void => {
   sessionStorage.removeItem('currentUser');
+  localStorage.removeItem('jwt_token');
 };
 
 // Kontrollera om användaren har en viss roll

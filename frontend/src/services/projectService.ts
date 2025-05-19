@@ -7,7 +7,7 @@ export interface ProjectInput {
   name: string;
   description: string;
   start_date: string;
-  end_date?: string;
+  end_date?: string; // Notera att detta är valfritt, så det kan vara undefined
 }
 
 /**
