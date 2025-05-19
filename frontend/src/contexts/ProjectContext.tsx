@@ -54,50 +54,41 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
   // Ladda projekt från databasen
   const [projects, setProjects] = useState<Project[]>(defaultProjects);
 
-  // Hämta alla projekt från databasen vid uppstart
+  // Hämta alla projekt från databasen vid uppstart med förbättrad felhantering
   useEffect(() => {
     const fetchAllProjects = async () => {
       try {
-        // Hämta projekt från backend-API via vår custom endpoint
+        // Hämta projekt från backend-API via vår förbättrade projektservice
         console.log('Försöker hämta projekt från databasen...');
-        const response = await fetch('/api/custom/projects');
-        if (response.ok) {
-          const projectsData = await response.json();
-          if (Array.isArray(projectsData) && projectsData.length > 0) {
-            // Formatera projekten enligt vår Project interface
-            const formattedProjects: Project[] = projectsData.map(p => ({
-              id: p.id.toString(),
-              name: p.name,
-              description: p.description || '',
-              endDate: p.end_date || ''
-            }));
+        const projectsData = await projectService.getAllProjects();
+        
+        if (projectsData && projectsData.length > 0) {
+          console.log('Hämtade projekt från databasen:', projectsData);
+          setProjects(projectsData);
 
-            console.log('Hämtade projekt från databasen:', formattedProjects);
-            setProjects(formattedProjects);
-
-            // Uppdatera currentProject baserat på selectedProjectId
-            const selectedProjectId = sessionStorage.getItem('selectedProjectId');
-            if (selectedProjectId) {
-              const selectedProject = formattedProjects.find(p => p.id === selectedProjectId);
-              if (selectedProject) {
-                console.log('Sätter aktivt projekt till:', selectedProject);
-                setCurrentProjectState(selectedProject);
-              }
-            } 
-            // Annars behåll nuvarande projekt om det finns i listan
-            else if (currentProject && currentProject.id) {
-              const currentInDb = formattedProjects.find(p => p.id === currentProject.id);
-              if (currentInDb) {
-                setCurrentProjectState(currentInDb);
-              } else {
-                // Fallback till senast skapade projektet om nuvarande inte hittades
-                const latestProject = [...formattedProjects].sort((a, b) => parseInt(b.id) - parseInt(a.id))[0];
-                setCurrentProjectState(latestProject);
-              }
+          // Uppdatera currentProject baserat på selectedProjectId
+          const selectedProjectId = sessionStorage.getItem('selectedProjectId');
+          if (selectedProjectId) {
+            const selectedProject = projectsData.find(p => p.id === selectedProjectId);
+            if (selectedProject) {
+              console.log('Sätter aktivt projekt till:', selectedProject);
+              setCurrentProjectState(selectedProject);
+            }
+          } 
+          // Annars behåll nuvarande projekt om det finns i listan
+          else if (currentProject && currentProject.id) {
+            const currentInDb = projectsData.find(p => p.id === currentProject.id);
+            if (currentInDb) {
+              setCurrentProjectState(currentInDb);
+            } else {
+              // Fallback till senast skapade projektet om nuvarande inte hittades
+              const latestProject = [...projectsData].sort((a, b) => parseInt(b.id) - parseInt(a.id))[0];
+              setCurrentProjectState(latestProject);
             }
           }
         } else {
-          console.error('Kunde inte hämta projekt från API:', response.statusText);
+          console.warn('Inga projekt hittades i databasen, använder standardprojekt');
+          // Om API-anropet inte returnerar några projekt, behåll de fördefinierade
         }
       } catch (error) {
         console.error('Fel vid hämtning av projekt:', error);

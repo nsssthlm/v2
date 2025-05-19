@@ -75,7 +75,7 @@ const TopMenu: React.FC = () => {
     }
   };
   
-  // Hantera nytt projekt - skapa i backend-databasen
+  // Hantera nytt projekt - skapa i backend-databasen med förbättrad felhantering
   const handleNewProjectSubmit = async () => {
     if (!newProject.name.trim()) {
       alert('Vänligen ange ett projektnamn.');
@@ -94,86 +94,44 @@ const TopMenu: React.FC = () => {
         return;
       }
       
-      // Skapar projektet direkt i databasen MED autentisering
-      const response = await fetch('/api/custom/create-project', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: newProject.name,
-          description: newProject.description || '',
-          start_date: today,
-          end_date: newProject.endDate || null
-        }),
-      });
+      // Skapa projektet via den förbättrade projektservicen
+      const projectData = {
+        name: newProject.name,
+        description: newProject.description || '',
+        start_date: today,
+        end_date: newProject.endDate || null
+      };
       
-      if (!response.ok) {
+      console.log('Skapar nytt projekt med data:', projectData);
+      
+      // Använd projektservice istället för direkt fetch - detta hanterar även skapande av standardmapp
+      const createdProject = await projectService.createProject(projectData);
+      
+      if (!createdProject) {
         throw new Error('Kunde inte skapa projektet');
       }
       
-      const result = await response.json();
-      console.log('Projekt skapat i databasen:', result);
+      console.log('Projekt skapat framgångsrikt:', createdProject);
       
-      // Skapa nytt projekt-objekt för frontend
-      const createdProject: Project = {
-        id: result.id.toString(),
-        name: newProject.name,
-        description: newProject.description || '',
-        endDate: newProject.endDate || ''
-      };
-      
-      // Lägg till projektet i listan och byt till det
+      // Lägg till projektet i listan 
       addProject(createdProject);
       
       // Stäng formuläret
       setNewProjectModalOpen(false);
       setNewProject({ name: '', description: '', endDate: '' });
       
-      // Skapa en standardmapp för det nya projektet för att undvika 500-fel
-      try {
-        console.log('Försöker skapa standardmapp för projekt:', result.id);
-        
-        // Gör ett anrop med korrekt autentisering
-        const createFolderResponse = await fetch('/api/files/directories/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            name: 'Standard',
-            project: result.id,
-            parent: null,
-            type: 'folder',
-            is_sidebar: true,
-          })
-        });
-      
-        if (!createFolderResponse.ok) {
-          const errorText = await createFolderResponse.text();
-          console.warn('Kunde inte skapa standardmapp för projektet:', errorText);
-        } else {
-          const folderResult = await createFolderResponse.json();
-          console.log('Standardmapp skapad för det nya projektet:', folderResult);
-          
-          // Vänta lite innan vi försöker hämta mappdata
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      } catch (folderError) {
-        console.warn('Fel vid skapande av standardmapp:', folderError);
-      }
-      
-      // Använd projektväljaren för att byta till det nya projektet
+      // Sätt det nya projektet som aktivt via ProjectContext
       console.log('Sätter projektId i sessionStorage:', createdProject.id);
       sessionStorage.setItem('selectedProjectId', createdProject.id);
       
-      // Fördröj omladdningen något för att ge tid för backend att uppdatera
+      // Visa ett meddelande om att projektet har skapats
+      alert(`Projektet "${createdProject.name}" har skapats!`);
+      
+      // Fördröj omladdningen för att ge tid för backend att uppdatera
       setTimeout(() => {
-        // Ladda om sidan för att visa det nya projektet
+        // Ladda om sidan för att visa det nya projektet och dess mappar
         window.location.reload();
-      }, 1000);
+      }, 1500);
     } catch (error) {
       console.error('Kunde inte skapa nytt projekt:', error);
       alert('Kunde inte skapa nytt projekt. Försök igen senare.');
