@@ -1,0 +1,22 @@
+Öppnar PDF: http://0.0.0.0:8001/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_nEnRBw3.pdf AAAAExempel på ritningar
+FolderPageNew.tsx:287 Använda direkt PDF URL via Replit proxy
+FolderPageNew.tsx:290 Använder final PDF URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_nEnRBw3.pdf
+PDFJSViewer.tsx?t=1747675238929:30 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx?t=1747675238929:36 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_nEnRBw3.pdf
+PDFJSViewer.tsx?t=1747675238929:30 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx?t=1747675238929:36 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_nEnRBw3.pdf
+PDFJSViewer.tsx:25 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:33 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_nEnRBw3.pdf
+PDFJSViewer.tsx:25 PDF Debug: {providedProjectId: undefined, contextProjectId: '3', activeProjectId: '3', currentProject: {…}}
+PDFJSViewer.tsx:33 PDF original URL: https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000/api/files/web/karlatornet-31-54/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_nEnRBw3.pdf
+AAAAExempel_pa_ritningar_nEnRBw3.pdf:1 An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.Understand this warning
+PDFJSDirectViewer.tsx:29 PDF is taking too long to load, preparing fallback option
+Console.js:61 You are loading @emotion/react when it is already loaded. Running multiple instances may cause problems. This can happen if multiple versions are used, or if multiple builds of the same version are used.
+Mt.forEach.n.<computed> @ Console.js:61
+(anonymous) @ chunk-CAZREADN.js?v=dc9a4f35:3485Understand this warning
+Console.js:61 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+Console.js:61 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+Console.js:61 Försöker hämta projekt från databasen...
+Console.js:61 Försöker hämta projekt från databasen...
+Console.js:61 Hämtade projekt från databasen: (13) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Console.js:61 Hämtade projekt från databasen: (13) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
