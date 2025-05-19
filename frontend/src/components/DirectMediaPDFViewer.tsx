@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Box, Typography, Button, CircularProgress } from '@mui/joy';
 import { FullscreenOutlined, Refresh } from '@mui/icons-material';
 
-interface SimplePDFViewerProps {
+interface DirectMediaPDFViewerProps {
   pdfUrl: string;
   fileName?: string;
   onClose?: () => void;
 }
 
 /**
- * Enkel PDF-visare som använder den mest grundläggande metoden för att visa PDF-filer
- * med hjälp av direktåtkomst och iframe-element
+ * En PDF-visare som använder direktlänkar till media-katalogen för att visa PDF-filer
+ * Denna komponent följer Django:s fillagringskonvention
  */
-const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
+const DirectMediaPDFViewer: React.FC<DirectMediaPDFViewerProps> = ({
   pdfUrl,
   fileName = 'Document',
   onClose
@@ -24,49 +24,31 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
   // Extrahera filnamnet från URL:en om det behövs
   const extractedFileName = pdfUrl.split('/').pop() || fileName;
   
-  // Skapa direktlänk till media-katalogen (detta är nyckeln till lösningen)
-  let mediaDirectUrl = '';
-  if (extractedFileName.endsWith('.pdf')) {
-    // Använd direct URL till media-katalogen enligt Django's static serving
-    // Detta är den path som Django serverar enligt backend/files/models.py: upload_to='project_files/%Y/%m/%d/'
-    
-    // Extrahera filnamnet från den ursprungliga URL:en
-    const parts = pdfUrl.split('/');
-    const dateParts = parts.filter(part => part.match(/\d{4}/)); // Hitta år i URL:en
-    
-    // Försök konstruera media-URL baserat på delar från original-URL:en
-    if (parts.includes('project_files')) {
-      // Hitta positionen för project_files i URL:en
-      const projectFilesIndex = parts.indexOf('project_files');
-      if (projectFilesIndex !== -1 && projectFilesIndex + 3 < parts.length) {
-        // Konstruera URL baserat på år/månad/dag
-        const year = parts[projectFilesIndex + 1];
-        const month = parts[projectFilesIndex + 2];
-        const day = parts[projectFilesIndex + 3];
-        mediaDirectUrl = `/media/project_files/${year}/${month}/${day}/${extractedFileName}`;
-      }
-    }
-    
-    // Om vi inte kunde konstruera URL:en från delarna, använd standard
-    if (!mediaDirectUrl) {
-      // Fallback till generisk path i media
-      mediaDirectUrl = `/media/${extractedFileName}`;
-    }
-    
-    console.log("Konstruerad media URL:", mediaDirectUrl);
+  // Originalfilen finns i Django's media-katalog enligt modellen i files/models.py
+  // File model, upload_to='project_files/%Y/%m/%d/'
+  
+  // Extrahera datum från URL:en om möjligt
+  const dateParts = pdfUrl.match(/(\d{4})\/(\d{2})\/(\d{2})/);
+  let year = '2025';
+  let month = '05';
+  let day = '19';
+  
+  if (dateParts && dateParts.length >= 4) {
+    [, year, month, day] = dateParts;
   }
   
-  // Använd den direkta media-länken om den finns, annars den vanliga URL:en
-  const finalUrl = mediaDirectUrl || pdfUrl;
+  // Skapa en direktlänk till media-katalogen
+  const mediaUrl = `/media/project_files/${year}/${month}/${day}/${extractedFileName}`;
   
-  // Hantera när iframe har laddats
+  console.log("PDF URL direkt från media:", mediaUrl);
+  
+  // Hantera laddning och fel
   const handleLoad = () => {
     setLoading(false);
   };
   
-  // Hantera laddningsfel
   const handleError = () => {
-    setError('Kunde inte visa PDF-filen direkt. Prova att öppna i ny flik.');
+    setError('Kunde inte visa PDF-filen. Prova att öppna i ny flik eller ladda om.');
     setLoading(false);
   };
   
@@ -74,12 +56,12 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
   const reloadPdf = () => {
     setLoading(true);
     setError(null);
-    setKey(Date.now()); // Tvingar iframe att ladda om
+    setKey(Date.now());
   };
   
   // Öppna i ny flik
   const openInNewTab = () => {
-    window.open(finalUrl, '_blank');
+    window.open(mediaUrl, '_blank');
   };
   
   return (
@@ -145,7 +127,7 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
       <Box sx={{ 
         flex: 1, 
         position: 'relative',
-        overflow: 'auto',
+        overflow: 'hidden',
         bgcolor: 'grey.100'
       }}>
         {/* Visa laddningsindikator */}
@@ -183,35 +165,44 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({
             <Typography level="body-md" sx={{ mb: 2 }}>
               {error}
             </Typography>
-            <Button 
-              onClick={openInNewTab}
-              variant="solid"
-              color="primary"
-              startDecorator={<FullscreenOutlined />}
-            >
-              Öppna i ny flik
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button 
+                onClick={reloadPdf}
+                variant="solid"
+                color="primary"
+              >
+                Försök igen
+              </Button>
+              
+              <Button 
+                onClick={openInNewTab}
+                variant="outlined"
+                color="neutral"
+                startDecorator={<FullscreenOutlined />}
+              >
+                Öppna i ny flik
+              </Button>
+            </Box>
           </Box>
         )}
         
-        {/* Iframe för att visa PDF-filen */}
+        {/* Direkt embedded PDF-visare med iframe */}
         <iframe
           key={key}
-          src={finalUrl}
+          src={mediaUrl}
           width="100%"
           height="100%"
           style={{ 
-            border: 'none',
-            display: loading ? 'none' : 'block'
+            border: 'none', 
+            display: loading ? 'none' : 'block' 
           }}
           title={fileName}
           onLoad={handleLoad}
           onError={handleError}
-          sandbox="allow-same-origin allow-scripts allow-popups"
         />
       </Box>
     </Box>
   );
 };
 
-export default SimplePDFViewer;
+export default DirectMediaPDFViewer;

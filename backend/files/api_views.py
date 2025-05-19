@@ -151,9 +151,15 @@ def serve_project_file(request, project_id, path_info):
         # Set headers for proper handling
         response['Content-Disposition'] = f'inline; filename="{os.path.basename(file_path)}"'
         response['Content-Length'] = os.path.getsize(file_path)
+        response['Accept-Ranges'] = 'bytes'
         response['Access-Control-Allow-Origin'] = '*'
         response['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
         response['Access-Control-Allow-Headers'] = 'Content-Type, Accept, Authorization'
+        
+        # Explicitly add Cache-Control headers
+        response['Cache-Control'] = 'no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
         
         # Remove headers that might interfere with embedding
         for header in ['X-Frame-Options', 'Content-Security-Policy']:
