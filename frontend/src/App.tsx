@@ -26,6 +26,9 @@ import FolderListPage from './pages/folders/FolderListPage';
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
 
+// Fristående PDF-visare
+import DirectPDFView from './pages/pdf/DirectPDFView';
+
 // The main App component doesn't access context directly
 function App() {
   // Handle login success - can be empty now as AuthContext handles the state
@@ -45,6 +48,9 @@ function App() {
               
               {/* Auth routes */}
               <Route path="/login" element={<LoginPage />} />
+              
+              {/* Fristående PDF-visare utan layout */}
+              <Route path="/view-pdf/:id" element={<DirectPDFView />} />
               
               {/* Protected routes with layout */}
               <Route element={<Layout />}>
