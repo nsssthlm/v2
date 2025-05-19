@@ -91,8 +91,8 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
     if (!pdfUrl) return "";
 
     // Få basens URL för proxys och direkta anrop
-    const API_BASE =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:8001";
+    // Använd relativ URL för att fungera i både Replit preview och production
+    const API_BASE = '/api';
     let finalUrl = pdfUrl;
 
     // Logga original-URL:en för diagnostik
@@ -118,18 +118,18 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
     const parts = finalUrl.split("/");
     const fileName = parts[parts.length - 1]?.split("?")[0]; // Ta bort eventuella queryparameter
 
-    // Strategi 1: Om URL:en innehåller project_files med datum, använd den direkta PDF-endpointen
-    if (finalUrl.includes("project_files/")) {
-      const dateAndPathPattern =
-        /project_files\/(\d{4}\/\d{2}\/\d{2}\/[^?&]+\.pdf)/;
-      const dateAndPathMatch = finalUrl.match(dateAndPathPattern);
-
-      if (dateAndPathMatch && dateAndPathMatch[1]) {
-        // Använd direkta PDF-endpointen
-        finalUrl = `${API_BASE}/pdf/${dateAndPathMatch[1]}`;
-        console.log("1. Använder direkt PDF-endpoint:", finalUrl);
-      }
+    // Om URL:en redan innehåller project_files, använd den direkt i stället
+  // för att försöka omformulera den
+  if (finalUrl.includes("project_files/")) {
+    // Använd hela den ursprungliga webbadressen, men försök ändå rensa bort eventuella 
+    // parametrar och använda den korrekta relativa webbadressen
+    finalUrl = pdfUrl.split("?")[0];
+    
+    // Använd direkt länk om vi har det
+    if (finalUrl.includes("/data/project_files/")) {
+      console.log("1. Använder direkt länk till PDF-filen:", finalUrl);
     }
+  }
     // Strategi 2: Om URL:en kommer från API-endpoint, extrahera sökvägen därifrån
     else if (finalUrl.includes("/api/files/web/")) {
       const apiPattern =
@@ -171,9 +171,8 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
     const urlParts = cleanUrl.split("/");
     const filename = urlParts[urlParts.length - 1];
 
-    // Bas-URL för alla requests
-    const API_BASE =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:8001";
+    // Bas-URL för alla requests - använd relativ URL
+    const API_BASE = '/api';
 
     // Skapa olika fallback-strategier baserat på vilken försöksordning vi är på
     switch (attemptNum) {
@@ -184,7 +183,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
             "Fallback 1: Använder pdf-finder med exact match",
             filename,
           );
-          return `${API_BASE}/pdf-finder/?filename=${filename}&stream=true`;
+          return `/api/pdf-finder/?filename=${filename}&stream=true`;
         }
         break;
 
@@ -197,12 +196,12 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
             "Fallback 2: Använder exakt sökväg med datum",
             dateMatch[1],
           );
-          return `${API_BASE}/pdf/${dateMatch[1]}`;
+          return `/api/pdf/${dateMatch[1]}`;
         }
 
         // Om ingen träff, prova vanliga media-URL med dagens datum
         const today = new Date().toISOString().split("T")[0].replace(/-/g, "/");
-        return `${API_BASE}/media/project_files/${today}/${filename}`;
+        return `/api/media/project_files/${today}/${filename}`;
 
       case 3:
         // Tredje alternativ: Prova direct/media som direktserverar filen
@@ -211,7 +210,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
           // Försök extrahera hela sökvägen efter project_files/
           const projectMatch = url.match(/project_files\/(.+\.pdf)/);
           if (projectMatch && projectMatch[1]) {
-            return `${API_BASE}/direct/media/project_files/${projectMatch[1]}`;
+            return `/api/direct/media/project_files/${projectMatch[1]}`;
           }
         }
         // Om vi inte kan hitta projekt-sökvägen, prova med dagens datum
@@ -219,7 +218,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
           .toISOString()
           .split("T")[0]
           .replace(/-/g, "/");
-        return `${API_BASE}/direct/media/project_files/${today2}/${filename}`;
+        return `/api/direct/media/project_files/${today2}/${filename}`;
 
       case 4:
         // Sista utvägen: Prova att söka efter basnamnet utan eventuella hash-tillägg
