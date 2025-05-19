@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/joy";
 import { useProject } from "../contexts/ProjectContext";
-import PDFJSDirectViewer from "./PDFJSDirectViewer";
+import ReactPDFViewer from "./ReactPDFViewer";
 
 interface PDFJSViewerProps {
   pdfUrl: string;
@@ -43,16 +43,10 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
       display: "flex",
       flexDirection: "column"
     }}>
-      <iframe
-        src={finalUrl}
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          backgroundColor: '#fff'
-        }}
-        title={filename}
-        allowFullScreen
+      <ReactPDFViewer
+        pdfUrl={finalUrl}
+        fileName={filename}
+        onClose={() => {}} // Empty function since we're not using the close button in this context
       />
     </Box>
   );

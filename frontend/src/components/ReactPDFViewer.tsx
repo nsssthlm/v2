@@ -1,266 +1,231 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Box, Button, Typography, CircularProgress, IconButton } from '@mui/joy';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import ZoomOutIcon from '@mui/icons-material/ZoomOut';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { Box, Typography, Button, CircularProgress, ButtonGroup } from '@mui/joy';
+import { 
+  ZoomIn, 
+  ZoomOut, 
+  NavigateBefore, 
+  NavigateNext, 
+  FullscreenExitOutlined,
+  FullscreenOutlined
+} from '@mui/icons-material';
 
-// Konfigurera worker path för PDFjs
+// Set up worker for PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface ReactPDFViewerProps {
   pdfUrl: string;
-  filename: string;
-  width?: string | number;
-  height?: string | number;
+  fileName?: string;
+  onClose?: () => void;
 }
 
-const ReactPDFViewer = ({ 
+const ReactPDFViewer: React.FC<ReactPDFViewerProps> = ({ 
   pdfUrl, 
-  filename, 
-  width = '100%', 
-  height = '100%' 
-}: ReactPDFViewerProps) => {
+  fileName = 'Document',
+  onClose 
+}) => {
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-  const [scale, setScale] = useState<number>(1.0);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [scale, setScale] = useState(1.0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Hantera dokumentladdning
+  // Functions to handle document loading
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    setPageNumber(1);
     setLoading(false);
-    setError(false);
   };
 
   const onDocumentLoadError = (error: Error) => {
     console.error('Error loading PDF:', error);
+    setError(error);
     setLoading(false);
-    setError(true);
   };
 
-  // Navigeringsfunktioner
+  // Navigation functions
   const goToPrevPage = () => {
-    setPageNumber(prev => Math.max(prev - 1, 1));
+    setPageNumber(page => Math.max(page - 1, 1));
   };
 
   const goToNextPage = () => {
-    if (numPages) {
-      setPageNumber(prev => Math.min(prev + 1, numPages));
-    }
+    setPageNumber(page => Math.min(page + 1, numPages || 1));
   };
 
-  // Zoomfunktioner
+  // Zoom functions
   const zoomIn = () => {
-    setScale(prev => Math.min(prev + 0.2, 3));
+    setScale(prevScale => Math.min(prevScale + 0.2, 3.0));
   };
 
   const zoomOut = () => {
-    setScale(prev => Math.max(prev - 0.2, 0.5));
+    setScale(prevScale => Math.max(prevScale - 0.2, 0.4));
+  };
+
+  // Function to open PDF in a new tab
+  const openInNewTab = () => {
+    window.open(pdfUrl, '_blank');
   };
 
   return (
-    <Box
-      sx={{
-        width,
-        height,
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        overflow: 'hidden',
-        bgcolor: '#333'
-      }}
-    >
-      {/* "Nuvarande version" badge */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 16,
-          left: 16,
-          zIndex: 10,
-          bgcolor: '#6366f1',
-          color: 'white',
-          fontSize: '0.75rem',
-          py: 0.5,
-          px: 1.5,
-          borderRadius: 'md',
-          fontWeight: 'bold'
-        }}
-      >
-        Nuvarande version
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100%', 
+      width: '100%', 
+      bgcolor: 'background.paper',
+      borderRadius: 'md',
+      overflow: 'hidden'
+    }}>
+      {/* Header with filename and controls */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        p: 1,
+        borderBottom: '1px solid',
+        borderColor: 'divider'
+      }}>
+        <Typography level="title-md" sx={{ 
+          flexGrow: 1, 
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}>
+          {fileName}
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button 
+            onClick={openInNewTab} 
+            variant="outlined"
+            size="sm"
+            startDecorator={<FullscreenOutlined fontSize="small" />}
+          >
+            Öppna i ny flik
+          </Button>
+          
+          {onClose && (
+            <Button 
+              onClick={onClose} 
+              variant="plain"
+              size="sm"
+            >
+              Stäng
+            </Button>
+          )}
+        </Box>
       </Box>
 
-      {/* Visa loading spinner under laddning */}
-      {loading && (
-        <Box 
-          sx={{ 
-            position: 'absolute', 
-            top: '50%', 
-            left: '50%', 
-            transform: 'translate(-50%, -50%)',
-            zIndex: 5,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 2
-          }}
-        >
-          <CircularProgress size="lg" />
-          <Typography level="body-lg" sx={{ color: 'white' }}>
-            Laddar PDF...
-          </Typography>
-        </Box>
-      )}
-
-      {/* Visa felmeddelande om PDF inte kunde laddas */}
-      {error ? (
-        <Box 
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            p: 4,
-            color: 'white',
-            textAlign: 'center'
-          }}
-        >
-          <Typography level="title-lg" sx={{ mb: 2 }}>
-            Det gick inte att visa PDF-filen
-          </Typography>
-          <Typography sx={{ mb: 2 }}>
-            Din webbläsare kunde inte visa PDF-filen "{filename}".
-          </Typography>
-          <Button
-            component="a"
-            href={pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="solid"
-            color="primary"
-            size="lg"
+      {/* Controls for navigation and zoom */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        p: 1,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        gap: 2
+      }}>
+        <ButtonGroup size="sm" variant="outlined">
+          <Button 
+            onClick={goToPrevPage} 
+            disabled={pageNumber <= 1}
           >
-            Öppna i nytt fönster
+            <NavigateBefore />
           </Button>
-        </Box>
-      ) : (
-        <Box sx={{ 
-          flex: 1, 
-          overflow: 'auto', 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'flex-start',
-          bgcolor: 'white',
-          p: 4
-        }}>
+          <Button 
+            onClick={goToNextPage} 
+            disabled={pageNumber >= (numPages || 1)}
+          >
+            <NavigateNext />
+          </Button>
+        </ButtonGroup>
+        
+        <Typography level="body-sm">
+          Sida {pageNumber} av {numPages || '...'}
+        </Typography>
+        
+        <ButtonGroup size="sm" variant="outlined">
+          <Button onClick={zoomOut} disabled={scale <= 0.4}>
+            <ZoomOut />
+          </Button>
+          <Button sx={{ minWidth: '64px' }}>
+            {Math.round(scale * 100)}%
+          </Button>
+          <Button onClick={zoomIn} disabled={scale >= 3.0}>
+            <ZoomIn />
+          </Button>
+        </ButtonGroup>
+      </Box>
+
+      {/* PDF document */}
+      <Box sx={{ 
+        flex: 1, 
+        overflow: 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+        bgcolor: 'grey.100',
+        position: 'relative'
+      }}>
+        {loading && (
+          <Box sx={{ 
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 10
+          }}>
+            <CircularProgress />
+          </Box>
+        )}
+        
+        {error ? (
+          <Box sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            p: 3,
+            gap: 2
+          }}>
+            <Typography level="title-lg" color="danger">
+              Kunde inte ladda PDF
+            </Typography>
+            <Typography level="body-md" sx={{ mb: 2 }}>
+              Det gick inte att visa dokumentet direkt i applikationen.
+            </Typography>
+            <Button 
+              onClick={openInNewTab}
+              variant="solid"
+              color="primary"
+              size="lg"
+              startDecorator={<FullscreenOutlined />}
+            >
+              Öppna i ny flik
+            </Button>
+          </Box>
+        ) : (
           <Document
             file={pdfUrl}
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}
-            loading={null}
-            noData={null}
-            error={null}
-          >
-            <Page 
-              pageNumber={pageNumber} 
-              scale={scale}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-              loading={null}
-              error={null}
-              width={Math.min(window.innerWidth * 0.7, 800)}
-            />
-          </Document>
-          
-          {/* Grön vertikal linje till vänster */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: 0,
-              width: '8px',
-              backgroundColor: '#4caf50'
+            loading={<CircularProgress />}
+            options={{
+              cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+              cMapPacked: true,
             }}
-          />
-        </Box>
-      )}
-      
-      {/* Navigationskontroller längst ned */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          py: 1.5,
-          px: 2,
-          bgcolor: '#222',
-          borderTop: '1px solid #444'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
-          <IconButton
-            onClick={zoomOut}
-            disabled={scale <= 0.5}
-            sx={{ color: 'white' }}
-            size="sm"
           >
-            <ZoomOutIcon />
-          </IconButton>
-          
-          <Typography sx={{ color: 'white', mx: 2 }}>
-            {Math.round(scale * 100)}%
-          </Typography>
-          
-          <IconButton
-            onClick={zoomIn}
-            disabled={scale >= 3}
-            sx={{ color: 'white' }}
-            size="sm"
-          >
-            <ZoomInIcon />
-          </IconButton>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton
-            onClick={goToPrevPage}
-            disabled={pageNumber <= 1}
-            sx={{ color: 'white' }}
-            size="sm"
-          >
-            <ArrowBackIcon />
-          </IconButton>
-          
-          <Typography sx={{ color: 'white', mx: 2 }}>
-            Sida {pageNumber} av {numPages || '?'}
-          </Typography>
-          
-          <IconButton
-            onClick={goToNextPage}
-            disabled={!numPages || pageNumber >= numPages}
-            sx={{ color: 'white' }}
-            size="sm"
-          >
-            <ArrowForwardIcon />
-          </IconButton>
-        </Box>
-        
-        <Button
-          component="a"
-          href={pdfUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          size="sm"
-          variant="solid"
-          color="primary"
-          sx={{ ml: 4 }}
-        >
-          Öppna i helskärm
-        </Button>
+            <Box sx={{ p: 2 }}>
+              <Page 
+                pageNumber={pageNumber} 
+                scale={scale}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+              />
+            </Box>
+          </Document>
+        )}
       </Box>
     </Box>
   );
