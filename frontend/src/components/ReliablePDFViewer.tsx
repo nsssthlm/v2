@@ -294,10 +294,21 @@ const ReliablePDFViewer = ({
               </Box>
             </Box>
           ) : (
-            <iframe
-              key={key}
-              src={finalUrl}
-              width="100%"
+            <Box 
+              sx={{ 
+                position: 'relative', 
+                width: '100%', 
+                height: '100%', 
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              {/* Förbättrad iframe med bättre felhantering */}
+              <iframe
+                key={key}
+                src={finalUrl}
+                width="100%"
               height="100%"
               style={{ 
                 border: 'none',
@@ -309,6 +320,7 @@ const ReliablePDFViewer = ({
               allowFullScreen
               sandbox="allow-same-origin allow-scripts allow-popups"
             />
+            </Box>
           )}
         </Box>
         
