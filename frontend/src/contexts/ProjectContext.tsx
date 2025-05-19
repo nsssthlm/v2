@@ -38,7 +38,21 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
   
   // State för projekten och laddar-status
   const [projects, setProjects] = useState<Project[]>([defaultProject]);
-  const [currentProject, setCurrentProjectState] = useState<Project>(defaultProject);
+  
+  // Initiera currentProject från localStorage om det finns
+  const [currentProject, setCurrentProjectState] = useState<Project>(() => {
+    // Försök hämta från localStorage först
+    const savedProject = localStorage.getItem('currentProject');
+    if (savedProject) {
+      try {
+        return JSON.parse(savedProject) as Project;
+      } catch (e) {
+        console.error('Kunde inte parsa sparat projekt från localStorage', e);
+      }
+    }
+    return defaultProject;
+  });
+  
   const [loading, setLoading] = useState(true);
 
   // Hämta alla projekt från databasen vid uppstart
