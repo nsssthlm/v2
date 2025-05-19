@@ -82,28 +82,82 @@ const projectService = {
   // Skapa ett nytt projekt
   createProject: async (projectData: ProjectInput): Promise<Project | null> => {
     try {
-      const headers = getStandardHeaders();
+      // Hämta CSRF-token från cookies för bättre autentisering
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return undefined;
+      };
+      
+      const csrfToken = getCookie('csrftoken');
+      console.log('CSRF-token för projektskapande:', csrfToken);
+      
+      const headers = {
+        ...getStandardHeaders(),
+        ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
+      };
       
       console.log('Skapar projekt med URL:', `${API_BASE_URL}/api/custom/create-project`);
       console.log('Projekdata:', projectData);
       console.log('Headers:', headers);
       
-      // Använd rätt API-endpoint för Django backend
-      const response = await axios.post(`${API_BASE_URL}/api/custom/create-project`, projectData, {
-        headers
+      // Använd fetch istället för axios för att säkerställa att credentials skickas med
+      const response = await fetch(`${API_BASE_URL}/api/custom/create-project`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
+        },
+        body: JSON.stringify(projectData)
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Projektskapande misslyckades med status:', response.status, errorText);
+        throw new Error(`Kunde inte skapa projektet: ${response.status} ${errorText}`);
+      }
+      
+      const data = await response.json();
       
       // Mappa om API-svaret till frontend-format
       const createdProject: Project = {
-        id: response.data.id.toString(),
-        name: response.data.name,
-        description: response.data.description || '',
-        endDate: response.data.end_date || response.data.endDate || ''
+        id: data.id.toString(),
+        name: data.name,
+        description: data.description || '',
+        endDate: data.end_date || data.endDate || ''
       };
       
-      // Skapa en standardmapp för projektet
+      // Skapa en standardmapp för projektet med direkt fetch-anrop
       try {
-        await projectService.createDefaultFolder(createdProject.id);
+        // Skapa standardmappen direkt här för att använda samma sessionkontext
+        const folderData = {
+          name: 'Dokument',
+          project: createdProject.id,
+          parent: null,
+          is_sidebar_item: true 
+        };
+        
+        const folderResponse = await fetch(`${API_BASE_URL}/api/files/directories/`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
+          },
+          body: JSON.stringify(folderData)
+        });
+        
+        if (folderResponse.ok) {
+          const folderData = await folderResponse.json();
+          console.log('Standardmapp skapad direkt:', folderData);
+        } else {
+          const folderErrorText = await folderResponse.text();
+          console.warn('Kunde inte skapa standardmapp direkt:', folderResponse.status, folderErrorText);
+        }
       } catch (folderError) {
         console.warn('Kunde inte skapa standardmapp:', folderError);
       }

@@ -6,10 +6,21 @@ export const API_BASE_URL = '';
 // Direktlänkar för PDF-visning - använd relativ URL för att fungera både på HTTP och HTTPS
 export const DIRECT_API_URL = '';
 
+// Funktion för att hämta CSRF-token från cookies
+export const getCsrfToken = () => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; csrftoken=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return undefined;
+};
+
 // Hämta standardheaders för API-anrop
 export const getStandardHeaders = () => {
+  const csrfToken = getCsrfToken();
   return {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
   };
 };
 
@@ -17,11 +28,14 @@ export const getStandardHeaders = () => {
 export const getAuthHeader = () => {
   // Försök hämta token från localStorage
   const token = localStorage.getItem('token');
+  const csrfToken = getCsrfToken();
   
-  // Retunera headers med eller utan auth-token
+  // Returnera headers med autentiseringsinformation
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    'Accept': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
   };
 };
 
