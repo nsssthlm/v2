@@ -86,11 +86,20 @@ const TopMenu: React.FC = () => {
       // Förbered data för backend-API
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
       
-      // Skapar projektet direkt i databasen
+      // Hämta JWT-token för autentisering
+      const token = localStorage.getItem('jwt_token');
+      
+      if (!token) {
+        alert('Du är inte inloggad. Logga in för att skapa ett projekt.');
+        return;
+      }
+      
+      // Skapar projektet direkt i databasen MED autentisering
       const response = await fetch('/api/custom/create-project', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: newProject.name,
@@ -124,46 +133,47 @@ const TopMenu: React.FC = () => {
       
       // Skapa en standardmapp för det nya projektet för att undvika 500-fel
       try {
-        // Hämta JWT-token från localStorage för autentisering
-        const token = localStorage.getItem('jwt_token');
+        console.log('Försöker skapa standardmapp för projekt:', result.id);
         
-        // Gör inte anropet om vi inte har en token
-        if (!token) {
-          console.warn('Ingen JWT-token tillgänglig, kan inte skapa standardmapp');
+        // Gör ett anrop med korrekt autentisering
+        const createFolderResponse = await fetch('/api/files/directories/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: 'Standard',
+            project: result.id,
+            parent: null,
+            type: 'folder',
+            is_sidebar: true,
+          })
+        });
+      
+        if (!createFolderResponse.ok) {
+          const errorText = await createFolderResponse.text();
+          console.warn('Kunde inte skapa standardmapp för projektet:', errorText);
         } else {
-          console.log('Försöker skapa standardmapp för projekt:', result.id);
+          const folderResult = await createFolderResponse.json();
+          console.log('Standardmapp skapad för det nya projektet:', folderResult);
           
-          const createFolderResponse = await fetch('/api/files/directories/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              name: 'Standard',
-              project: result.id,
-              parent: null,
-              type: 'folder',
-              // Använd 'is_sidebar' istället baserat på API-felmeddelandet
-              is_sidebar: true,
-            })
-          });
-        
-          if (!createFolderResponse.ok) {
-            console.warn('Kunde inte skapa standardmapp för projektet, men fortsätter ändå.');
-          } else {
-            console.log('Standardmapp skapad för det nya projektet');
-          }
+          // Vänta lite innan vi försöker hämta mappdata
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       } catch (folderError) {
         console.warn('Fel vid skapande av standardmapp:', folderError);
       }
       
+      // Använd projektväljaren för att byta till det nya projektet
+      console.log('Sätter projektId i sessionStorage:', createdProject.id);
+      sessionStorage.setItem('selectedProjectId', createdProject.id);
+      
       // Fördröj omladdningen något för att ge tid för backend att uppdatera
       setTimeout(() => {
         // Ladda om sidan för att visa det nya projektet
         window.location.reload();
-      }, 500);
+      }, 1000);
     } catch (error) {
       console.error('Kunde inte skapa nytt projekt:', error);
       alert('Kunde inte skapa nytt projekt. Försök igen senare.');
