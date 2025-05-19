@@ -19,6 +19,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EmbeddedPDFViewer from './EmbeddedPDFViewer';
+import pdfjs from 'pdfjs-dist';
 
 interface PDFDialogProps {
   open: boolean;
