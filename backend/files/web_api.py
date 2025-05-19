@@ -19,26 +19,79 @@ def directory_data(request, slug):
     if direct_param and direct_param.lower() == 'true':
         # Kontrollera om filnamn angetts
         filename = request.query_params.get('filename', None)
-        if filename:
-            try:
+        file_path_param = request.query_params.get('filepath', None)
+        
+        try:
+            # Om vi har en filsökväg, prioritera den
+            if file_path_param:
+                import os
+                from django.conf import settings
+                
+                # Säkerställ att filsökvägen är relativ till media-katalogen
+                if file_path_param.startswith('/'):
+                    file_path_param = file_path_param[1:]
+                
+                # Konstruera fullständig sökväg
+                file_path = os.path.join(settings.MEDIA_ROOT, file_path_param)
+                
+                # Kontrollera att filen existerar och är läsbar
+                if not os.path.exists(file_path):
+                    return Response({"error": f"Kan inte hitta filen: {file_path_param}"}, status=404)
+                
+                # Öppna filen direkt
+                from django.http import FileResponse
+                response = FileResponse(
+                    open(file_path, 'rb'),
+                    content_type='application/pdf'
+                )
+                
+                # Sätt headers för korrekt visning
+                response['Content-Disposition'] = f'inline; filename="{os.path.basename(file_path)}"'
+                response.headers.pop('X-Frame-Options', None)
+                response['Access-Control-Allow-Origin'] = '*'
+                
+                print(f"Direktnedladdning av {file_path}")
+                return response
+                
+            # Annars försök med filnamn
+            elif filename:
                 # Hämta filen från databasen
                 file_obj = File.objects.get(name=filename, directory__slug=slug)
                 
-                # Returnera filen som PDF
+                # Öppna filen direkt från disk
+                import os
+                from django.conf import settings
+                
+                file_path = os.path.join(settings.MEDIA_ROOT, file_obj.file.name)
+                
+                # Kontrollera att filen finns
+                if not os.path.exists(file_path):
+                    return Response({"error": "Filen hittades inte på disken"}, status=404)
+                    
+                # Returnera filen som PDF med öppen filestream
                 from django.http import FileResponse
                 response = FileResponse(
-                    file_obj.file, 
-                    content_type='application/pdf',
-                    as_attachment=False
+                    open(file_path, 'rb'),
+                    content_type='application/pdf'
                 )
                 
+                # Sätt nödvändiga headers för korrekt PDF-visning
                 response['Content-Disposition'] = f'inline; filename="{file_obj.name}.pdf"'
-                response['X-Frame-Options'] = 'ALLOWALL'
+                
+                # Radera X-Frame-Options header helt för att tillåta embedding
+                response.headers.pop('X-Frame-Options', None)
+                
+                # Tillåt innehållsdelning mellan olika ursprung
+                response['Access-Control-Allow-Origin'] = '*'
+                print(f"Serving PDF file via filename: {file_path}")
+                
                 return response
-            except File.DoesNotExist:
-                return Response({"error": "Filen hittades inte"}, status=404)
-            except Exception as e:
-                return Response({"error": str(e)}, status=500)
+        except File.DoesNotExist:
+            return Response({"error": "Filen hittades inte"}, status=404)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": str(e)}, status=500)
     
     # Standardlogik för att hämta mappdata
     directory = get_object_or_404(Directory, slug=slug)
@@ -93,20 +146,39 @@ def direct_file_download(request, file_id):
         # Hämta filen från databasen
         file_obj = get_object_or_404(File, id=file_id)
         
-        # Returnera filen som PDF
+        # Öppna filen direkt från disk
+        import os
+        from django.conf import settings
+        
+        file_path = os.path.join(settings.MEDIA_ROOT, file_obj.file.name)
+        
+        # Kontrollera att filen finns
+        if not os.path.exists(file_path):
+            return Response({"error": "Filen hittades inte på disken"}, status=404)
+            
+        # Returnera filen som PDF med öppen filestream
         from django.http import FileResponse
         response = FileResponse(
-            file_obj.file, 
-            content_type='application/pdf',
-            as_attachment=False
+            open(file_path, 'rb'),
+            content_type='application/pdf'
         )
         
-        # Sätt headers för korrekt visning i iframe
+        # Sätt nödvändiga headers för korrekt PDF-visning
         response['Content-Disposition'] = f'inline; filename="{file_obj.name}.pdf"'
-        response['X-Frame-Options'] = 'ALLOWALL'
+        
+        # Radera X-Frame-Options header helt för att tillåta embedding
+        response.headers.pop('X-Frame-Options', None)
+        
+        # Tillåt innehållsdelning mellan olika ursprung
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        
+        # Underlätta debugging
+        print(f"Serving PDF file: {file_path} with content type: {response['Content-Type']}")
         
         return response
     except Exception as e:
+        print(f"Error serving PDF: {str(e)}")
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
