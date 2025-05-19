@@ -132,4 +132,5 @@ def pdf_file_finder(request):
 urlpatterns.append(path('pdf-finder/', pdf_finder, name='pdf_finder'))
 
 # Lägg till API-hantering för filer
-urlpatterns.append(path('api/files/', include('files.urls')))file_finder, name='pdf_finder'))
+urlpatterns.append(path('api/files/', include('files.urls')))
+urlpatterns.append(path('pdf-finder/', pdf_file_finder, name='pdf_finder'))
