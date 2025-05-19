@@ -1,0 +1,107 @@
+PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_o5VnzZP.pdf', projectId: null, loading: true, error: null, useFallback: false}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_o5VnzZP.pdf', projectId: null, loading: true, error: null, useFallback: false}
+react-pdf.js?v=dc9a4f35:44 Warning: Error: Setting up fake worker failed: "Failed to fetch dynamically imported module: https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import".
+printWarning2 @ react-pdf.js?v=dc9a4f35:44
+warning9 @ react-pdf.js?v=dc9a4f35:63
+onLoadError @ react-pdf.js?v=dc9a4f35:21603
+(anonymous) @ react-pdf.js?v=dc9a4f35:21641
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this error
+UltimatePDFViewer.tsx:72 PDF laddningsfel: Error: Setting up fake worker failed: "Failed to fetch dynamically imported module: https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import".
+    at react-pdf.js?v=dc9a4f35:12337:36
+handleLoadError @ UltimatePDFViewer.tsx:72
+onLoadError @ react-pdf.js?v=dc9a4f35:21605
+(anonymous) @ react-pdf.js?v=dc9a4f35:21641
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this error
+UltimatePDFViewer.tsx:76 Byter till fallback PDF-rendering
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_o5VnzZP.pdf', projectId: null, loading: true, error: null, useFallback: true}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_o5VnzZP.pdf', projectId: null, loading: true, error: null, useFallback: true}
+VM18543 eruda.js:2 You are loading @emotion/react when it is already loaded. Running multiple instances may cause problems. This can happen if multiple versions are used, or if multiple builds of the same version are used.
+Mt.forEach.n.<computed> @ VM18543 eruda.js:2
+(anonymous) @ VM18608 chunk-CAZREADN.js:3485Understand this warning
+VM18543 eruda.js:2 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+VM18543 eruda.js:2 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_o5VnzZP.pdf', projectId: null, loading: false, error: null, useFallback: true}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_o5VnzZP.pdf', projectId: null, loading: false, error: null, useFallback: true}
+VM18543 eruda.js:2 Försöker hämta projekt från databasen...
+VM18543 eruda.js:2 Försöker hämta projekt från databasen...
+VM18543 eruda.js:2 Hämtade projekt från databasen: (15) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+VM18543 eruda.js:2 Sätter aktivt projekt till: {id: '15', name: 'Fred1', description: 'Fred1', endDate: '2025-07-18'}
+VM18543 eruda.js:2 Hämtade projekt från databasen: (15) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+VM18543 eruda.js:2 Sätter aktivt projekt till: {id: '15', name: 'Fred1', description: 'Fred1', endDate: '2025-07-18'}
+ModernFolderPage.tsx:59 Öppnar PDF: http://0.0.0.0:8001/api/files/web/fred1-70/data/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf AAAAExempel på ritningar
+ModernFolderPage.tsx:75 Använder direkt media-URL: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf
+ModernFolderPage.tsx:84 Final PDF URL för visning: /media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: true, error: null, useFallback: false}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: true, error: null, useFallback: false}
+react-pdf.js?v=dc9a4f35:44 Warning: Error: Setting up fake worker failed: "Failed to fetch dynamically imported module: https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import".
+printWarning2 @ react-pdf.js?v=dc9a4f35:44
+warning9 @ react-pdf.js?v=dc9a4f35:63
+onLoadError @ react-pdf.js?v=dc9a4f35:21603
+(anonymous) @ react-pdf.js?v=dc9a4f35:21641
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this error
+UltimatePDFViewer.tsx:72 PDF laddningsfel: Error: Setting up fake worker failed: "Failed to fetch dynamically imported module: https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import".
+    at react-pdf.js?v=dc9a4f35:12337:36
+handleLoadError @ UltimatePDFViewer.tsx:72
+onLoadError @ react-pdf.js?v=dc9a4f35:21605
+(anonymous) @ react-pdf.js?v=dc9a4f35:21641
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+commitRootImpl @ chunk-276SZO74.js?v=dc9a4f35:19416
+commitRoot @ chunk-276SZO74.js?v=dc9a4f35:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=dc9a4f35:9119
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:18627Understand this error
+UltimatePDFViewer.tsx:76 Byter till fallback PDF-rendering
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: true, error: null, useFallback: true}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: true, error: null, useFallback: true}
+Console.js:61 You are loading @emotion/react when it is already loaded. Running multiple instances may cause problems. This can happen if multiple versions are used, or if multiple builds of the same version are used.
+Mt.forEach.n.<computed> @ Console.js:61
+(anonymous) @ chunk-CAZREADN.js?v=dc9a4f35:3485Understand this warning
+Console.js:61 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+Console.js:61 Använder standardprojekt: {id: '3', name: 'Karlatornet', description: 'Byggnation av Karlatornet i Göteborg', endDate: '2027-12-31'}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: false, error: null, useFallback: true}
+UltimatePDFViewer.tsx:47 PDF Debug: {pdfUrl: '/media/project_files/2025/05/19/AAAAExempel_pa_ritningar_oxd8Cfb.pdf', projectId: null, loading: false, error: null, useFallback: true}
+Console.js:61 Försöker hämta projekt från databasen...
+Console.js:61 Försöker hämta projekt från databasen...
+Console.js:61 Hämtade projekt från databasen: (15) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Console.js:61 Sätter aktivt projekt till: {id: '15', name: 'Fred1', description: 'Fred1', endDate: '2025-07-18'}
+Console.js:61 Hämtade projekt från databasen: (15) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+Console.js:61 Sätter aktivt projekt till: {id: '15', name: 'Fred1', description: 'Fred1', endDate: '2025-07-18'}
