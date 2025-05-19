@@ -186,22 +186,69 @@ const ModernFolderPage = () => {
         setError(null);
         setLoading(true);
         
-        // Direkthämtning av data
+        // Direkthämtning av data med förbättrad felhantering
         axios.get(`${API_BASE_URL}/files/web/${slugWithoutQueryParams}/data/`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('jwt_token') || ''}`,
             'Content-Type': 'application/json'
-          }
+          },
+          // Viktigt: Validera att svaret är i rätt format och inte en HTML-sida
+          validateStatus: status => status === 200,
+          transformResponse: [(data) => {
+            // Om vi får HTML tillbaka istället för JSON, hantera det som ett fel
+            if (typeof data === 'string' && data.trim().startsWith('<!DOCTYPE html>')) {
+              console.error("Fel API-svar: Fick HTML istället för JSON");
+              throw new Error("Felaktigt API-svar: fick HTML istället för JSON");
+            }
+            
+            try {
+              // Parse JSON-svaret
+              return JSON.parse(data);
+            } catch (e) {
+              console.error("Kunde inte tolka API-svaret som JSON:", data.substring(0, 200) + "...");
+              throw new Error("Felaktigt API-svar: kunde inte tolka som JSON");
+            }
+          }]
         })
         .then(response => {
-          console.log("DIREKT MAPPDATA:", response.data);
-          setFolderData(response.data);
-          setLoading(false);
+          // Kontrollera att vi har rätt datastruktur
+          if (response.data && typeof response.data === 'object') {
+            console.log("DIREKT MAPPDATA:", response.data);
+            setFolderData(response.data);
+            setLoading(false);
+          } else {
+            throw new Error("Oväntat API-svar: saknar korrekt datastruktur");
+          }
         })
         .catch(err => {
           console.error("Fel vid direkthämtning:", err);
-          setError("Kunde inte hämta mappdata: " + (err.message || "Okänt fel"));
-          setLoading(false);
+          
+          // Försöka återhämta genom att använda direkta mapp-URL
+          console.log("Försöker alternativ hämtning med exakt URL...");
+          
+          // Direkt anrop utan transformations för att se det exakta svaret
+          fetch(`${API_BASE_URL}/files/web/${slugWithoutQueryParams}/data/`)
+            .then(resp => resp.text())
+            .then(text => {
+              console.log("Rått API-svar:", text.substring(0, 500) + "...");
+              
+              try {
+                // Försök tolka som JSON
+                const data = JSON.parse(text);
+                console.log("Framgångsrik alternativ datahämtning:", data);
+                setFolderData(data);
+                setLoading(false);
+              } catch (e) {
+                console.error("Kunde inte återhämta data:", e);
+                setError("Kunde inte hämta mappdata: " + (err.message || "Okänt fel"));
+                setLoading(false);
+              }
+            })
+            .catch(fetchErr => {
+              console.error("Alternativ hämtning misslyckades:", fetchErr);
+              setError("Kunde inte hämta mappdata: " + (err.message || "Okänt fel"));
+              setLoading(false);
+            });
         });
       } else {
         console.log("Användare inte inloggad, omdirigerar till login");
