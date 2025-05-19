@@ -166,9 +166,14 @@ const DirectPDFDialog: React.FC<DirectPDFDialogProps> = ({ open, onClose, pdfUrl
         }
         
         // Om vi kommer hit, försök med den ursprungliga URL:en som fallback
-        console.log('Använder ursprunglig URL som fallback:', apiUrl);
+        console.log('Använder ursprunglig URL som fallback:', fetchUrl);
+        
+        // Se till att vi har en giltig URL för att hämta PDF:en
+        const finalUrl = fetchUrl.includes('http') ? fetchUrl : `${window.location.origin}${fetchUrl}`;
+        console.log('Final URL för PDF-hämtning:', finalUrl);
+        
         const loadingTask = pdfjsLib.getDocument({
-          url: apiUrl,
+          url: finalUrl,
           ...options,
           withCredentials: true  // Skicka med cookies för sessions-autentisering
         });
