@@ -146,13 +146,20 @@ def upload_file(request):
         
         # Returnera fileinfo inklusive URL för att visa filen
         from django.conf import settings
+        from django.urls import reverse
+        
+        # Skapa flera olika URL-format för att garantera att PDF:en hittas av frontend
+        media_url = f"{settings.MEDIA_URL}{new_file.file.name}"
+        direct_url = f"/api/files/pdf-media/{new_file.file.name}"  # Använd vår direkta PDF-hanteringsrutt
+        
         fileinfo = {
             'id': new_file.id,
             'name': new_file.name,
             'description': new_file.description,
             'size': new_file.size,
             'created_at': new_file.created_at,
-            'file_url': f"{settings.MEDIA_URL}{new_file.file.name}",
+            'file_url': media_url,
+            'direct_url': direct_url,
             'directory': directory.id if directory else None,
             'project': project.id if project else None,
         }

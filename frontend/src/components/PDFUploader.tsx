@@ -63,11 +63,11 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         handleClose();
         
         // Öppna PDF-filen direkt i vår inbyggda PDF-visare
-        if (data.file_url) {
+        if (data.direct_url || data.file_url) {
           openPDFDialog({
-            pdfUrl: data.file_url,
-            title: data.name || file.name,
-            description: data.description || description
+            pdfUrl: data.direct_url || data.file_url,
+            filename: data.name || file.name,
+            fileId: data.id
           });
         }
         
