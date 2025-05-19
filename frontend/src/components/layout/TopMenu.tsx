@@ -22,7 +22,7 @@ import {
 } from '@mui/joy';
 import { useProject, Project } from '../../contexts/ProjectContext';
 import projectService from '../../services/projectService';
-import { generateFakeJwtToken } from '../../utils/authUtils';
+
 
 const TopMenu: React.FC = () => {
   const [searchText, setSearchText] = useState('');

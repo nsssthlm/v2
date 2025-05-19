@@ -44,8 +44,12 @@ const projectService = {
     try {
       const headers = getStandardHeaders();
       
-      // Använd rätt API-endpoint
-      const response = await axios.post(`${API_BASE_URL}/custom/create-project`, projectData, {
+      console.log('Skapar projekt med URL:', `${API_BASE_URL}/custom/projects/`);
+      console.log('Projekdata:', projectData);
+      console.log('Headers:', headers);
+      
+      // Använd rätt API-endpoint för Django backend - observera / på slutet
+      const response = await axios.post(`${API_BASE_URL}/custom/projects/`, projectData, {
         headers
       });
       
@@ -76,11 +80,13 @@ const projectService = {
     try {
       const headers = getStandardHeaders();
       
+      // Förbättrad loggning för debugging
+      console.log('Skapar standardmapp för projekt:', projectId);
+      
       const folderData = {
-        name: 'Standard',
+        name: 'Dokument',
         project: projectId,
         parent: null,
-        type: 'folder',
         is_sidebar: true,
       };
       
