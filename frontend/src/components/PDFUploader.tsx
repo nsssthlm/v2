@@ -52,8 +52,30 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
       
       // Använd den givna folderId (mapp-slug) för att säkerställa att filen uppladdas i rätt mapp
       // OBS: I backend-API förväntas filuppladdningar under files/web/[slug]/upload/
+      // Lägg till credentials: 'include' för att skicka med cookies för autentisering
+      // och rätt headers för att hantera CORS-problem och CSRF-token
+      
+      // Hämta först CSRF-token från cookies
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return undefined;
+      };
+      
+      const csrfToken = getCookie('csrftoken');
+      console.log('CSRF-token:', csrfToken);
+      
       const response = await fetch(`/api/files/web/${folderId || 'dokument'}/upload/`, {
         method: 'POST',
+        credentials: 'include',
+        headers: {
+          // Skippa Content-Type header eftersom FormData används
+          // Detta låter webbläsaren sätta rätt boundary för multipart/form-data
+          'Accept': 'application/json',
+          // Lägg till CSRF-token om den finns tillgänglig
+          ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
+        },
         body: formData,
       });
 

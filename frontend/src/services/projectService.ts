@@ -118,9 +118,22 @@ const projectService = {
   // Skapa en standardmapp för ett projekt
   createDefaultFolder: async (projectId: string): Promise<any> => {
     try {
-      // Använd auth-headers för att säkerställa att autentiseringen fungerar
+      // Hämta CSRF-token från cookies
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return undefined;
+      };
+      
+      const csrfToken = getCookie('csrftoken');
+      console.log('CSRF-token för mappskapande:', csrfToken);
+      
+      // Använd både auth-headers och CSRF-token för säkerställa autentisering
       const headers = {
-        ...getAuthHeader()
+        ...getAuthHeader(),
+        'Content-Type': 'application/json',
+        ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
       };
       
       // Förbättrad loggning för debugging
@@ -133,12 +146,24 @@ const projectService = {
         is_sidebar_item: true, // Använd korrekt fältnamn is_sidebar_item (inte is_sidebar)
       };
       
-      const response = await axios.post(`${API_BASE_URL}/api/files/directories/`, folderData, {
-        headers
+      // Använd fetch istället för axios för konsekvent hantering av credentials
+      const response = await fetch(`${API_BASE_URL}/api/files/directories/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify(folderData)
       });
       
-      console.log('Standardmapp skapad:', response.data);
-      return response.data;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Mappskapande misslyckades med status:', response.status, errorText);
+        throw new Error(`Fel vid skapande av mapp: ${response.status} ${errorText}`);
+      }
+      
+      const data = await response.json();
+      
+      console.log('Standardmapp skapad:', data);
+      return data;
     } catch (error) {
       console.error('Fel vid skapande av standardmapp:', error);
       throw error;
