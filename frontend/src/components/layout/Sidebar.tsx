@@ -100,15 +100,10 @@ const FileSystemNode = ({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          // Klick på mappen öppnar mappens innehåll med enkel och direkt navigering
+          // Klick på mappen öppnar mappens innehåll (navigerar till mappens sida)
           if (isFolder && node.slug) {
-            console.log("Klick på mapp:", node.name, "med slug:", node.slug);
-            // Skapa en URL med tidsstämpel för att förhindra caching
-            const timestamp = Date.now();
-            const url = `/folders/${node.slug}?t=${timestamp}`;
-            
-            // Använd direkt window.location.href för garanterad helsida uppdatering
-            window.location.href = url;
+            // Använd React Router istället för window.location för bättre hantering av SPA-navigering
+            window.location.href = `/folders/${node.slug}?t=${Date.now()}`; // Lägger till tidsstämpel för att tvinga omladdning
           }
         }}
         onMouseOver={(e) => {
@@ -526,20 +521,13 @@ const Sidebar = () => {
         // Använd projektets ID för att filtrera mappar
         const directoriesData = await directoryService.getSidebarDirectories(currentProject.id);
         
-        // Kontrollera om data är en array innan vi försöker använda map
-        if (!directoriesData || !Array.isArray(directoriesData)) {
-          console.warn('Data från API är inte en array:', directoriesData);
-          setFilesystemNodes([]);
-          return;
-        }
-        
         // Konvertera från API-format till SidebarFileNode-format
         const sidebarNodes: SidebarFileNode[] = directoriesData.map(dir => ({
-          id: dir.id?.toString() || `temp-${Math.random()}`,  // Konvertera till string-format, med fallback
-          name: dir.name || 'Namnlös mapp',
-          type: (dir.type as 'folder' | 'file') || 'folder',
+          id: dir.id.toString(),  // Konvertera till string-format
+          name: dir.name,
+          type: dir.type as 'folder' | 'file',
           parent_id: dir.parent ? dir.parent.toString() : null,
-          db_id: dir.id || 0,
+          db_id: dir.id,
           slug: dir.slug || undefined
         }));
         

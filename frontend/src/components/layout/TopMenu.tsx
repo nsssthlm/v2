@@ -63,79 +63,17 @@ const TopMenu: React.FC = () => {
     setCurrentProject(project);
     handleProjectMenuClose();
     
-    // Spara valet i både localStorage och sessionStorage för att förhindra utloggning
-    localStorage.setItem('selectedProjectId', project.id);
+    // Sätt en sessionStorage-flagga som vi kan kontrollera för att veta vilket projekt att ladda
     sessionStorage.setItem('selectedProjectId', project.id);
     
-    // Spara även fullständig projektdata
-    localStorage.setItem('currentProject', JSON.stringify(project));
-    sessionStorage.setItem('currentProject', JSON.stringify(project));
-    
-    // Säkerställ att autentiseringsinformation finns i både localStorage och sessionStorage
-    // 1. Samla alla befintliga tokens
-    const localJwtToken = localStorage.getItem('jwt_token');
-    const localAuthToken = localStorage.getItem('auth_token');
-    const localToken = localStorage.getItem('token');
-    const sessionToken = sessionStorage.getItem('current_token');
-    const csrfToken = localStorage.getItem('csrftoken');
-    
-    // 2. Använd den första tillgängliga
-    const bestToken = localJwtToken || localAuthToken || localToken || sessionToken;
-    
-    // 3. Synkronisera token till alla lagringsplatser
-    if (bestToken) {
-      localStorage.setItem('jwt_token', bestToken);
-      localStorage.setItem('auth_token', bestToken);
-      localStorage.setItem('token', bestToken);
-      sessionStorage.setItem('current_token', bestToken);
-      sessionStorage.setItem('jwt_token', bestToken);
-      sessionStorage.setItem('auth_token', bestToken);
-      sessionStorage.setItem('token', bestToken);
-    }
-    
-    // 4. Synkronisera CSRF-token
-    if (csrfToken) {
-      sessionStorage.setItem('csrftoken', csrfToken);
-    }
-    
-    // 5. Synkronisera användardata
-    const userDataLocal = localStorage.getItem('currentUser');
-    const userDataSession = sessionStorage.getItem('currentUser');
-    if (userDataLocal) {
-      sessionStorage.setItem('currentUser', userDataLocal);
-    } else if (userDataSession) {
-      localStorage.setItem('currentUser', userDataSession);
-    }
-    
-    // Använd ett mer säkert sätt att hantera projektbyte utan att ladda om sidan
-    // Detta förhindrar att användaren blir utloggad vid projektbyte
-    try {
-      // Skapa en anpassad händelse som andra komponenter kan lyssna efter
-      const event = new CustomEvent('projectChanged', { detail: project });
-      window.dispatchEvent(event);
-      
-      console.log('Hämtar mappdata från API för projekt:', project.id);
-      
-      // Använd en långsam timeout för att låta tokens synkroniseras
-      setTimeout(() => {
-        // Undvik window.location.href eftersom det laddar om sidan
-        // vilket kan orsaka sessionsförlust i vissa webbläsare
-        if (window.location.pathname.includes('/folders/')) {
-          // Använd history API för navigation utan omladdning
-          window.history.pushState({}, '', '/dashboard');
-          window.dispatchEvent(new PopStateEvent('popstate'));
-        } else {
-          // Tvinga en omrendering av komponenter utan sidladdning
-          const currentPath = window.location.pathname;
-          window.history.pushState({}, '', currentPath === '/' ? '/dashboard' : '/');
-          window.history.pushState({}, '', currentPath);
-          window.dispatchEvent(new PopStateEvent('popstate'));
-        }
-      }, 100);
-    } catch (error) {
-      console.error('Fel vid projektbyte:', error);
-      // Fallback om det inte fungerar - acceptera omladdning som sista utväg
-      window.location.href = '/dashboard';
+    // Ladda om sidan när man byter projekt för att säkerställa att rätt innehåll visas
+    // och för att förhindra att innehåll från föregående projekt visas
+    if (window.location.pathname.includes('/folders/')) {
+      // Om vi är på en mappsida, gå tillbaka till startsidan
+      window.location.href = '/';
+    } else {
+      // Ladda annars om hela sidan för att uppdatera mapparna i sidebaren
+      window.location.reload();
     }
   };
   

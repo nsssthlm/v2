@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { 
   Box, 
   Typography, 
@@ -16,15 +15,12 @@ import {
   Divider,
   Alert
 } from '@mui/joy';
-import { useAuth } from '../../contexts/AuthContext';
+import { loginUser } from '../../utils/authUtils';
 
 // URL till skogsbilden i public-mappen
 const forestImageUrl = '/images/swedish-forest.webp';
 
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const { login, isLoggedIn, user, refreshSession } = useAuth();
-  
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,53 +33,24 @@ const LoginPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [inviteCode, setInviteCode] = useState('');
-  
-  // Kör endast en gång vid mount
-  useEffect(() => {
-    // Vi uppdaterar autentiseringsstatus en gång när komponenten renderas
-    refreshSession();
-  }, []); // Tom beroendematris körs bara en gång vid mount
-  
-  // Om användaren redan är inloggad, navigera till dashboard eller till den sidans som var målet
-  useEffect(() => {
-    if (isLoggedIn) {
-      // Kontrollera om det finns en sparad omdirigeringsväg efter inloggningen
-      const redirectPath = sessionStorage.getItem('redirectAfterLogin');
-      if (redirectPath) {
-        console.log("Omdirigerar efter inloggning till:", redirectPath);
-        sessionStorage.removeItem('redirectAfterLogin'); // Rensa efter användning
-        navigate(redirectPath);
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [isLoggedIn, navigate]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     
-    // Använd login från AuthContext
-    const result = login(username, password);
+    // Använd loginUser från utils/authUtils
+    const result = loginUser(username, password);
     
     setTimeout(() => {
       setIsLoading(false);
       
       if (result.success) {
         // Visa info om inloggad användare
-        console.log(`Inloggad som ${user?.username} med rollen ${user?.role}`);
+        console.log(`Inloggad som ${result.user?.username} med rollen ${result.user?.role}`);
         
-        // Kontrollera om det finns en sparad omdirigeringsväg efter inloggningen
-        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
-        if (redirectPath) {
-          console.log("Omdirigerar efter inloggning till:", redirectPath);
-          sessionStorage.removeItem('redirectAfterLogin'); // Rensa efter användning
-          navigate(redirectPath);
-        } else {
-          // Använd React Router för att navigera vilket bevarar sessionsinformation
-          navigate('/dashboard');
-        }
+        // Redirect till dashboard/hem efter inloggning
+        window.location.href = '/dashboard';
       } else {
         // Visa felmeddelande
         setError(result.message || 'Inloggningen misslyckades');

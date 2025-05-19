@@ -60,14 +60,11 @@ export const loginUser = (username: string, password: string): { success: boolea
     // Spara token i localStorage för att kunna användas vid API-anrop
     localStorage.setItem('jwt_token', fakeJwtToken);
     
-    // Spara användarinformation i både localStorage och sessionStorage för att förhindra utloggning vid projektbyte
-    const userInfo = { 
+    // Spara användarinformation i session storage för att hålla sessionen levande
+    sessionStorage.setItem('currentUser', JSON.stringify({ 
       username: user.username,
       role: user.role 
-    };
-    localStorage.setItem('currentUser', JSON.stringify(userInfo));
-    sessionStorage.setItem('currentUser', JSON.stringify(userInfo));
-    
+    }));
     return { success: true, user };
   }
   
@@ -76,63 +73,19 @@ export const loginUser = (username: string, password: string): { success: boolea
 
 // Kontrollera om användaren är inloggad
 export const isAuthenticated = (): boolean => {
-  // Kontrollera alla möjliga lagringsplatser för inloggningsinformation
-  const checks = [
-    // User data
-    localStorage.getItem('currentUser') !== null,
-    sessionStorage.getItem('currentUser') !== null,
-    
-    // Tokens in different locations
-    localStorage.getItem('jwt_token') !== null,
-    localStorage.getItem('auth_token') !== null,
-    localStorage.getItem('token') !== null,
-    sessionStorage.getItem('jwt_token') !== null,
-    sessionStorage.getItem('auth_token') !== null,
-    sessionStorage.getItem('token') !== null,
-    sessionStorage.getItem('current_token') !== null
-  ];
-  
-  // Om någon av kontrollerna visar inloggad, returnera true
-  return checks.some(check => check === true);
+  return sessionStorage.getItem('currentUser') !== null;
 };
 
 // Hämta nuvarande inloggad användare
 export const getCurrentUser = (): { username: string; role: UserRole } | null => {
-  // Försök först i localStorage (för persistens mellan sessioner)
-  const localUserJson = localStorage.getItem('currentUser');
-  if (localUserJson) {
-    try {
-      return JSON.parse(localUserJson);
-    } catch (e) {
-      console.error('Kunde inte parsa användardata från localStorage', e);
-    }
-  }
-  
-  // Om det inte finns i localStorage, försök i sessionStorage (bakåtkompatibilitet)
-  const sessionUserJson = sessionStorage.getItem('currentUser');
-  if (sessionUserJson) {
-    try {
-      const userData = JSON.parse(sessionUserJson);
-      // Synka till localStorage för framtida användning
-      localStorage.setItem('currentUser', sessionUserJson);
-      return userData;
-    } catch (e) {
-      console.error('Kunde inte parsa användardata från sessionStorage', e);
-    }
-  }
-  
-  return null;
+  const userJson = sessionStorage.getItem('currentUser');
+  return userJson ? JSON.parse(userJson) : null;
 };
 
 // Logga ut användaren
 export const logoutUser = (): void => {
-  // Ta bort från både localStorage och sessionStorage för att säkerställa fullständig utloggning
   sessionStorage.removeItem('currentUser');
-  localStorage.removeItem('currentUser');
   localStorage.removeItem('jwt_token');
-  localStorage.removeItem('token');
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('refresh_token');
 };
 
 // Kontrollera om användaren har en viss roll

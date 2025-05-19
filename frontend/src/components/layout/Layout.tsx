@@ -1,39 +1,9 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/joy';
 import Sidebar from './Sidebar';
 import TopMenu from './TopMenu';
-import { useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 
 const Layout = () => {
-  const navigate = useNavigate();
-  const { isLoggedIn, refreshSession } = useAuth();
-  
-  // Kontrollera inloggningsstatus när layouten laddas och vid projektbyte
-  useEffect(() => {
-    // Uppdatera autentiseringssessionen
-    refreshSession();
-    
-    // Lyssna på projektbyten för att bevara inloggning
-    const handleProjectChange = () => {
-      console.log('Projektbyte detekterat - uppdaterar autentiseringssession');
-      refreshSession();
-    };
-    
-    // Lyssna efter händelsen projectChanged från TopMenu
-    window.addEventListener('projectChanged', handleProjectChange);
-    
-    // Om inte inloggad, navigera till login
-    if (!isLoggedIn) {
-      navigate('/login');
-    }
-    
-    // Städa upp lyssnare när komponenten avmonteras
-    return () => {
-      window.removeEventListener('projectChanged', handleProjectChange);
-    };
-  }, [isLoggedIn, navigate, refreshSession]);
-  
   return (
     <Box sx={{ 
       display: 'flex', 

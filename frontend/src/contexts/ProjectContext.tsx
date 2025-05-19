@@ -7,7 +7,30 @@ export interface Project {
   name: string;
   description: string;
   endDate: string;
+  // Här kan vi lägga till fler fält som är relevanta för projekt i framtiden
 }
+
+// Standardprojekt som är synkroniserade med databasen
+const defaultProjects: Project[] = [
+  {
+    id: '1',
+    name: 'Test projekt',
+    description: 'Ett testprojekt',
+    endDate: '2026-12-31'
+  },
+  {
+    id: '2',
+    name: 'Nya Slussen',
+    description: 'Ombyggnad av Slussen i Stockholm',
+    endDate: '2025-06-30'
+  },
+  {
+    id: '3',
+    name: 'Karlatornet',
+    description: 'Byggnation av Karlatornet i Göteborg',
+    endDate: '2027-12-31'
+  }
+];
 
 // Kontexttyp
 interface ProjectContextType {
@@ -28,118 +51,133 @@ interface ProjectProviderProps {
 
 // ProjectProvider-komponenten som ger tillgång till kontexten
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
-  // Standardprojekt
-  const defaultProject: Project = {
-    id: '1',
-    name: 'Projekt 1',
-    description: 'Ett generellt projekt för att samla dokument',
-    endDate: '2026-12-31'
-  };
-  
-  // State för projekten och laddar-status
-  const [projects, setProjects] = useState<Project[]>([defaultProject]);
-  
-  // Initiera currentProject från localStorage om det finns
-  const [currentProject, setCurrentProjectState] = useState<Project>(() => {
-    // Försök hämta från localStorage först
-    const savedProject = localStorage.getItem('currentProject');
-    if (savedProject) {
-      try {
-        return JSON.parse(savedProject) as Project;
-      } catch (e) {
-        console.error('Kunde inte parsa sparat projekt från localStorage', e);
-      }
-    }
-    return defaultProject;
-  });
-  
-  const [loading, setLoading] = useState(true);
+  // Ladda projekt från databasen
+  const [projects, setProjects] = useState<Project[]>(defaultProjects);
 
-  // Hämta alla projekt från databasen vid uppstart
+  // Hämta alla projekt från databasen vid uppstart med förbättrad felhantering
   useEffect(() => {
     const fetchAllProjects = async () => {
       try {
+        // Hämta projekt från backend-API via vår förbättrade projektservice
         console.log('Försöker hämta projekt från databasen...');
         const projectsData = await projectService.getAllProjects();
         
         if (projectsData && projectsData.length > 0) {
           console.log('Hämtade projekt från databasen:', projectsData);
-          
-          // Uppdatera projektlistan
           setProjects(projectsData);
-          
-          // Hitta rätt projekt att aktivera - använd localStorage istället för sessionStorage
-          // för att behålla valet även efter inloggning
-          const selectedProjectId = localStorage.getItem('selectedProjectId');
+
+          // Uppdatera currentProject baserat på selectedProjectId
+          const selectedProjectId = sessionStorage.getItem('selectedProjectId');
           if (selectedProjectId) {
-            console.log('Hittade sparat projektId i localStorage:', selectedProjectId);
             const selectedProject = projectsData.find(p => p.id === selectedProjectId);
             if (selectedProject) {
-              console.log('Aktiverar sparat projekt:', selectedProject);
+              console.log('Sätter aktivt projekt till:', selectedProject);
               setCurrentProjectState(selectedProject);
-            } else {
-              console.log('Sparat projekt hittades ej, använder första i listan');
-              setCurrentProjectState(projectsData[0]);
             }
-          } else {
-            // Om inget valt projekt, använd det första
-            console.log('Inget sparat projektval, använder första projekt i listan');
-            setCurrentProjectState(projectsData[0]);
+          } 
+          // Annars behåll nuvarande projekt om det finns i listan
+          else if (currentProject && currentProject.id) {
+            const currentInDb = projectsData.find(p => p.id === currentProject.id);
+            if (currentInDb) {
+              setCurrentProjectState(currentInDb);
+            } else {
+              // Fallback till senast skapade projektet om nuvarande inte hittades
+              const latestProject = [...projectsData].sort((a, b) => parseInt(b.id) - parseInt(a.id))[0];
+              setCurrentProjectState(latestProject);
+            }
           }
         } else {
-          // Behåll standardprojektet om inget kommer från API
-          console.log('Inga projekt från API, använder standardprojekt');
+          console.warn('Inga projekt hittades i databasen, använder standardprojekt');
+          // Om API-anropet inte returnerar några projekt, behåll de fördefinierade
         }
       } catch (error) {
         console.error('Fel vid hämtning av projekt:', error);
-        // Behåll standardprojektet vid fel
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchAllProjects();
   }, []);
 
-  // Funktion för att byta aktivt projekt
+  // Ladda aktuellt projekt baserat på selectedProjectId från sessionStorage om det finns
+  const [currentProject, setCurrentProjectState] = useState<Project>(() => {
+    // Kontrollera om det finns ett valt projektid i sessionStorage
+    const selectedProjectId = sessionStorage.getItem('selectedProjectId');
+
+    if (selectedProjectId) {
+      // Försök hitta projektet i vår lista av projekt
+      const selectedProject = projects.find(p => p.id === selectedProjectId);
+      if (selectedProject) {
+        console.log('Använder valt projekt från sessionStorage:', selectedProject);
+        return selectedProject;
+      }
+    }
+
+    // Annars försök ladda senaste valda projekt
+    const savedCurrentProject = sessionStorage.getItem('currentProject');
+    if (savedCurrentProject) {
+      try {
+        const parsed = JSON.parse(savedCurrentProject);
+        const validProject = projects.find(p => p.id === parsed.id);
+        if (validProject) {
+          console.log('Använder senast sparade projekt:', validProject);
+          return validProject;
+        }
+      } catch (e) {
+        console.error('Kunde inte tolka sparat projekt', e);
+      }
+    }
+
+    // Använd första projektet som standard eller senast skapade projektet
+    const sortedProjects = [...projects].sort((a, b) => parseInt(b.id) - parseInt(a.id));
+    const firstProject = sortedProjects[0] || defaultProjects[0];
+    console.log('Använder standardprojekt:', firstProject);
+    return firstProject;
+  });
+
+  // Flagga för att visa när inladdningen är klar
+  const [loading, setLoading] = useState(true);
+
+  // Sätt bara flaggan för när inladdningen är färdig
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
   const setCurrentProject = (project: Project) => {
     console.log('Sätter nytt projekt:', project);
     setCurrentProjectState(project);
-    
-    // Spara både i sessionStorage och localStorage för att säkerställa att
-    // användarens val sparas även om de måste logga in igen
-    localStorage.setItem('currentProject', JSON.stringify(project));
-    localStorage.setItem('selectedProjectId', project.id);
-    console.log('Projektval sparat i localStorage, projektId:', project.id);
-    
-    // Även i sessionStorage för bakåtkompatibilitet
     sessionStorage.setItem('currentProject', JSON.stringify(project));
     sessionStorage.setItem('selectedProjectId', project.id);
 
-    // Uppdatera URL:en utan att ladda om sidan om vi är i en mapp
+    // När projektet byts, rensa tidigare innehåll och uppdatera URL:en
     if (window.location.pathname.includes('/folders/')) {
-      window.history.pushState({}, '', '/');
-      // Utlös en route-ändring event så React Router märker förändringen
-      window.dispatchEvent(new Event('popstate'));
+      console.log('Byter projekt, navigerar till start');
+      window.location.href = '/';
     }
   };
 
-  // Lägg till ett nytt projekt
+  // Lägg till ett nytt projekt till projektkontexten
   const addProject = (project: Project) => {
+    // Lägg till projektet i listan
     const updatedProjects = [...projects, project];
     setProjects(updatedProjects);
+
+    // Byt automatiskt till det nya projektet
     setCurrentProject(project);
+
     console.log('Nytt projekt tillagt:', project);
   };
 
+  // Kontextens värde
+  const value = {
+    currentProject,
+    setCurrentProject,
+    projects,
+    addProject,
+    loading
+  };
+
   return (
-    <ProjectContext.Provider value={{
-      currentProject,
-      setCurrentProject,
-      projects,
-      addProject,
-      loading
-    }}>
+    <ProjectContext.Provider value={value}>
       {children}
     </ProjectContext.Provider>
   );
@@ -149,7 +187,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) =>
 export const useProject = (): ProjectContextType => {
   const context = useContext(ProjectContext);
   if (context === undefined) {
-    throw new Error('useProject måste användas inom en ProjectProvider');
+    throw new Error('useProject must be used within a ProjectProvider');
   }
   return context;
 };

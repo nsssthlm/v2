@@ -64,47 +64,19 @@ const directoryService = {
         return cachedData.data;
       }
       
-      // Skapa en tom array istället för dummydata, enligt användarens önskemål ska inga standardmappar visas
-      const fallbackData = [];
-      
       // Försök med vanlig proxy-anslutning
       try {
         console.log('Hämtar mappdata från API för projekt:', validProjectId);
-        
-        // Sätta specifika headers för att säkerställa att vi får JSON
-        // Korrekt URL-struktur som matchar backend DirectoryViewSet
-        // Baserat på faktiska tester är korrekt URL /api/files/directories/
-        const response = await axios.get(`${API_BASE_URL}/api/files/directories/`, {
-          params: params,
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          // Öka timeout för att ge servern mer tid att svara
-          timeout: 5000
+        const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
+          params: params
         });
-        
-        // Kontrollera att svaret är JSON genom att kontrollera typen
-        if (typeof response.data === 'string') {
-          console.warn('API returnerade en sträng istället för JSON, använder fallback-data');
-          return fallbackData;
-        }
         
         let data;
         // API svarar med en results-array om pagination är aktiverad
-        if (response.data && response.data.results && Array.isArray(response.data.results)) {
+        if (response.data.results) {
           data = response.data.results;
-        } else if (Array.isArray(response.data)) {
-          data = response.data;
         } else {
-          console.warn('API returnerade oväntad datastruktur, använder fallback-data');
-          return fallbackData;
-        }
-        
-        // Om data är en tom array, använd fallback-data för att visa något i UI
-        if (data.length === 0) {
-          console.log('API returnerade en tom array, använder fallback-data');
-          data = fallbackData;
+          data = response.data;
         }
         
         // Spara i cache
@@ -115,10 +87,31 @@ const directoryService = {
         
         return data;
       } catch (proxyError) {
-        console.warn('Kunde inte hämta mappar via proxy, använder fallback-data', proxyError);
+        console.warn('Kunde inte hämta mappar via proxy, försöker med direkt anslutning', proxyError);
         
-        // Returnera fallback-data istället för att försöka med en till anslutning som troligen också misslyckas
-        return fallbackData;
+        // Om det misslyckas, försök med direkt anslutning
+        const directResponse = await axios.get(`${DIRECT_API_URL}/files/directories/`, {
+          params: params,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        let data;
+        if (directResponse.data.results) {
+          data = directResponse.data.results;
+        } else {
+          data = directResponse.data;
+        }
+        
+        // Spara i cache
+        directoryCache[cacheKey] = {
+          data,
+          timestamp: now
+        };
+        
+        return data;
       }
     } catch (error) {
       console.error('Error fetching sidebar directories:', error);
@@ -174,45 +167,17 @@ const directoryService = {
       
       // Försök med API-anropet
       try {
-        // Hämta CSRF-token från cookies
-        const getCookie = (name: string) => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop()?.split(';').shift();
-          return undefined;
-        };
-        
-        const csrfToken = getCookie('csrftoken');
-        console.log('CSRF-token för mappskapande:', csrfToken);
-        
-        // Använd fetch med credentials och CSRF-token för att säkerställa att autentiseringen fungerar
-        console.log('Skapar mapp med URL:', `${API_BASE_URL}/api/files/directories/`);
-        
-        const response = await fetch(`${API_BASE_URL}/api/files/directories/`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
-          },
-          body: JSON.stringify(dirData)
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Mappskapande misslyckades med status:', response.status, errorText);
-          throw new Error(`Kunde inte skapa mappen: ${response.status} ${errorText}`);
-        }
-        
-        const data = await response.json();
-        console.log('Mapp skapad via API:', data);
-        return data;
+        // Vi använder bara den primära metoden nu för att minska komplexiteten
+        const response = await axios.post(`${API_BASE_URL}/files/directories/`, dirData);
+        console.log('Mapp skapad via API:', response.data);
+        return response.data;
       } catch (error: any) {
         console.error('Fel vid kommunikation med backend-API:', error);
         
         // Felmeddelande för användaren
-        console.error('API svarade med fel:', error.message || 'Okänt fel');
+        if (error.response) {
+          console.error('API svarade med fel:', error.response.data);
+        }
         
         // Returnera förkastningen för att hantera i UI
         throw error;
