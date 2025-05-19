@@ -19,6 +19,19 @@ ALLOWED_HOSTS = ['*']  # For development, restrict this in production
 # Tillåt att resurser visas i iframes inom samma domän
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
+# CORS-inställningar för att tillåta alla förfrågningar i utvecklingsmiljö
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# Tillåt alla CSRF-förfrågningar utan verifiering i utvecklingsmiljö
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.replit.dev',
+    'https://*.replit.app',
+    'http://localhost:*',
+    'http://127.0.0.1:*',
+    'http://0.0.0.0:*'
+]
+
 
 # Application definition
 
