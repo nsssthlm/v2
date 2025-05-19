@@ -18,8 +18,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import UploadIcon from '@mui/icons-material/Upload';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import EmbeddedPDFViewer from './EmbeddedPDFViewer';
-import pdfjs from 'pdfjs-dist';
+import SimplePDFViewer from './SimplePDFViewer';
 
 interface PDFDialogProps {
   open: boolean;
@@ -348,51 +347,10 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     position: 'relative'
                   }}
                 >
-                  {/* Testa direktvisning med iframe för att få bättre PDF-rendering */}
-                  <iframe
-                    src={pdfUrl}
-                    width="100%"
-                    height="100%"
-                    style={{
-                      border: 'none',
-                      flexGrow: 1,
-                      minHeight: '500px',
-                      background: '#fff'
-                    }}
-                  ></iframe>
-                  
-                  {/* Fallback om iframe inte fungerar */}
-                  <Box 
-                    sx={{ 
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 3,
-                      bgcolor: 'background.paper',
-                      zIndex: -1
-                    }}
-                  >
-                    <Typography level="h4" sx={{ mb: 2 }}>PDF-visning</Typography>
-                    <Typography sx={{ mb: 3, textAlign: 'center' }}>
-                      Din webbläsare kan inte visa PDF-filer direkt.
-                    </Typography>
-                    <Button
-                      component="a"
-                      href={pdfUrl}
-                      target="_blank"
-                      variant="solid"
-                      color="primary"
-                      size="lg"
-                    >
-                      Öppna i ny flik
-                    </Button>
-                  </Box>
+                  <SimplePDFViewer 
+                    pdfUrl={pdfUrl} 
+                    filename={filename} 
+                  />
                 </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
