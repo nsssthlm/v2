@@ -149,37 +149,9 @@ const projectService = {
         endDate: data.end_date || data.endDate || ''
       };
       
-      // Skapa en standardmapp för projektet med direkt fetch-anrop
-      try {
-        // Skapa standardmappen direkt här för att använda samma sessionkontext
-        const folderData = {
-          name: 'Dokument',
-          project: createdProject.id,
-          parent: null,
-          is_sidebar_item: true 
-        };
-        
-        const folderResponse = await fetch(`${API_BASE_URL}/api/files/directories/`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
-          },
-          body: JSON.stringify(folderData)
-        });
-        
-        if (folderResponse.ok) {
-          const folderData = await folderResponse.json();
-          console.log('Standardmapp skapad direkt:', folderData);
-        } else {
-          const folderErrorText = await folderResponse.text();
-          console.warn('Kunde inte skapa standardmapp direkt:', folderResponse.status, folderErrorText);
-        }
-      } catch (folderError) {
-        console.warn('Kunde inte skapa standardmapp:', folderError);
-      }
+      // Ta bort automatisk skapande av standardmapp enligt användarens önskemål
+      // Nya projekt ska inte ha några mappar som standard, användaren skapar själv mappar vid behov
+      console.log('Nytt projekt skapat utan standardmappar enligt krav');
       
       return createdProject;
     } catch (error) {
@@ -188,42 +160,32 @@ const projectService = {
     }
   },
   
-  // Skapa en standardmapp för ett projekt
-  createDefaultFolder: async (projectId: string): Promise<any> => {
+  // Metod för att skapa mappar i projekt (ska endast användas när användaren explicit ber om det)
+  createFolder: async (projectId: string, folderName: string, parentId: number | null = null, isSidebarItem: boolean = true): Promise<any> => {
     try {
       // Hämta CSRF-token från cookies
-      const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift();
-        return undefined;
-      };
-      
-      const csrfToken = getCookie('csrftoken');
+      const csrfToken = getCsrfToken();
       console.log('CSRF-token för mappskapande:', csrfToken);
       
-      // Använd både auth-headers och CSRF-token för säkerställa autentisering
-      const headers = {
-        ...getAuthHeader(),
-        'Content-Type': 'application/json',
-        ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
-      };
-      
       // Förbättrad loggning för debugging
-      console.log('Skapar standardmapp för projekt:', projectId);
+      console.log('Skapar mapp för projekt:', projectId, 'med namn:', folderName);
       
       const folderData = {
-        name: 'Dokument',
+        name: folderName,
         project: projectId,
-        parent: null,
-        is_sidebar_item: true, // Använd korrekt fältnamn is_sidebar_item (inte is_sidebar)
+        parent: parentId,
+        is_sidebar_item: isSidebarItem,
       };
       
-      // Använd fetch istället för axios för konsekvent hantering av credentials
+      // Använd fetch med credentials för att säkerställa att sessionen skickas med
       const response = await fetch(`${API_BASE_URL}/api/files/directories/`, {
         method: 'POST',
         credentials: 'include',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {})
+        },
         body: JSON.stringify(folderData)
       });
       
@@ -235,10 +197,10 @@ const projectService = {
       
       const data = await response.json();
       
-      console.log('Standardmapp skapad:', data);
+      console.log('Mapp skapad:', data);
       return data;
     } catch (error) {
-      console.error('Fel vid skapande av standardmapp:', error);
+      console.error('Fel vid skapande av mapp:', error);
       throw error;
     }
   }
