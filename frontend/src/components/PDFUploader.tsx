@@ -63,9 +63,13 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         // Stäng först dialogrutan för uppladdning
         handleClose();
         
-        // Visa direkt PDF:en i en dialogruta
+        // Skapa en temporär Blob URL för att visa PDF direkt
+        // Detta låter oss visa PDF:en även om API:et har komplicerade URL:er
+        const fileObjectUrl = URL.createObjectURL(file);
+        
+        // Visa direkt PDF:en i en dialogruta med den lokala URL:en
         openPDFDialog({
-          pdfUrl: data.file_url || data.url || `/media/${data.filepath}`,
+          pdfUrl: fileObjectUrl,
           filename: file.name,
           fileId: data.id,
           folderId: folderId as number | null,

@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from 'react';
-import DirectPDFDialog from '../components/DirectPDFDialog';
+import BasicPDFDialog from '../components/BasicPDFDialog';
 
 // Interface för PDF-dialog state
 interface PDFDialogState {
@@ -36,10 +36,21 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
   const openPDFDialog = (params: { pdfUrl: string; filename: string; fileId?: string | number; folderId?: number | null; projectId?: number | string | null }) => {
     console.log('Öppnar PDF:', params.pdfUrl, params.filename, 'projektID:', params.projectId, 'mappID:', params.folderId);
     
-    // Behåll den ursprungliga URL:en som vi får från API:et
-    // PDF-visaren kommer att hantera URL:en korrekt utan extra ändringar
+    // Hantera olika typer av URL:er
     let pdfApiUrl = params.pdfUrl;
-    console.log('Öppnar PDF med original URL:', pdfApiUrl, params.filename);
+    
+    // Om URL:en är en relativ sökväg, lägg till basURL:en
+    if (pdfApiUrl && !pdfApiUrl.startsWith('http') && !pdfApiUrl.startsWith('/')) {
+      pdfApiUrl = `/${pdfApiUrl}`;
+    }
+    
+    // Om URL:en innehåller "0.0.0.0:8001", ersätt med window.location.origin
+    if (pdfApiUrl && pdfApiUrl.includes('0.0.0.0:8001')) {
+      const path = pdfApiUrl.split('0.0.0.0:8001')[1];
+      pdfApiUrl = `${window.location.origin}${path}`;
+    }
+    
+    console.log('Öppnar PDF med URL:', pdfApiUrl, params.filename);
     
     setDialogState({
       isOpen: true,
@@ -60,13 +71,11 @@ export function PDFDialogProvider({ children }: { children: ReactNode }) {
     <PDFDialogContext.Provider value={{ dialogState, openPDFDialog, closePDFDialog }}>
       {children}
       {dialogState.isOpen && dialogState.pdfUrl && (
-        <DirectPDFDialog 
+        <BasicPDFDialog 
           open={dialogState.isOpen} 
           onClose={closePDFDialog}
           pdfUrl={dialogState.pdfUrl}
           filename={dialogState.filename || 'PDF-dokument'}
-          projectId={dialogState.projectId}
-          folderId={dialogState.folderId}
         />
       )}
     </PDFDialogContext.Provider>
