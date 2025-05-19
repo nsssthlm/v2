@@ -23,14 +23,13 @@ import CalendarPage from './pages/dashboard/CalendarPage';
 import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
 
+// PDF hantering
+import PDFViewerPage from './pages/PDFViewerPage';
+import SimplePDFPage from './pages/SimplePDFPage';
+import SimpleDirectPDFPage from './pages/SimpleDirectPDFPage';
+
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
-
-// Other pages
-import ComingSoonPage from './pages/ComingSoonPage';
-
-// Fristående PDF-visare
-import DirectPDFView from './pages/pdf/DirectPDFView';
 
 // The main App component doesn't access context directly
 function App() {
@@ -52,9 +51,6 @@ function App() {
               {/* Auth routes */}
               <Route path="/login" element={<LoginPage />} />
               
-              {/* Fristående PDF-visare utan layout */}
-              <Route path="/view-pdf/:id" element={<DirectPDFView />} />
-              
               {/* Protected routes with layout */}
               <Route element={<Layout />}>
                 <Route path="dashboard" element={<Dashboard />} />
@@ -68,6 +64,11 @@ function App() {
                 {/* Folder routes */}
                 <Route path="folders" element={<FolderListPage />} />
                 <Route path="folders/:slug" element={<FolderPageNew />} />
+                
+                {/* Nya dedikerade PDF-viewer sidor */}
+                <Route path="pdf-viewer" element={<PDFViewerPage />} />
+                <Route path="simple-pdf" element={<SimplePDFPage />} />
+                <Route path="direct-pdf" element={<SimpleDirectPDFPage />} />
                 
                 {/* Vault routes */}
                 <Route path="vault">
@@ -90,6 +91,12 @@ function App() {
   );
 }
 
-// Vi använder nu den importerade ComingSoonPage-komponenten från './pages/ComingSoonPage'
+// Simple component to show for routes not yet implemented
+const ComingSoonPage = ({ title }: { title: string }) => (
+  <div style={{ padding: '20px' }}>
+    <h1>{title}</h1>
+    <p>Denna sida är under utveckling och kommer snart.</p>
+  </div>
+);
 
 export default App;
