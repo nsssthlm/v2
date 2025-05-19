@@ -23,5 +23,5 @@ urlpatterns = [
     path('web/<str:project_slug>/data/', views.ProjectDataView.as_view(), name='project_data_api'),
     
     # Projektsida med nytt format för att matcha frontend-anrop
-    path('projects/<slug:project_slug>/data/', views.ProjectDataView.as_view(), name='project_data_api_alt'),t'),
+    path('projects/<slug:project_slug>/data/', views.ProjectDataView.as_view(), name='project_data_api_alt'),
 ]
