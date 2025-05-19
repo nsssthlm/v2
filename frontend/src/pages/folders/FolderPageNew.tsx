@@ -312,8 +312,12 @@ const FolderPageNew = () => {
     }
     
     console.log("Använder full URL:", fullUrl);
-    setSelectedPdf({ url: fullUrl, name: fileName });
-    setPdfDialogOpen(true);
+    
+    setPdfDialogData({
+      open: true,
+      pdfUrl: fullUrl, // Använd den bearbetade URL:en direkt
+      title: fileName
+    });
   };
 
   if (loading) {

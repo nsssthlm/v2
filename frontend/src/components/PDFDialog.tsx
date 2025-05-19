@@ -326,8 +326,9 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                     position: 'relative'
                   }}
                 >
-                  <object
-                    data={pdfUrl}
+                  {/* Direkt inbäddad PDF med embed-tag som funkar bättre i vissa miljöer */}
+                  <embed
+                    src={pdfUrl}
                     type="application/pdf"
                     width="100%"
                     height="100%"
@@ -337,9 +338,38 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
                       minHeight: '500px',
                       background: '#fff'
                     }}
-                  >
-                    <p>Din webbläsare kan inte visa PDF-filer direkt. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen</a></p>
-                  </object>
+                  />
+                  
+                  {/* Reservlösning om embed inte fungerar */}
+                  <Box sx={{ 
+                    position: 'absolute', 
+                    top: '50%', 
+                    left: '50%', 
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    p: 2,
+                    borderRadius: 'md',
+                    display: 'none',
+                    className: 'pdf-fallback'
+                  }}>
+                    <Typography>Kunde inte visa PDF-filer direkt. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen</a></Typography>
+                  </Box>
+                  
+                  {/* Script för att kontrollera om PDF kan visas */}
+                  <iframe 
+                    style={{ display: 'none' }} 
+                    onLoad={() => {
+                      const fallbackEl = document.querySelector('.pdf-fallback') as HTMLElement;
+                      if (fallbackEl) {
+                        setTimeout(() => {
+                          const embedEl = document.querySelector('embed[type="application/pdf"]') as HTMLElement;
+                          if (embedEl && embedEl.clientHeight < 50) {
+                            fallbackEl.style.display = 'block';
+                          }
+                        }, 1000);
+                      }
+                    }}
+                  />
                 </Box>
                 
                 {/* Gröna sidramen för designen som matchar bild 2 */}
