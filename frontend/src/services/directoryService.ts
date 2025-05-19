@@ -81,8 +81,8 @@ const directoryService = {
         
         // Sätta specifika headers för att säkerställa att vi får JSON
         // Korrekt URL-struktur som matchar backend DirectoryViewSet
-        // Notera att i urls.py registreras DirectoryViewSet till 'directories'
-        const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
+        // Baserat på faktiska tester är korrekt URL /api/files/directories/
+        const response = await axios.get(`${API_BASE_URL}/api/files/directories/`, {
           params: params,
           headers: {
             'Accept': 'application/json',
