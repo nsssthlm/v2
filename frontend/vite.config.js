@@ -33,6 +33,11 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-    allowedHosts: ["3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev"]
+    allowedHosts: [
+      "3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev",
+      "valvxv1.replit.app",
+      ".replit.app",
+      ".replit.dev"
+    ]
   },
 });
