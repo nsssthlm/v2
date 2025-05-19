@@ -23,6 +23,9 @@ urlpatterns = [
     # Direktåtkomst till fil via ID
     path('direct/<int:file_id>/', web_api.direct_file_download, name='direct_file_download'),
     
+    # Ny endpoint för att hämta fil-innehåll (PDF) via ID
+    path('get-file-content/<str:file_id>/', web_api.get_file_content, name='get_file_content'),
+    
     # Direktåtkomst till PDF-fil via sökväg i media-katalogen (utan avslutande /)
     path('pdf-media/<path:file_path>', web_api.serve_pdf_file, name='serve_pdf_file'),
     

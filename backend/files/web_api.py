@@ -290,3 +290,48 @@ def delete_file(request, file_id):
         return Response({"status": "success", "message": f"Fil {file_id} har raderats"}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_file_content(request, file_id):
+    """
+    API-endpoint för att hämta en PDF-fils innehåll direkt via ID.
+    Stödjer strömning av PDF-filer för inline-visning i webbläsare.
+    """
+    try:
+        # Hämta filen från databasen
+        file_obj = get_object_or_404(File, id=file_id)
+        file_path = file_obj.file.path
+        
+        # Kontrollera att filen finns på disken
+        if not os.path.exists(file_path):
+            return Response({"error": "Filen hittades inte på disken"}, status=404)
+        
+        # Returnera filen som PDF med öppnad filestream
+        from django.http import FileResponse
+        response = FileResponse(
+            open(file_path, 'rb'),
+            content_type='application/pdf'
+        )
+        
+        # Sätt headers för korrekt PDF-visning och caching
+        response['Content-Disposition'] = f'inline; filename="{file_obj.name}"'
+        
+        # Förbättrad cachehantering för PDF-filer
+        response['Cache-Control'] = 'no-store, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        
+        # Tillåt embedding i iframe och cross-origin access
+        response.headers.pop('X-Frame-Options', None)
+        response['Access-Control-Allow-Origin'] = '*'
+        
+        print(f"Levererar PDF-fil via get_file_content: {file_path}")
+        return response
+        
+    except File.DoesNotExist:
+        return Response({"error": "Filen hittades inte i databasen"}, status=404)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=500)
