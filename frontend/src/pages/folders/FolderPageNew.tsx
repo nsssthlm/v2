@@ -223,22 +223,22 @@ const FolderPageNew = () => {
       const response = await axios.delete(`${API_BASE_URL}/files/directories/${directoryId}/`);
       console.log("Svar från radering av mapp:", response.data);
       
+      // Stäng dialogrutan
+      setDeleteFolderDialogOpen(false);
+      
       // Visa meddelande om lyckad radering
       alert('Mappen och alla dess innehåll har raderats');
       
-      // Rensa cachen
-      Object.keys(folderDataCache).forEach(key => {
-        if (key.startsWith(slug) || key === slug) {
-          delete folderDataCache[key];
-        }
-      });
+      // Rensa alla mappcache
+      localStorage.removeItem('folderDataCache');
       
-      // Navigera tillbaka till överliggande mapp eller start
-      if (folderData?.parent_slug) {
-        window.location.href = `/folders/${folderData.parent_slug}`;
-      } else {
-        window.location.href = '/folders';
-      }
+      // Navigera med page reload för att säkerställa att data laddas om
+      const targetUrl = folderData?.parent_slug 
+        ? `/folders/${folderData.parent_slug}` 
+        : '/folders';
+      
+      // Tvinga en fullständig omladdning av sidan
+      window.location.replace(targetUrl);
     } catch (err: any) {
       console.error('Fel vid radering av mapp:', err);
       alert(`Kunde inte radera mappen: ${err.message || 'Okänt fel'}`);
@@ -466,7 +466,7 @@ const FolderPageNew = () => {
       <Modal open={deleteFolderDialogOpen} onClose={() => setDeleteFolderDialogOpen(false)}>
         <ModalDialog variant="outlined" role="alertdialog">
           <DialogTitle>
-            <Typography level="h4" color="danger">Ta bort mapp</Typography>
+            Ta bort mapp
           </DialogTitle>
           <ModalClose />
           <DialogContent>
