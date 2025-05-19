@@ -21,6 +21,25 @@ interface PDFJSViewerProps {
 }
 
 // Hjälpfunktion för att kontrollera om en URL pekar till en extern domän
+const constructPdfUrl = (url: string) => {
+  // If it's already a full URL, return it
+  if (url.startsWith('http')) return url;
+  
+  // Add API prefix if needed
+  if (!url.startsWith('/api/')) {
+    url = `/api/${url}`;
+  }
+  
+  // Add auth token
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    const separator = url.includes('?') ? '&' : '?';
+    url = `${url}${separator}token=${token}`;
+  }
+  
+  return url;
+};
+
 const isExternalUrl = (url: string) => {
   if (!url.startsWith('http')) return false;
   try {
