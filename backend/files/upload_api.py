@@ -141,7 +141,7 @@ def upload_file(request):
             uploaded_by=user,
             directory=directory,
             project=project,
-            mimetype='application/pdf'
+            content_type='application/pdf'
         )
         
         # Returnera fileinfo inklusive URL för att visa filen

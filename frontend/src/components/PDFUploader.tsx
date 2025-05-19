@@ -59,13 +59,19 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
         const data = await response.json();
         console.log('Uppladdning lyckades:', data);
         
-        // Skapa en temporär lokal URL för direkt förhandsgranskning
-        const fileURL = URL.createObjectURL(file);
-        
-        // Öppna den uppladdade PDF:en direkt i ett nytt fönster
-        window.open(fileURL, '_blank');
-        
+        // Stäng uppladdningsdialogrutan
         handleClose();
+        
+        // Öppna PDF-filen direkt i vår inbyggda PDF-visare
+        if (data.file_url) {
+          openPDFDialog({
+            pdfUrl: data.file_url,
+            title: data.name || file.name,
+            description: data.description || description
+          });
+        }
+        
+        // Anropa callback om tillhandahållen
         if (onUploadSuccess) {
           onUploadSuccess();
         }
