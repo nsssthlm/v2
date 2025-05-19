@@ -24,6 +24,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FolderIcon from '@mui/icons-material/Folder';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
+import SimpleFileUploader from '../../components/SimpleFileUploader';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -58,10 +59,9 @@ interface FileRowProps {
   id: string;
   fileUrl: string;
   onDelete?: (id: string) => void;
-  onPdfClick: (url: string, name: string) => void;
 }
 
-const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, status, id, fileUrl, onDelete, onPdfClick }: FileRowProps) => {
+const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, status, id, fileUrl, onDelete }: FileRowProps) => {
   return (
     <tr>
       <td style={{ padding: '12px 8px' }}>
@@ -69,13 +69,8 @@ const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, s
           sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 1,
-            cursor: 'pointer',
-            '&:hover': {
-              color: 'primary.main'
-            }
+            gap: 1
           }}
-          onClick={() => onPdfClick(fileUrl, name)}
         >
           <Box component="span" sx={{ color: 'primary.500' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -361,13 +356,10 @@ const FolderPageNew = () => {
           sx={{ width: 300 }}
         />
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            size="sm"
-            color="primary"
-            onClick={() => setUploadDialogOpen(true)}
-          >
-            Ladda upp fil
-          </Button>
+          <SimpleFileUploader
+            folderId={slug}
+            onUploadSuccess={handleUploadSuccess}
+          />
           <Button 
             size="sm"
             variant="soft"
