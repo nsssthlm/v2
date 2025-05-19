@@ -80,7 +80,9 @@ const directoryService = {
         console.log('Hämtar mappdata från API för projekt:', validProjectId);
         
         // Sätta specifika headers för att säkerställa att vi får JSON
-        const response = await axios.get(`${API_BASE_URL}/files/directories/`, {
+        // Ändrad URL-struktur för att anpassa till backend-API:et
+        // I backend finns en separat web-route för mappar
+        const response = await axios.get(`${API_BASE_URL}/files/web/`, {
           params: params,
           headers: {
             'Accept': 'application/json',

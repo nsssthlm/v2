@@ -51,7 +51,8 @@ const PDFUploader = ({ folderId, onUploadSuccess }: PDFUploaderProps) => {
       console.log(`Laddar upp fil till mapp: ${folderId}`);
       
       // Använd den givna folderId (mapp-slug) för att säkerställa att filen uppladdas i rätt mapp
-      const response = await fetch(`/api/files/upload/?directory_slug=${folderId}`, {
+      // OBS: I backend-API förväntas filuppladdningar under files/web/[slug]/upload/
+      const response = await fetch(`/api/files/web/${folderId || 'dokument'}/upload/`, {
         method: 'POST',
         body: formData,
       });
