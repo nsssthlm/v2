@@ -26,10 +26,21 @@ const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({ pdfUrl, filename }) =
     
     // Om i Replit-miljö, använd speciell hantering för PDF-filer
     if (window.location.hostname.includes('replit')) {
-      // För API-URL från backend, lägg till direct=true för att få direkt åtkomst till filen
-      if (finalUrl.includes('/api/files/web/')) {
-        finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}direct=true`;
-        console.log("Lagt till direct=true parameter:", finalUrl);
+      // För API-URL från backend, konvertera till media URL för att få direkt åtkomst till filen
+      if (finalUrl.includes('/api/files/web/') && finalUrl.includes('project_files/')) {
+        // Extrahera sökvägen från project_files och framåt
+        const pathMatch = finalUrl.match(/project_files\/.*\.pdf/);
+        if (pathMatch) {
+          // Skapa direkt länk till media-filen
+          const mediaPath = pathMatch[0];
+          // Använd proxy eller direkt URL beroende på miljö
+          finalUrl = `${window.location.protocol}//${window.location.host}/proxy/3000/media/${mediaPath}`;
+          console.log("Konverterad till direkt media URL:", finalUrl);
+        } else {
+          // Fallback: lägg till direct=true parameter
+          finalUrl = `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}direct=true`;
+          console.log("Lagt till direct=true parameter (fallback):", finalUrl);
+        }
       }
     }
     
