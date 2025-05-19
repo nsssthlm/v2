@@ -270,57 +270,14 @@ const FolderPageNew = () => {
   const handlePdfClick = (fileUrl: string, fileName: string) => {
     console.log("Öppnar PDF:", fileUrl, fileName);
     
-    // Extrahera den faktiska sökvägen från URL:en
-    let fullUrl = fileUrl;
+    // För uppladdade filer använder vi direkt API-URL för att få PDF-innehållet
+    // Detta säkerställer att vi får rätt innehåll oavsett miljö (Replit eller lokal)
+    const directUrl = fileUrl;
     
-    // Generera korrekt bas-URL för servern
-    // Vi behöver använda API_BASE_URL:s bas för att hantera både lokala och Replit-miljöer korrekt
-    let serverBaseUrl = window.location.origin;
+    console.log("Använder direkt PDF URL:", directUrl);
     
-    // I utvecklingsmiljön, särskilt hos Replit, behöver vi vara säkra på att använda backend-serverns URL
-    if (API_BASE_URL.startsWith('/api')) {
-      // Om vi använder relativ URL, behåll window.location.origin
-      serverBaseUrl = window.location.origin;
-    } else if (API_BASE_URL.includes('localhost')) {
-      // För localhost, använd port 8001 eftersom det är där Django-servern körs
-      serverBaseUrl = 'http://localhost:8001';
-    } else if (API_BASE_URL.includes('0.0.0.0')) {
-      // Om vi använder 0.0.0.0, behöver vi ersätta det med korrekt IP
-      serverBaseUrl = 'http://0.0.0.0:8001';
-    }
-    
-    console.log("Använder server URL:", serverBaseUrl);
-    
-    // Kontrollera om det är en API-URL från web_api.py där vi får komplett sökväg till filen
-    if (fileUrl.includes('/api/files/web/')) {
-      // Hitta vilken del av URL:en som innehåller project_files
-      if (fileUrl.includes('project_files/')) {
-        // Extrahera sökvägen från project_files och framåt
-        const pathFromProject = fileUrl.substring(fileUrl.indexOf('project_files/'));
-        // Använd server base URL och bygg upp komplett mediasökväg
-        fullUrl = `${serverBaseUrl}/media/${pathFromProject}`;
-      } else {
-        // Om URL:en inte innehåller project_files, använd sista delen som filnamn
-        const parts = fileUrl.split('/');
-        const filename = parts[parts.length - 1];
-        // Använd server base URL och bygg upp komplett mediasökväg
-        fullUrl = `${serverBaseUrl}/media/project_files/${filename}`;
-      }
-    }
-    // Kontrollera om den innehåller media/ - det är en korrekt sökväg
-    else if (fileUrl.includes('media/')) {
-      const mediaPath = fileUrl.substring(fileUrl.indexOf('media/'));
-      fullUrl = `${serverBaseUrl}/${mediaPath}`;
-    } 
-    // För alla andra typer av URL:er
-    else if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
-      fullUrl = `${API_BASE_URL}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
-    }
-    
-    console.log("Använder full URL:", fullUrl);
-    
-    // Öppna PDF i dialogrutan
-    setSelectedPdf({ url: fullUrl, name: fileName });
+    // Öppna PDF i dialogrutan med direktlänk till API:et
+    setSelectedPdf({ url: directUrl, name: fileName });
     setPdfDialogOpen(true);
   };
 

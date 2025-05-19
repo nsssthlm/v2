@@ -10,17 +10,32 @@ interface SimplePDFViewerProps {
  * En förenklad PDF-visare som använder iframe för bästa kompatibilitet
  */
 const SimplePDFViewer: React.FC<SimplePDFViewerProps> = ({ pdfUrl, filename }) => {
+  // Bearbeta URL till ett format som kan visas i iframe
+  const processedUrl = React.useMemo(() => {
+    // För API-URL från backend, konvertera till media URL för direkt nedladdning
+    if (pdfUrl && pdfUrl.includes('/api/files/web/')) {
+      // Endast för Replit-miljö, anpassa URL för att få direkt åtkomst till API
+      if (window.location.hostname.includes('replit')) {
+        // Använd en direkt URL till PDF-filen via API:et
+        return `${pdfUrl}?direct=true`;
+      }
+    }
+    return pdfUrl;
+  }, [pdfUrl]);
+  
   return (
     <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
       <Box sx={{ width: '100%', height: '100%' }}>
+        {/* Använd direkt länk i iframe för att visa PDF */}
         <iframe
-          src={pdfUrl}
+          src={`${processedUrl}#view=FitH`}
           title={filename}
           width="100%"
           height="100%"
           style={{
-            border: 'none',
-            minHeight: '500px'
+            border: 'none', 
+            minHeight: '500px',
+            background: 'white'
           }}
         />
       </Box>

@@ -51,19 +51,14 @@ const PDFDialog = ({ open, onClose, pdfUrl, filename }: PDFDialogProps) => {
   
   // Konvertera API-URL till en direkt länk till PDF-filen
   const getDirectPdfUrl = (url: string): string => {
-    // Om URL:en redan innehåller media/ så är den direkt användbar
-    if (url.includes('/media/')) {
-      return url;
-    }
+    // Om vi har en direkt URL, använd den som den är
+    if (!url) return '';
     
-    // Om det är en API-URL från backend som innehåller PDF-filnamnet
+    // För API-länkar, gör dem direkta genom att lägga till ?direct=true
+    // Detta gör att Django-backend skickar filen direkt istället för JSON
     if (url.includes('/api/files/web/')) {
-      // Extrahera filnamnet från URL:en
-      const parts = url.split('/');
-      const filename = parts[parts.length - 1];
-      
-      // Skapa direktlänk till filen i media-mappen
-      return url;
+      // Lägg till direct=true för att säga åt backend att skicka filen direkt
+      return `${url}${url.includes('?') ? '&' : '?'}direct=true`;
     }
     
     // Standardfall, returnera URL:en oförändrad
