@@ -49,16 +49,24 @@ const FolderPage = () => {
   const { openPDFDialog } = usePDFDialog();
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; name: string, folderId: string } | null>(null);
   
-  // Hantera klick på PDF-filer - öppna i vår dialogruta
+  // Projektkontexten för nuvarande användare
+  const projectContext = useProject();
+  
+  // Hantera klick på PDF-filer - öppna i vår förbättrade dialogruta
   const handlePdfClick = (fileUrl: string, fileName: string, fileId: string) => {
-    console.log("Öppnar PDF i dialog:", fileUrl, fileName, "FileID:", fileId);
+    console.log("Öppnar PDF:", fileUrl, fileName, "FileID:", fileId);
     
-    // VIKTIG ÄNDRING: Vi använder den exakta URL-strukturen enligt instruktionerna
-    // Denna URL går direkt till API:et för att hämta PDF-innehåll
-    const pdfUrl = `/api/pdf/${fileId}/content/`;
-    console.log("Använder korrekt PDF API URL:", pdfUrl);
+    // Använd den direkta filsökvägen för bättre kompatibilitet
+    // Detta är den ursprungliga backend URL:en som fungerar bättre för vissa webbläsare
+    const pdfUrl = fileUrl;
+    console.log("Använder final PDF URL:", pdfUrl);
     
-    // Sätt selected PDF för att visa i vår SimplePDFViewer
+    // Logga projektkontext för felsökning
+    console.log("PDF Debug:", { 
+      currentProject: projectContext.currentProject 
+    });
+    
+    // Sätt selected PDF för att visa i ReliablePDFDialog som har bättre stöd
     setSelectedPdf({
       url: pdfUrl,
       name: fileName,
@@ -296,7 +304,7 @@ const FolderPage = () => {
               onClose={() => setSelectedPdf(null)}
               pdfUrl={selectedPdf.url}
               filename={selectedPdf.name}
-              folderId={selectedPdf.folderId}
+              folderId={parseInt(selectedPdf.folderId, 10) || null}
             />
           )}
         </Box>
