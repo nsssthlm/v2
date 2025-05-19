@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -36,46 +36,14 @@ interface FolderData {
   }[];
 }
 
-/**
- * Enkel mappvisningskomponent utan beroende av komplexa API-anrop
- */
-const SimpleFolderView = () => {
+// Enklare mappvisningskomponent
+const BasicFolderView: React.FC = () => {
   const { slug = '' } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   const [loading, setLoading] = useState(true);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Hämta PDF-filer för den aktuella mappen
-  const fetchPDFFiles = useCallback(async (folderSlug: string) => {
-    try {
-      // Försök hämta PDF-filer i denna mapp
-      const response = await fetch(`/api/files/web/${folderSlug}/data/`);
-      
-      if (response.ok) {
-        const text = await response.text();
-        try {
-          const data = JSON.parse(text);
-          console.log('Hämtade filer för mapp:', data);
-          
-          // Om vi har filer i svaret, använd dem
-          if (data && data.files) {
-            return data.files;
-          }
-        } catch (e) {
-          console.error('Kunde inte tolka filsvar för mapp:', e);
-        }
-      } else {
-        console.error('Fel vid hämtning av filer:', response.status);
-      }
-    } catch (e) {
-      console.error('Fel vid filhämtning:', e);
-    }
-    
-    // Returnera tom array om vi inte kunde hämta filer
-    return [];
-  }, []);
 
   // Ladda mappdata när komponenten mountas
   useEffect(() => {
@@ -87,61 +55,65 @@ const SimpleFolderView = () => {
       return;
     }
 
-    console.log('SimpleFolderView: Laddar data för mapp', slug);
+    console.log('BasicFolderView: Laddar data för mapp', slug);
     setLoading(true);
     setError(null);
 
     const loadFolderData = async () => {
-      // Använd statisk data för kända mappar
-      if (slug === '6789-72') {
-        // Hämta eventuella filer specifikt för undermappen
-        const files = await fetchPDFFiles(slug);
+      try {
+        let files: any[] = [];
         
-        setFolderData({
-          name: '6789',
-          slug: '6789-72',
-          description: null,
-          page_title: '6789',
-          subfolders: [],
-          files: files,
-          parent_name: '999999',
-          parent_slug: '999999-71'
-        });
-        setLoading(false);
-      } 
-      else if (slug === '999999-71') {
-        // Hämta eventuella filer specifikt för huvudmappen
-        const files = await fetchPDFFiles(slug);
-        
-        setFolderData({
-          name: '999999',
-          slug: '999999-71',
-          description: null,
-          page_title: '999999',
-          subfolders: [{ name: '6789', slug: '6789-72' }],
-          files: files
-        });
-        setLoading(false);
-      }
-      else {
+        // Försök hämta filer om möjligt
         try {
+          const filesResponse = await fetch(`/api/files/web/${slug}/data/`);
+          if (filesResponse.ok) {
+            const filesData = await filesResponse.json();
+            if (filesData && filesData.files) {
+              files = filesData.files;
+            }
+          }
+        } catch (e) {
+          console.error('Kunde inte hämta filer:', e);
+        }
+        
+        // Hämta mappstruktur
+        if (slug === '6789-72') {
+          setFolderData({
+            name: '6789',
+            slug: '6789-72',
+            description: null,
+            page_title: '6789',
+            subfolders: [],
+            files: files,
+            parent_name: '999999',
+            parent_slug: '999999-71'
+          });
+        } 
+        else if (slug === '999999-71') {
+          setFolderData({
+            name: '999999',
+            slug: '999999-71',
+            description: null,
+            page_title: '999999',
+            subfolders: [{ name: '6789', slug: '6789-72' }],
+            files: files
+          });
+        }
+        else {
           // Försök att hämta mappdata från API
-          const response = await fetch(`/api/files/directories/?is_sidebar=true`);
-          
-          if (!response.ok) {
-            throw new Error(`API-fel: ${response.status} ${response.statusText}`);
+          const dirResponse = await fetch(`/api/files/directories/?is_sidebar=true`);
+          if (!dirResponse.ok) {
+            throw new Error(`Kunde inte hämta mappar: ${dirResponse.status}`);
           }
           
-          const data = await response.json();
-          
-          if (data && data.results) {
-            // Hitta den specifika mappen
-            const folder = data.results.find((f: any) => f.slug === slug);
+          const dirData = await dirResponse.json();
+          if (dirData && dirData.results) {
+            const currentFolder = dirData.results.find((f: any) => f.slug === slug);
             
-            if (folder) {
+            if (currentFolder) {
               // Hitta undermappar
-              const subfolders = data.results
-                .filter((f: any) => f.parent === folder.id)
+              const subfolders = dirData.results
+                .filter((f: any) => f.parent === currentFolder.id)
                 .map((f: any) => ({
                   name: f.name,
                   slug: f.slug
@@ -151,23 +123,19 @@ const SimpleFolderView = () => {
               let parentName = '';
               let parentSlug = '';
               
-              if (folder.parent) {
-                const parent = data.results.find((f: any) => f.id === folder.parent);
+              if (currentFolder.parent) {
+                const parent = dirData.results.find((f: any) => f.id === currentFolder.parent);
                 if (parent) {
                   parentName = parent.name;
                   parentSlug = parent.slug;
                 }
               }
               
-              // Hämta filer för denna mapp
-              const files = await fetchPDFFiles(slug);
-              
-              // Skapa mappdata
               setFolderData({
-                name: folder.name,
-                slug: folder.slug,
-                description: folder.page_description,
-                page_title: folder.page_title,
+                name: currentFolder.name,
+                slug: currentFolder.slug,
+                description: currentFolder.page_description,
+                page_title: currentFolder.page_title,
                 parent_name: parentName || undefined,
                 parent_slug: parentSlug || undefined,
                 subfolders: subfolders,
@@ -179,12 +147,12 @@ const SimpleFolderView = () => {
           } else {
             setError('Felaktigt API-svar format');
           }
-        } catch (err) {
-          console.error('Fel vid hämtning av mappdata:', err);
-          setError(`Kunde inte hämta mappdata: ${err instanceof Error ? err.message : 'Okänt fel'}`);
-        } finally {
-          setLoading(false);
         }
+      } catch (err: any) {
+        console.error('Fel vid hämtning av mappdata:', err);
+        setError(`Kunde inte hämta mappdata: ${err.message || 'Okänt fel'}`);
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -194,37 +162,7 @@ const SimpleFolderView = () => {
   // Hantera uppladdning av filer
   const handleUploadSuccess = () => {
     console.log('Fil uppladdad framgångsrikt till mapp:', slug);
-    
-    // Uppdatera filsektionen för att visa den nya filen
-    setLoading(true);
-    
-    // Ladda om mappdata för att hämta de uppdaterade filerna
-    const reloadFolderData = async () => {
-      try {
-        // Hämta uppdaterade filer för denna mapp
-        const files = await fetchPDFFiles(slug);
-        
-        // Uppdatera mappdata med de nya filerna
-        setFolderData(prevData => {
-          if (prevData) {
-            return {
-              ...prevData,
-              files: files
-            };
-          }
-          return prevData;
-        });
-      } catch (error) {
-        console.error('Fel vid omladdning av mappdata:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    // Kör omladdningen efter en kort fördröjning
-    setTimeout(() => {
-      reloadFolderData();
-    }, 1000);
+    window.location.reload(); // Enkel lösning - ladda om hela sidan
   };
 
   return (
@@ -369,4 +307,4 @@ const SimpleFolderView = () => {
   );
 };
 
-export default SimpleFolderView;
+export default BasicFolderView;
