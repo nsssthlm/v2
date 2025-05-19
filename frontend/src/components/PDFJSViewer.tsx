@@ -43,10 +43,16 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
       display: "flex",
       flexDirection: "column"
     }}>
-      <PDFJSDirectViewer
-        pdfUrl={finalUrl}
-        fileName={filename}
-        onClose={() => {}} // Empty function since we're not using the close button in this context
+      <iframe
+        src={finalUrl}
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none',
+          backgroundColor: '#fff'
+        }}
+        title={filename}
+        allowFullScreen
       />
     </Box>
   );
