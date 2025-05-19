@@ -21,7 +21,8 @@ const EmbeddedPDFViewer = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [fullUrl, setFullUrl] = useState<string>('');
-  const [showDirectView, setShowDirectView] = useState(false);
+  // Aktivera direkt visning som standard
+  const [showDirectView, setShowDirectView] = useState(true);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   
   // Hantera fullständig URL för PDF-filen
@@ -103,8 +104,9 @@ const EmbeddedPDFViewer = ({
             position: 'relative'
           }}
         >
-          <iframe 
-            src={`${pdfUrl}#view=FitH&toolbar=1&navpanes=1`}
+          <object
+            data={pdfUrl}
+            type="application/pdf"
             title={filename}
             width="100%"
             height="100%"
@@ -113,8 +115,9 @@ const EmbeddedPDFViewer = ({
               flexGrow: 1,
               minHeight: '500px'
             }}
-            ref={iframeRef}
-          />
+          >
+            <p>Din webbläsare kan inte visa PDF-filer direkt. <a href={pdfUrl} target="_blank" rel="noreferrer">Klicka här för att öppna filen</a></p>
+          </object>
           
           <Box sx={{
             position: 'absolute',
