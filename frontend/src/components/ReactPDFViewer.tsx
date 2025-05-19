@@ -11,7 +11,8 @@ import {
 } from '@mui/icons-material';
 
 // Set up worker for PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Use a relative path from our own server to avoid CORS issues
+pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
 
 interface ReactPDFViewerProps {
   pdfUrl: string;
@@ -212,8 +213,9 @@ const ReactPDFViewer: React.FC<ReactPDFViewerProps> = ({
             onLoadError={onDocumentLoadError}
             loading={<CircularProgress />}
             options={{
-              cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+              cMapUrl: '/cmaps/',
               cMapPacked: true,
+              standardFontDataUrl: '/standard_fonts/'
             }}
           >
             <Box sx={{ p: 2 }}>

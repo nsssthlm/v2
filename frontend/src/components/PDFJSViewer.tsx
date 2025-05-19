@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/joy";
 import { useProject } from "../contexts/ProjectContext";
-import ReactPDFViewer from "./ReactPDFViewer";
+import SimplePDFRenderer from "./SimplePDFRenderer";
 
 interface PDFJSViewerProps {
   pdfUrl: string;
@@ -43,7 +43,7 @@ const PDFJSViewer: React.FC<PDFJSViewerProps> = ({
       display: "flex",
       flexDirection: "column"
     }}>
-      <ReactPDFViewer
+      <SimplePDFRenderer
         pdfUrl={finalUrl}
         fileName={filename}
         onClose={() => {}} // Empty function since we're not using the close button in this context

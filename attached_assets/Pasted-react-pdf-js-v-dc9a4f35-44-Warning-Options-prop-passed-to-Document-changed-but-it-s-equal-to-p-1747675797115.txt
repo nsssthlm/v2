@@ -1,0 +1,48 @@
+react-pdf.js?v=dc9a4f35:44 Warning: Options prop passed to <Document /> changed, but it's equal to previous one. This might result in unnecessary reloads. Consider memoizing the value passed to "options" prop.
+printWarning2 @ react-pdf.js?v=dc9a4f35:44
+warning9 @ react-pdf.js?v=dc9a4f35:63
+Document2 @ react-pdf.js?v=dc9a4f35:21490
+renderWithHooks @ chunk-276SZO74.js?v=dc9a4f35:11548
+updateForwardRef @ chunk-276SZO74.js?v=dc9a4f35:14325
+beginWork @ chunk-276SZO74.js?v=dc9a4f35:15946
+beginWork$1 @ chunk-276SZO74.js?v=dc9a4f35:19753
+performUnitOfWork @ chunk-276SZO74.js?v=dc9a4f35:19198
+workLoopSync @ chunk-276SZO74.js?v=dc9a4f35:19137
+renderRootSync @ chunk-276SZO74.js?v=dc9a4f35:19116
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=dc9a4f35:18678
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+Access to script at 'https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js' from origin 'https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+karlatornet-31-54:1 Access to script at 'https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js' from origin 'https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+react-pdf.js?v=dc9a4f35:534 Warning: Setting up fake worker.
+Access to script at 'https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js' from origin 'https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+karlatornet-31-54:1 Access to script at 'https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js' from origin 'https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+karlatornet-31-54:1 Access to script at 'https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import' from origin 'https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+react-pdf.js?v=dc9a4f35:12381 
+            
+            
+           GET https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import net::ERR_FAILED 404 (Not Found)
+loader @ react-pdf.js?v=dc9a4f35:12381
+get _setupFakeWorkerGlobal @ react-pdf.js?v=dc9a4f35:12385
+_setupFakeWorker @ react-pdf.js?v=dc9a4f35:12324
+terminateEarly @ react-pdf.js?v=dc9a4f35:12274
+worker.addEventListener.signal @ react-pdf.js?v=dc9a4f35:12280Understand this error
+react-pdf.js?v=dc9a4f35:44 Warning: Error: Setting up fake worker failed: "Failed to fetch dynamically imported module: https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import".
+printWarning2 @ react-pdf.js?v=dc9a4f35:44
+warning9 @ react-pdf.js?v=dc9a4f35:63
+onLoadError @ react-pdf.js?v=dc9a4f35:21603
+(anonymous) @ react-pdf.js?v=dc9a4f35:21641
+commitHookEffectListMount @ chunk-276SZO74.js?v=dc9a4f35:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=dc9a4f35:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=dc9a4f35:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=dc9a4f35:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=dc9a4f35:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=dc9a4f35:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=dc9a4f35:19447
+(anonymous) @ chunk-276SZO74.js?v=dc9a4f35:19328
+workLoop @ chunk-276SZO74.js?v=dc9a4f35:197
+flushWork @ chunk-276SZO74.js?v=dc9a4f35:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=dc9a4f35:384Understand this error
+ReactPDFViewer.tsx:41 Error loading PDF: Error: Setting up fake worker failed: "Failed to fetch dynamically imported module: https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js?import".
+    at react-pdf.js?v=dc9a4f35:12337:36
