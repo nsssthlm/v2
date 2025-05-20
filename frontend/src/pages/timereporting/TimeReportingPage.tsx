@@ -161,18 +161,21 @@ const PDFViewer = ({ pdfUrl, filename, onClose }: PDFViewerProps) => {
             maxWidth: '100%'
           }}
         >
-          <iframe
-            src={`${pdfUrl}#toolbar=0`}
+          <object
+            data={pdfUrl}
+            type="application/pdf"
             style={{
-              width: '100%',
+              width: '800px',
               height: '85vh', 
               border: 'none',
               backgroundColor: 'white',
               boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
             }}
             onLoad={() => setLoading(false)}
-            title="PDF Viewer"
-          />
+          >
+            <p>Det verkar som att din webbläsare inte kan visa PDF direkt. 
+               <a href={pdfUrl} target="_blank" rel="noopener noreferrer">Klicka här för att ladda ner PDF-filen</a>.</p>
+          </object>
         </Box>
       </Box>
     </Box>
