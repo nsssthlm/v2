@@ -28,6 +28,9 @@ import PDFProxyPage from './pages/files/PDFProxyPage';
 // Tidsrapportering
 import BasicTimeReportingPage from './pages/timereporting/BasicTimeReportingPage';
 
+// 3D Översikt
+import ThreeDOverviewPage from './pages/3d/ThreeDOverviewPage';
+
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
 
@@ -60,6 +63,7 @@ function App() {
               <Route path="team" element={<ComingSoonPage title="Team" />} />
               <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
               <Route path="timereporting" element={<BasicTimeReportingPage />} />
+              <Route path="3d-overview" element={<ThreeDOverviewPage />} />
               
               {/* Folder routes */}
               <Route path="folders" element={<FolderListPage />} />
