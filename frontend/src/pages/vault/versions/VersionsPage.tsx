@@ -454,34 +454,23 @@ export default function VersionsPage() {
                               sx={{ 
                                 width: '100%', 
                                 height: '100%', 
-                                position: 'relative',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: '#f5f5f5',
-                                borderRadius: 'sm',
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                gap: 2,
-                                padding: 3
+                                position: 'relative'
                               }}
                             >
-                              <Typography level="title-lg">PDF-dokumentet är klart</Typography>
-                              <Typography sx={{ mb: 2, textAlign: 'center' }}>
-                                På grund av webbläsarens säkerhetsinställningar kan vi inte visa PDFen inbäddad, 
-                                men du kan öppna den direkt i ett nytt fönster.
-                              </Typography>
-                              
-                              <Button
-                                variant="solid"
-                                color="primary"
-                                size="lg"
-                                onClick={() => window.open(pdfUrl, '_blank')}
-                                startDecorator={<span>📄</span>}
+                              <object
+                                data={pdfUrl}
+                                type="application/pdf"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
                               >
-                                Öppna PDF i nytt fönster
-                              </Button>
+                                <embed
+                                  src={pdfUrl}
+                                  type="application/pdf"
+                                  width="100%" 
+                                  height="100%"
+                                />
+                              </object>
                             </Box>
                           ) : (
                             <Box sx={{ 
