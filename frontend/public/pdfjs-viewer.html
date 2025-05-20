@@ -216,7 +216,7 @@
     // Hantera scroll och zoom i viewerContainer
     function setupScrollAndZoom() {
       // Hantera mushjul för zoom när Ctrl är nedtryckt
-      viewerContainer.addEventListener('wheel', function(e) {
+      document.addEventListener('wheel', function(e) {
         if (e.ctrlKey) {
           e.preventDefault();
           const delta = e.deltaY > 0 ? -0.1 : 0.1;
