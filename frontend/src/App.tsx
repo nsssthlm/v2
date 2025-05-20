@@ -21,6 +21,8 @@ import CalendarPage from './pages/dashboard/CalendarPage';
 // Folder pages
 import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
+import GenericFolderView from './pages/folders/GenericFolderView';
+import FilesOverviewPage from './pages/files/FilesOverviewPage';
 
 // Tidsrapportering
 import BasicTimeReportingPage from './pages/timereporting/BasicTimeReportingPage';
@@ -53,14 +55,14 @@ function App() {
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="projects" element={<ComingSoonPage title="Projekt" />} />
               <Route path="tasks" element={<ComingSoonPage title="Uppgifter" />} />
-              <Route path="files" element={<ComingSoonPage title="Dokument" />} />
+              <Route path="files" element={<FilesOverviewPage />} />
               <Route path="team" element={<ComingSoonPage title="Team" />} />
               <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
               <Route path="timereporting" element={<BasicTimeReportingPage />} />
               
               {/* Folder routes */}
               <Route path="folders" element={<FolderListPage />} />
-              <Route path="folders/:slug" element={<FolderPageNew />} />
+              <Route path="folders/:slug" element={<GenericFolderView />} />
               
               {/* Vault routes */}
               <Route path="vault">
