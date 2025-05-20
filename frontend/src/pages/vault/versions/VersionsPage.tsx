@@ -249,29 +249,39 @@ export default function VersionsPage() {
     
     setUploading(true);
     try {
-      // In a real implementation, this would upload to the server
-      // For now, we'll just add a new version to our sample data
+      // Skapa en URL för den nya PDF-filen
+      const fileUrl = URL.createObjectURL(newVersionFile);
+      
+      // Skapa en ny version med den uppladdade filen
       const newVersion: FileVersion = {
-        id: `${selectedFileId}-${SAMPLE_FILE_VERSIONS.length + 1}`,
-        versionNumber: SAMPLE_FILE_VERSIONS.length + 1,
-        filename: `${newVersionFile.name}`,
-        fileUrl: '/sample-pdfs/sample1.pdf', // Use sample PDF
+        id: `${selectedFileId}-${fileVersions.length + 1}`,
+        versionNumber: fileVersions.length + 1,
+        filename: newVersionFile.name,
+        fileUrl: fileUrl, // Använd den nya PDF:ens URL
         description: newVersionDescription,
         uploaded: new Date().toISOString(),
         uploadedBy: 'Current User'
       };
       
-      // Add the new version to our sample data
-      const updatedVersions = [...SAMPLE_FILE_VERSIONS, newVersion];
+      // Lägg till den nya versionen i listan
+      const updatedVersions = [...fileVersions, newVersion];
       setFileVersions(updatedVersions);
       
-      // Set the active version to the new one
+      // Sätt den aktiva versionen till den nya och ladda in den
       setActiveVersionId(newVersion.id);
       
-      // Close the dialog and reset form
+      // Använd direkt Google Docs Viewer med den nya filens URL
+      // Notera att URL.createObjectURL ger en blob: URL som inte fungerar med Google Docs,
+      // så vi genererar en direktlänk till Google Docs Viewer som kan visa filen
+      const googleDocsViewerUrl = `https://docs.google.com/viewer?embedded=true`;
+      setPdfUrl(fileUrl);
+      
+      // Stäng dialogen och återställ formuläret
       setUploadDialogOpen(false);
       setNewVersionFile(null);
       setNewVersionDescription('');
+      
+      console.log('PDF uppladdad och visad:', newVersion);
       
     } catch (error) {
       console.error('Error uploading new version:', error);
