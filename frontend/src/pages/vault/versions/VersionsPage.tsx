@@ -456,18 +456,13 @@ export default function VersionsPage() {
                                 height: '100%', 
                                 position: 'relative'
                               }}
-                              dangerouslySetInnerHTML={{
-                                __html: `
-                                  <embed 
-                                    src="${pdfUrl}" 
-                                    type="application/pdf" 
-                                    width="100%" 
-                                    height="100%" 
-                                    style="border: none;"
-                                  />
-                                `
-                              }}
-                            />
+                            >
+                              <iframe
+                                src={`/pdfjs-viewer.html?url=${encodeURIComponent(pdfUrl)}`}
+                                style={{ width: '100%', height: '100%', border: 'none' }}
+                                allow="fullscreen"
+                              />
+                            </Box>
                           ) : (
                             <Box sx={{ 
                               display: 'flex', 
