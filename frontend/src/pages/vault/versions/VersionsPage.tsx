@@ -439,25 +439,30 @@ export default function VersionsPage() {
                     {loading ? (
                       <CircularProgress size="lg" sx={{ my: 4 }} />
                     ) : pdfUrl ? (
-                      <Box sx={{ textAlign: 'center', p: 4 }}>
-                        <Typography level="title-lg">
-                          PDF förhandsvisning
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%' }}>
+                        <Typography level="title-lg" sx={{ mb: 2 }}>
+                          {activeVersionId && fileVersions.find(v => v.id === activeVersionId)?.filename}
                         </Typography>
-                        <Box sx={{ my: 3 }}>
-                          <img 
-                            src="https://cdn-icons-png.flaticon.com/512/2965/2965335.png" 
-                            alt="PDF Icon" 
-                            style={{ width: '120px', opacity: 0.7 }} 
+                        
+                        <Box sx={{ width: '100%', height: 'calc(100% - 120px)', position: 'relative', border: '1px solid', borderColor: 'divider', borderRadius: 'sm', overflow: 'hidden' }}>
+                          <iframe 
+                            src={pdfUrl} 
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              border: 'none',
+                              backgroundColor: '#f5f5f5'
+                            }}
+                            title="PDF Viewer"
                           />
                         </Box>
-                        <Typography level="body-md" sx={{ mb: 2 }}>
-                          PDF:en har laddats men kan inte visas direkt i gränssnittet.
-                        </Typography>
+                        
                         <Button 
                           variant="solid" 
                           color="primary"
                           startDecorator={<DownloadIcon />}
                           onClick={() => window.open(pdfUrl, '_blank')}
+                          sx={{ mt: 2 }}
                         >
                           Öppna PDF i ny flik
                         </Button>
