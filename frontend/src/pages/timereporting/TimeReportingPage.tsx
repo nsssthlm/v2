@@ -37,6 +37,7 @@ interface PDFDocument {
   description?: string;
   fileUrl: string;
   uploadedBy: string;
+  isLocal?: boolean; // Indikerar om filen kommer från lokal uppladdning eller server
 }
 
 // Använder vår nya PDFEmbed-komponent istället för en egen implementation
@@ -113,7 +114,8 @@ const TimeReportingPage = () => {
         uploadDate: new Date().toISOString().split('T')[0],
         description: 'Uppladdad PDF',
         fileUrl: URL.createObjectURL(uploadFile), // Skapa en temporär URL för filen
-        uploadedBy: 'Aktuell användare'
+        uploadedBy: 'Aktuell användare',
+        isLocal: true // Markera att denna fil är lokal och inte på servern
       };
       
       setPdfList(prevList => [...prevList, newPdf]);

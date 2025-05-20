@@ -5,6 +5,7 @@ from . import web_views
 from . import web_api
 from . import upload_api
 from . import api_views
+from . import proxy_views
 
 # API router för RESTful endpoints
 router = DefaultRouter()
@@ -29,6 +30,9 @@ urlpatterns = [
     
     # Direktåtkomst till PDF-fil via sökväg i media-katalogen (utan avslutande /)
     path('pdf-media/<path:file_path>', web_api.serve_pdf_file, name='serve_pdf_file'),
+    
+    # Proxy för PDF-filer som löser CORS-problem
+    path('pdf-proxy/<int:file_id>/', proxy_views.PDFProxyView.as_view(), name='pdf_proxy'),
     
     # Ny förbättrad endpoint för direkt åtkomst till projektfiler (PDF)
     path('web/<str:project_id>/data/<path:path_info>', api_views.serve_project_file, name='serve_project_file'),
