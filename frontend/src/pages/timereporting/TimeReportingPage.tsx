@@ -30,6 +30,7 @@ import api from '../../services/api';
 import SimplePDFViewer from '../../components/timereporting/SimplePDFViewer';
 import CanvasPDFViewer from '../../components/timereporting/CanvasPDFViewer';
 import EmbeddedPDFViewer from '../../components/timereporting/EmbeddedPDFViewer';
+import BlobPDFViewer from '../../components/timereporting/BlobPDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -128,49 +129,56 @@ const TimeReportingPage = () => {
     }
   };
 
-  // Funktion för att öppna PDF i visaren med blob URL
+  // Funktion för att öppna PDF i visaren - konverterar alltid till blob först
   const openPdfViewer = async (pdf: PDFDocument) => {
     try {
       // Om fileUrl redan är en blob-URL (dvs. startar med 'blob:'), använd direkt
       if (pdf.fileUrl.startsWith('blob:')) {
+        console.log('PDF är redan i blob-format, visar direkt');
         setSelectedPdf({...pdf, isLocal: true});
         setIsViewerOpen(true);
-      } else {
-        // För lokala uppladdade filer (som redan är blob-URLs), använd dem direkt
-        if (pdf.isLocal) {
-          setSelectedPdf(pdf);
-          setIsViewerOpen(true);
-          return;
-        }
-        
-        try {
-          // Hämta som blob
-          const response = await fetch(pdf.fileUrl);
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
+        return;
+      }
+      
+      // För lokala uppladdade filer (som redan är blob-URLs), använd dem direkt
+      if (pdf.isLocal && pdf.fileUrl.startsWith('blob:')) {
+        console.log('Lokal PDF med blob-URL, visar direkt');
+        setSelectedPdf(pdf);
+        setIsViewerOpen(true);
+        return;
+      }
+      
+      // I alla andra fall, konvertera till blob först för att undvika sandbox-restriktioner
+      try {
+        console.log('Konverterar PDF till blob-URL:', pdf.fileName);
+        // Hämta som blob
+        const response = await fetch(pdf.fileUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
 
-          // Skapa en kopia av objektet med blob-URL
-          const blobPdf: PDFDocument = {
-            ...pdf,
-            fileUrl: blobUrl,
-            isLocal: true
-          };
+        // Skapa en kopia av objektet med blob-URL
+        const blobPdf: PDFDocument = {
+          ...pdf,
+          fileUrl: blobUrl,
+          isLocal: true
+        };
 
-          setSelectedPdf(blobPdf);
-          setIsViewerOpen(true);
-        } catch (blobError) {
-          console.error('Kunde inte ladda PDF som blob:', blobError);
-          // Använd proxy-endpoint istället som fallback
-          setSelectedPdf({
-            ...pdf,
-            isLocal: false // Markera att detta är en server-fil som behöver proxy
-          });
-          setIsViewerOpen(true);
-        }
+        console.log('PDF konverterad till blob-URL:', blobUrl);
+        setSelectedPdf(blobPdf);
+        setIsViewerOpen(true);
+      } catch (blobError) {
+        console.error('Kunde inte ladda PDF som blob, försöker med fallback:', blobError);
+        // Visa fallback-meddelande direkt
+        // Markera som ej lokal så att fallback-UI visas
+        setSelectedPdf({
+          ...pdf,
+          isLocal: false
+        });
+        setIsViewerOpen(true);
       }
     } catch (error) {
-      console.error('Fel vid öppning av PDF-visare:', error);
-      // Fallback till original URL om det inte går att konvertera till blob
+      console.error('Allvarligt fel vid öppning av PDF-visare:', error);
+      // Visa fallback-UI
       setSelectedPdf(pdf);
       setIsViewerOpen(true);
     }
@@ -361,12 +369,20 @@ const TimeReportingPage = () => {
                 bgcolor: 'background.level1',
                 height: 'calc(80vh - 64px)'
               }}>
-                <EmbeddedPDFViewer 
-                  pdfUrl={selectedPdf.fileUrl}
-                  filename={selectedPdf.fileName}
-                  fileId={selectedPdf.id}
-                  isLocal={selectedPdf.isLocal}
-                />
+                {/* Använd BlobPDFViewer när URL är i blob-format, annars visa felmeddelande */}
+                {selectedPdf.fileUrl.startsWith('blob:') ? (
+                  <BlobPDFViewer 
+                    pdfUrl={selectedPdf.fileUrl}
+                    filename={selectedPdf.fileName}
+                  />
+                ) : (
+                  <EmbeddedPDFViewer 
+                    pdfUrl={selectedPdf.fileUrl}
+                    filename={selectedPdf.fileName}
+                    fileId={selectedPdf.id}
+                    isLocal={selectedPdf.isLocal}
+                  />
+                )}
               </Box>
             </Box>
           )}

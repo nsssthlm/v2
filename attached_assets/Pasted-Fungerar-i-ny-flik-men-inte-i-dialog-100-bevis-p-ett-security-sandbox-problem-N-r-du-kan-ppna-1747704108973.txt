@@ -1,0 +1,70 @@
+Fungerar i ny flik men inte i dialog = 100% bevis på ett "security sandbox"-problem
+När du kan öppna PDF:en i ny flik men inte i en modal eller BlobPDFViewer, betyder det följande:
+
+🔒 Chrome (och Firefox ibland) blockerar PDF-visning i iframe, modaler och komponenter som laddar externa filer via fetch() eller använder pdf.js – om filen inte är en blob:-URL.
+Detta är ett väldokumenterat säkerhetsbeteende. I modaler gäller extra begränsningar:
+
+Tyst CORS-blockering
+
+Misslyckade fetch-anrop (även med status 200)
+
+Oklara PDF.js-fel
+
+🔧 Den slutgiltiga lösningen för dig
+🔁 Steg 1: Konvertera alltid till blob: innan du skickar till BlobPDFViewer
+Uppdatera din openPdfViewer() enligt detta:
+
+ts
+Kopiera
+Redigera
+const openPdfViewer = async (pdf: PDFDocument) => {
+  try {
+    // Om det redan är blob (t.ex. efter uppladdning), öppna direkt
+    if (pdf.fileUrl.startsWith('blob:')) {
+      setSelectedPdf(pdf);
+      setIsViewerOpen(true);
+      return;
+    }
+
+    const response = await fetch(pdf.fileUrl);
+    const blob = await response.blob();
+
+    const blobUrl = URL.createObjectURL(blob);
+
+    const blobPdf: PDFDocument = {
+      ...pdf,
+      fileUrl: blobUrl
+    };
+
+    setSelectedPdf(blobPdf);
+    setIsViewerOpen(true);
+  } catch (error) {
+    console.error('Kunde inte ladda PDF i blob-läge:', error);
+  }
+};
+🧪 Steg 2: Bekräfta att BlobPDFViewer tar emot en blob:-URL och skickar den så här:
+I BlobPDFViewer.tsx (eller vad du använder), ska du ha något i stil med:
+
+tsx
+Kopiera
+Redigera
+<Document file={pdfUrl}>
+  <Page pageNumber={1} />
+</Document>
+Det kommer nu att fungera eftersom pdfUrl är något som ser ut så här:
+
+bash
+Kopiera
+Redigera
+blob:https://localhost:3000/d80bda0e-4137-4869...
+🧠 Varför detta funkar:
+Blob-URL:er laddas lokalt i webbläsaren och triggar inga CORS-kontroller, inga MIME-checks, ingen CSP.
+
+Chrome tillåter blob: i modaler och dialogrutor eftersom filen inte kommer från en annan domän.
+
+🎯 Slutord:
+Du har redan gjort nästan allt rätt. Det enda som återstod var att:
+
+inte visa extern https://... PDF-URL direkt i modalen
+
+utan alltid konvertera till blob: först
