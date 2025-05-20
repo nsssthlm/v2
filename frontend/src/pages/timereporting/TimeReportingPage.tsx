@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import EmbeddedPDFViewer from '../../components/timereporting/EmbeddedPDFViewer';
+import ReactPDFViewer from '../../components/timereporting/ReactPDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -312,12 +312,12 @@ const TimeReportingPage = () => {
               <Box sx={{ 
                 flexGrow: 1, 
                 overflow: 'hidden', 
-                p: 2, 
-                bgcolor: 'background.level1'
+                bgcolor: 'background.level1',
+                height: 'calc(80vh - 64px)'
               }}>
-                <EmbeddedPDFViewer 
+                <ReactPDFViewer 
                   pdfUrl={selectedPdf.fileUrl} 
-                  height="calc(80vh - 64px)" 
+                  filename={selectedPdf.fileName}
                 />
               </Box>
             </Box>
