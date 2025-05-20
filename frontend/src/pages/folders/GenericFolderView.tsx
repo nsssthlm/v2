@@ -13,7 +13,11 @@ import {
   IconButton, 
   Tooltip,
   Sheet,
-  Table
+  Table,
+  Modal,
+  ModalDialog,
+  ModalClose,
+  Divider
 } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
@@ -50,6 +54,10 @@ const GenericFolderView = () => {
   // Tillstånd för PDF-dialogen
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
   const [selectedPdf, setSelectedPdf] = useState<{ url: string; filename: string } | null>(null);
+  
+  // Tillstånd för "Ta bort mapp"-dialogen
+  const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
+  const [deletingFolder, setDeletingFolder] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -100,6 +108,29 @@ const GenericFolderView = () => {
       setError(`Kunde inte radera filen: ${err.message || 'Okänt fel'}`);
     } finally {
       setDeleteLoading(null);
+    }
+  };
+  
+  // Funktion för att öppna bekräftelsedialog för att ta bort mapp
+  const openDeleteFolderDialog = () => {
+    setDeleteFolderDialogOpen(true);
+  };
+
+  // Funktion för att ta bort den aktuella mappen
+  const handleDeleteFolder = async () => {
+    if (!slug) return;
+    
+    setDeletingFolder(true);
+    
+    try {
+      await axios.delete(`${API_BASE_URL}/files/delete-directory/${slug}/`);
+      // Navigera tillbaka en nivå eller till roten
+      window.location.href = '/';
+    } catch (err: any) {
+      console.error('Fel vid radering av mapp:', err);
+      setError(`Kunde inte radera mappen: ${err.message || 'Okänt fel'}`);
+      setDeletingFolder(false);
+      setDeleteFolderDialogOpen(false);
     }
   };
 
@@ -162,13 +193,23 @@ const GenericFolderView = () => {
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography level="h3">PDF Dokument</Typography>
-          <Button 
-            variant="solid"
-            color="primary"
-            onClick={() => setUploadDialogOpen(true)}
-          >
-            Ladda upp PDF
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button 
+              variant="solid"
+              color="primary"
+              onClick={() => setUploadDialogOpen(true)}
+            >
+              Ladda upp PDF
+            </Button>
+            <Button 
+              variant="solid"
+              color="danger"
+              onClick={openDeleteFolderDialog}
+              startDecorator={<DeleteIcon />}
+            >
+              Ta bort mapp
+            </Button>
+          </Box>
         </Box>
         
         {folderData?.files.length === 0 ? (
@@ -370,6 +411,62 @@ const GenericFolderView = () => {
           filename={selectedPdf.filename}
         />
       )}
+
+      {/* Bekräftelsedialog för att ta bort mapp */}
+      <Modal open={deleteFolderDialogOpen} onClose={() => !deletingFolder && setDeleteFolderDialogOpen(false)}>
+        <ModalDialog
+          variant="outlined"
+          role="alertdialog"
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+          sx={{ 
+            maxWidth: 500,
+            borderRadius: 'md',
+            p: 3,
+            boxShadow: 'lg'
+          }}
+        >
+          <ModalClose 
+            disabled={deletingFolder}
+            onClick={() => setDeleteFolderDialogOpen(false)}
+          />
+          
+          <Typography
+            id="delete-dialog-title"
+            component="h2"
+            level="title-lg"
+            startDecorator={<DeleteIcon />}
+            sx={{ color: 'danger.600', mb: 1 }}
+          >
+            Ta bort mapp
+          </Typography>
+          
+          <Divider sx={{ my: 2 }} />
+          
+          <Typography id="delete-dialog-description" textColor="text.tertiary" mb={3}>
+            Är du säker på att du vill ta bort den här mappen? Alla undermappar till denna mapp kommer också tas bort.
+          </Typography>
+          
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+            <Button
+              variant="plain"
+              color="neutral"
+              onClick={() => setDeleteFolderDialogOpen(false)}
+              disabled={deletingFolder}
+            >
+              Avbryt
+            </Button>
+            <Button
+              variant="solid"
+              color="danger"
+              onClick={handleDeleteFolder}
+              loading={deletingFolder}
+            >
+              Ja, ta bort permanent
+            </Button>
+          </Box>
+        </ModalDialog>
+      </Modal>
     </Box>
   );
 };
