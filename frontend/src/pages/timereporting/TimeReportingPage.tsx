@@ -282,29 +282,92 @@ const TimeReportingPage = () => {
                 }}
               >
                 <Typography level="title-lg">{selectedPdf.fileName}</Typography>
-                <Button 
-                  size="sm" 
-                  variant="soft" 
-                  color="primary" 
-                  startDecorator={<DownloadIcon />}
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = selectedPdf.fileUrl;
-                    link.download = selectedPdf.fileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                <Stack direction="row" spacing={1}>
+                  <Button 
+                    size="sm" 
+                    variant="soft" 
+                    color="primary" 
+                    startDecorator={<DownloadIcon />}
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = selectedPdf.fileUrl;
+                      link.download = selectedPdf.fileName;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                  >
+                    Ladda ner
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="solid"
+                    color="primary"
+                    onClick={() => window.open(selectedPdf.fileUrl, '_blank', 'noopener,noreferrer')}
+                  >
+                    Öppna i ny flik
+                  </Button>
+                </Stack>
+              </Sheet>
+              <Box sx={{ 
+                flexGrow: 1, 
+                overflow: 'hidden', 
+                p: 2, 
+                bgcolor: 'background.level1',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Box 
+                  sx={{ 
+                    width: '100%', 
+                    maxWidth: '800px',
+                    minHeight: '400px',
+                    backgroundColor: 'white',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    borderRadius: 'md',
+                    p: 4
                   }}
                 >
-                  Ladda ner
-                </Button>
-              </Sheet>
-              <Box sx={{ flexGrow: 1, overflow: 'hidden', p: 2, bgcolor: 'background.level1' }}>
-                <PDFEmbed 
-                  pdfUrl={selectedPdf.fileUrl} 
-                  title={selectedPdf.fileName}
-                  height="100%" 
-                />
+                  <Typography level="h3" sx={{ mb: 2 }}>
+                    PDF-visning
+                  </Typography>
+                  <PdfIcon sx={{ fontSize: 80, color: 'error.600', mb: 4 }} />
+                  <Typography sx={{ mb: 4, textAlign: 'center' }}>
+                    Din PDF "{selectedPdf.fileName}" är redo att visas. På grund av säkerhetsbegränsningar i webbläsaren kan vi inte visa den direkt i dialogrutan.
+                  </Typography>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <Button
+                      variant="solid"
+                      color="primary"
+                      size="lg"
+                      onClick={() => window.open(selectedPdf.fileUrl, '_blank', 'noopener,noreferrer')}
+                    >
+                      Öppna PDF i ny flik
+                    </Button>
+                    <Button 
+                      variant="outlined" 
+                      color="neutral"
+                      size="lg"
+                      startDecorator={<DownloadIcon />}
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = selectedPdf.fileUrl;
+                        link.download = selectedPdf.fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      Ladda ner PDF
+                    </Button>
+                  </Stack>
+                </Box>
               </Box>
             </Box>
           )}
