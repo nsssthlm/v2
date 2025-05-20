@@ -13,237 +13,219 @@ const IFCViewer: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Three.js objekt
-  const sceneRef = useRef<{
-    scene?: THREE.Scene;
-    camera?: THREE.PerspectiveCamera;
-    renderer?: THREE.WebGLRenderer;
-    building?: THREE.Mesh;
-    roof?: THREE.Mesh;
-    animationId?: number;
-    isDragging?: boolean;
-    previousMousePosition?: { x: number; y: number };
-  }>({});
-  
   // Initiera 3D-scenen när en modell har laddats
   useEffect(() => {
+    // Om vi inte har en container eller om det inte finns en laddad modell, avsluta
     if (!containerRef.current || !loadedModel) return;
     
-    const container = containerRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    // Rensa event-hanterare från tidigare körningar
+    const cleanupEventHandlers: (() => void)[] = [];
     
-    // Skapa scenen
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
-    
-    // Skapa kameran
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(15, 15, 15);
-    camera.lookAt(0, 0, 0);
-    
-    // Skapa renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.innerHTML = '';
-    container.appendChild(renderer.domElement);
-    
-    // Lägg till ljus
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 20, 10);
-    scene.add(directionalLight);
-    
-    // Lägg till grid för orientering
-    const gridHelper = new THREE.GridHelper(20, 20);
-    scene.add(gridHelper);
-    
-    // Lägg till axlar för orientering (röd=X, grön=Y, blå=Z)
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-    
-    // Skapa en byggnadmodell
-    const buildingGeometry = new THREE.BoxGeometry(8, 12, 6);
-    const buildingMaterial = new THREE.MeshStandardMaterial({
-      color: 0x4287f5,
-      transparent: true,
-      opacity: 0.7
-    });
-    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
-    building.position.set(0, 6, 0);
-    
-    // Skapa basen
-    const baseGeometry = new THREE.BoxGeometry(12, 1, 8);
-    const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
-    const base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.position.set(0, 0, 0);
-    
-    // Skapa tak
-    const roofGeometry = new THREE.ConeGeometry(6, 4, 4);
-    const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x883333 });
-    const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-    roof.position.set(0, 14, 0);
-    roof.rotation.y = Math.PI / 4;
-    
-    // Lägg till allt i scenen
-    scene.add(building, base, roof);
-    
-    // Spara referenser
-    sceneRef.current = {
-      scene, 
-      camera, 
-      renderer,
-      building,
-      roof,
-      isDragging: false,
-      previousMousePosition: { x: 0, y: 0 }
-    };
-    
-    // Animationsloop
-    const animate = () => {
-      const animationId = requestAnimationFrame(animate);
-      sceneRef.current.animationId = animationId;
+    try {
+      const container = containerRef.current;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
       
-      // Rotera byggnaden långsamt om vi inte drar runt den
-      if (!sceneRef.current.isDragging) {
-        building.rotation.y += 0.005;
-        roof.rotation.y += 0.005;
+      // Skapa scenen
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf5f5f5);
+      
+      // Skapa kameran
+      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+      camera.position.set(10, 10, 10);
+      camera.lookAt(0, 0, 0);
+      
+      // Skapa renderer
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+      
+      // Lägg till ljus
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 20, 10);
+      scene.add(directionalLight);
+      
+      // Lägg till grid för orientering
+      const gridHelper = new THREE.GridHelper(20, 20);
+      scene.add(gridHelper);
+      
+      // Skapa en enkel byggnad som representerar en IFC-modell
+      const buildingGeometry = new THREE.BoxGeometry(8, 12, 6);
+      const buildingMaterial = new THREE.MeshStandardMaterial({
+        color: 0x4287f5,
+        transparent: true,
+        opacity: 0.7
+      });
+      const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+      building.position.set(0, 6, 0);
+      
+      // Skapa basen
+      const baseGeometry = new THREE.BoxGeometry(12, 1, 8);
+      const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+      const base = new THREE.Mesh(baseGeometry, baseMaterial);
+      base.position.set(0, 0, 0);
+      
+      // Skapa ett tak
+      const roofGeometry = new THREE.ConeGeometry(6, 4, 4);
+      const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x883333 });
+      const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+      roof.position.set(0, 14, 0);
+      roof.rotation.y = Math.PI / 4;
+      
+      // Lägg till allt i scenen
+      scene.add(building, base, roof);
+      
+      // Variabler för interaktion
+      let isDragging = false;
+      let previousMousePosition = { x: 0, y: 0 };
+      let animationId: number;
+      
+      // Skapa animationsloopen
+      const animate = () => {
+        animationId = requestAnimationFrame(animate);
+        
+        // Om vi inte drar med musen, rotera automatiskt
+        if (!isDragging) {
+          building.rotation.y += 0.005;
+          roof.rotation.y += 0.005;
+        }
+        
+        renderer.render(scene, camera);
+      };
+      
+      animate();
+      
+      // Mushanterare för rotation
+      const handleMouseDown = (event: MouseEvent) => {
+        isDragging = true;
+        previousMousePosition = {
+          x: event.clientX,
+          y: event.clientY
+        };
+      };
+      
+      const handleMouseMove = (event: MouseEvent) => {
+        if (!isDragging) return;
+        
+        const deltaMove = {
+          x: event.clientX - previousMousePosition.x,
+          y: event.clientY - previousMousePosition.y
+        };
+        
+        // Rotera modellen
+        building.rotation.y += deltaMove.x * 0.005;
+        roof.rotation.y += deltaMove.x * 0.005;
+        
+        previousMousePosition = {
+          x: event.clientX,
+          y: event.clientY
+        };
+      };
+      
+      const handleMouseUp = () => {
+        isDragging = false;
+      };
+      
+      // Hantera zoom med mushjul
+      const handleWheel = (event: WheelEvent) => {
+        const zoomSpeed = 0.1;
+        const delta = event.deltaY > 0 ? 1 : -1; // Positiv delta = zooma ut
+        
+        // Normalisera kameravektorn och justera längden (zooma)
+        const currentDistance = camera.position.length();
+        const newDistance = currentDistance + delta * zoomSpeed;
+        
+        // Begränsa zoom (min och max avstånd)
+        if (newDistance > 5 && newDistance < 30) {
+          camera.position.normalize();
+          camera.position.multiplyScalar(newDistance);
+        }
+      };
+      
+      // Hantera fönsterstorlek
+      const handleResize = () => {
+        if (!containerRef.current) return;
+        
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+        
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      };
+      
+      // Lägg till event-lyssnare
+      renderer.domElement.addEventListener('mousedown', handleMouseDown);
+      renderer.domElement.addEventListener('mousemove', handleMouseMove);
+      renderer.domElement.addEventListener('mouseup', handleMouseUp);
+      renderer.domElement.addEventListener('wheel', handleWheel);
+      window.addEventListener('resize', handleResize);
+      
+      // Spara cleanup-funktioner
+      cleanupEventHandlers.push(() => {
+        renderer.domElement.removeEventListener('mousedown', handleMouseDown);
+        renderer.domElement.removeEventListener('mousemove', handleMouseMove);
+        renderer.domElement.removeEventListener('mouseup', handleMouseUp);
+        renderer.domElement.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('resize', handleResize);
+        cancelAnimationFrame(animationId);
+      });
+      
+      // Spara referenser för vykontroller
+      const viewFrontBtn = document.getElementById('view-front');
+      const viewTopBtn = document.getElementById('view-top');
+      const viewIsoBtn = document.getElementById('view-iso');
+      const resetViewBtn = document.getElementById('reset-view');
+      
+      if (viewFrontBtn) {
+        viewFrontBtn.onclick = () => {
+          camera.position.set(0, 6, 20);
+          camera.lookAt(0, 6, 0);
+        };
       }
       
-      renderer.render(scene, camera);
-    };
-    
-    animate();
-    
-    // Hantera musinteraktioner för rotation
-    const handleMouseDown = (event: MouseEvent) => {
-      sceneRef.current.isDragging = true;
-      sceneRef.current.previousMousePosition = {
-        x: event.clientX,
-        y: event.clientY
-      };
-    };
-    
-    const handleMouseMove = (event: MouseEvent) => {
-      if (!sceneRef.current.isDragging) return;
-      
-      const { previousMousePosition } = sceneRef.current;
-      if (!previousMousePosition) return;
-      
-      const deltaMove = {
-        x: event.clientX - previousMousePosition.x,
-        y: event.clientY - previousMousePosition.y
-      };
-      
-      // Rotera byggnaden baserat på musdrag
-      const rotationSpeed = 0.005;
-      building.rotation.y += deltaMove.x * rotationSpeed;
-      building.rotation.x += deltaMove.y * rotationSpeed;
-      roof.rotation.y += deltaMove.x * rotationSpeed;
-      roof.rotation.x += deltaMove.y * rotationSpeed;
-      
-      sceneRef.current.previousMousePosition = {
-        x: event.clientX,
-        y: event.clientY
-      };
-    };
-    
-    const handleMouseUp = () => {
-      sceneRef.current.isDragging = false;
-    };
-    
-    // Hantera zoom (med mushjul)
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      
-      const camera = sceneRef.current.camera;
-      if (!camera) return;
-      
-      // Zoom in eller ut baserat på mushjulsriktning
-      const zoomSpeed = 0.1;
-      const delta = event.deltaY > 0 ? 1 : -1;
-      
-      // Begränsa zoom (min 5, max 35)
-      const newPosition = camera.position.length() + delta * zoomSpeed;
-      if (newPosition > 5 && newPosition < 35) {
-        // Normalisera kameraposition först (behåller riktningen)
-        camera.position.normalize();
-        // Sätt sedan ny längd på vektorn (zoomar in/ut)
-        camera.position.multiplyScalar(newPosition);
+      if (viewTopBtn) {
+        viewTopBtn.onclick = () => {
+          camera.position.set(0, 25, 0);
+          camera.lookAt(0, 6, 0);
+        };
       }
-    };
-    
-    // Hantera fönsterändring
-    const handleResize = () => {
-      if (!containerRef.current || !sceneRef.current.camera || !sceneRef.current.renderer) return;
       
-      const width = containerRef.current.clientWidth;
-      const height = containerRef.current.clientHeight;
+      if (viewIsoBtn) {
+        viewIsoBtn.onclick = () => {
+          camera.position.set(15, 15, 15);
+          camera.lookAt(0, 6, 0);
+        };
+      }
       
-      sceneRef.current.camera.aspect = width / height;
-      sceneRef.current.camera.updateProjectionMatrix();
-      sceneRef.current.renderer.setSize(width, height);
-    };
+      if (resetViewBtn) {
+        resetViewBtn.onclick = () => {
+          camera.position.set(10, 10, 10);
+          camera.lookAt(0, 0, 0);
+          building.rotation.set(0, 0, 0);
+          roof.rotation.set(0, Math.PI / 4, 0);
+        };
+      }
+    } catch (error) {
+      console.error('Fel vid initiering av 3D-scen:', error);
+      setErrorMessage('Fel vid initiering av 3D-visare');
+    }
     
-    // Lägg till event-lyssnare
-    renderer.domElement.addEventListener('mousedown', handleMouseDown);
-    renderer.domElement.addEventListener('mousemove', handleMouseMove);
-    renderer.domElement.addEventListener('mouseup', handleMouseUp);
-    renderer.domElement.addEventListener('wheel', handleWheel);
-    window.addEventListener('resize', handleResize);
-    
-    // Städa upp
+    // Rensa upp vid komponentavmontering
     return () => {
-      if (sceneRef.current.animationId) {
-        cancelAnimationFrame(sceneRef.current.animationId);
+      cleanupEventHandlers.forEach(cleanup => cleanup());
+      
+      // Rensa containern
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
       }
-      
-      renderer.domElement.removeEventListener('mousedown', handleMouseDown);
-      renderer.domElement.removeEventListener('mousemove', handleMouseMove);
-      renderer.domElement.removeEventListener('mouseup', handleMouseUp);
-      renderer.domElement.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('resize', handleResize);
-      
-      renderer.dispose();
-      container.removeChild(renderer.domElement);
     };
   }, [loadedModel]);
-  
-  // Vyfunktioner
-  const viewFront = () => {
-    if (!sceneRef.current.camera) return;
-    
-    sceneRef.current.camera.position.set(0, 6, 20);
-    sceneRef.current.camera.lookAt(0, 6, 0);
-  };
-  
-  const viewTop = () => {
-    if (!sceneRef.current.camera) return;
-    
-    sceneRef.current.camera.position.set(0, 25, 0);
-    sceneRef.current.camera.lookAt(0, 6, 0);
-  };
-  
-  const viewIso = () => {
-    if (!sceneRef.current.camera) return;
-    
-    sceneRef.current.camera.position.set(15, 15, 15);
-    sceneRef.current.camera.lookAt(0, 6, 0);
-  };
-  
-  const resetView = () => {
-    if (!sceneRef.current.camera || !sceneRef.current.building || !sceneRef.current.roof) return;
-    
-    sceneRef.current.camera.position.set(15, 15, 15);
-    sceneRef.current.camera.lookAt(0, 6, 0);
-    sceneRef.current.building.rotation.x = 0;
-    sceneRef.current.building.rotation.y = 0;
-    sceneRef.current.roof.rotation.x = 0;
-    sceneRef.current.roof.rotation.y = Math.PI / 4;
-  };
   
   // Hantera filuppladdning
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,7 +246,7 @@ const IFCViewer: React.FC = () => {
     setTimeout(() => {
       setLoadedModel(file.name);
       setIsLoading(false);
-    }, 1500);
+    }, 1000);
   };
   
   // Rensa modell
@@ -387,10 +369,10 @@ const IFCViewer: React.FC = () => {
       
       <Box sx={{ p: 1, borderTop: '1px solid', borderColor: 'divider' }}>
         <Stack direction="row" spacing={1} justifyContent="center">
-          <Button size="sm" variant="soft" onClick={viewFront} disabled={!loadedModel || isLoading}>Fram</Button>
-          <Button size="sm" variant="soft" onClick={viewTop} disabled={!loadedModel || isLoading}>Ovan</Button>
-          <Button size="sm" variant="soft" onClick={viewIso} disabled={!loadedModel || isLoading}>ISO</Button>
-          <Button size="sm" variant="soft" onClick={resetView} disabled={!loadedModel || isLoading}>Återställ</Button>
+          <Button id="view-front" size="sm" variant="soft" disabled={!loadedModel || isLoading}>Fram</Button>
+          <Button id="view-top" size="sm" variant="soft" disabled={!loadedModel || isLoading}>Ovan</Button>
+          <Button id="view-iso" size="sm" variant="soft" disabled={!loadedModel || isLoading}>ISO</Button>
+          <Button id="reset-view" size="sm" variant="soft" disabled={!loadedModel || isLoading}>Återställ</Button>
         </Stack>
       </Box>
     </Box>
