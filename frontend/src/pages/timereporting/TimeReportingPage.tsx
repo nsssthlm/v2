@@ -344,6 +344,8 @@ const TimeReportingPage = () => {
                 <SimplePDFViewer 
                   pdfUrl={selectedPdf.fileUrl}
                   filename={selectedPdf.fileName}
+                  fileId={selectedPdf.id}
+                  isLocal={selectedPdf.isLocal}
                 />
               </Box>
             </Box>

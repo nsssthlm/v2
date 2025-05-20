@@ -9,7 +9,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
-from .models import File
+from django.db.models import Model
+from .models import File  # Import direkt från modeller
+import logging
+
+logger = logging.getLogger('files')
 
 class PDFProxyView(APIView):
     """
@@ -23,14 +27,23 @@ class PDFProxyView(APIView):
             if not file_id:
                 return Response({"error": "Inget fil-ID angivet"}, status=status.HTTP_400_BAD_REQUEST)
             
+            logger.debug(f"Försöker hämta fil med ID: {file_id}")
+            
             # Hämta fil från databasen
-            file_obj = File.objects.get(pk=file_id)
+            try:
+                file_obj = File.objects.get(pk=file_id)
+            except Exception as db_error:
+                logger.error(f"Kunde inte hitta fil med ID {file_id}: {str(db_error)}")
+                return Response({"error": f"Filen med ID {file_id} existerar inte eller kunde inte hämtas"}, 
+                                status=status.HTTP_404_NOT_FOUND)
             
             # Hämta den fysiska filen
             file_path = os.path.join(settings.MEDIA_ROOT, str(file_obj.file))
+            logger.debug(f"Filsökväg: {file_path}")
             
             if not os.path.exists(file_path):
-                return Response({"error": "Filen hittades inte"}, status=status.HTTP_404_NOT_FOUND)
+                logger.error(f"Filen existerar inte på disk: {file_path}")
+                return Response({"error": "Filen hittades inte på disk"}, status=status.HTTP_404_NOT_FOUND)
             
             # Bestäm MIME-typ baserat på filändelse
             content_type, encoding = mimetypes.guess_type(file_path)
@@ -47,21 +60,27 @@ class PDFProxyView(APIView):
             response['X-Frame-Options'] = 'SAMEORIGIN'
             response['Access-Control-Allow-Origin'] = '*'
             response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-            response['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept'
+            response['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization'
             
+            logger.debug(f"Serverar fil: {filename} med content-type: {content_type}")
             return response
             
-        except File.DoesNotExist:
-            return Response({"error": "Filen existerar inte"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            logger.error(f"Fel vid hämtning av fil: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def options(self, request, *args, **kwargs):
         """
         Hantera OPTIONS-förfrågningar för CORS-preflight
         """
-        response = HttpResponse()
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept'
+        # Skapa en korrekt DRF-response istället för HttpResponse för att matcha APIView:s return-typ
+        response = Response(
+            {},  # Tom data
+            status=status.HTTP_200_OK,
+            headers={
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
+            }
+        )
         return response
