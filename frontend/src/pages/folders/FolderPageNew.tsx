@@ -102,20 +102,35 @@ const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, s
       </td>
       <td style={{ padding: '12px 8px' }}>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {isPdf && (
-            <Button
-              size="sm"
-              variant="solid"
-              color="primary"
-              startDecorator={<VisibilityIcon sx={{ fontSize: 16 }} />}
-              sx={{ fontSize: '0.75rem', py: 0.5, minWidth: '84px' }}
+          {name.toLowerCase().endsWith('.pdf') && (
+            <a 
+              href={fileUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#1976d2',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                textDecoration: 'none',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
               onClick={(e) => {
                 e.stopPropagation();
-                onViewPdf && onViewPdf(fileUrl, name);
               }}
             >
-              Visa PDF
-            </Button>
+              <span style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <VisibilityIcon style={{ fontSize: 16 }} />
+                Visa PDF
+              </span>
+            </a>
           )}
           <IconButton 
             size="sm" 
