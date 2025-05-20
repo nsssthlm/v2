@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import SimplestPDF from '../../components/timereporting/SimplestPDF';
+import BlobPDFViewer from '../../components/timereporting/BlobPDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -315,9 +315,10 @@ const TimeReportingPage = () => {
                 bgcolor: 'background.level1',
                 height: 'calc(80vh - 64px)'
               }}>
-                <SimplestPDF 
+                <BlobPDFViewer 
                   pdfUrl={selectedPdf.fileUrl}
                   filename={selectedPdf.fileName}
+                  isDialogMode={true}
                 />
               </Box>
             </Box>
