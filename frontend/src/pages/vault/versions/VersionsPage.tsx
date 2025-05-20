@@ -187,8 +187,10 @@ export default function VersionsPage() {
       // For now, we'll use our sample PDF
       const version = SAMPLE_FILE_VERSIONS.find(v => v.id === versionId);
       if (version) {
-        // Use relative path to the sample PDF
-        setPdfUrl('/sample-pdfs/sample1.pdf');
+        // Use Google Docs Viewer as a fallback method to display PDFs when browser security blocks direct embed
+        // This is a well-known technique for PDF viewing in secure environments
+        const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + '/sample-pdfs/sample1.pdf')}&embedded=true`;
+        setPdfUrl(googleDocsViewerUrl);
       }
     } catch (error) {
       console.error('Error loading PDF content:', error);
@@ -445,15 +447,17 @@ export default function VersionsPage() {
                         </Typography>
                         
                         <Box sx={{ width: '100%', height: 'calc(100% - 120px)', position: 'relative', border: '1px solid', borderColor: 'divider', borderRadius: 'sm', overflow: 'hidden' }}>
-                          <iframe 
-                            src={pdfUrl} 
+                          <iframe
+                            src={pdfUrl}
                             style={{ 
                               width: '100%', 
                               height: '100%', 
                               border: 'none',
                               backgroundColor: '#f5f5f5'
                             }}
+                            frameBorder="0"
                             title="PDF Viewer"
+                            allowFullScreen
                           />
                         </Box>
                         
