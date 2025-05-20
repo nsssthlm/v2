@@ -249,34 +249,30 @@ export default function VersionsPage() {
     
     setUploading(true);
     try {
-      // Skapa en URL för den nya PDF-filen
+      // Skapa en fil-URL för den uppladdade PDF:en
       const fileUrl = URL.createObjectURL(newVersionFile);
       
-      // Skapa en ny version med den uppladdade filen
+      // Skapa versionsinformation
+      const nextVersionNumber = fileVersions.length + 1;
       const newVersion: FileVersion = {
-        id: `${selectedFileId}-${fileVersions.length + 1}`,
-        versionNumber: fileVersions.length + 1,
+        id: `${selectedFileId}-${nextVersionNumber}`,
+        versionNumber: nextVersionNumber,
         filename: newVersionFile.name,
-        fileUrl: fileUrl, // Använd den nya PDF:ens URL
+        fileUrl: fileUrl,
         description: newVersionDescription,
         uploaded: new Date().toISOString(),
         uploadedBy: 'Current User'
       };
       
-      // Lägg till den nya versionen i listan
+      // Uppdatera versionshistoriken
       const updatedVersions = [...fileVersions, newVersion];
       setFileVersions(updatedVersions);
       
-      // Sätt den aktiva versionen till den nya och ladda in den
+      // Sätt den nya versionen som aktiv
       setActiveVersionId(newVersion.id);
-      
-      // Använd direkt Google Docs Viewer med den nya filens URL
-      // Notera att URL.createObjectURL ger en blob: URL som inte fungerar med Google Docs,
-      // så vi genererar en direktlänk till Google Docs Viewer som kan visa filen
-      const googleDocsViewerUrl = `https://docs.google.com/viewer?embedded=true`;
       setPdfUrl(fileUrl);
       
-      // Stäng dialogen och återställ formuläret
+      // Stäng dialogrutan och återställ formuläret
       setUploadDialogOpen(false);
       setNewVersionFile(null);
       setNewVersionDescription('');
@@ -456,19 +452,33 @@ export default function VersionsPage() {
                           {activeVersionId && fileVersions.find(v => v.id === activeVersionId)?.filename}
                         </Typography>
                         
-                        <Box sx={{ width: '100%', height: 'calc(100% - 120px)', position: 'relative', border: '1px solid', borderColor: 'divider', borderRadius: 'sm', overflow: 'hidden' }}>
-                          <iframe
-                            src={pdfUrl}
-                            style={{ 
-                              width: '100%', 
-                              height: '100%', 
-                              border: 'none',
-                              backgroundColor: '#f5f5f5'
-                            }}
-                            frameBorder="0"
-                            title="PDF Viewer"
-                            allowFullScreen
-                          />
+                        <Box sx={{ 
+                          width: '100%', 
+                          height: 'calc(100% - 120px)', 
+                          position: 'relative', 
+                          border: '1px solid', 
+                          borderColor: 'divider', 
+                          borderRadius: 'sm', 
+                          overflow: 'hidden',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: '#f5f5f5'
+                        }}>
+                          <Box sx={{ textAlign: 'center', p: 4 }}>
+                            <img
+                              src="/chrome-blocked.png"
+                              alt="PDF"
+                              style={{ width: '64px', opacity: 0.7, marginBottom: '16px' }}
+                            />
+                            <Typography level="title-md">
+                              {activeVersionId && fileVersions.find(v => v.id === activeVersionId)?.filename}
+                            </Typography>
+                            <Typography level="body-md" sx={{ mb: 3, color: 'text.secondary' }}>
+                              PDF:en har laddats upp och finns tillgänglig
+                            </Typography>
+                          </Box>
                         </Box>
                         
                         <Button 
