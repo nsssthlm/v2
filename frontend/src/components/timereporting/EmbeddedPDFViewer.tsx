@@ -1,158 +1,234 @@
-import React, { useState, useEffect } from 'react';
-import { Box, CircularProgress, Typography, Button, Stack } from '@mui/joy';
-import { OpenInNew } from '@mui/icons-material';
+import React, { useEffect, useRef, useState } from 'react';
+import { Box, Typography, Button, Stack, CircularProgress } from '@mui/joy';
+import { PictureAsPdf, OpenInNew, Download } from '@mui/icons-material';
 
 interface EmbeddedPDFViewerProps {
   pdfUrl: string;
-  height?: string | number;
-  width?: string | number;
+  filename: string;
+  fileId?: string;
+  isLocal?: boolean;
 }
 
 /**
- * En komponent som visar PDF direkt i dialogrutan,
- * med flera olika metoder för att säkerställa kompatibilitet
- * med olika webbläsare och miljöer.
+ * En enkel direkt-inbäddad PDF-visare med objektelement
  */
 const EmbeddedPDFViewer: React.FC<EmbeddedPDFViewerProps> = ({
   pdfUrl,
-  height = '100%',
-  width = '100%'
+  filename,
+  fileId,
+  isLocal = false
 }) => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const objectRef = useRef<HTMLObjectElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  
+  // För att hantera när PDF-objekt laddas
   useEffect(() => {
-    // Kontrollera om URL:en är giltig
-    const checkUrl = async () => {
-      try {
-        // Säkerställ att vi har en URL att arbeta med
-        if (!pdfUrl) {
-          setError(true);
-          setLoading(false);
-          return;
+    // Återställ laddningsstatus när URL ändras
+    setIsLoading(true);
+    setLoadError(false);
+    
+    // Sätt en timer för att kontrollera om PDF laddas inom rimlig tid
+    const loadTimer = setTimeout(() => {
+      if (isLoading) {
+        console.log('PDF-laddningstid överskreds, försöker med alternativa metoder...');
+        if (objectRef.current) {
+          // Kontrollera om objektet faktiskt har laddat innehåll
+          try {
+            const hasContent = objectRef.current.clientHeight > 50;
+            if (!hasContent) {
+              setLoadError(true);
+            }
+          } catch (e) {
+            console.error('Kunde inte kontrollera PDF-objektet:', e);
+            setLoadError(true);
+          }
         }
-
-        // Vänta lite innan vi döljer laddningsindikatorn
-        // för att säkerställa att PDF:en har tid att laddas
-        const timer = setTimeout(() => {
-          setLoading(false);
-        }, 1500);
-
-        return () => clearTimeout(timer);
-      } catch (err) {
-        console.error('Fel vid laddning av PDF:', err);
-        setError(true);
-        setLoading(false);
       }
+    }, 5000); // 5 sekunder timeout
+    
+    return () => {
+      clearTimeout(loadTimer);
     };
+  }, [pdfUrl, isLoading]);
 
-    checkUrl();
-  }, [pdfUrl]);
+  // Hantera när inläsningen är klar 
+  const handleLoad = () => {
+    console.log('PDF laddad framgångsrikt:', filename);
+    setIsLoading(false);
+    setLoadError(false);
+  };
 
-  // Om det uppstår ett fel, visa ett felmeddelande och en knapp för att öppna i ny flik
-  if (error) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: height,
-          p: 3
-        }}
-      >
-        <Typography level="h3" sx={{ mb: 2 }}>
-          Kunde inte visa PDF direkt
-        </Typography>
-        <Typography sx={{ mb: 3, textAlign: 'center' }}>
-          Det gick inte att visa PDF-filen direkt i dialogrutan. Prova att öppna den i en ny flik.
-        </Typography>
-        <Button
-          variant="solid"
-          color="primary"
-          startDecorator={<OpenInNew />}
-          onClick={() => window.open(pdfUrl, '_blank', 'noopener,noreferrer')}
-        >
-          Öppna i ny flik
-        </Button>
-      </Box>
-    );
-  }
+  // Hantera fel vid inläsning av PDF
+  const handleError = () => {
+    console.error('Fel vid laddning av PDF:', filename);
+    setIsLoading(false);
+    setLoadError(true);
+  };
 
-  // Konstruera dataURL för Base64-metoden om pdfUrl är en faktisk URL (inte en data-URL)
-  // Detta förutsätter att pdfUrl är en absolut URL eller en relativ URL till en server
-  // som hanterar CORS korrekt
-  const embedUrl = pdfUrl.startsWith('data:') ? pdfUrl : pdfUrl;
+  // Ladda ner PDF
+  const handleDownload = () => {
+    if (isLocal) {
+      // För lokala blob URLs, använd standard nedladdningslogik
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // För server-filer, öppna direktlänk
+      window.location.href = pdfUrl;
+    }
+  };
+
+  // Öppna PDF i nytt fönster
+  const handleOpenInNewTab = () => {
+    window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
-    <Box sx={{ position: 'relative', height: height, width: width }}>
-      {loading && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 10
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      )}
-      <Box
-        sx={{
-          height: '100%',
-          width: '100%',
-          overflow: 'hidden'
-        }}
-      >
-        {/* METOD 1: Använd embed-taggen (fungerar bra i många miljöer) */}
-        <embed
-          src={embedUrl+"#toolbar=0&navpanes=0"}
-          type="application/pdf"
-          width="100%"
-          height="100%"
-          style={{ border: 'none' }}
-        />
-        
-        {/* METOD 2: Alternativ metod med iframe som backup (visas om embed inte fungerar) */}
-        <Box
-          sx={{
-            mt: 2,
-            display: loading ? 'none' : 'block',
-            iframe: {
-              width: '100%',
-              height: 'calc(100% - 40px)',
-              border: 'none'
-            }
-          }}
-        >
-          {/* Visa en knapp för att öppna i ny flik som en fallback-lösning */}
-          <Stack 
-            direction="row" 
-            spacing={2} 
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* PDF-visningsområde */}
+      <Box sx={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
+        {/* Laddningsindikator */}
+        {isLoading && (
+          <Box 
             sx={{ 
-              mt: 2, 
-              display: 'flex', 
-              justifyContent: 'center' 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              bgcolor: 'rgba(255,255,255,0.8)',
+              zIndex: 10
             }}
           >
-            <Button
-              size="sm"
-              variant="outlined" 
-              color="neutral"
-              startDecorator={<OpenInNew />}
-              onClick={() => window.open(pdfUrl, '_blank', 'noopener,noreferrer')}
+            <CircularProgress size="lg" />
+          </Box>
+        )}
+        
+        {/* Felmeddelande om PDF inte kan laddas */}
+        {loadError && (
+          <Box 
+            sx={{ 
+              height: '100%',
+              display: 'flex', 
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              p: 4,
+              textAlign: 'center'
+            }}
+          >
+            <PictureAsPdf 
+              sx={{ fontSize: 80, color: 'primary.main', opacity: 0.7, mb: 3 }}
+            />
+            
+            <Typography level="h4" sx={{ mb: 2 }}>
+              {filename}
+            </Typography>
+            
+            <Typography sx={{ mb: 4, color: 'text.secondary' }}>
+              PDF-filen kunde inte visas direkt i dialogrutan på grund av webbläsarens säkerhetsinställningar.
+              <br />
+              Använd knapparna nedan för att visa dokumentet på ett annat sätt.
+            </Typography>
+            
+            <Stack direction="row" spacing={2}>
+              <Button 
+                variant="solid" 
+                color="primary"
+                size="lg"
+                startDecorator={<OpenInNew />}
+                onClick={handleOpenInNewTab}
+              >
+                Öppna i ny flik
+              </Button>
+              
+              <Button 
+                variant="outlined" 
+                color="neutral"
+                size="lg"
+                startDecorator={<Download />}
+                onClick={handleDownload}
+              >
+                Ladda ner
+              </Button>
+            </Stack>
+          </Box>
+        )}
+
+        {/* Primär metod: Visa PDF inline med objekt-element */}
+        {!loadError && (
+          <object
+            ref={objectRef}
+            data={pdfUrl}
+            type="application/pdf"
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              display: loadError ? 'none' : 'block'
+            }}
+            onLoad={handleLoad}
+            onError={handleError}
+          >
+            {/* Fallback till iframe om object inte fungerar */}
+            <iframe
+              ref={iframeRef}
+              src={`${pdfUrl}#toolbar=0`}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                border: 'none'
+              }}
+              title={filename}
+              onLoad={handleLoad}
+              onError={handleError}
             >
-              Öppna PDF i ny flik om den inte visas korrekt
-            </Button>
-          </Stack>
-        </Box>
+              <Typography>
+                Din webbläsare kan inte visa PDF-filer inline. 
+                <Button onClick={handleOpenInNewTab}>Öppna i nytt fönster</Button>
+              </Typography>
+            </iframe>
+          </object>
+        )}
+      </Box>
+      
+      {/* Kontrollpanel längst ner */}
+      <Box 
+        sx={{ 
+          p: 2, 
+          display: 'flex', 
+          justifyContent: 'center', 
+          borderTop: '1px solid', 
+          borderColor: 'divider',
+          bgcolor: 'background.surface'
+        }}
+      >
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="outlined"
+            color="primary"
+            startDecorator={<OpenInNew />}
+            onClick={handleOpenInNewTab}
+          >
+            Öppna i ny flik
+          </Button>
+          
+          <Button
+            variant="outlined"
+            color="neutral"
+            startDecorator={<Download />}
+            onClick={handleDownload}
+          >
+            Ladda ner
+          </Button>
+        </Stack>
       </Box>
     </Box>
   );
