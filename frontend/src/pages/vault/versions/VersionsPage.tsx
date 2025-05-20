@@ -245,39 +245,59 @@ export default function VersionsPage() {
     
     setUploading(true);
     try {
-      // Skapa en fil-URL för den uppladdade PDF:en - direkt URL utan begränsningar
-      const fileUrl = URL.createObjectURL(newVersionFile);
+      // Skapa en statisk fil-URL istället för blob URL för bättre kompatibilitet
+      const fileReader = new FileReader();
       
-      // Skapa versionsinformation med enkel versionsnumrering
-      const nextVersionNumber = fileVersions.length + 1;
-      const newVersion: FileVersion = {
-        id: `${selectedFileId}-${nextVersionNumber}`,
-        versionNumber: nextVersionNumber,
-        filename: newVersionFile.name,
-        fileUrl: fileUrl,
-        description: newVersionDescription,
-        uploaded: new Date().toISOString(),
-        uploadedBy: 'Current User'
+      fileReader.onload = (event) => {
+        if (!event.target || !event.target.result) {
+          console.error('Kunde inte läsa fil');
+          setUploading(false);
+          return;
+        }
+
+        // Konvertera filen till en base64-sträng som kan inlinas direkt
+        const base64String = event.target.result.toString();
+        
+        // Skapa versionsinformation
+        const nextVersionNumber = fileVersions.length + 1;
+        const newVersion: FileVersion = {
+          id: `${selectedFileId}-${nextVersionNumber}`,
+          versionNumber: nextVersionNumber,
+          filename: newVersionFile.name,
+          fileUrl: base64String,  // Spara basen64-strängen direkt som URL
+          description: newVersionDescription,
+          uploaded: new Date().toISOString(),
+          uploadedBy: 'Current User'
+        };
+        
+        // Uppdatera versionshistoriken
+        const updatedVersions = [...fileVersions, newVersion];
+        setFileVersions(updatedVersions);
+        
+        // Sätt den nya versionen som aktiv
+        setActiveVersionId(newVersion.id);
+        setPdfUrl(base64String);
+        
+        // Stäng dialogrutan och återställ formuläret
+        setUploadDialogOpen(false);
+        setNewVersionFile(null);
+        setNewVersionDescription('');
+        
+        console.log('PDF uppladdad och visad:', newVersion);
+        
+        setUploading(false);
       };
       
-      // Uppdatera versionshistoriken
-      const updatedVersions = [...fileVersions, newVersion];
-      setFileVersions(updatedVersions);
+      fileReader.onerror = () => {
+        console.error('Fel vid läsning av fil');
+        setUploading(false);
+      };
       
-      // Sätt den nya versionen som aktiv direkt
-      setActiveVersionId(newVersion.id);
-      setPdfUrl(fileUrl);
-      
-      // Stäng dialogrutan och återställ formuläret
-      setUploadDialogOpen(false);
-      setNewVersionFile(null);
-      setNewVersionDescription('');
-      
-      console.log('PDF uppladdad och visad:', newVersion);
+      // Starta filläsningen som en data-URL (base64)
+      fileReader.readAsDataURL(newVersionFile);
       
     } catch (error) {
       console.error('Error uploading new version:', error);
-    } finally {
       setUploading(false);
     }
   };
@@ -450,21 +470,22 @@ export default function VersionsPage() {
                         
                         <Box sx={{ width: '100%', height: 'calc(100% - 120px)' }}>
                           {pdfUrl ? (
-                            <Box sx={{ width: '100%', height: '100%' }}>
-                              <object
-                                data={pdfUrl}
+                            <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+                              <embed
+                                src={pdfUrl}
                                 type="application/pdf"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 'none' }}
+                              />
+                              <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={() => window.open(pdfUrl, '_blank')}
+                                sx={{ position: 'absolute', bottom: 10, right: 10, zIndex: 100 }}
                               >
-                                <Typography sx={{ p: 2 }}>
-                                  Din webbläsare kan inte visa PDF-filen. 
-                                  <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                                    Klicka här för att öppna den i en ny flik
-                                  </a>
-                                </Typography>
-                              </object>
+                                Öppna i ny flik
+                              </Button>
                             </Box>
                           ) : (
                             <Box sx={{ 
