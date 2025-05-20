@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import ReactPDFViewerImproved from '../../components/timereporting/ReactPDFViewerImproved';
+import PDFViewer from '../../components/timereporting/PDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -315,7 +315,7 @@ const TimeReportingPage = () => {
                 bgcolor: 'background.level1',
                 height: 'calc(80vh - 64px)'
               }}>
-                <ReactPDFViewerImproved 
+                <PDFViewer 
                   pdfUrl={selectedPdf.fileUrl} 
                   filename={selectedPdf.fileName}
                   onDownload={() => {
