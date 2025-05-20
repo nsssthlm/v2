@@ -459,14 +459,26 @@ export default function VersionsPage() {
                             bgcolor: '#f5f5f5'
                           }}
                         >
-                          <iframe
-                            src={pdfUrl}
-                            width="100%"
-                            height="100%"
-                            style={{ border: 'none' }}
-                            title="PDF Viewer"
-                            allowFullScreen
-                          />
+                          {!pdfUrl ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                              <Typography level="body-lg">Ingen PDF vald</Typography>
+                            </Box>
+                          ) : (
+                            <object
+                              data={pdfUrl}
+                              type="application/pdf"
+                              width="100%"
+                              height="100%"
+                              style={{ border: 'none' }}
+                            >
+                              <Typography sx={{ p: 2 }}>
+                                Det går inte att visa PDF-filen. 
+                                <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                                  Klicka här för att öppna i en ny flik
+                                </a>
+                              </Typography>
+                            </object>
+                          )}
                         </Box>
                         
                         <Button 
