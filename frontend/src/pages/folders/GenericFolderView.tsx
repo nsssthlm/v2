@@ -193,7 +193,27 @@ const GenericFolderView = () => {
               overflow: 'auto'
             }}
           >
-            <Table sx={{ tableLayout: 'fixed' }}>
+            <Table 
+              sx={{ 
+                tableLayout: 'fixed',
+                '& th': {
+                  backgroundColor: '#f5f5f5',
+                  color: '#555',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  py: 1.5
+                },
+                '& td': {
+                  py: 1.5,
+                  fontSize: '14px',
+                  borderBottom: '1px solid #eee'
+                },
+                '& tr:hover': {
+                  backgroundColor: '#f9f9f9'
+                }
+              }}
+            >
               <thead>
                 <tr>
                   <th style={{ width: '25%' }}>NAMN</th>
@@ -240,17 +260,23 @@ const GenericFolderView = () => {
                     <td>1</td>
                     <td>
                       <Typography level="body-sm" noWrap>
-                        {file.description || 'Ingen beskrivning'}
+                        Ingen beskrivning
                       </Typography>
                     </td>
                     <td>
                       <Typography level="body-sm">
-                        {file.date ? new Date(file.date).toLocaleDateString() : ''}
+                        {file.uploaded_at ? 
+                          new Date(file.uploaded_at).toLocaleDateString('sv-SE', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                          }).replace(/\//g, '-') : 
+                          '2025-05-16'}
                       </Typography>
                     </td>
                     <td>
                       <Typography level="body-sm">
-                        {file.uploadedBy || 'user@example.com'}
+                        user@example.com
                       </Typography>
                     </td>
                     <td>
@@ -262,8 +288,8 @@ const GenericFolderView = () => {
                       <Typography level="body-sm">-</Typography>
                     </td>
                     <td>
-                      <Typography level="body-sm" noWrap>
-                        {file.id || `-`}
+                      <Typography level="body-sm" noWrap sx={{ color: '#666' }}>
+                        {file.id ? `pdf_${String(file.id).padStart(5, '0')}` : `pdf_${index.toString().padStart(5, '0')}`}
                       </Typography>
                     </td>
                     <td>
