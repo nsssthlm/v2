@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useProject } from '../../contexts/ProjectContext';
 import axios from 'axios';
 import { 
   Box, 
@@ -45,12 +46,15 @@ interface FolderData {
 
 const GenericFolderView = () => {
   const { slug = '' } = useParams<{ slug: string }>();
-  const navigate = useNavigate(); // Lägg till navigate-funktionen
+  const navigate = useNavigate(); 
+  const { currentProject, setCurrentProject } = useProject(); // Hämta projektkontext
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [folderProjectId, setFolderProjectId] = useState<string | null>(null);
   
   // Tillstånd för PDF-dialogen
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
@@ -71,8 +75,29 @@ const GenericFolderView = () => {
     setError(null);
     
     try {
+      console.log(`Hämtar mappdata för slug: ${slug}`);
       const response = await axios.get(`${API_BASE_URL}/files/web/${slug}/data/`);
+      
+      // Spara mappdata och sätt projektID om det finns
       setFolderData(response.data);
+      
+      // Kontrollera om mappen har projektinformation
+      if (response.data && response.data.project_id) {
+        console.log(`Mappen tillhör projekt: ${response.data.project_id}`);
+        setFolderProjectId(response.data.project_id.toString());
+        
+        // Om mappens projekt skiljer sig från nuvarande projekt, uppdatera projektkontext
+        if (currentProject && currentProject.id !== response.data.project_id.toString()) {
+          // Hitta det matchande projektet för att sätta rätt projektkontext
+          const projects = JSON.parse(sessionStorage.getItem('projects') || '[]');
+          const matchingProject = projects.find((p: any) => p.id === response.data.project_id.toString());
+          
+          if (matchingProject) {
+            console.log('Byter till mappens projekt:', matchingProject.name);
+            setCurrentProject(matchingProject);
+          }
+        }
+      }
     } catch (err: any) {
       console.error('Fel vid hämtning av mappdata:', err);
       setError(err.message || 'Ett fel uppstod vid hämtning av mappdata');
