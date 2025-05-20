@@ -1,0 +1,73 @@
+Mixed Content – HTTP laddas i HTTPS
+Om din webbsida körs på https://, men PDF:en laddas från http://, så blockerar Chrome det automatiskt.
+
+Lösning:
+Se till att PDF:en laddas via HTTPS, t.ex.:
+
+https://dinsajt.se ska inte ladda en PDF från http://localhost:8001/pdf.pdf.
+Använd istället https://proxy.dinsajt.se/pdf.pdf.
+
+🛡️ 2. CORS – Cross-Origin Resource Sharing
+Om PDF:en hämtas från en annan domän än frontend, måste servern skicka rätt CORS-header:
+
+Servern ska skicka:
+
+Access-Control-Allow-Origin: *
+eller ännu säkrare:
+
+Access-Control-Allow-Origin: https://dinsajt.se
+
+I Django kan du t.ex. lägga till i settings.py:
+
+CORS_ALLOWED_ORIGINS = [ "https://dinsajt.se", ]
+
+Använder du proxy (som nginx eller Replit), måste även den stödja CORS.
+
+🔐 3. Content Security Policy (CSP)
+Om din server har en strikt CSP-policy, t.ex.:
+
+Content-Security-Policy: frame-src 'self'
+
+...då blockeras PDF:er som laddas in via iframe.
+
+Lösning:
+Ändra din CSP så att PDF-domänen tillåts, t.ex.:
+
+Content-Security-Policy: frame-src 'self' https://pdfserver.dinsajt.se;
+
+📁 4. PDF i dialog/iframe blockeras
+Om du laddar PDF:en i en <iframe> eller <object> som visas i en modal eller dialog, kan Chrome blockera den.
+
+Lösningar:
+
+Testa att öppna PDF:en i en ny flik eller nytt fönster.
+
+Eller: använd pdfjs-dist för att visa PDF:en direkt som komponent.
+
+Exempel på PDF.js-anrop:
+
+const loadingTask = pdfjs.getDocument({ url });
+
+🧪 5. Visa PDF via blob istället för direktlänk
+Att visa PDF:en som blob undviker många säkerhetsblockeringar.
+
+Exempel:
+
+scss
+Kopiera
+Redigera
+fetch(pdfUrl)
+  .then(res => res.blob())
+  .then(blob => {
+    const blobUrl = URL.createObjectURL(blob);
+    setPdfSrc(blobUrl);
+  });
+Sedan sätter du blobUrl som src i din iframe eller skickar det till PDF.js.
+
+📌 Snabb översikt
+Problem	Lösning
+PDF laddas via HTTP	Använd HTTPS
+Annan domän utan CORS	Konfigurera Access-Control-Allow-Origin
+CSP blockerar iframe	Lägg till domän i CSP
+Modal blockerar PDF	Visa i ny flik eller använd pdf.js/blob
+Chrome blockerar iframe	Byt till blob eller visa utanför dialog
