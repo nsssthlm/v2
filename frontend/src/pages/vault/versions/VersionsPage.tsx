@@ -245,10 +245,10 @@ export default function VersionsPage() {
     
     setUploading(true);
     try {
-      // Skapa en fil-URL för den uppladdade PDF:en
+      // Skapa en fil-URL för den uppladdade PDF:en - direkt URL utan begränsningar
       const fileUrl = URL.createObjectURL(newVersionFile);
       
-      // Skapa versionsinformation
+      // Skapa versionsinformation med enkel versionsnumrering
       const nextVersionNumber = fileVersions.length + 1;
       const newVersion: FileVersion = {
         id: `${selectedFileId}-${nextVersionNumber}`,
@@ -264,7 +264,7 @@ export default function VersionsPage() {
       const updatedVersions = [...fileVersions, newVersion];
       setFileVersions(updatedVersions);
       
-      // Sätt den nya versionen som aktiv
+      // Sätt den nya versionen som aktiv direkt
       setActiveVersionId(newVersion.id);
       setPdfUrl(fileUrl);
       
