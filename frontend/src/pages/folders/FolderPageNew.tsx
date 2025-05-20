@@ -22,9 +22,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import FolderIcon from '@mui/icons-material/Folder';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
 import SimpleFileUploader from '../../components/SimpleFileUploader';
+import PDFViewerDialog from '../../components/PDFViewerDialog';
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -112,6 +115,10 @@ const FolderPageNew = () => {
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  
+  // PDF Viewer state
+  const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState<{url: string, name: string} | null>(null);
   
   // Delete folder dialog state
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
@@ -250,10 +257,11 @@ const FolderPageNew = () => {
     }
   };
   
-  // Filhantering - endast grundläggande funktioner, ingen PDF-visning
-  const handleFileAction = (fileUrl: string, fileName: string) => {
-    console.log("Filhantering är grundläggande - ingen PDF-visningsfunktionalitet:", fileName);
-    // Ingen PDF-visningsfunktionalitet inkluderad
+  // Hantera visning av PDF-filer
+  const handleViewPdf = (fileUrl: string, fileName: string) => {
+    console.log("Laddar PDF:", fileName, "från URL:", fileUrl);
+    setSelectedPdf({ url: fileUrl, name: fileName });
+    setPdfViewerOpen(true);
   };
 
   if (loading) {
