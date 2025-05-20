@@ -12,26 +12,13 @@ import {
   Breadcrumbs, 
   Link, 
   CircularProgress,
-  Alert,
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Sheet,
-  Button,
-  IconButton
+  Alert
 } from '@mui/joy';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import SimplePDFViewer from '../components/workspace/SimplePDFViewer';
 import FolderIcon from '@mui/icons-material/Folder';
 import ListAltIcon from '@mui/icons-material/ListAlt';
-import DescriptionIcon from '@mui/icons-material/Description';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import PDFList from '../components/workspace/PDFList';
-import PDFViewer from '../components/workspace/PDFViewer';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import api from '../services/api';
-import { PDFDocument } from '../types';
 
 interface Project {
   id: number;
@@ -48,19 +35,10 @@ const Workspace: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   
-  const [activeTab, setActiveTab] = useState<number>(1); // Set to PDF tab by default
+  const [activeTab, setActiveTab] = useState<number>(0); // Set to Files tab by default
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPDF, setSelectedPDF] = useState<PDFDocument | null>(null);
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    console.log('PDF loaded with', numPages, 'pages');
-    setNumPages(numPages);
-    setPageNumber(1);
-  }
   
   useEffect(() => {
     const fetchProject = async () => {
@@ -104,22 +82,6 @@ const Workspace: React.FC = () => {
     
     fetchProject();
   }, [projectId, navigate]);
-  
-  // Tab change is handled inline with the onChange handler
-  
-  const handleOpenPDF = (pdf: PDFDocument) => {
-    console.log('Opening PDF:', pdf);
-    // Force update with setTimeout to ensure state update is processed
-    setTimeout(() => {
-      setSelectedPDF(pdf);
-      console.log('selectedPDF has been set to:', pdf.title);
-    }, 0);
-  };
-  
-  const handleClosePDF = () => {
-    console.log('Closing PDF viewer');
-    setSelectedPDF(null);
-  };
   
   if (loading) {
     return (
@@ -167,12 +129,6 @@ const Workspace: React.FC = () => {
             </Tab>
             <Tab>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <DescriptionIcon />
-                <span>PDFer</span>
-              </Box>
-            </Tab>
-            <Tab>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <ListAltIcon />
                 <span>Wiki</span>
               </Box>
@@ -191,146 +147,15 @@ const Workspace: React.FC = () => {
             </TabPanel>
             
             <TabPanel value={1}>
-              <PDFList 
-                projectId={currentProjectId} 
-                onOpenPDF={handleOpenPDF} 
-              />
-            </TabPanel>
-            
-            <TabPanel value={2}>
               <Typography>Wiki kommer snart.</Typography>
             </TabPanel>
             
-            <TabPanel value={3}>
+            <TabPanel value={2}>
               <Typography>Dashboard kommer snart.</Typography>
             </TabPanel>
           </CardContent>
         </Tabs>
       </Card>
-      
-      {/* PDF Viewer Modal - implemented directly in Workspace */}
-      {selectedPDF && (
-        <Modal
-          open={true}
-          onClose={handleClosePDF}
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1400
-          }}
-        >
-          <ModalDialog 
-            variant="outlined"
-            layout="fullscreen" 
-            sx={{ 
-              p: 3, 
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              maxWidth: '80vw',
-              maxHeight: '85vh',
-              margin: 'auto',
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)'
-            }}
-          >
-            <ModalClose />
-            <Typography level="h4" sx={{ mb: 2 }}>
-              {selectedPDF.title}
-            </Typography>
-            
-            <Sheet 
-              variant="outlined"
-              sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                flex: 1,
-                overflow: 'hidden',
-                borderRadius: 'sm'
-              }}
-            >
-              <Box sx={{ p: 2, mb: 2 }}>
-                <Typography level="body-sm">
-                  <strong>Filnamn:</strong> {selectedPDF.title}
-                </Typography>
-                <Typography level="body-sm">
-                  <strong>Uppladdad av:</strong> {selectedPDF.uploaded_by_details.first_name} {selectedPDF.uploaded_by_details.last_name}
-                </Typography>
-                <Typography level="body-sm">
-                  <strong>Uppladdad:</strong> {new Date(selectedPDF.created_at).toLocaleDateString('sv-SE')}
-                </Typography>
-                <Typography level="body-sm">
-                  <strong>Filstorlek:</strong> {Math.round(selectedPDF.size / 1024 / 1024 * 10) / 10} MB
-                </Typography>
-              </Box>
-              
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                height: '100%',
-                flex: 1,
-                position: 'relative'
-              }}>
-                {/* Toolbar med knapp för att öppna i nytt fönster */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end',
-                  padding: 1,
-                  borderBottom: '1px solid',
-                  borderColor: 'divider'
-                }}>
-                  <IconButton 
-                    variant="outlined" 
-                    color="neutral"
-                    onClick={() => window.open(`http://0.0.0.0:8001${selectedPDF.file_url}`, '_blank', 'noopener,noreferrer')}
-                    title="Öppna i nytt fönster"
-                  >
-                    <OpenInNewIcon />
-                  </IconButton>
-                </Box>
-                
-                {/* PDF-visare med avancerad PDF.js-integrering */}
-                <Box sx={{ 
-                  flex: 1, 
-                  overflow: 'auto',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: 2
-                }}>
-                  <Box sx={{ 
-                    width: '100%', 
-                    height: '80vh',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-                  }}>
-                    <SimplePDFViewer 
-                      pdfUrl={`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`}
-                      title={selectedPDF.title}
-                    />
-                    <Button 
-                      onClick={() => window.open(`http://0.0.0.0:8001/api/workspace/pdfs/${selectedPDF.id}/content/`, '_blank')}
-                      variant="outlined"
-                      color="primary"
-                      size="sm"
-                      startDecorator={<OpenInNewIcon />}
-                      sx={{ mt: 2 }}
-                    >
-                      Öppna i nytt fönster
-                    </Button>
-                  </Box>
-                </Box>
-                
-                {/* Pagination ingår nu i SimplePDFViewer */}
-              </Box>
-            </Sheet>
-          </ModalDialog>
-        </Modal>
-      )}
     </Container>
   );
 };
