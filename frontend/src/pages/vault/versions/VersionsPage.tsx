@@ -28,7 +28,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import { useProject } from '../../../contexts/ProjectContext';
 import { format } from 'date-fns';
 
-// Import PDF utilities
+// Import PDF utilities and library
 import { configurePdfWorker } from '../../../lib/pdf-worker-config';
 import { 
   getLatestPDFVersion, 
@@ -184,10 +184,11 @@ export default function VersionsPage() {
     setLoading(true);
     try {
       // In a real implementation, this would fetch from the server
-      // For now, we'll just set a sample PDF URL
+      // For now, we'll use our sample PDF
       const version = SAMPLE_FILE_VERSIONS.find(v => v.id === versionId);
       if (version) {
-        setPdfUrl(version.fileUrl);
+        // Use relative path to the sample PDF
+        setPdfUrl('/sample-pdfs/sample1.pdf');
       }
     } catch (error) {
       console.error('Error loading PDF content:', error);
