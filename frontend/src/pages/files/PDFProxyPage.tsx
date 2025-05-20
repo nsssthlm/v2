@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography, Button } from '@mui/joy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { fetchAndCreateBlobUrl } from './ProxyPDFService';
 
 /**
  * Denna sida fungerar som en proxy för att visa PDF-filer via PDF.js
@@ -12,6 +13,7 @@ const PDFProxyPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [processedPdfUrl, setProcessedPdfUrl] = useState<string | null>(null);
   
   // Hämta URL och returnera-URL från parametrarna
   const pdfUrl = searchParams.get('url');
@@ -25,12 +27,29 @@ const PDFProxyPage = () => {
       return;
     }
 
-    // Ge den tid att ladda
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    // Hämta PDF via vår proxy-tjänst för att undvika Mixed Content-fel
+    const fetchPdf = async () => {
+      try {
+        setLoading(true);
+        // Använd vår proxy-tjänst för att konvertera HTTP-URL till blob URL
+        const safeUrl = await fetchAndCreateBlobUrl(pdfUrl);
+        setProcessedPdfUrl(safeUrl);
+      } catch (err: any) {
+        console.error('Fel vid hämtning av PDF:', err);
+        setError(`Kunde inte ladda PDF: ${err.message || 'Okänt fel'}`);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchPdf();
+
+    // Rensa blob URL när komponenten avmonteras
+    return () => {
+      if (processedPdfUrl && processedPdfUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(processedPdfUrl);
+      }
+    };
   }, [pdfUrl]);
 
   if (error) {
@@ -85,9 +104,9 @@ const PDFProxyPage = () => {
       </Box>
       
       <Box sx={{ flexGrow: 1, position: 'relative' }}>
-        {pdfUrl && (
+        {processedPdfUrl && (
           <iframe
-            src={`/pdfjs-viewer.html?url=${encodeURIComponent(pdfUrl)}`}
+            src={`/pdfjs-viewer.html?url=${encodeURIComponent(processedPdfUrl)}`}
             style={{ 
               width: '100%', 
               height: '100%', 
