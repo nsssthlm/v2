@@ -16,8 +16,6 @@ import {
   Button,
   IconButton,
   Stack,
-  CircularProgress,
-  Slider,
   Sheet
 } from '@mui/joy';
 import { 
@@ -25,13 +23,11 @@ import {
   Description as DescriptionIcon,
   PictureAsPdf as PdfIcon,
   Delete as DeleteIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
   DownloadForOffline as DownloadIcon
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import SimplePDFViewer from '../../components/timereporting/SimplePDFViewer';
+import PDFEmbed from '../../components/timereporting/PDFEmbed';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -43,7 +39,7 @@ interface PDFDocument {
   uploadedBy: string;
 }
 
-// Använder vår nya SimplePDFViewer-komponent istället för en egen implementation
+// Använder vår nya PDFEmbed-komponent istället för en egen implementation
 
 const TimeReportingPage = () => {
   const { currentProject } = useProject();
@@ -304,10 +300,10 @@ const TimeReportingPage = () => {
                 </Button>
               </Sheet>
               <Box sx={{ flexGrow: 1, overflow: 'hidden', p: 2, bgcolor: 'background.level1' }}>
-                <SimplePDFViewer 
+                <PDFEmbed 
                   pdfUrl={selectedPdf.fileUrl} 
+                  title={selectedPdf.fileName}
                   height="100%" 
-                  width="100%" 
                 />
               </Box>
             </Box>
