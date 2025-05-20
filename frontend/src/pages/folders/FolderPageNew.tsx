@@ -22,12 +22,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import FolderIcon from '@mui/icons-material/Folder';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
 import SimpleFileUploader from '../../components/SimpleFileUploader';
-// Tar bort import av PDFViewerDialog då den inte används
 
 // Cache för mappdata för att minska inladdningstiden
 const folderDataCache: Record<string, {data: any, timestamp: number}> = {};
@@ -62,13 +59,9 @@ interface FileRowProps {
   id: string;
   fileUrl: string;
   onDelete?: (id: string) => void;
-  onViewPdf?: (fileUrl: string, fileName: string) => void;
 }
 
-const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, status, id, fileUrl, onDelete, onViewPdf }: FileRowProps) => {
-  // Kolla om filen är en PDF baserat på namn 
-  const isPdf = name.toLowerCase().endsWith('.pdf');
-
+const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, status, id, fileUrl, onDelete }: FileRowProps) => {
   return (
     <tr>
       <td style={{ padding: '12px 8px' }}>
@@ -79,14 +72,10 @@ const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, s
             gap: 1
           }}
         >
-          <Box component="span" sx={{ color: isPdf ? 'error.500' : 'primary.500' }}>
-            {isPdf ? (
-              <PictureAsPdfIcon fontSize="small" />
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
-              </svg>
-            )}
+          <Box component="span" sx={{ color: 'primary.500' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
+            </svg>
           </Box>
           {name}
         </Box>
@@ -101,39 +90,17 @@ const FileRow = ({ name, version, description, uploadedAt, uploadedBy, folder, s
         {id}
       </td>
       <td style={{ padding: '12px 8px' }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {name.toLowerCase().endsWith('.pdf') && (
-            <Button
-              size="sm"
-              variant="solid"
-              color="primary"
-              startDecorator={<VisibilityIcon fontSize="small" />}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // Öppna PDF direkt i en ny flik
-                window.open(fileUrl, '_blank');
-              }}
-              sx={{ 
-                fontSize: '0.75rem',
-                py: 0.5
-              }}
-            >
-              Visa PDF
-            </Button>
-          )}
-          <IconButton 
-            size="sm" 
-            variant="plain" 
-            color="danger"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete && onDelete(id);
-            }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
+        <IconButton 
+          size="sm" 
+          variant="plain" 
+          color="danger"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete && onDelete(id);
+          }}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
       </td>
     </tr>
   );
@@ -145,8 +112,6 @@ const FolderPageNew = () => {
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  
-  // PDF Viewer-tillstånd är inte längre behövligt eftersom vi öppnar i ny flik
   
   // Delete folder dialog state
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
@@ -285,11 +250,10 @@ const FolderPageNew = () => {
     }
   };
   
-  // Hantera visning av PDF-filer
-  const handleViewPdf = (fileUrl: string, fileName: string) => {
-    console.log("Laddar PDF:", fileName, "från URL:", fileUrl);
-    // Öppna PDF-filen direkt i en ny flik
-    window.open(fileUrl, '_blank');
+  // Filhantering - endast grundläggande funktioner, ingen PDF-visning
+  const handleFileAction = (fileUrl: string, fileName: string) => {
+    console.log("Filhantering är grundläggande - ingen PDF-visningsfunktionalitet:", fileName);
+    // Ingen PDF-visningsfunktionalitet inkluderad
   };
 
   if (loading) {
@@ -421,7 +385,6 @@ const FolderPageNew = () => {
                   id={file.id || `file_${index}`}
                   fileUrl={file.file}
                   onDelete={handleDeleteFile}
-                  onViewPdf={handleViewPdf}
                 />
               ))
             )}
