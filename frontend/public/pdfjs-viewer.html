@@ -21,26 +21,24 @@
       position: absolute;
       top: 0;
       left: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      cursor: grab;
+    }
+    #viewerContainer.grabbing {
+      cursor: grabbing;
     }
     #pdfViewer {
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       margin: 0 auto;
-      overflow: visible;
+      transition: transform 0.05s ease-out;
     }
     .page {
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
       background-color: white;
       margin: 20px auto;
-      display: none; /* Dölj alla sidor som standard */
+      display: none; 
     }
     .page.active {
-      display: block; /* Visa bara aktiv sida */
+      display: block;
     }
     .loading {
       display: flex;
@@ -53,33 +51,6 @@
     }
     .error {
       color: #ff6b6b;
-    }
-    .controls {
-      position: fixed;
-      bottom: 10px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      padding: 10px;
-      z-index: 100;
-    }
-    .controls button {
-      background-color: rgba(0, 0, 0, 0.6);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 8px 15px;
-      margin: 0 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .controls button:hover {
-      background-color: rgba(0, 0, 0, 0.8);
-    }
-    .controls button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
   </style>
 </head>
@@ -102,8 +73,14 @@
     let currentPage = 1;
     let totalPages = 0;
     let currentScale = 1.2;
+    let lastRenderedScale = 1.2;
     const container = document.getElementById('pdfViewer');
     const viewerContainer = document.getElementById('viewerContainer');
+    
+    // Variabler för dragfunktionalitet
+    let isDragging = false;
+    let startPoint = { x: 0, y: 0 };
+    let scrollStart = { left: 0, top: 0 };
     
     // Lyssna på meddelanden från förälderkomponenten
     window.addEventListener('message', function(event) {
@@ -129,7 +106,12 @@
       } else if (message.type === 'setZoom') {
         if (message.zoom) {
           currentScale = message.zoom;
-          renderCurrentPage();
+          updateScaleWithoutRender();
+          // Endast rendera om skillnaden är tillräckligt stor
+          if (Math.abs(currentScale - lastRenderedScale) > 0.2) {
+            renderCurrentPage();
+            lastRenderedScale = currentScale;
+          }
         }
       } else if (message.type === 'jumpToPage') {
         if (message.page && message.page >= 1 && message.page <= totalPages) {
@@ -138,6 +120,21 @@
         }
       }
     });
+
+    // Funktion för att uppdatera zoom utan att rendera om
+    function updateScaleWithoutRender() {
+      // Uppdatera skalan för aktuell sida utan att rendera om
+      const pageContainer = container.querySelector('.page-' + currentPage);
+      if (pageContainer) {
+        const canvas = pageContainer.querySelector('canvas');
+        if (canvas) {
+          // Ändra storleken på canvas med CSS transform istället för att rendera om
+          const ratio = currentScale / lastRenderedScale;
+          pageContainer.style.transform = `scale(${ratio})`;
+        }
+      }
+      updateParent();
+    }
 
     // Funktion för att uppdatera parent-komponenten
     function updateParent() {
@@ -156,20 +153,24 @@
       }
     }
 
+    // Cache för rendererade sidor
+    const pageCache = {};
+
     // Funktion för att rendera enbart den aktiva sidan
     async function renderCurrentPage() {
       if (!pdf) return;
       
-      // Ta bort alla gamla sidor
+      // Ta bort alla synliga sidor
       const existingPages = container.querySelectorAll('.page');
       existingPages.forEach(page => {
-        if (!page.classList.contains('page-' + currentPage)) {
-          page.remove();
+        if (page.classList.contains('active')) {
+          page.classList.remove('active');
         }
       });
       
-      // Kolla om sidan redan finns
-      let pageContainer = container.querySelector('.page-' + currentPage);
+      // Kolla om sidan redan finns i cachen
+      const cacheKey = `page_${currentPage}_scale_${currentScale.toFixed(1)}`;
+      let pageContainer = pageCache[cacheKey];
       
       if (!pageContainer) {
         try {
@@ -201,30 +202,92 @@
           };
           
           await page.render(renderContext).promise;
+          
+          // Spara i cachen
+          pageCache[cacheKey] = pageContainer;
+          
+          // Spara senaste renderade skalan
+          lastRenderedScale = currentScale;
         } catch (error) {
           console.error('Fel vid rendering av sida:', error);
         }
       } else {
-        // Markera den befintliga sidan som aktiv
-        pageContainer.classList.add('active');
+        // Använd den befintliga sidan från cachen
+        if (!container.contains(pageContainer)) {
+          container.appendChild(pageContainer);
+        }
       }
       
-      // Updatera statusen
+      // Markera sidan som aktiv
+      if (pageContainer) {
+        pageContainer.classList.add('active');
+        pageContainer.style.transform = 'scale(1)'; // Återställ eventuell transform
+      }
+      
+      // Uppdatera statusen
       updateParent();
     }
 
-    // Hantera scroll och zoom i viewerContainer
+    // Implementera dragfunktionalitet
+    function setupDragAndDrop() {
+      // Starta drag
+      viewerContainer.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        viewerContainer.classList.add('grabbing');
+        startPoint = { x: e.clientX, y: e.clientY };
+        scrollStart = { left: viewerContainer.scrollLeft, top: viewerContainer.scrollTop };
+        e.preventDefault();
+      });
+      
+      // Avsluta drag
+      viewerContainer.addEventListener('mouseup', function() {
+        isDragging = false;
+        viewerContainer.classList.remove('grabbing');
+      });
+      
+      viewerContainer.addEventListener('mouseleave', function() {
+        isDragging = false;
+        viewerContainer.classList.remove('grabbing');
+      });
+      
+      // Panorera när musen flyttas
+      viewerContainer.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const dx = e.clientX - startPoint.x;
+        const dy = e.clientY - startPoint.y;
+        
+        viewerContainer.scrollLeft = scrollStart.left - dx;
+        viewerContainer.scrollTop = scrollStart.top - dy;
+      });
+    }
+
+    // Hantera scroll och zoom
     function setupScrollAndZoom() {
+      // Timer för att fördröja rendering vid zoom
+      let zoomTimer = null;
+      
       // Hantera mushjul för zoom när Ctrl är nedtryckt
       document.addEventListener('wheel', function(e) {
         if (e.ctrlKey) {
           e.preventDefault();
-          const delta = e.deltaY > 0 ? -0.1 : 0.1;
-          currentScale = Math.max(0.5, Math.min(3, currentScale + delta));
-          renderCurrentPage();
           
-          // Skicka uppdatering till parent
-          updateParent();
+          // Beräkna nya skalan
+          const delta = e.deltaY > 0 ? -0.1 : 0.1;
+          const oldScale = currentScale;
+          currentScale = Math.max(0.5, Math.min(3, currentScale + delta));
+          
+          // Uppdatera skalan utan att rendera om
+          updateScaleWithoutRender();
+          
+          // Rendera om efter en viss tid om ingen mer zoom sker
+          clearTimeout(zoomTimer);
+          zoomTimer = setTimeout(() => {
+            if (Math.abs(currentScale - lastRenderedScale) > 0.05) {
+              renderCurrentPage();
+              lastRenderedScale = currentScale;
+            }
+          }, 200);
         }
       }, { passive: false });
       
@@ -258,6 +321,7 @@
       try {
         if (initialZoom) {
           currentScale = parseFloat(initialZoom);
+          lastRenderedScale = currentScale;
         }
         
         // Ladda PDF
@@ -268,8 +332,9 @@
         container.innerHTML = '';
         container.classList.remove('loading');
         
-        // Sätt upp navigering
+        // Sätt upp interaktivitet
         setupScrollAndZoom();
+        setupDragAndDrop();
         
         // Rendera första sidan
         renderCurrentPage();
