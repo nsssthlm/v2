@@ -198,6 +198,12 @@ const GenericFolderView = () => {
               variant="solid"
               color="primary"
               onClick={() => setUploadDialogOpen(true)}
+              sx={{ 
+                backgroundColor: '#50af5f', 
+                '&:hover': { 
+                  backgroundColor: '#b3dcc8'
+                }
+              }}
             >
               Ladda upp PDF
             </Button>
@@ -206,6 +212,12 @@ const GenericFolderView = () => {
               color="danger"
               onClick={openDeleteFolderDialog}
               startDecorator={<DeleteIcon />}
+              sx={{ 
+                backgroundColor: '#e53935', 
+                '&:hover': { 
+                  backgroundColor: '#d32f2f'
+                }
+              }}
             >
               Ta bort mapp
             </Button>
