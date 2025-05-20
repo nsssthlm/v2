@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import BasicPDFObject from '../../components/timereporting/BasicPDFObject';
+import PDFEmbed from '../../components/timereporting/PDFEmbed';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -313,20 +313,47 @@ const TimeReportingPage = () => {
                 flexGrow: 1, 
                 overflow: 'hidden', 
                 bgcolor: 'background.level1',
-                height: 'calc(80vh - 64px)'
+                height: 'calc(80vh - 64px)',
+                display: 'flex',
+                flexDirection: 'column'
               }}>
-                <BasicPDFObject 
-                  pdfUrl={selectedPdf.fileUrl}
-                  onDownload={() => {
-                    const link = document.createElement('a');
-                    link.href = selectedPdf.fileUrl;
-                    link.download = selectedPdf.fileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                {/* PDF-visningsområdet */}
+                <Box sx={{ flexGrow: 1, position: 'relative' }}>
+                  <PDFEmbed 
+                    pdfUrl={selectedPdf.fileUrl}
+                    title={selectedPdf.fileName}
+                    height="100%"
+                  />
+                </Box>
+                
+                {/* Knappar längst ner */}
+                <Box 
+                  sx={{ 
+                    p: 2, 
+                    borderTop: '1px solid', 
+                    borderColor: 'divider',
+                    display: 'flex',
+                    justifyContent: 'center'
                   }}
-                  onOpenInNewTab={() => window.open(selectedPdf.fileUrl, '_blank', 'noopener,noreferrer')}
-                />
+                >
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      variant="outlined"
+                      color="neutral"
+                      startDecorator={<DownloadIcon />}
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = selectedPdf.fileUrl;
+                        link.download = selectedPdf.fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      Ladda ner
+                    </Button>
+                  </Stack>
+                </Box>
               </Box>
             </Box>
           )}
