@@ -172,9 +172,13 @@ const GenericFolderView = () => {
         // Sätt en flagga för att indikera att mappsystemet behöver uppdateras
         sessionStorage.setItem('force_refresh_directories', 'true');
         
-        // Navigera tillbaka till mappöversikten med React Router
-        // Detta bevarar autentiseringstillståndet och tvingar en omladdning av maplistan
-        window.location.href = '/folders';
+        // Om mappen har en föräldermapp, navigera till den istället för mappöversikten
+        if (folderData?.parent_slug) {
+          window.location.href = `/folders/${folderData.parent_slug}`;
+        } else {
+          // Om det inte finns en föräldermapp, navigera till dashboard istället för mappöversikten
+          window.location.href = '/';
+        }
       }, 500);
       
     } catch (err: any) {
