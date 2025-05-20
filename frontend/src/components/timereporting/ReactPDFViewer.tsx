@@ -3,8 +3,11 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { Box, Typography, CircularProgress, Button, Stack } from '@mui/joy';
 import { KeyboardArrowLeft, KeyboardArrowRight, ZoomIn, ZoomOut, OpenInNew, Download } from '@mui/icons-material';
 
-// Konfigurera worker för react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Konfigurera worker för react-pdf (lokal lösning som fungerar utan beroende av externa tjänster)
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
 
 interface ReactPDFViewerProps {
   pdfUrl: string;
