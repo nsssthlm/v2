@@ -23,6 +23,9 @@ import CalendarPage from './pages/dashboard/CalendarPage';
 import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
 
+// Tidsrapportering
+import TimeReportingPage from './pages/timereporting/TimeReportingPage';
+
 // PDF hantering
 import PDFViewerPage from './pages/PDFViewerPage';
 import SimplePDFPage from './pages/SimplePDFPage';
@@ -61,6 +64,7 @@ function App() {
                 <Route path="files" element={<ComingSoonPage title="Dokument" />} />
                 <Route path="team" element={<ComingSoonPage title="Team" />} />
                 <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
+                <Route path="timereporting" element={<TimeReportingPage />} />
                 
                 {/* Folder routes */}
                 <Route path="folders" element={<FolderListPage />} />
