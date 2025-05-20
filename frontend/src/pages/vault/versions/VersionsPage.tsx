@@ -439,28 +439,29 @@ export default function VersionsPage() {
                     {loading ? (
                       <CircularProgress size="lg" sx={{ my: 4 }} />
                     ) : pdfUrl ? (
-                      <Document
-                        file={pdfUrl}
-                        onLoadSuccess={onDocumentLoadSuccess}
-                        loading={<CircularProgress size="lg" sx={{ my: 4 }} />}
-                        error={
-                          <Box sx={{ textAlign: 'center', p: 4 }}>
-                            <Typography level="title-lg" color="danger">
-                              Kunde inte ladda PDF-dokumentet
-                            </Typography>
-                            <Typography level="body-sm">
-                              Kontrollera att dokumentet finns och är tillgängligt.
-                            </Typography>
-                          </Box>
-                        }
-                      >
-                        <Page
-                          pageNumber={pageNumber}
-                          scale={scale}
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                        />
-                      </Document>
+                      <Box sx={{ textAlign: 'center', p: 4 }}>
+                        <Typography level="title-lg">
+                          PDF förhandsvisning
+                        </Typography>
+                        <Box sx={{ my: 3 }}>
+                          <img 
+                            src="https://cdn-icons-png.flaticon.com/512/2965/2965335.png" 
+                            alt="PDF Icon" 
+                            style={{ width: '120px', opacity: 0.7 }} 
+                          />
+                        </Box>
+                        <Typography level="body-md" sx={{ mb: 2 }}>
+                          PDF:en har laddats men kan inte visas direkt i gränssnittet.
+                        </Typography>
+                        <Button 
+                          variant="solid" 
+                          color="primary"
+                          startDecorator={<DownloadIcon />}
+                          onClick={() => window.open(pdfUrl, '_blank')}
+                        >
+                          Öppna PDF i ny flik
+                        </Button>
+                      </Box>
                     ) : (
                       <Box sx={{ textAlign: 'center', p: 4 }}>
                         <Typography level="title-lg">
