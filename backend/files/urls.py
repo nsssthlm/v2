@@ -22,6 +22,9 @@ urlpatterns = [
     # API för att radera en fil
     path('delete/<int:file_id>/', web_api.delete_file, name='delete_file'),
     
+    # API för att radera en mapp med alla dess undermappar och filer
+    path('delete-directory/<slug:slug>/', web_api.delete_directory, name='delete_directory'),
+    
     # Direktåtkomst till fil via ID
     path('direct/<int:file_id>/', web_api.direct_file_download, name='direct_file_download'),
     

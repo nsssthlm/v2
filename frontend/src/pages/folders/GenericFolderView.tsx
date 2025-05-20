@@ -123,7 +123,13 @@ const GenericFolderView = () => {
     setDeletingFolder(true);
     
     try {
-      await axios.delete(`${API_BASE_URL}/files/delete-directory/${slug}/`);
+      console.log(`Försöker radera mapp: ${slug}`);
+      const response = await axios.delete(`${API_BASE_URL}/files/delete-directory/${slug}/`);
+      console.log("Svar från API efter borttagning:", response.data);
+      
+      // Visa meddelande om lyckad borttagning
+      alert(`Mappen "${slug}" har raderats framgångsrikt.`);
+      
       // Navigera tillbaka en nivå eller till roten
       window.location.href = '/';
     } catch (err: any) {
