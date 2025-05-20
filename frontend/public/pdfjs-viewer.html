@@ -126,12 +126,11 @@
       // Uppdatera skalan för aktuell sida utan att rendera om
       const pageContainer = container.querySelector('.page-' + currentPage);
       if (pageContainer) {
-        const canvas = pageContainer.querySelector('canvas');
-        if (canvas) {
-          // Ändra storleken på canvas med CSS transform istället för att rendera om
-          const ratio = currentScale / lastRenderedScale;
-          pageContainer.style.transform = `scale(${ratio})`;
-        }
+        // Ändra storleken på canvas med CSS transform istället för att rendera om
+        const ratio = currentScale / lastRenderedScale;
+        pageContainer.style.transform = `scale(${ratio})`;
+        // Centrera sidan efter zoom
+        pageContainer.style.transformOrigin = 'center center';
       }
       updateParent();
     }
@@ -266,28 +265,51 @@
     function setupScrollAndZoom() {
       // Timer för att fördröja rendering vid zoom
       let zoomTimer = null;
+      let consecutiveZooms = 0;
+      let zoomStartTime = 0;
       
       // Hantera mushjul för zoom när Ctrl är nedtryckt
       document.addEventListener('wheel', function(e) {
         if (e.ctrlKey) {
           e.preventDefault();
           
-          // Beräkna nya skalan
-          const delta = e.deltaY > 0 ? -0.1 : 0.1;
-          const oldScale = currentScale;
+          // Registrera zoomnings-aktivitet
+          const now = Date.now();
+          if (now - zoomStartTime < 500) {
+            consecutiveZooms++;
+          } else {
+            consecutiveZooms = 0;
+          }
+          zoomStartTime = now;
+          
+          // Beräkna nya skalan, och öka zoommängden vid snabb scrollning
+          let zoomStep = 0.1;
+          if (consecutiveZooms > 5) {
+            zoomStep = 0.25; // Snabbare zoom vid kontinuerlig scrollning
+          } else if (consecutiveZooms > 2) {
+            zoomStep = 0.15; 
+          }
+          
+          const delta = e.deltaY > 0 ? -zoomStep : zoomStep;
           currentScale = Math.max(0.5, Math.min(3, currentScale + delta));
           
           // Uppdatera skalan utan att rendera om
           updateScaleWithoutRender();
           
-          // Rendera om efter en viss tid om ingen mer zoom sker
+          // Rendera om efter en viss tid om ingen mer zoom sker,
+          // men maximalt var 500ms för att säkerställa god kvalitet
           clearTimeout(zoomTimer);
+          
+          // Bestäm fördröjningstid baserat på antalet zoom-händelser
+          const delay = consecutiveZooms > 5 ? 500 : 300;
+          
           zoomTimer = setTimeout(() => {
             if (Math.abs(currentScale - lastRenderedScale) > 0.05) {
               renderCurrentPage();
               lastRenderedScale = currentScale;
+              consecutiveZooms = 0;
             }
-          }, 200);
+          }, delay);
         }
       }, { passive: false });
       
