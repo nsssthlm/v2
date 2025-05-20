@@ -113,9 +113,6 @@ const FolderPageNew = () => {
   const [folderData, setFolderData] = useState<FolderData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   
-  // Uppladdning
-  const [uploadDialogDummyState, setUploadDialogDummyState] = useState(false);
-  
   // Delete folder dialog state
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
 
@@ -253,10 +250,10 @@ const FolderPageNew = () => {
     }
   };
   
-  // Filhanteringsfunktion (inaktiverad)
+  // Filhantering - endast grundläggande funktioner, ingen PDF-visning
   const handleFileAction = (fileUrl: string, fileName: string) => {
-    console.log("Filhantering inaktiverad:", fileName);
-    // PDF-visningsfunktionalitet har tagits bort
+    console.log("Filhantering är grundläggande - ingen PDF-visningsfunktionalitet:", fileName);
+    // Ingen PDF-visningsfunktionalitet inkluderad
   };
 
   if (loading) {
@@ -402,8 +399,6 @@ const FolderPageNew = () => {
         folderSlug={slug}
         onSuccess={handleUploadSuccess}
       />
-      
-      {/* Placeholder for future components */}
       
       {/* Delete Folder Confirmation Dialog */}
       <Modal open={deleteFolderDialogOpen} onClose={() => setDeleteFolderDialogOpen(false)}>
