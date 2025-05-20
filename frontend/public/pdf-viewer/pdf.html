@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #pdf-container {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    iframe, embed, object {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="pdf-container"></div>
+  
+  <script>
+    // När sidan laddas, hämta PDF-URL från URL-parametrar
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const pdfUrl = params.get('url');
+      
+      if (pdfUrl) {
+        const container = document.getElementById('pdf-container');
+        
+        // Skapa embed-element för att visa PDF:en
+        const embed = document.createElement('embed');
+        embed.src = decodeURIComponent(pdfUrl);
+        embed.type = 'application/pdf';
+        embed.width = '100%';
+        embed.height = '100%';
+        
+        // Lägg till embed i containern
+        container.appendChild(embed);
+      } else {
+        document.body.innerHTML = '<div style="text-align: center; padding: 20px;">Ingen PDF-URL angiven</div>';
+      }
+    };
+  </script>
+</body>
+</html>

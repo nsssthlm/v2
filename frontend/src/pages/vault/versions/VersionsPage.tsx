@@ -17,6 +17,7 @@ import {
   ModalClose,
   Input
 } from '@mui/joy';
+import EmbeddedPDFViewer from '../../../components/EmbeddedPDFViewer';
 import AddIcon from '@mui/icons-material/Add';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
@@ -447,37 +448,22 @@ export default function VersionsPage() {
                           {activeVersionId && fileVersions.find(v => v.id === activeVersionId)?.filename}
                         </Typography>
                         
-                        <Box 
-                          sx={{ 
-                            width: '100%', 
-                            height: 'calc(100% - 120px)', 
-                            position: 'relative', 
-                            border: '1px solid', 
-                            borderColor: 'divider', 
-                            borderRadius: 'sm', 
-                            overflow: 'hidden',
-                            bgcolor: '#f5f5f5'
-                          }}
-                        >
-                          {!pdfUrl ? (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                        <Box sx={{ width: '100%', height: 'calc(100% - 120px)' }}>
+                          {pdfUrl ? (
+                            <EmbeddedPDFViewer url={pdfUrl} />
+                          ) : (
+                            <Box sx={{ 
+                              display: 'flex', 
+                              justifyContent: 'center', 
+                              alignItems: 'center', 
+                              height: '100%',
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              borderRadius: 'sm',
+                              bgcolor: '#f5f5f5'
+                            }}>
                               <Typography level="body-lg">Ingen PDF vald</Typography>
                             </Box>
-                          ) : (
-                            <object
-                              data={pdfUrl}
-                              type="application/pdf"
-                              width="100%"
-                              height="100%"
-                              style={{ border: 'none' }}
-                            >
-                              <Typography sx={{ p: 2 }}>
-                                Det går inte att visa PDF-filen. 
-                                <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                                  Klicka här för att öppna i en ny flik
-                                </a>
-                              </Typography>
-                            </object>
                           )}
                         </Box>
                         
