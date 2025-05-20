@@ -12,7 +12,7 @@ export interface ProjectInput {
 
 /**
  * Service för att hantera projekt via backend API
- * Alla anrop inkluderar nu JWT-token för autentisering
+ * Alla anrop är förenklade utan extra headers
  */
 const projectService = {
   // Hämta alla projekt
@@ -78,7 +78,7 @@ const projectService = {
   // Skapa en standardmapp för ett projekt
   createDefaultFolder: async (projectId: string): Promise<any> => {
     try {
-      // Använd explicit AuthHeader för att säkerställa att autentiseringen fungerar
+      // Enkel request utan headers
       const headers = {
         'Content-Type': 'application/json',
         ...getAuthHeader()

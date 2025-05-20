@@ -450,7 +450,22 @@ export default function VersionsPage() {
                         
                         <Box sx={{ width: '100%', height: 'calc(100% - 120px)' }}>
                           {pdfUrl ? (
-                            <EmbeddedPDFViewer url={pdfUrl} />
+                            <Box sx={{ width: '100%', height: '100%' }}>
+                              <object
+                                data={pdfUrl}
+                                type="application/pdf"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
+                              >
+                                <Typography sx={{ p: 2 }}>
+                                  Din webbläsare kan inte visa PDF-filen. 
+                                  <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                                    Klicka här för att öppna den i en ny flik
+                                  </a>
+                                </Typography>
+                              </object>
+                            </Box>
                           ) : (
                             <Box sx={{ 
                               display: 'flex', 
