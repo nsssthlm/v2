@@ -320,7 +320,7 @@ const GenericFolderView = () => {
                 '& tbody tr': {
                   backgroundColor: 'white'
                 },
-                '& tr:hover': {
+                '& tbody tr:hover': {
                   backgroundColor: '#e0f2e9'
                 }
               }}
@@ -356,12 +356,14 @@ const GenericFolderView = () => {
                         </span>
                         <Button
                           variant="plain"
-                          color="primary"
+                          color="neutral"
                           onClick={() => openPdf(file.id?.toString() || "", file.name, file.file)}
                           sx={{ 
                             p: 0.5,
                             fontWeight: 'normal',
-                            justifyContent: 'flex-start'
+                            justifyContent: 'flex-start',
+                            backgroundColor: 'transparent',
+                            color: '#3182ce'
                           }}
                         >
                           {file.name}
