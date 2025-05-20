@@ -28,6 +28,7 @@ import {
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
 import SimplePDFViewer from '../../components/timereporting/SimplePDFViewer';
+import CanvasPDFViewer from '../../components/timereporting/CanvasPDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -359,7 +360,7 @@ const TimeReportingPage = () => {
                 bgcolor: 'background.level1',
                 height: 'calc(80vh - 64px)'
               }}>
-                <SimplePDFViewer 
+                <CanvasPDFViewer 
                   pdfUrl={selectedPdf.fileUrl}
                   filename={selectedPdf.fileName}
                   fileId={selectedPdf.id}
