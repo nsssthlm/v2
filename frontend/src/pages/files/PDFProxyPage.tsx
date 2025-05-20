@@ -94,7 +94,8 @@ const PDFProxyPage = () => {
               border: 'none',
               position: 'absolute',
               top: 0,
-              left: 0
+              left: 0,
+              backgroundColor: '#f5f5f5'
             }}
             title="PDF Viewer"
             allow="fullscreen"

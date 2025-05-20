@@ -96,25 +96,17 @@ const GenericFolderView = () => {
     fetchFolderData();
   };
 
-  // Funktion för att öppna PDF direkt med iframe
+  // Funktion för att öppna PDF via dedicerad proxy-sida
   function openPdf(id: string | number, name: string, fileUrl: string) {
     console.log("Öppnar PDF:", {id, name, fileUrl});
     
-    // Konvertera backend-URL:en till en frontend-proxyer URL
-    // Detta löser Mixed Content-problemet genom att använda samma protokoll som frontend
-    const proxyUrl = `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}`;
+    // Använd vår nya dedikerade PDF-visningssida istället för ett modalt fönster
+    // Detta löser Mixed Content-problemet och ser till att vi får en smidig användarupplevelse
+    const currentPath = `/folders/${slug}`;
+    const pdfViewerUrl = `/pdf-viewer?url=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(name)}&return=${encodeURIComponent(currentPath)}`;
     
-    const pdfFile: PDFFile = {
-      id: id,
-      name: name,
-      fileUrl: fileUrl,
-      uploaded: new Date().toISOString()
-    };
-    
-    setActivePdfFile(pdfFile);
-    setPdfUrl(proxyUrl); // Använd den proxyade URL:en istället
-    setPdfModalOpen(true);
-    setPdfViewerReady(true);
+    // Navigera till PDF-visningssidan
+    window.location.href = pdfViewerUrl;
   }
 
   // Funktion för att radera PDF-filer

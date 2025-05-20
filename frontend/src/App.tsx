@@ -23,6 +23,7 @@ import FolderPageNew from './pages/folders/FolderPageNew';
 import FolderListPage from './pages/folders/FolderListPage';
 import GenericFolderView from './pages/folders/GenericFolderView';
 import FilesOverviewPage from './pages/files/FilesOverviewPage';
+import PDFProxyPage from './pages/files/PDFProxyPage';
 
 // Tidsrapportering
 import BasicTimeReportingPage from './pages/timereporting/BasicTimeReportingPage';
@@ -63,6 +64,7 @@ function App() {
               {/* Folder routes */}
               <Route path="folders" element={<FolderListPage />} />
               <Route path="folders/:slug" element={<GenericFolderView />} />
+              <Route path="pdf-viewer" element={<PDFProxyPage />} />
               
               {/* Vault routes */}
               <Route path="vault">
