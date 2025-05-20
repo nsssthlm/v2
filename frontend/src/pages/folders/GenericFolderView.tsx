@@ -382,35 +382,7 @@ const GenericFolderView = () => {
         )}
       </Box>
 
-      {/* Undermappar om det finns några */}
-      {folderData.subfolders.length > 0 && (
-        <Box sx={{ mb: 4 }}>
-          <Typography level="h3" sx={{ mb: 2 }}>Undermappar</Typography>
-          <List>
-            {folderData.subfolders.map((subfolder) => (
-              <ListItem key={subfolder.slug}>
-                <ListItemContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span style={{ color: '#f59e0b' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-                      </svg>
-                    </span>
-                    <Link 
-                      to={`/folders/${subfolder.slug}`} 
-                      style={{ textDecoration: 'none', color: 'inherit' }}
-                    >
-                      <Typography sx={{ '&:hover': { textDecoration: 'underline' } }}>
-                        {subfolder.name}
-                      </Typography>
-                    </Link>
-                  </Box>
-                </ListItemContent>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      )}
+      {/* Ta bort undermappar-sektion enligt användarens önskemål */}
 
       {/* Dialogrutor */}
       <UploadDialog
