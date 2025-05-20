@@ -17,7 +17,7 @@
     #viewerContainer {
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      overflow: auto;
       position: absolute;
       top: 0;
       left: 0;
@@ -26,20 +26,10 @@
     #viewerContainer.grabbing {
       cursor: grabbing;
     }
-    #pdfContainer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-    }
     #pdfViewer {
       position: relative;
       margin: 0 auto;
-      transform-origin: center center;
-      transform: scale(1);
-      transition: transform 0.05s linear;
+      transition: transform 0.05s ease-out;
     }
     .page {
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
@@ -66,9 +56,7 @@
 </head>
 <body>
   <div id="viewerContainer">
-    <div id="pdfContainer">
-      <div id="pdfViewer" class="loading">Laddar PDF...</div>
-    </div>
+    <div id="pdfViewer" class="loading">Laddar PDF...</div>
   </div>
 
   <script>
@@ -87,7 +75,6 @@
     let currentScale = 1.2;
     let lastRenderedScale = 1.2;
     const container = document.getElementById('pdfViewer');
-    const pdfContainer = document.getElementById('pdfContainer');
     const viewerContainer = document.getElementById('viewerContainer');
     
     // Variabler för dragfunktionalitet
@@ -118,7 +105,13 @@
         }
       } else if (message.type === 'setZoom') {
         if (message.zoom) {
-          setNewZoom(message.zoom);
+          currentScale = message.zoom;
+          updateScaleWithoutRender();
+          // Endast rendera om skillnaden är tillräckligt stor
+          if (Math.abs(currentScale - lastRenderedScale) > 0.2) {
+            renderCurrentPage();
+            lastRenderedScale = currentScale;
+          }
         }
       } else if (message.type === 'jumpToPage') {
         if (message.page && message.page >= 1 && message.page <= totalPages) {
@@ -128,17 +121,17 @@
       }
     });
 
-    // Funktion för att sätta ny zoomnivå med flytande övergång
-    function setNewZoom(newScale) {
-      currentScale = newScale;
-      applyZoom();
-    }
-
-    // Applicera zoom direkt på container
-    function applyZoom() {
-      container.style.transform = `scale(${currentScale})`;
-      
-      // Skicka uppdatering till parent
+    // Funktion för att uppdatera zoom utan att rendera om
+    function updateScaleWithoutRender() {
+      // Uppdatera skalan för aktuell sida utan att rendera om
+      const pageContainer = container.querySelector('.page-' + currentPage);
+      if (pageContainer) {
+        // Ändra storleken på canvas med CSS transform istället för att rendera om
+        const ratio = currentScale / lastRenderedScale;
+        pageContainer.style.transform = `scale(${ratio})`;
+        // Centrera sidan efter zoom
+        pageContainer.style.transformOrigin = 'center center';
+      }
       updateParent();
     }
 
@@ -175,7 +168,7 @@
       });
       
       // Kolla om sidan redan finns i cachen
-      const cacheKey = `page_${currentPage}`;
+      const cacheKey = `page_${currentPage}_scale_${currentScale.toFixed(1)}`;
       let pageContainer = pageCache[cacheKey];
       
       if (!pageContainer) {
@@ -188,9 +181,8 @@
           pageContainer.className = 'page page-' + currentPage + ' active';
           container.appendChild(pageContainer);
           
-          // Beräkna viewport baserat på originalskala (1.0)
-          // Vi använder sedan CSS transform för att zooma, så vi renderar alltid i standardstorlek
-          const viewport = page.getViewport({ scale: 1.0 });
+          // Beräkna viewport baserat på zoom
+          const viewport = page.getViewport({ scale: currentScale });
           pageContainer.style.width = viewport.width + 'px';
           pageContainer.style.height = viewport.height + 'px';
           
@@ -213,6 +205,8 @@
           // Spara i cachen
           pageCache[cacheKey] = pageContainer;
           
+          // Spara senaste renderade skalan
+          lastRenderedScale = currentScale;
         } catch (error) {
           console.error('Fel vid rendering av sida:', error);
         }
@@ -226,10 +220,8 @@
       // Markera sidan som aktiv
       if (pageContainer) {
         pageContainer.classList.add('active');
+        pageContainer.style.transform = 'scale(1)'; // Återställ eventuell transform
       }
-      
-      // Uppdatera zoom
-      applyZoom();
       
       // Uppdatera statusen
       updateParent();
@@ -242,10 +234,7 @@
         isDragging = true;
         viewerContainer.classList.add('grabbing');
         startPoint = { x: e.clientX, y: e.clientY };
-        scrollStart = { 
-          left: pdfContainer.scrollLeft, 
-          top: pdfContainer.scrollTop 
-        };
+        scrollStart = { left: viewerContainer.scrollLeft, top: viewerContainer.scrollTop };
         e.preventDefault();
       });
       
@@ -267,28 +256,60 @@
         const dx = e.clientX - startPoint.x;
         const dy = e.clientY - startPoint.y;
         
-        pdfContainer.scrollLeft = scrollStart.left - dx;
-        pdfContainer.scrollTop = scrollStart.top - dy;
+        viewerContainer.scrollLeft = scrollStart.left - dx;
+        viewerContainer.scrollTop = scrollStart.top - dy;
       });
     }
 
     // Hantera scroll och zoom
     function setupScrollAndZoom() {
+      // Timer för att fördröja rendering vid zoom
+      let zoomTimer = null;
+      let consecutiveZooms = 0;
+      let zoomStartTime = 0;
+      
       // Hantera mushjul för zoom när Ctrl är nedtryckt
-      viewerContainer.addEventListener('wheel', function(e) {
+      document.addEventListener('wheel', function(e) {
         if (e.ctrlKey) {
           e.preventDefault();
           
-          // Beräkna nya skalan, med mjuk justering
-          const delta = e.deltaY > 0 ? -0.05 : 0.05;
-          const newScale = Math.max(0.5, Math.min(3, currentScale + delta));
+          // Registrera zoomnings-aktivitet
+          const now = Date.now();
+          if (now - zoomStartTime < 500) {
+            consecutiveZooms++;
+          } else {
+            consecutiveZooms = 0;
+          }
+          zoomStartTime = now;
           
-          // Animera zoom med CSS
-          setNewZoom(newScale);
-        } else {
-          // Normal scrollning
-          pdfContainer.scrollTop += e.deltaY;
-          pdfContainer.scrollLeft += e.deltaX;
+          // Beräkna nya skalan, och öka zoommängden vid snabb scrollning
+          let zoomStep = 0.1;
+          if (consecutiveZooms > 5) {
+            zoomStep = 0.25; // Snabbare zoom vid kontinuerlig scrollning
+          } else if (consecutiveZooms > 2) {
+            zoomStep = 0.15; 
+          }
+          
+          const delta = e.deltaY > 0 ? -zoomStep : zoomStep;
+          currentScale = Math.max(0.5, Math.min(3, currentScale + delta));
+          
+          // Uppdatera skalan utan att rendera om
+          updateScaleWithoutRender();
+          
+          // Rendera om efter en viss tid om ingen mer zoom sker,
+          // men maximalt var 500ms för att säkerställa god kvalitet
+          clearTimeout(zoomTimer);
+          
+          // Bestäm fördröjningstid baserat på antalet zoom-händelser
+          const delay = consecutiveZooms > 5 ? 500 : 300;
+          
+          zoomTimer = setTimeout(() => {
+            if (Math.abs(currentScale - lastRenderedScale) > 0.05) {
+              renderCurrentPage();
+              lastRenderedScale = currentScale;
+              consecutiveZooms = 0;
+            }
+          }, delay);
         }
       }, { passive: false });
       
@@ -322,6 +343,7 @@
       try {
         if (initialZoom) {
           currentScale = parseFloat(initialZoom);
+          lastRenderedScale = currentScale;
         }
         
         // Ladda PDF
