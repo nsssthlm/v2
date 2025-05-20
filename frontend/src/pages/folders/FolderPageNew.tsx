@@ -253,32 +253,10 @@ const FolderPageNew = () => {
     }
   };
   
-  // Hantera klick på PDF-filer
-  const handlePdfClick = (fileUrl: string, fileName: string) => {
-    console.log("Öppnar PDF:", fileUrl, fileName);
-    
-    // Konvertera alla URL:er till Replit-anpassade URL:er
-    let finalUrl = fileUrl;
-    
-    // Ersätt alla lokala URL:er (http://0.0.0.0:8001/) med Replit proxy URL
-    if (fileUrl.includes('0.0.0.0:8001')) {
-      // Ersätt med Replit proxy URL
-      finalUrl = fileUrl.replace(
-        'http://0.0.0.0:8001', 
-        'https://3eabe322-11fd-420e-9b72-6dc9b22d9093-00-2gpr7cql4w25w.kirk.replit.dev/proxy/3000'
-      );
-    }
-    
-    // Om URL:en innehåller "api/files/web" och ".pdf", se till att API-anropet hanteras korrekt
-    if (finalUrl.includes('/api/files/web/') && finalUrl.includes('.pdf')) {
-      console.log("Använda direkt PDF URL via Replit proxy");
-    }
-    
-    console.log("Använder final PDF URL:", finalUrl);
-    
-    // Öppna PDF i dialogrutan med direkt media-länk
-    setSelectedPdf({ url: finalUrl, name: fileName });
-    setPdfDialogOpen(true);
+  // Filhanteringsfunktion (inaktiverad)
+  const handleFileAction = (fileUrl: string, fileName: string) => {
+    console.log("Filhantering inaktiverad:", fileName);
+    // PDF-visningsfunktionalitet har tagits bort
   };
 
   if (loading) {
@@ -410,7 +388,6 @@ const FolderPageNew = () => {
                   id={file.id || `pdf_${index}`}
                   fileUrl={file.file}
                   onDelete={handleDeleteFile}
-                  onPdfClick={handlePdfClick}
                 />
               ))
             )}
