@@ -472,36 +472,31 @@ export default function VersionsPage() {
                         <Box sx={{ width: '100%', height: 'calc(100% - 120px)' }}>
                           {pdfUrl ? (
                             <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
-                              <div 
-                                id="pdf-display-container" 
-                                style={{ width: '100%', height: '100%' }}
-                                dangerouslySetInnerHTML={{
-                                  __html: `
-                                    <object 
-                                      data="${pdfUrl}" 
-                                      type="application/pdf" 
-                                      width="100%"
-                                      height="100%"
-                                      style="border: none;">
-                                      <iframe
-                                        src="${pdfUrl}"
-                                        width="100%"
-                                        height="100%"
-                                        style="border: none;">
-                                        <a href="${pdfUrl}" target="_blank">Klicka för att visa PDF</a>
-                                      </iframe>
-                                    </object>
-                                  `
+                              <iframe
+                                src={`/simple-pdf.html?url=${encodeURIComponent(pdfUrl)}`}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  border: 'none'
                                 }}
+                                title="PDF Viewer"
                               />
-                              <Button
-                                variant="solid"
-                                color="primary"
-                                onClick={() => window.open(pdfUrl, '_blank')}
-                                sx={{ position: 'absolute', bottom: 10, right: 10, zIndex: 1000 }}
-                              >
-                                Öppna i ny flik
-                              </Button>
+                              <Box sx={{ position: 'absolute', bottom: 10, right: 10, zIndex: 1000, display: 'flex', gap: 1 }}>
+                                <Button
+                                  variant="solid"
+                                  color="primary"
+                                  onClick={() => window.open(pdfUrl, '_blank')}
+                                >
+                                  Öppna i ny flik
+                                </Button>
+                                <Button
+                                  variant="outlined" 
+                                  color="primary"
+                                  onClick={() => window.open(`/pdfviewer.html?file=${encodeURIComponent(pdfUrl)}`, '_blank')}
+                                >
+                                  Öppna i visningstillstånd
+                                </Button>
+                              </Box>
                             </Box>
                           ) : (
                             <Box sx={{ 

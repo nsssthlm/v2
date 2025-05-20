@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PDF Viewer</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    #pdf-container {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="pdf-container"></div>
+  
+  <script>
+    // Enkel funktion för att hämta URL-parametrar
+    function getParameterByName(name) {
+      const url = window.location.href;
+      name = name.replace(/[\[\]]/g, '\\$&');
+      const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+      const results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    
+    // Hämta PDF-URL-parametern
+    const pdfUrl = getParameterByName('url');
+    
+    if (pdfUrl) {
+      // Skapa en direkt länk till PDFen utan några säkerhetsbegränsningar
+      document.getElementById('pdf-container').innerHTML = `
+        <object data="${pdfUrl}" type="application/pdf" width="100%" height="100%">
+          <embed src="${pdfUrl}" type="application/pdf" width="100%" height="100%">
+            <p>Din webbläsare kan inte visa inbäddade PDF-filer. 
+               <a href="${pdfUrl}" target="_blank">Klicka här för att öppna PDF-filen direkt.</a>
+            </p>
+          </embed>
+        </object>
+      `;
+    } else {
+      document.getElementById('pdf-container').innerHTML = '<p>Ingen PDF-URL angiven. Använd ?url=din-pdf-url.</p>';
+    }
+  </script>
+</body>
+</html>

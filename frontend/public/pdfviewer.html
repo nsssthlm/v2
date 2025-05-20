@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' blob: data:">
+    <title>PDF Viewer</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #pdf-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+        }
+        iframe, embed, object {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #fallback-message {
+            padding: 20px;
+            text-align: center;
+        }
+        #open-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="pdf-container">
+        <!-- PDF kommer att visas här -->
+    </div>
+
+    <script>
+        // Hämta PDF-URL från query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const pdfUrl = urlParams.get('file');
+        
+        // Funktion för att visa PDF
+        function showPDF() {
+            const container = document.getElementById('pdf-container');
+            
+            if (!pdfUrl) {
+                container.innerHTML = '<div id="fallback-message">Ingen PDF specificerad</div>';
+                return;
+            }
+            
+            // Försök först med iframe
+            try {
+                container.innerHTML = `
+                    <iframe 
+                        src="${pdfUrl}" 
+                        type="application/pdf" 
+                        width="100%" 
+                        height="100%">
+                    </iframe>
+                `;
+            } catch (e) {
+                console.error('Kunde inte visa PDF med iframe:', e);
+                
+                // Försök med embed som fallback
+                try {
+                    container.innerHTML = `
+                        <embed 
+                            src="${pdfUrl}" 
+                            type="application/pdf" 
+                            width="100%" 
+                            height="100%">
+                        </embed>
+                    `;
+                } catch (e) {
+                    console.error('Kunde inte visa PDF med embed:', e);
+                    
+                    // Fallback till object
+                    try {
+                        container.innerHTML = `
+                            <object 
+                                data="${pdfUrl}" 
+                                type="application/pdf" 
+                                width="100%" 
+                                height="100%">
+                                <div id="fallback-message">
+                                    <p>PDF kunde inte visas direkt.</p>
+                                    <button id="open-btn" onclick="window.open('${pdfUrl}', '_blank')">
+                                        Öppna i nytt fönster
+                                    </button>
+                                </div>
+                            </object>
+                        `;
+                    } catch (e) {
+                        console.error('Kunde inte visa PDF med object:', e);
+                        
+                        // Slutgiltig fallback - bara en länk
+                        container.innerHTML = `
+                            <div id="fallback-message">
+                                <p>PDF kunde inte visas direkt.</p>
+                                <button id="open-btn" onclick="window.open('${pdfUrl}', '_blank')">
+                                    Öppna i nytt fönster
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            }
+        }
+        
+        // Visa PDF när sidan laddats
+        document.addEventListener('DOMContentLoaded', showPDF);
+        
+        // Visa också PDF direkt för att undvika fördröjning
+        showPDF();
+    </script>
+</body>
+</html>

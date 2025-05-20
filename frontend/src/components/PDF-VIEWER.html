@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" style="width: 100%; height: 100%"></div>
+
+    <script>
+        // Bara visa PDFen direkt utan några säkerhetskontroller
+        window.onload = function() {
+            // Hämta PDF-URL från query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const pdfUrl = urlParams.get('file');
+            
+            if (pdfUrl) {
+                document.getElementById('container').innerHTML = `
+                    <embed 
+                        id="pdf-viewer"
+                        src="${pdfUrl}" 
+                        type="application/pdf" 
+                        width="100%" 
+                        height="100%">
+                `;
+            } else {
+                document.getElementById('container').innerHTML = '<p>Ingen PDF specificerad</p>';
+            }
+        };
+    </script>
+</body>
+</html>
