@@ -199,7 +199,11 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
-        p: 1
+        p: 1,
+        backdropFilter: 'blur(5px)',
+        '& .MuiBackdrop-root': {
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        }
       }}
     >
       <ModalDialog
@@ -207,12 +211,14 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
         variant="outlined"
         layout="fullscreen"
         sx={{ 
-          width: '100%', 
-          height: '100%',
+          width: '90%', 
+          height: '90%',
           p: 0,
           overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
         }}
       >
         {/* Header */}
