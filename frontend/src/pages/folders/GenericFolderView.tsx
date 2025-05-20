@@ -12,7 +12,8 @@ import {
   Alert, 
   IconButton, 
   Tooltip,
-  Sheet
+  Sheet,
+  Table
 } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
@@ -185,64 +186,114 @@ const GenericFolderView = () => {
             </Typography>
           </Sheet>
         ) : (
-          <List>
-            {folderData?.files.map((file, index) => (
-              <ListItem 
-                key={`${file.name}-${index}`}
-                endAction={
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <Tooltip title="Radera fil" placement="top">
-                      <IconButton
-                        variant="plain"
-                        color="danger"
-                        size="sm"
-                        onClick={() => handleDeleteFile(file.id || `file_${index}`)}
-                        disabled={deleteLoading === String(file.id || `file_${index}`)}
+          <Sheet
+            variant="outlined"
+            sx={{
+              borderRadius: 'md',
+              overflow: 'auto'
+            }}
+          >
+            <Table sx={{ tableLayout: 'fixed' }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '25%' }}>NAMN</th>
+                  <th style={{ width: '8%' }}>VERSION</th>
+                  <th style={{ width: '18%' }}>BESKRIVNING</th>
+                  <th style={{ width: '10%' }}>UPPLADDAD</th>
+                  <th style={{ width: '15%' }}>UPPLADDAD AV</th>
+                  <th style={{ width: '10%' }}>MAPP</th>
+                  <th style={{ width: '8%' }}>STATUS</th>
+                  <th style={{ width: '17%' }}>ID</th>
+                  <th style={{ width: '5%' }}>ÅTGÄRDER</th>
+                </tr>
+              </thead>
+              <tbody>
+                {folderData?.files.map((file, index) => (
+                  <tr key={`${file.name}-${index}`}>
+                    <td>
+                      <Box 
                         sx={{ 
-                          '&:hover': { backgroundColor: '#f8e0e0' },
-                          borderRadius: 'sm'
+                          display: 'flex', 
+                          alignItems: 'center',
+                          gap: 1
                         }}
                       >
-                        {deleteLoading === String(file.id || `file_${index}`) ? (
-                          <CircularProgress size="sm" />
-                        ) : (
-                          <DeleteIcon />
-                        )}
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                }
-              >
-                <ListItemContent>
-                  <Box 
-                    sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      gap: 1
-                    }}
-                  >
-                    <span style={{ color: '#3182ce' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
-                      </svg>
-                    </span>
-                    <Button
-                      variant="solid"
-                      color="primary"
-                      onClick={() => openPdf(file.id?.toString() || "", file.name, file.file)}
-                      sx={{ 
-                        p: 1,
-                        fontWeight: 'normal',
-                        justifyContent: 'flex-start'
-                      }}
-                    >
-                      {file.name}
-                    </Button>
-                  </Box>
-                </ListItemContent>
-              </ListItem>
-            ))}
-          </List>
+                        <span style={{ color: '#3182ce' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
+                          </svg>
+                        </span>
+                        <Button
+                          variant="plain"
+                          color="primary"
+                          onClick={() => openPdf(file.id?.toString() || "", file.name, file.file)}
+                          sx={{ 
+                            p: 0.5,
+                            fontWeight: 'normal',
+                            justifyContent: 'flex-start'
+                          }}
+                        >
+                          {file.name}
+                        </Button>
+                      </Box>
+                    </td>
+                    <td>1</td>
+                    <td>
+                      <Typography level="body-sm" noWrap>
+                        {file.description || 'Ingen beskrivning'}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-sm">
+                        {file.date ? new Date(file.date).toLocaleDateString() : ''}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-sm">
+                        {file.uploadedBy || 'user@example.com'}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-sm">
+                        {folderData?.name || 'Huvudmapp'}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-sm">-</Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-sm" noWrap>
+                        {file.id || `-`}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Tooltip title="Radera fil" placement="top">
+                          <IconButton
+                            variant="plain"
+                            color="danger"
+                            size="sm"
+                            onClick={() => handleDeleteFile(file.id || `file_${index}`)}
+                            disabled={deleteLoading === String(file.id || `file_${index}`)}
+                            sx={{ 
+                              '&:hover': { backgroundColor: '#f8e0e0' },
+                              borderRadius: 'sm'
+                            }}
+                          >
+                            {deleteLoading === String(file.id || `file_${index}`) ? (
+                              <CircularProgress size="sm" />
+                            ) : (
+                              <DeleteIcon />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Sheet>
         )}
       </Box>
 
