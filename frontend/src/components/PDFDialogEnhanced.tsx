@@ -81,8 +81,8 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? -10 : 10;
-        const newZoom = Math.min(200, Math.max(50, zoomLevel + delta));
+        const delta = e.deltaY > 0 ? -25 : 25;
+        const newZoom = Math.min(300, Math.max(50, zoomLevel + delta));
         setZoomLevel(newZoom);
         
         // Försök kommunicera med iframe för att ändra zoom
@@ -164,7 +164,7 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
 
   // Funktioner för zoom
   const zoomIn = () => {
-    const newZoom = Math.min(200, zoomLevel + 10);
+    const newZoom = Math.min(300, zoomLevel + 25);
     setZoomLevel(newZoom);
     // Kommunicera med iframe för att ändra zoom
     try {
@@ -178,7 +178,7 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
   };
 
   const zoomOut = () => {
-    const newZoom = Math.max(50, zoomLevel - 10);
+    const newZoom = Math.max(50, zoomLevel - 25);
     setZoomLevel(newZoom);
     // Kommunicera med iframe för att ändra zoom
     try {
