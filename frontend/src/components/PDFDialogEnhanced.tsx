@@ -17,9 +17,6 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
-import HistoryIcon from '@mui/icons-material/History';
-import AspectRatioIcon from '@mui/icons-material/AspectRatio';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { fetchAndCreateBlobUrl } from '../pages/files/ProxyPDFService';
 
 interface PDFDialogEnhancedProps {
@@ -301,7 +298,6 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
               size="sm"
               variant="soft"
               color="primary"
-              startDecorator={<HistoryIcon />}
             >
               Versioner
             </Button>
@@ -310,7 +306,6 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
               size="sm"
               variant="soft"
               color="neutral"
-              startDecorator={<AspectRatioIcon />}
             >
               Markera område
             </Button>
@@ -319,7 +314,6 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
               size="sm"
               variant="solid"
               color="primary"
-              startDecorator={<UploadFileIcon />}
             >
               Ny version
             </Button>
