@@ -42,16 +42,8 @@ export default function SimpleURLViewer({ pdfUrl, title }: SimpleURLViewerProps)
         console.log('Fixed URL format with /api/ prefix. New URL:', apiUrl);
       }
       
-      // Lägg till auth token till URL
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        // Om URL redan har parametrar, använd &, annars använd ?
-        const separator = apiUrl.includes('?') ? '&' : '?';
-        apiUrl = `${apiUrl}${separator}token=${token}`;
-      }
-      
-      // Logga slutlig URL (men dölj token i loggen)
-      console.log('Final PDF URL (auth token hidden):', apiUrl.split('token=')[0] + 'token=HIDDEN');
+      // Enkel URL utan token
+      console.log('PDF URL:', apiUrl);
       
       // Sätt URL för iframe
       setFullUrl(apiUrl);
