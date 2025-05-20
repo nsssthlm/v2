@@ -337,7 +337,7 @@ const GenericFolderView = () => {
               </thead>
               <tbody>
                 {folderData?.files.map((file, index) => (
-                  <tr key={`${file.name}-${index}`}>
+                  <tr key={`${file.name}-${index}`} style={{ backgroundColor: 'transparent' }}>
                     <td>
                       <Box 
                         sx={{ 
