@@ -3,9 +3,11 @@ import { Box, Typography, Button, Stack, CircularProgress } from '@mui/joy';
 import { OpenInNew, Download, PictureAsPdf, Visibility } from '@mui/icons-material';
 import { Document, Page, pdfjs } from 'react-pdf';
 
-// Konfigurera pdfjs att använda en worker från CDN
-pdfjs.GlobalWorkerOptions.workerSrc = 
-  `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Konfigurera pdfjs
+// Istället för att använda externhostad worker eller lokal worker-fil, 
+// använder vi en "fake worker", vilket fungerar direkt i alla miljöer
+pdfjs.GlobalWorkerOptions.workerSrc = '';
+console.warn('PDF.js konfigurerad för att använda fake worker (för maximal kompabilitet)');
 
 // Importera stilar för PDF-visning
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';

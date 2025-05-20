@@ -124,10 +124,34 @@ const TimeReportingPage = () => {
     }
   };
 
-  // Funktion för att öppna PDF i visaren
-  const openPdfViewer = (pdf: PDFDocument) => {
-    setSelectedPdf(pdf);
-    setIsViewerOpen(true);
+  // Funktion för att öppna PDF i visaren med blob URL
+  const openPdfViewer = async (pdf: PDFDocument) => {
+    try {
+      // Om fileUrl redan är en blob-URL (dvs. startar med 'blob:'), använd direkt
+      if (pdf.fileUrl.startsWith('blob:')) {
+        setSelectedPdf(pdf);
+        setIsViewerOpen(true);
+      } else {
+        // Hämta som blob
+        const response = await fetch(pdf.fileUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Skapa en kopia av objektet med blob-URL
+        const blobPdf: PDFDocument = {
+          ...pdf,
+          fileUrl: blobUrl
+        };
+
+        setSelectedPdf(blobPdf);
+        setIsViewerOpen(true);
+      }
+    } catch (error) {
+      console.error('Kunde inte ladda PDF som blob:', error);
+      // Fallback till original URL om det inte går att konvertera till blob
+      setSelectedPdf(pdf);
+      setIsViewerOpen(true);
+    }
   };
 
   // Funktion för att stänga PDF-visaren
