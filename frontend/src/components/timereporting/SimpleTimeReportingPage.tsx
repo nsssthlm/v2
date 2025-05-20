@@ -20,7 +20,7 @@ import {
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
 
-// Förenklad version utan PDF-hantering
+// Förenklad version för tidsrapportering
 const SimpleTimeReportingPage = () => {
   const { activeProject } = useProject();
   const [isUploading, setIsUploading] = useState(false);
@@ -57,7 +57,6 @@ const SimpleTimeReportingPage = () => {
       console.log('Fil uppladdad:', file.name);
       
       // Kod för att hantera filuppladdning
-      // Detta är en förenklad version utan PDF-hantering
       
       const formData = new FormData();
       formData.append('file', file);

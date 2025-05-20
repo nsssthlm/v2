@@ -4,9 +4,6 @@ import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, Grid, IconButton, Tooltip } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
-import SuperReliablePDFDialog from '../../components/SuperReliablePDFDialog';
-import { usePDFDialog } from '../../contexts/PDFDialogContext';
-import PDFUploader from '../../components/PDFUploader';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useProject } from '../../contexts/ProjectContext';
 
