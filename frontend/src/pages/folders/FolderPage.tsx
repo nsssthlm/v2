@@ -109,6 +109,17 @@ const FolderPage = () => {
       console.error("Ogiltig fil eller fil-URL saknas:", file);
     }
   };
+  
+  // Direktfunktion för att öppna PDF, mer simpel
+  function openPdf(id: string, name: string, fileUrl: string) {
+    console.log("Öppnar PDF direkt:", {id, name, fileUrl});
+    
+    setSelectedPdf({
+      url: fileUrl,
+      filename: name
+    });
+    setPdfDialogOpen(true);
+  };
 
   // Funktion för att radera PDF-filer
   const handleDeleteFile = async (fileId: string) => {
@@ -246,11 +257,11 @@ const FolderPage = () => {
                       </svg>
                     </span>
                     <Button
-                      variant="plain"
+                      variant="solid"
                       color="primary"
-                      onClick={() => handlePdfClick(file)}
+                      onClick={() => openPdf(file.id?.toString() || "", file.name, file.file)}
                       sx={{ 
-                        p: 0,
+                        p: 1,
                         fontWeight: 'normal',
                         justifyContent: 'flex-start'
                       }}
