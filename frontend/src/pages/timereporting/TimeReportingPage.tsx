@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import PDFViewer from '../../components/timereporting/PDFViewer';
+import BasicPDFObject from '../../components/timereporting/BasicPDFObject';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -315,9 +315,8 @@ const TimeReportingPage = () => {
                 bgcolor: 'background.level1',
                 height: 'calc(80vh - 64px)'
               }}>
-                <PDFViewer 
-                  pdfUrl={selectedPdf.fileUrl} 
-                  filename={selectedPdf.fileName}
+                <BasicPDFObject 
+                  pdfUrl={selectedPdf.fileUrl}
                   onDownload={() => {
                     const link = document.createElement('a');
                     link.href = selectedPdf.fileUrl;
