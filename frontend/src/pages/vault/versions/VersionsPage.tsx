@@ -245,59 +245,60 @@ export default function VersionsPage() {
     
     setUploading(true);
     try {
-      // Skapa en statisk fil-URL istället för blob URL för bättre kompatibilitet
-      const fileReader = new FileReader();
+      // Skapa en URL till den uppladdade filen - använd URL.createObjectURL för bästa kompatibilitet
+      const url = URL.createObjectURL(newVersionFile);
       
-      fileReader.onload = (event) => {
-        if (!event.target || !event.target.result) {
-          console.error('Kunde inte läsa fil');
-          setUploading(false);
-          return;
+      // Skapa versionsinformation med vanlig URL
+      const nextVersionNumber = fileVersions.length + 1;
+      const newVersion: FileVersion = {
+        id: `${selectedFileId}-${nextVersionNumber}`,
+        versionNumber: nextVersionNumber,
+        filename: newVersionFile.name,
+        fileUrl: url,
+        description: newVersionDescription,
+        uploaded: new Date().toISOString(),
+        uploadedBy: 'Current User'
+      };
+      
+      // Uppdatera versionshistoriken
+      const updatedVersions = [...fileVersions, newVersion];
+      setFileVersions(updatedVersions);
+      
+      // Sätt den nya versionen som aktiv direkt
+      setActiveVersionId(newVersion.id);
+      setPdfUrl(url);
+      
+      // Stäng dialogrutan och återställ formuläret
+      setUploadDialogOpen(false);
+      setNewVersionFile(null);
+      setNewVersionDescription('');
+      
+      console.log('PDF uppladdad och visad:', newVersion);
+      setTimeout(() => {
+        const container = document.getElementById('pdf-display-container');
+        if (container) {
+          container.innerHTML = `
+            <object 
+              data="${url}" 
+              type="application/pdf" 
+              width="100%"
+              height="100%"
+              style="border: none;">
+              <iframe
+                src="${url}"
+                width="100%"
+                height="100%"
+                style="border: none;">
+                <a href="${url}" target="_blank">Klicka för att visa PDF</a>
+              </iframe>
+            </object>
+          `;
         }
-
-        // Konvertera filen till en base64-sträng som kan inlinas direkt
-        const base64String = event.target.result.toString();
-        
-        // Skapa versionsinformation
-        const nextVersionNumber = fileVersions.length + 1;
-        const newVersion: FileVersion = {
-          id: `${selectedFileId}-${nextVersionNumber}`,
-          versionNumber: nextVersionNumber,
-          filename: newVersionFile.name,
-          fileUrl: base64String,  // Spara basen64-strängen direkt som URL
-          description: newVersionDescription,
-          uploaded: new Date().toISOString(),
-          uploadedBy: 'Current User'
-        };
-        
-        // Uppdatera versionshistoriken
-        const updatedVersions = [...fileVersions, newVersion];
-        setFileVersions(updatedVersions);
-        
-        // Sätt den nya versionen som aktiv
-        setActiveVersionId(newVersion.id);
-        setPdfUrl(base64String);
-        
-        // Stäng dialogrutan och återställ formuläret
-        setUploadDialogOpen(false);
-        setNewVersionFile(null);
-        setNewVersionDescription('');
-        
-        console.log('PDF uppladdad och visad:', newVersion);
-        
-        setUploading(false);
-      };
-      
-      fileReader.onerror = () => {
-        console.error('Fel vid läsning av fil');
-        setUploading(false);
-      };
-      
-      // Starta filläsningen som en data-URL (base64)
-      fileReader.readAsDataURL(newVersionFile);
+      }, 500);
       
     } catch (error) {
       console.error('Error uploading new version:', error);
+    } finally {
       setUploading(false);
     }
   };
@@ -471,18 +472,33 @@ export default function VersionsPage() {
                         <Box sx={{ width: '100%', height: 'calc(100% - 120px)' }}>
                           {pdfUrl ? (
                             <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
-                              <embed
-                                src={pdfUrl}
-                                type="application/pdf"
-                                width="100%"
-                                height="100%"
-                                style={{ border: 'none' }}
+                              <div 
+                                id="pdf-display-container" 
+                                style={{ width: '100%', height: '100%' }}
+                                dangerouslySetInnerHTML={{
+                                  __html: `
+                                    <object 
+                                      data="${pdfUrl}" 
+                                      type="application/pdf" 
+                                      width="100%"
+                                      height="100%"
+                                      style="border: none;">
+                                      <iframe
+                                        src="${pdfUrl}"
+                                        width="100%"
+                                        height="100%"
+                                        style="border: none;">
+                                        <a href="${pdfUrl}" target="_blank">Klicka för att visa PDF</a>
+                                      </iframe>
+                                    </object>
+                                  `
+                                }}
                               />
                               <Button
-                                variant="outlined"
+                                variant="solid"
                                 color="primary"
                                 onClick={() => window.open(pdfUrl, '_blank')}
-                                sx={{ position: 'absolute', bottom: 10, right: 10, zIndex: 100 }}
+                                sx={{ position: 'absolute', bottom: 10, right: 10, zIndex: 1000 }}
                               >
                                 Öppna i ny flik
                               </Button>
