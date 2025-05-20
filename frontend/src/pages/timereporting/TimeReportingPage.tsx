@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import PDFEmbed from '../../components/timereporting/PDFEmbed';
+import EmbeddedPDFViewer from '../../components/timereporting/EmbeddedPDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -313,61 +313,12 @@ const TimeReportingPage = () => {
                 flexGrow: 1, 
                 overflow: 'hidden', 
                 p: 2, 
-                bgcolor: 'background.level1',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
+                bgcolor: 'background.level1'
               }}>
-                <Box 
-                  sx={{ 
-                    width: '100%', 
-                    maxWidth: '800px',
-                    minHeight: '400px',
-                    backgroundColor: 'white',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    borderRadius: 'md',
-                    p: 4
-                  }}
-                >
-                  <Typography level="h3" sx={{ mb: 2 }}>
-                    PDF-visning
-                  </Typography>
-                  <PdfIcon sx={{ fontSize: 80, color: 'error.600', mb: 4 }} />
-                  <Typography sx={{ mb: 4, textAlign: 'center' }}>
-                    Din PDF "{selectedPdf.fileName}" är redo att visas. På grund av säkerhetsbegränsningar i webbläsaren kan vi inte visa den direkt i dialogrutan.
-                  </Typography>
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                    <Button
-                      variant="solid"
-                      color="primary"
-                      size="lg"
-                      onClick={() => window.open(selectedPdf.fileUrl, '_blank', 'noopener,noreferrer')}
-                    >
-                      Öppna PDF i ny flik
-                    </Button>
-                    <Button 
-                      variant="outlined" 
-                      color="neutral"
-                      size="lg"
-                      startDecorator={<DownloadIcon />}
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = selectedPdf.fileUrl;
-                        link.download = selectedPdf.fileName;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}
-                    >
-                      Ladda ner PDF
-                    </Button>
-                  </Stack>
-                </Box>
+                <EmbeddedPDFViewer 
+                  pdfUrl={selectedPdf.fileUrl} 
+                  height="calc(80vh - 64px)" 
+                />
               </Box>
             </Box>
           )}
