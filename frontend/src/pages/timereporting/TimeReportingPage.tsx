@@ -131,25 +131,43 @@ const TimeReportingPage = () => {
     try {
       // Om fileUrl redan är en blob-URL (dvs. startar med 'blob:'), använd direkt
       if (pdf.fileUrl.startsWith('blob:')) {
-        setSelectedPdf(pdf);
+        setSelectedPdf({...pdf, isLocal: true});
         setIsViewerOpen(true);
       } else {
-        // Hämta som blob
-        const response = await fetch(pdf.fileUrl);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
+        // För lokala uppladdade filer (som redan är blob-URLs), använd dem direkt
+        if (pdf.isLocal) {
+          setSelectedPdf(pdf);
+          setIsViewerOpen(true);
+          return;
+        }
+        
+        try {
+          // Hämta som blob
+          const response = await fetch(pdf.fileUrl);
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
 
-        // Skapa en kopia av objektet med blob-URL
-        const blobPdf: PDFDocument = {
-          ...pdf,
-          fileUrl: blobUrl
-        };
+          // Skapa en kopia av objektet med blob-URL
+          const blobPdf: PDFDocument = {
+            ...pdf,
+            fileUrl: blobUrl,
+            isLocal: true
+          };
 
-        setSelectedPdf(blobPdf);
-        setIsViewerOpen(true);
+          setSelectedPdf(blobPdf);
+          setIsViewerOpen(true);
+        } catch (blobError) {
+          console.error('Kunde inte ladda PDF som blob:', blobError);
+          // Använd proxy-endpoint istället som fallback
+          setSelectedPdf({
+            ...pdf,
+            isLocal: false // Markera att detta är en server-fil som behöver proxy
+          });
+          setIsViewerOpen(true);
+        }
       }
     } catch (error) {
-      console.error('Kunde inte ladda PDF som blob:', error);
+      console.error('Fel vid öppning av PDF-visare:', error);
       // Fallback till original URL om det inte går att konvertera till blob
       setSelectedPdf(pdf);
       setIsViewerOpen(true);
