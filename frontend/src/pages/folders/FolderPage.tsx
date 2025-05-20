@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Box, Typography, Button, List, ListItem, ListItemContent, CircularProgress, Divider, Alert, IconButton, Tooltip } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
+import PDFDialog from '../../components/PDFDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useProject } from '../../contexts/ProjectContext';
 
@@ -40,6 +41,10 @@ const FolderPage = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  
+  // Tillstånd för PDF-visningsdialogen
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState<{ url: string; filename: string } | null>(null);
   
   // Projektkontexten för nuvarande användare
   const projectContext = useProject();
@@ -88,6 +93,15 @@ const FolderPage = () => {
     fetchFolderData();
   };
   
+  // Funktion för att hantera klick på PDF-filer
+  const handlePdfClick = (file: any) => {
+    setSelectedPdf({
+      url: file.file,
+      filename: file.name
+    });
+    setPdfDialogOpen(true);
+  };
+
   // Funktion för att radera PDF-filer
   const handleDeleteFile = async (fileId: string) => {
     // Sätt laddningsstatus för den specifika filen
@@ -211,17 +225,25 @@ const FolderPage = () => {
                 }
               >
                 <ListItemContent>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    gap: 1 
-                  }}>
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      gap: 1,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                        color: 'primary.600'
+                      }
+                    }}
+                    onClick={() => handlePdfClick(file)}
+                  >
                     <span style={{ color: '#3182ce' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"/>
                       </svg>
                     </span>
-                    <Typography>{file.name}</Typography>
+                    <Typography sx={{ color: 'inherit' }}>{file.name}</Typography>
                   </Box>
                 </ListItemContent>
               </ListItem>
@@ -248,6 +270,16 @@ const FolderPage = () => {
         folderSlug={slug}
         onSuccess={handleUploadSuccess}
       />
+
+      {/* PDF Viewer Dialog */}
+      {selectedPdf && (
+        <PDFDialog
+          open={pdfDialogOpen}
+          onClose={() => setPdfDialogOpen(false)}
+          pdfUrl={selectedPdf.url}
+          filename={selectedPdf.filename}
+        />
+      )}
     </Box>
   );
 };
