@@ -42,13 +42,20 @@ interface PDFDocument {
   uploadedBy: string;
 }
 
+// Props för PDF-visare-komponenten
+interface PDFViewerProps {
+  pdfUrl: string;
+  filename: string;
+  onClose: () => void;
+}
+
 // Enkel inbyggd PDF-visare
-const PDFViewer = ({ pdfUrl, filename, onClose }) => {
+const PDFViewer = ({ pdfUrl, filename, onClose }: PDFViewerProps) => {
   const [scale, setScale] = useState(1);
   const [loading, setLoading] = useState(true);
 
   // Hantera zoomning
-  const handleZoom = (newScale) => {
+  const handleZoom = (newScale: number) => {
     setScale(Math.max(0.5, Math.min(2.5, newScale)));
   };
 
@@ -172,7 +179,7 @@ const PDFViewer = ({ pdfUrl, filename, onClose }) => {
   );
 };
 
-const TimeReportingPage: React.FC = () => {
+const TimeReportingPage = () => {
   const { currentProject } = useProject();
   const [pdfList, setPdfList] = useState<PDFDocument[]>([]);
   const [isUploading, setIsUploading] = useState(false);
