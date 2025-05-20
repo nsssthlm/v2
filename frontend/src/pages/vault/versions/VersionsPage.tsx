@@ -178,14 +178,14 @@ export default function VersionsPage() {
   const loadPdfContent = async (versionId: string) => {
     setLoading(true);
     try {
-      // In a real implementation, this would fetch from the server
-      // For now, we'll use our sample PDF
-      const version = SAMPLE_FILE_VERSIONS.find(v => v.id === versionId);
+      // Hitta den begärda versionen
+      const version = fileVersions.find(v => v.id === versionId);
       if (version) {
-        // Use Google Docs Viewer as a fallback method to display PDFs when browser security blocks direct embed
-        // This is a well-known technique for PDF viewing in secure environments
-        const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + '/sample-pdfs/sample1.pdf')}&embedded=true`;
-        setPdfUrl(googleDocsViewerUrl);
+        // Använd direkt URL till PDF-filen
+        // Om det är en blob-URL från en uppladdad fil, använd den direkt
+        setPdfUrl(version.fileUrl);
+        
+        console.log('Laddar PDF:', version.filename, 'från URL:', version.fileUrl);
       }
     } catch (error) {
       console.error('Error loading PDF content:', error);
