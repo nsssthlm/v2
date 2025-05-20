@@ -11,10 +11,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, width = '100%', height = '10
   const iframeRef = useRef<HTMLIFrameElement>(null);
   
   useEffect(() => {
-    // Skapa en säker PDF-visare
+    // Skapa en PDF-visare
     if (url && iframeRef.current) {
-      // Generera en iframe-URL som direkt laddar PDF-filen
-      // Vi använder en URL som ger webbläsaren bästa möjligheten att visa PDF-filen
+      // Ladda PDF direkt
       iframeRef.current.src = url;
     }
   }, [url]);
