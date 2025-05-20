@@ -1,17 +1,154 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Button, CircularProgress, Typography, Stack } from '@mui/joy';
+import * as THREE from 'three';
 
 /**
  * IFC-visare för att ladda och visa IFC-modeller i 3D
- * Denna implementering demonstrerar gränssnittet och simuleringen av IFC-filer
+ * Använder Three.js för att visa 3D-modeller
  */
 const IFCViewer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadedModel, setLoadedModel] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  // Vyfunktioner - i en riktig implementation skulle dessa styra 3D-vyn
+  // Skapa en Three.js-scen med en byggnad som representerar en 3D-modell
+  useEffect(() => {
+    // Om vi inte har en container eller om det inte finns en laddad modell, avsluta
+    if (!containerRef.current || !loadedModel) return;
+    
+    // Hämta container-elementet och beräkna dimensioner
+    const container = containerRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    // Skapa en Three.js-scen
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf0f0f0);
+    
+    // Skapa en kamera
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(15, 15, 15);
+    camera.lookAt(0, 0, 0);
+    
+    // Skapa en renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.innerHTML = ''; // Rensa containern
+    container.appendChild(renderer.domElement);
+    
+    // Skapa ljus i scenen
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 20, 10);
+    scene.add(directionalLight);
+    
+    // Lägg till grid för orientering
+    const gridHelper = new THREE.GridHelper(20, 20);
+    scene.add(gridHelper);
+    
+    // Lägg till axlar för orientering (X=röd, Y=grön, Z=blå)
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+    
+    // Skapa en enkel byggnad för att representera IFC-modellen
+    
+    // Skapa huvudbyggnaden
+    const buildingGeometry = new THREE.BoxGeometry(8, 12, 6);
+    const buildingMaterial = new THREE.MeshStandardMaterial({
+      color: 0x4287f5,
+      transparent: true,
+      opacity: 0.7
+    });
+    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+    building.position.set(0, 6, 0);
+    
+    // Skapa basen för byggnaden
+    const baseGeometry = new THREE.BoxGeometry(12, 1, 8);
+    const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+    const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    base.position.set(0, 0, 0);
+    
+    // Skapa fönster
+    const windowMaterial = new THREE.MeshStandardMaterial({ color: 0xaaeeff });
+    const windowGeometry = new THREE.BoxGeometry(0.5, 1, 0.1);
+    
+    // Framsida
+    const window1 = new THREE.Mesh(windowGeometry, windowMaterial);
+    window1.position.set(4.1, 5, 0);
+    scene.add(window1);
+    
+    // Baksida
+    const window2 = new THREE.Mesh(windowGeometry, windowMaterial);
+    window2.position.set(-4.1, 5, 0);
+    scene.add(window2);
+    
+    // Vänster sida
+    const window3 = new THREE.Mesh(windowGeometry, windowMaterial);
+    window3.rotation.y = Math.PI / 2;
+    window3.position.set(0, 5, 3.1);
+    scene.add(window3);
+    
+    // Höger sida
+    const window4 = new THREE.Mesh(windowGeometry, windowMaterial);
+    window4.rotation.y = Math.PI / 2;
+    window4.position.set(0, 5, -3.1);
+    scene.add(window4);
+    
+    // Skapa tak
+    const roofGeometry = new THREE.ConeGeometry(6, 4, 4);
+    const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x883333 });
+    const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+    roof.position.set(0, 14, 0);
+    roof.rotation.y = Math.PI / 4;
+    
+    // Lägg till alla delar till scenen
+    scene.add(building, base, roof);
+    
+    // Skapa animationsloopen
+    let animationId: number;
+    
+    const animate = () => {
+      animationId = requestAnimationFrame(animate);
+      
+      // Rotera byggnaden långsamt
+      building.rotation.y += 0.005;
+      roof.rotation.y += 0.005;
+      
+      // Rendera scenen
+      renderer.render(scene, camera);
+    };
+    
+    animate();
+    
+    // Hantera fönsterändring
+    const handleResize = () => {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Städa upp när komponenten avmonteras
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationId);
+      renderer.dispose();
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+    };
+  }, [loadedModel]); // Kör om effekten när loadedModel ändras
+  
+  // Vyfunktioner (simulerade i denna version)
   const viewFront = () => {
     console.log('Byter till frontvy');
   };
@@ -25,7 +162,7 @@ const IFCViewer: React.FC = () => {
   };
   
   const resetView = () => {
-    console.log('Återställer vyn');
+    console.log('Återställer kameravyn');
   };
   
   // Funktion för att hantera filuppladdning
@@ -43,7 +180,8 @@ const IFCViewer: React.FC = () => {
     setIsLoading(true);
     setErrorMessage(null);
     
-    // Simulera filbearbetning
+    // I en verklig implementation skulle vi här processa IFC-filen
+    // För nu simulerar vi bara filbearbetning
     setTimeout(() => {
       setLoadedModel(file.name);
       setIsLoading(false);
@@ -157,51 +295,15 @@ const IFCViewer: React.FC = () => {
           </Box>
         ) : (
           <Box
+            ref={containerRef}
             sx={{
               width: '100%',
               height: '100%',
               borderRadius: 'sm',
               overflow: 'hidden',
-              bgcolor: '#f5f5f5',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: 3
+              bgcolor: '#f5f5f5'
             }}
-          >
-            <Typography level="h3" sx={{ mb: 2 }}>
-              IFC-modell laddad
-            </Typography>
-            <Typography level="body-lg" sx={{ mb: 4, fontWeight: 'bold' }}>
-              {loadedModel}
-            </Typography>
-            <Box sx={{ 
-              width: '100%', 
-              height: '300px',
-              borderRadius: 'sm', 
-              bgcolor: '#e0e0e0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              mb: 3
-            }}>
-              <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: '16px' }}>
-                <path d="M1 6V22L8 18L16 22L23 18V2L16 6L8 2L1 6Z" stroke="#4287f5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="#e8f4ff" />
-                <path d="M8 2V18" stroke="#4287f5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 6V22" stroke="#4287f5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <Typography level="body-md" color="neutral">
-                3D-visualisering av IFC-modell
-              </Typography>
-            </Box>
-            <Typography level="body-sm" sx={{ textAlign: 'center', maxWidth: '600px' }}>
-              Detta är en förenklad visning av IFC-filen. I en fullständig implementation 
-              skulle här visas en interaktiv 3D-modell med möjlighet att rotera, 
-              zooma och utforska byggnadsobjektet.
-            </Typography>
-          </Box>
+          />
         )}
       </Box>
       
