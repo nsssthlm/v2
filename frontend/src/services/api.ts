@@ -25,61 +25,20 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for adding auth token
+// Enkel konfiguration utan autentisering eller token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Inga headers för autentisering
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for handling common errors and token refresh
+// Enkel felhantering utan token-hantering
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // If error is 401 and we haven't tried to refresh the token yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      try {
-        // Try to refresh the token
-        const refreshToken = localStorage.getItem('refresh_token');
-        
-        if (refreshToken) {
-          console.log('Attempting to refresh token');
-          const response = await axios.post(`${API_URL}/token/refresh/`, {
-            refresh: refreshToken,
-          });
-          
-          console.log('Token refreshed successfully');
-          // Get new access token
-          const { access } = response.data;
-          
-          // Store the new token
-          localStorage.setItem('access_token', access);
-          
-          // Update the header for the original request
-          originalRequest.headers.Authorization = `Bearer ${access}`;
-          
-          // Retry the original request
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        // If refresh fails, clear tokens and force login
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        
-        // Redirect to login (handled by components)
-        window.dispatchEvent(new Event('auth:logout'));
-      }
-    }
-    
+  (error) => {
+    console.log('API-fel:', error.message);
     return Promise.reject(error);
   }
 );
