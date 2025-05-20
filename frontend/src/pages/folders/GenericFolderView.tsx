@@ -318,7 +318,7 @@ const GenericFolderView = () => {
                   borderBottom: '1px solid #eee'
                 },
                 '& tr:hover': {
-                  backgroundColor: '#f9f9f9'
+                  backgroundColor: '#e0f2e9'
                 }
               }}
             >
