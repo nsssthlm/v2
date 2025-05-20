@@ -385,7 +385,7 @@ const FolderPageNew = () => {
                   uploadedAt={new Date(file.uploaded_at).toLocaleDateString()}
                   uploadedBy="user@example.com"
                   folder={folderData.name}
-                  id={file.id || `pdf_${index}`}
+                  id={file.id || `file_${index}`}
                   fileUrl={file.file}
                   onDelete={handleDeleteFile}
                 />
