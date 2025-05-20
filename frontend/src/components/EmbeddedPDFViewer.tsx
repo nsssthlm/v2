@@ -23,15 +23,12 @@ const EmbeddedPDFViewer: React.FC<EmbeddedPDFViewerProps> = ({
     setError(false);
     
     try {
-      // Använd vår egen PDF-visningssida som körs i en iframe för att kringgå säkerhetsbegränsningar
-      // Detta är en vanlig teknik för att visa PDF:er i säkra miljöer
+      // Enkel PDF-visning
       const pdfViewerUrl = `/pdf-viewer/pdf.html?url=${encodeURIComponent(url)}`;
       
-      // Sätt URL:en till vår PDF-visare
       if (iframeRef.current) {
         iframeRef.current.src = pdfViewerUrl;
         
-        // Lyssna på när iframe har laddat
         iframeRef.current.onload = () => {
           setLoading(false);
         };

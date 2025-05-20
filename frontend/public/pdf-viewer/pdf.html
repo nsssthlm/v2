@@ -29,7 +29,6 @@
   <div id="pdf-container"></div>
   
   <script>
-    // När sidan laddas, hämta PDF-URL från URL-parametrar
     window.onload = function() {
       const params = new URLSearchParams(window.location.search);
       const pdfUrl = params.get('url');
@@ -37,14 +36,13 @@
       if (pdfUrl) {
         const container = document.getElementById('pdf-container');
         
-        // Skapa embed-element för att visa PDF:en
+        // Enkel direktlänkning av PDF
         const embed = document.createElement('embed');
         embed.src = decodeURIComponent(pdfUrl);
         embed.type = 'application/pdf';
         embed.width = '100%';
         embed.height = '100%';
         
-        // Lägg till embed i containern
         container.appendChild(embed);
       } else {
         document.body.innerHTML = '<div style="text-align: center; padding: 20px;">Ingen PDF-URL angiven</div>';
