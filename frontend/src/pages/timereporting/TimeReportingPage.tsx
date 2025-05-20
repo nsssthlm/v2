@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import DirectPDFViewer from '../../components/timereporting/DirectPDFViewer';
+import BasicPDFViewer from '../../components/timereporting/BasicPDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
@@ -315,7 +315,7 @@ const TimeReportingPage = () => {
                 bgcolor: 'background.level1',
                 height: 'calc(80vh - 64px)'
               }}>
-                <DirectPDFViewer 
+                <BasicPDFViewer 
                   pdfUrl={selectedPdf.fileUrl} 
                   filename={selectedPdf.fileName}
                   onDownload={() => {
