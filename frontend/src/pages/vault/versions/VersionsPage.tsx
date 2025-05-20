@@ -255,7 +255,7 @@ export default function VersionsPage() {
         versionNumber: nextVersionNumber,
         filename: newVersionFile.name,
         fileUrl: url,
-        description: newVersionDescription,
+        description: "PDF uppladdad " + new Date().toLocaleDateString(),
         uploaded: new Date().toISOString(),
         uploadedBy: 'Current User'
       };
@@ -625,7 +625,7 @@ export default function VersionsPage() {
                 variant="solid" 
                 color="primary"
                 loading={uploading}
-                disabled={!newVersionFile || !newVersionDescription}
+                disabled={!newVersionFile}
                 onClick={uploadNewVersion}
               >
                 Ladda upp
