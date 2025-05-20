@@ -10,27 +10,17 @@ import {
   ListItemContent,
   ListDivider,
   AspectRatio,
-  Modal,
-  ModalDialog,
-  ModalClose,
   Button,
   IconButton,
-  Stack,
-  Sheet
+  Stack
 } from '@mui/joy';
 import { 
   FileUpload as FileUploadIcon,
   Description as DescriptionIcon,
-  PictureAsPdf as PdfIcon,
-  Delete as DeleteIcon,
-  DownloadForOffline as DownloadIcon
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import { useProject } from '../../contexts/ProjectContext';
 import api from '../../services/api';
-import SimplePDFViewer from '../../components/timereporting/SimplePDFViewer';
-import CanvasPDFViewer from '../../components/timereporting/CanvasPDFViewer';
-import EmbeddedPDFViewer from '../../components/timereporting/EmbeddedPDFViewer';
-import BlobPDFViewer from '../../components/timereporting/BlobPDFViewer';
 
 // Interface för PDF-dokument
 interface PDFDocument {
