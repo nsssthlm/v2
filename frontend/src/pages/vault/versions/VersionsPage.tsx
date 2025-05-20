@@ -457,20 +457,11 @@ export default function VersionsPage() {
                                 position: 'relative'
                               }}
                             >
-                              <object
-                                data={pdfUrl}
-                                type="application/pdf"
-                                width="100%"
-                                height="100%"
-                                style={{ border: 'none' }}
-                              >
-                                <embed
-                                  src={pdfUrl}
-                                  type="application/pdf"
-                                  width="100%" 
-                                  height="100%"
-                                />
-                              </object>
+                              <iframe
+                                src={`/pdf-viewer-frame.html?url=${encodeURIComponent(pdfUrl)}`}
+                                style={{ width: '100%', height: '100%', border: 'none' }}
+                                title="PDF Viewer"
+                              />
                             </Box>
                           ) : (
                             <Box sx={{ 
