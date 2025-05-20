@@ -12,6 +12,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background-color: #494949;
     }
     #viewerContainer {
       width: 100%;
@@ -20,18 +21,26 @@
       position: absolute;
       top: 0;
       left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
     #pdfViewer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+      overflow: visible;
     }
     .page {
-      margin: 10px auto;
-      position: relative;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      background-color: white;
+      margin: 20px auto;
+      display: none; /* Dölj alla sidor som standard */
+    }
+    .page.active {
+      display: block; /* Visa bara aktiv sida */
     }
     .loading {
       display: flex;
@@ -40,7 +49,37 @@
       height: 100%;
       font-family: Arial, sans-serif;
       font-size: 16px;
-      color: #333;
+      color: white;
+    }
+    .error {
+      color: #ff6b6b;
+    }
+    .controls {
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      z-index: 100;
+    }
+    .controls button {
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 15px;
+      margin: 0 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .controls button:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+    .controls button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -53,16 +92,162 @@
     // Konfigurera PDF.js worker
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    // Hämta PDF URL från query parameter
+    // Hämta PDF URL och andra parametrar från query
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
 
+    let pdf = null;
+    let currentPage = 1;
+    let totalPages = 0;
+    let currentScale = 1.2;
+    const container = document.getElementById('pdfViewer');
+    const viewerContainer = document.getElementById('viewerContainer');
+    
+    // Lyssna på meddelanden från förälderkomponenten
+    window.addEventListener('message', function(event) {
+      // Endast acceptera meddelanden från vår egen domän
+      if (event.origin !== window.location.origin && 
+          getQueryParam('parentOrigin') && 
+          event.origin !== getQueryParam('parentOrigin')) {
+        return;
+      }
+      
+      const message = event.data;
+      
+      if (message.type === 'nextPage') {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderCurrentPage();
+        }
+      } else if (message.type === 'prevPage') {
+        if (currentPage > 1) {
+          currentPage--;
+          renderCurrentPage();
+        }
+      } else if (message.type === 'setZoom') {
+        if (message.zoom) {
+          currentScale = message.zoom;
+          renderCurrentPage();
+        }
+      } else if (message.type === 'jumpToPage') {
+        if (message.page && message.page >= 1 && message.page <= totalPages) {
+          currentPage = message.page;
+          renderCurrentPage();
+        }
+      }
+    });
+
+    // Funktion för att uppdatera parent-komponenten
+    function updateParent() {
+      try {
+        // Försök skicka status till föräldern via window.parent
+        if (window.parent && window.parent !== window) {
+          window.parent.updatePDFStatus?.({
+            page: currentPage,
+            totalPages: totalPages
+          });
+          
+          window.parent.updateZoomLevel?.(currentScale);
+        }
+      } catch (e) {
+        console.error('Kunde inte skicka status till parent:', e);
+      }
+    }
+
+    // Funktion för att rendera enbart den aktiva sidan
+    async function renderCurrentPage() {
+      if (!pdf) return;
+      
+      // Ta bort alla gamla sidor
+      const existingPages = container.querySelectorAll('.page');
+      existingPages.forEach(page => {
+        if (!page.classList.contains('page-' + currentPage)) {
+          page.remove();
+        }
+      });
+      
+      // Kolla om sidan redan finns
+      let pageContainer = container.querySelector('.page-' + currentPage);
+      
+      if (!pageContainer) {
+        try {
+          // Hämta sidan från PDF-dokumentet
+          const page = await pdf.getPage(currentPage);
+          
+          // Skapa en container för sidan
+          pageContainer = document.createElement('div');
+          pageContainer.className = 'page page-' + currentPage + ' active';
+          container.appendChild(pageContainer);
+          
+          // Beräkna viewport baserat på zoom
+          const viewport = page.getViewport({ scale: currentScale });
+          pageContainer.style.width = viewport.width + 'px';
+          pageContainer.style.height = viewport.height + 'px';
+          
+          // Skapa canvas för rendering
+          const canvas = document.createElement('canvas');
+          pageContainer.appendChild(canvas);
+          
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          
+          // Rendera sida till canvas
+          const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+          };
+          
+          await page.render(renderContext).promise;
+        } catch (error) {
+          console.error('Fel vid rendering av sida:', error);
+        }
+      } else {
+        // Markera den befintliga sidan som aktiv
+        pageContainer.classList.add('active');
+      }
+      
+      // Updatera statusen
+      updateParent();
+    }
+
+    // Hantera scroll och zoom i viewerContainer
+    function setupScrollAndZoom() {
+      // Hantera mushjul för zoom när Ctrl är nedtryckt
+      viewerContainer.addEventListener('wheel', function(e) {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          const delta = e.deltaY > 0 ? -0.1 : 0.1;
+          currentScale = Math.max(0.5, Math.min(3, currentScale + delta));
+          renderCurrentPage();
+          
+          // Skicka uppdatering till parent
+          updateParent();
+        }
+      }, { passive: false });
+      
+      // Hantera tangentbordsnavigering
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+          if (currentPage < totalPages) {
+            currentPage++;
+            renderCurrentPage();
+          }
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          if (currentPage > 1) {
+            currentPage--;
+            renderCurrentPage();
+          }
+        }
+      });
+    }
+
     // Rendera PDF med PDF.js
     async function renderPDF() {
       const url = getQueryParam('url');
-      const container = document.getElementById('pdfViewer');
+      const initialZoom = getQueryParam('zoom');
       
       if (!url) {
         container.textContent = 'Ingen PDF URL angiven';
@@ -71,42 +256,26 @@
       }
 
       try {
+        if (initialZoom) {
+          currentScale = parseFloat(initialZoom);
+        }
+        
         // Ladda PDF
         const loadingTask = pdfjsLib.getDocument(url);
-        const pdf = await loadingTask.promise;
+        pdf = await loadingTask.promise;
+        totalPages = pdf.numPages;
         
         container.innerHTML = '';
         container.classList.remove('loading');
         
-        // Rendera varje sida
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          const page = await pdf.getPage(pageNum);
-          
-          // Skapa en canvas för varje sida
-          const scale = 1.5;
-          const viewport = page.getViewport({ scale });
-          
-          const pageContainer = document.createElement('div');
-          pageContainer.className = 'page';
-          pageContainer.style.width = viewport.width + 'px';
-          pageContainer.style.height = viewport.height + 'px';
-          
-          const canvas = document.createElement('canvas');
-          pageContainer.appendChild(canvas);
-          container.appendChild(pageContainer);
-          
-          const context = canvas.getContext('2d');
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          
-          // Rendera PDF innehåll på canvasen
-          const renderContext = {
-            canvasContext: context,
-            viewport: viewport
-          };
-          
-          await page.render(renderContext).promise;
-        }
+        // Sätt upp navigering
+        setupScrollAndZoom();
+        
+        // Rendera första sidan
+        renderCurrentPage();
+        
+        // Skicka initial status till parent
+        updateParent();
       } catch (error) {
         console.error('Fel vid laddning av PDF:', error);
         container.textContent = `Kunde inte ladda PDF: ${error.message}`;
