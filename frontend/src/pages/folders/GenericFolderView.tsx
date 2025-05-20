@@ -321,7 +321,13 @@ const GenericFolderView = () => {
                   backgroundColor: 'white'
                 },
                 '& tbody tr:hover': {
-                  backgroundColor: '#e0f2e9'
+                  backgroundColor: '#e0f2e9',
+                  '& td': {
+                    backgroundColor: '#e0f2e9'
+                  },
+                  '& button': {
+                    backgroundColor: '#e0f2e9 !important'
+                  }
                 }
               }}
             >
