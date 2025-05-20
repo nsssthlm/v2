@@ -239,7 +239,7 @@ export default function VersionsPage() {
   
   // Function to upload a new version
   const uploadNewVersion = async () => {
-    if (!selectedFileId || !newVersionFile || !newVersionDescription) {
+    if (!selectedFileId || !newVersionFile) {
       return;
     }
     
@@ -348,7 +348,7 @@ export default function VersionsPage() {
                       size="sm"
                       onClick={() => setUploadDialogOpen(true)}
                     >
-                      Ladda upp ny version
+                      Ladda upp PDF
                     </Button>
                   </Box>
                 </Box>
@@ -569,7 +569,7 @@ export default function VersionsPage() {
       >
         <ModalDialog variant="outlined">
           <ModalClose />
-          <Typography level="h4" sx={{ mb: 2 }}>Ladda upp ny version</Typography>
+          <Typography level="h4" sx={{ mb: 2 }}>Ladda upp PDF</Typography>
           
           <Stack spacing={2}>
             <Box sx={{ textAlign: 'center', p: 3, border: '2px dashed', borderColor: 'primary.300', borderRadius: 'sm' }}>
@@ -611,11 +611,7 @@ export default function VersionsPage() {
               )}
             </Box>
             
-            <Input
-              placeholder="Beskriv vad som har ändrats i denna version"
-              value={newVersionDescription}
-              onChange={(e) => setNewVersionDescription(e.target.value)}
-            />
+            {/* Beskrivningsfältet borttaget för enklare uppladdning */}
             
             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
               <Button 
