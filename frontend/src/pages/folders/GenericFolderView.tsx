@@ -156,9 +156,26 @@ const GenericFolderView = () => {
       // Visa meddelande om lyckad borttagning
       alert(`Mappen "${slug}" har raderats framgångsrikt.`);
       
-      // Navigera tillbaka till mappöversikten med React Router
-      // Detta bevarar autentiseringstillståndet
-      navigate('/folders');
+      // Stäng dialogen för borttagningsmapp
+      setDeleteFolderDialogOpen(false);
+      
+      // Lägg till en kort timeout så användaren ser meddelandet innan omdirigering
+      setTimeout(() => {
+        // Töm eventuella cachade mappar i localStorage för att tvinga omladdning
+        const cacheKeys = Object.keys(localStorage).filter(key => 
+          key.startsWith('sidebar_directories_') || 
+          key.startsWith('folders_')
+        );
+        
+        cacheKeys.forEach(key => localStorage.removeItem(key));
+        
+        // Sätt en flagga för att indikera att mappsystemet behöver uppdateras
+        sessionStorage.setItem('force_refresh_directories', 'true');
+        
+        // Navigera tillbaka till mappöversikten med React Router
+        // Detta bevarar autentiseringstillståndet och tvingar en omladdning av maplistan
+        window.location.href = '/folders';
+      }, 500);
       
     } catch (err: any) {
       console.error('Fel vid radering av mapp:', err);
