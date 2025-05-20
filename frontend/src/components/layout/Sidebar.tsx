@@ -40,7 +40,7 @@ const menuItems = [
   { text: 'Kalender', icon: <CalendarIcon />, path: '/calendar' },
   { text: 'Workspace', icon: <WorkspaceIcon />, path: '/workspace' },
   { text: 'Projektplanering', icon: <AssignmentIcon />, path: '/project-planning' },
-  { text: 'Tidsrapportering', icon: <AssignmentIcon />, path: '/time-reporting' },
+  { text: 'Tidsrapportering', icon: <AssignmentIcon />, path: '/timereporting' },
   { text: 'Vault', icon: <FolderIcon />, path: '/vault' },
   { text: 'Wiki', icon: <WikiIcon />, path: '/wiki' },
   { text: 'Meddelanden', icon: <MessageIcon />, path: '/messages' },
@@ -270,7 +270,7 @@ const mainMenuItems = [
   },
   { 
     name: 'Tidsrapportering', 
-    path: '/time', 
+    path: '/timereporting', 
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
