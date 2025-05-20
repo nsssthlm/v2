@@ -444,7 +444,7 @@ export default function VersionsPage() {
                         loading={<CircularProgress size="lg" sx={{ my: 4 }} />}
                         error={
                           <Box sx={{ textAlign: 'center', p: 4 }}>
-                            <Typography level="h6" color="danger">
+                            <Typography level="title-lg" color="danger">
                               Kunde inte ladda PDF-dokumentet
                             </Typography>
                             <Typography level="body-sm">
@@ -462,7 +462,7 @@ export default function VersionsPage() {
                       </Document>
                     ) : (
                       <Box sx={{ textAlign: 'center', p: 4 }}>
-                        <Typography level="h6">
+                        <Typography level="title-lg">
                           Ingen PDF vald
                         </Typography>
                         <Typography level="body-sm">
