@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Box, 
@@ -45,6 +45,7 @@ interface FolderData {
 
 const GenericFolderView = () => {
   const { slug = '' } = useParams<{ slug: string }>();
+  const navigate = useNavigate(); // Lägg till navigate-funktionen
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<FolderData | null>(null);
@@ -130,8 +131,10 @@ const GenericFolderView = () => {
       // Visa meddelande om lyckad borttagning
       alert(`Mappen "${slug}" har raderats framgångsrikt.`);
       
-      // Navigera tillbaka en nivå eller till roten
-      window.location.href = '/';
+      // Navigera tillbaka till mappöversikten med React Router
+      // Detta bevarar autentiseringstillståndet
+      navigate('/folders');
+      
     } catch (err: any) {
       console.error('Fel vid radering av mapp:', err);
       setError(`Kunde inte radera mappen: ${err.message || 'Okänt fel'}`);
