@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Button, CircularProgress, Typography, Stack } from '@mui/joy';
+import * as THREE from 'three';
 
 /**
  * IFC-visare för att ladda och visa IFC-modeller i 3D
- * Denna version är en grund som simulerar en IFC-läsare
- * I den faktiska implementationen skulle 3D-modeller läsas in och visas
+ * Detta är en förenklad version som använder Three.js för att visa en grundläggande 3D-scen
  */
 const IFCViewer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,21 +13,147 @@ const IFCViewer: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Simulerade vyfunktioner - dessa skulle interagera med 3D-scenen i en full implementation
+  // Initiera Three.js-scenen för 3D-visning
+  useEffect(() => {
+    // Kontrollera att container-elementet finns
+    if (!containerRef.current) return;
+    
+    const container = containerRef.current;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    // Skapa scen, kamera och renderer
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf5f5f5);
+    
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(10, 10, 10);
+    camera.lookAt(0, 0, 0);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+    
+    // Lägg till ljus
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 10, 7.5);
+    scene.add(directionalLight);
+    
+    // Lägg till rutnät och koordinataxlar
+    const gridHelper = new THREE.GridHelper(50, 50);
+    scene.add(gridHelper);
+    
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+    
+    // Skapa en enkel kubmodell som exemplifierar en byggnad
+    const geometry = new THREE.BoxGeometry(10, 6, 8);
+    const material = new THREE.MeshStandardMaterial({ 
+      color: 0x4287f5,
+      transparent: true,
+      opacity: 0.8
+    });
+    const cube = new THREE.Mesh(geometry, material);
+    cube.position.set(0, 3, 0);
+    
+    // Lägg till större bas för byggnaden
+    const baseGeometry = new THREE.BoxGeometry(15, 1, 12);
+    const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+    const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    base.position.set(0, -0.5, 0);
+    
+    // Samla modellen i en grupp
+    const buildingGroup = new THREE.Group();
+    buildingGroup.add(cube);
+    buildingGroup.add(base);
+    
+    // Lägg till en enkel IFC-liknande struktur när en modell laddas
+    if (loadedModel) {
+      scene.add(buildingGroup);
+      
+      // Låtsas att vi har en rotationskontroll
+      import('three/examples/jsm/controls/OrbitControls.js').then(module => {
+        const OrbitControls = module.OrbitControls;
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+        controls.target.set(0, 0, 0);
+        
+        // Skapa en animationsloop
+        const animate = () => {
+          requestAnimationFrame(animate);
+          controls.update();
+          renderer.render(scene, camera);
+        };
+        
+        animate();
+      }).catch(error => {
+        console.error("Kunde inte ladda OrbitControls:", error);
+        
+        // Enkel rotation av modellen som fallback
+        const animate = () => {
+          requestAnimationFrame(animate);
+          buildingGroup.rotation.y += 0.005;
+          renderer.render(scene, camera);
+        };
+        
+        animate();
+      });
+    } else {
+      // Om ingen modell är laddad, gör en enkel rotation
+      const animate = () => {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      };
+      
+      animate();
+    }
+    
+    // Hantera fönsterändring
+    const handleResize = () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Rensa upp när komponenten avmonteras
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      // Ta bort alla 3D-element och rensa minnet
+      while(scene.children.length > 0) { 
+        scene.remove(scene.children[0]); 
+      }
+      
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+      
+      renderer.dispose();
+    };
+  }, [loadedModel]); // Återrendera när en ny modell laddas
+  
+  // Vyfunktioner - simulerade
   const viewFront = () => {
-    console.log('Byter vy till framsida');
+    console.log('Byter till frontvy');
   };
   
   const viewTop = () => {
-    console.log('Byter vy till ovanifrån');
+    console.log('Byter till vy ovanifrån');
   };
   
   const viewIso = () => {
-    console.log('Byter vy till isometrisk');
+    console.log('Byter till isometrisk vy');
   };
   
   const resetView = () => {
-    console.log('Återställer kameravyn');
+    console.log('Återställer vyn');
   };
   
   // Funktion för att hantera filuppladdning
@@ -135,72 +261,16 @@ const IFCViewer: React.FC = () => {
           </Box>
         )}
         
-        {!loadedModel ? (
-          <Box
-            ref={containerRef}
-            sx={{
-              width: '100%',
-              height: '100%',
-              borderRadius: 'sm',
-              overflow: 'hidden',
-              bgcolor: '#f5f5f5',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2
-            }}
-          >
-            <Typography level="body-lg">
-              Ingen 3D-modell laddad
-            </Typography>
-            <Typography level="body-sm">
-              Ladda upp en IFC-fil för att visa den här
-            </Typography>
-          </Box>
-        ) : (
-          <Box
-            ref={containerRef}
-            sx={{
-              width: '100%',
-              height: '100%',
-              borderRadius: 'sm',
-              overflow: 'hidden',
-              bgcolor: '#f5f5f5',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: 3
-            }}
-          >
-            <Typography level="h3" sx={{ mb: 2 }}>
-              IFC-modell laddad
-            </Typography>
-            <Typography level="body-lg" sx={{ mb: 4, fontWeight: 'bold' }}>
-              {loadedModel}
-            </Typography>
-            <Box sx={{ 
-              width: '100%', 
-              height: '300px',
-              borderRadius: 'sm', 
-              bgcolor: '#e0e0e0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mb: 3
-            }}>
-              <Typography level="body-md" color="neutral">
-                3D-visualisering av IFC-modell
-              </Typography>
-            </Box>
-            <Typography level="body-sm" sx={{ textAlign: 'center', maxWidth: '600px' }}>
-              Detta är en förenklad visning av IFC-filen. I en fullständig implementation 
-              skulle här visas en interaktiv 3D-modell med möjlighet att rotera, 
-              zooma och utforska byggnadsobjektet.
-            </Typography>
-          </Box>
-        )}
+        <Box
+          ref={containerRef}
+          sx={{
+            width: '100%',
+            height: '100%',
+            borderRadius: 'sm',
+            overflow: 'hidden',
+            bgcolor: '#f5f5f5'
+          }}
+        />
       </Box>
       
       <Box sx={{ p: 1, borderTop: '1px solid', borderColor: 'divider' }}>
