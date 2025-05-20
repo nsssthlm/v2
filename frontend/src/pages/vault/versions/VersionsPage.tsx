@@ -17,7 +17,6 @@ import {
   ModalClose,
   Input
 } from '@mui/joy';
-import { Document, Page, pdfjs } from 'react-pdf';
 import AddIcon from '@mui/icons-material/Add';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
@@ -29,16 +28,12 @@ import { useProject } from '../../../contexts/ProjectContext';
 import { format } from 'date-fns';
 
 // Import PDF utilities and library
-import { configurePdfWorker } from '../../../lib/pdf-worker-config';
 import { 
   getLatestPDFVersion, 
   getPDFVersions,
   getPDFVersionContent,
   uploadPDFVersion
 } from '../../../lib/pdf-utils';
-
-// Configure PDF.js worker
-configurePdfWorker();
 
 // File Version interface
 interface FileVersion {
@@ -452,33 +447,26 @@ export default function VersionsPage() {
                           {activeVersionId && fileVersions.find(v => v.id === activeVersionId)?.filename}
                         </Typography>
                         
-                        <Box sx={{ 
-                          width: '100%', 
-                          height: 'calc(100% - 120px)', 
-                          position: 'relative', 
-                          border: '1px solid', 
-                          borderColor: 'divider', 
-                          borderRadius: 'sm', 
-                          overflow: 'hidden',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: '#f5f5f5'
-                        }}>
-                          <Box sx={{ textAlign: 'center', p: 4 }}>
-                            <img
-                              src="/chrome-blocked.png"
-                              alt="PDF"
-                              style={{ width: '64px', opacity: 0.7, marginBottom: '16px' }}
-                            />
-                            <Typography level="title-md">
-                              {activeVersionId && fileVersions.find(v => v.id === activeVersionId)?.filename}
-                            </Typography>
-                            <Typography level="body-md" sx={{ mb: 3, color: 'text.secondary' }}>
-                              PDF:en har laddats upp och finns tillgänglig
-                            </Typography>
-                          </Box>
+                        <Box 
+                          sx={{ 
+                            width: '100%', 
+                            height: 'calc(100% - 120px)', 
+                            position: 'relative', 
+                            border: '1px solid', 
+                            borderColor: 'divider', 
+                            borderRadius: 'sm', 
+                            overflow: 'hidden',
+                            bgcolor: '#f5f5f5'
+                          }}
+                        >
+                          <iframe
+                            src={pdfUrl}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 'none' }}
+                            title="PDF Viewer"
+                            allowFullScreen
+                          />
                         </Box>
                         
                         <Button 
