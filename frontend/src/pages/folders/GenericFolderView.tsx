@@ -100,6 +100,10 @@ const GenericFolderView = () => {
   function openPdf(id: string | number, name: string, fileUrl: string) {
     console.log("Öppnar PDF:", {id, name, fileUrl});
     
+    // Konvertera backend-URL:en till en frontend-proxyer URL
+    // Detta löser Mixed Content-problemet genom att använda samma protokoll som frontend
+    const proxyUrl = `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}`;
+    
     const pdfFile: PDFFile = {
       id: id,
       name: name,
@@ -108,7 +112,7 @@ const GenericFolderView = () => {
     };
     
     setActivePdfFile(pdfFile);
-    setPdfUrl(fileUrl);
+    setPdfUrl(proxyUrl); // Använd den proxyade URL:en istället
     setPdfModalOpen(true);
     setPdfViewerReady(true);
   }
