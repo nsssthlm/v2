@@ -12,20 +12,12 @@ import {
   Alert, 
   IconButton, 
   Tooltip,
-  Sheet,
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Divider
+  Sheet
 } from '@mui/joy';
 import { API_BASE_URL } from '../../config';
 import UploadDialog from '../../components/UploadDialog';
+import PDFDialogEnhanced from '../../components/PDFDialogEnhanced';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import ZoomOutIcon from '@mui/icons-material/ZoomOut';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DownloadIcon from '@mui/icons-material/Download';
 
 interface FolderData {
   id: number | string;
@@ -46,14 +38,6 @@ interface FolderData {
   }[];
 }
 
-// Gränssnitt för PDF-fil
-interface PDFFile {
-  id: string | number;
-  name: string;
-  fileUrl: string;
-  uploaded: string;
-}
-
 const GenericFolderView = () => {
   const { slug = '' } = useParams<{ slug: string }>();
   const [loading, setLoading] = useState(true);
@@ -62,14 +46,9 @@ const GenericFolderView = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   
-  // PDF-visare från VersionsPage
-  const [pdfModalOpen, setPdfModalOpen] = useState(false);
-  const [pdfViewerReady, setPdfViewerReady] = useState(false);
-  const [activePdfFile, setActivePdfFile] = useState<PDFFile | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(1);
+  // Tillstånd för PDF-dialogen
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState<{ url: string; filename: string } | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -96,17 +75,16 @@ const GenericFolderView = () => {
     fetchFolderData();
   };
 
-  // Funktion för att öppna PDF via dedicerad proxy-sida
+  // Funktion för att öppna PDF i dialog
   function openPdf(id: string | number, name: string, fileUrl: string) {
     console.log("Öppnar PDF:", {id, name, fileUrl});
     
-    // Använd vår nya dedikerade PDF-visningssida istället för ett modalt fönster
-    // Detta löser Mixed Content-problemet och ser till att vi får en smidig användarupplevelse
-    const currentPath = `/folders/${slug}`;
-    const pdfViewerUrl = `/pdf-viewer?url=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(name)}&return=${encodeURIComponent(currentPath)}`;
-    
-    // Navigera till PDF-visningssidan
-    window.location.href = pdfViewerUrl;
+    // Spara PDF-informationen och öppna dialogen
+    setSelectedPdf({
+      url: fileUrl,
+      filename: name
+    });
+    setPdfDialogOpen(true);
   }
 
   // Funktion för att radera PDF-filer
@@ -305,170 +283,16 @@ const GenericFolderView = () => {
         folderSlug={slug}
         onSuccess={handleUploadSuccess}
       />
-
-      {/* PDF Viewer Modal - exakt som i VersionsPage */}
-      <Modal
-        open={pdfModalOpen}
-        onClose={() => setPdfModalOpen(false)}
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          p: 1
-        }}
-      >
-        <ModalDialog
-          size="lg"
-          variant="outlined"
-          layout="fullscreen"
-          sx={{ 
-            width: '100%', 
-            height: '100%',
-            p: 0,
-            overflow: 'hidden'
-          }}
-        >
-          <Box sx={{ 
-            width: '100%', 
-            height: '100%', 
-            display: 'flex', 
-            flexDirection: 'column'
-          }}>
-            {/* Header */}
-            <Box sx={{ 
-              p: 2, 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              borderBottom: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography level="title-lg">
-                {activePdfFile?.name}
-              </Typography>
-              <ModalClose />
-            </Box>
-            
-            {/* Controls */}
-            <Box sx={{ 
-              p: 1, 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'neutral.softBg'
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <IconButton 
-                  size="sm" 
-                  variant="soft"
-                  onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.1))}
-                >
-                  <ZoomOutIcon />
-                </IconButton>
-                <IconButton 
-                  size="sm" 
-                  variant="soft"
-                  onClick={() => setZoomLevel(prev => Math.min(2, prev + 0.1))}
-                >
-                  <ZoomInIcon />
-                </IconButton>
-                
-                <Typography level="body-sm" sx={{ mx: 1 }}>
-                  {Math.round(zoomLevel * 100)}%
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <IconButton 
-                  size="sm" 
-                  variant="soft"
-                  disabled={currentPage <= 1}
-                  onClick={() => {
-                    if (currentPage > 1) {
-                      setCurrentPage(prev => prev - 1);
-                    }
-                  }}
-                >
-                  <ChevronLeftIcon />
-                </IconButton>
-                
-                <Typography level="body-sm">
-                  Sid {currentPage} / {totalPages || '?'}
-                </Typography>
-                
-                <IconButton 
-                  size="sm" 
-                  variant="soft"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => {
-                    if (currentPage < totalPages) {
-                      setCurrentPage(prev => prev + 1);
-                    }
-                  }}
-                >
-                  <ChevronRightIcon />
-                </IconButton>
-              </Box>
-              
-              <Box>
-                <Tooltip title="Ladda ner PDF" placement="top">
-                  <IconButton 
-                    size="sm" 
-                    variant="soft"
-                    component="a" 
-                    href={pdfUrl || '#'} 
-                    download 
-                    target="_blank"
-                  >
-                    <DownloadIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
-            
-            {/* PDF Document */}
-            <Box 
-              sx={{ 
-                flex: 1, 
-                overflow: 'auto', 
-                display: 'flex', 
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                p: 2,
-                bgcolor: 'grey.100'
-              }}
-            >
-              {pdfUrl ? (
-                <Box 
-                  sx={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    position: 'relative'
-                  }}
-                >
-                  <iframe
-                    src={`/pdfjs-viewer.html?url=${encodeURIComponent(pdfUrl)}`}
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                    allow="fullscreen"
-                  />
-                </Box>
-              ) : (
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  width: '100%', 
-                  height: '100%' 
-                }}>
-                  <Typography level="body-lg">Ingen PDF vald</Typography>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        </ModalDialog>
-      </Modal>
+      
+      {/* PDF Viewer Dialog - Ny förbättrad version med blob URL support */}
+      {selectedPdf && (
+        <PDFDialogEnhanced
+          open={pdfDialogOpen}
+          onClose={() => setPdfDialogOpen(false)}
+          pdfUrl={selectedPdf.url}
+          filename={selectedPdf.filename}
+        />
+      )}
     </Box>
   );
 };
