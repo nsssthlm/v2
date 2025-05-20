@@ -308,14 +308,16 @@ const mainMenuItems = [
   },
   { 
     name: '3D Viewer', 
-    path: '/3d-overview', 
+    path: '/3dviewer', 
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 18.8l-5.9-3.4V8.6l5.9 3.4v6.8zm1-8.3L7.1 6.9l5.9-3.4 5.9 3.4-5.9 3.6zm6.9 4.9l-5.9 3.4v-6.8l5.9-3.4v6.8z"/>
       </svg>
     ),
     submenu: [
-      { name: '3D Översikt', path: '/3d-overview' }
+      { name: '3D Översikt', path: '/3dviewer/overview' },
+      { name: 'Design', path: '/3dviewer/design' },
+      { name: 'Byggarbetsplats', path: '/3dviewer/construction' }
     ],
     collapsible: true
   },
