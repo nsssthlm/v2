@@ -105,25 +105,71 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       };
     }
 
-    // Lyssna på Ctrl+Scroll för zoom
-    const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey) {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -25 : 25;
-        const newZoom = Math.min(300, Math.max(50, zoomLevel + delta));
-        setZoomLevel(newZoom);
-        
-        // Försök kommunicera med iframe för att ändra zoom
-        try {
-          const iframe = document.querySelector('iframe');
-          if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({ type: 'setZoom', zoom: newZoom / 100 }, '*');
-          }
-        } catch (e) {
-          console.error('Kunde inte kommunicera med PDF-visaren:', e);
+    // Hantera markeringar - start punkt, slutpunkt och aktuell markering
+  const [startPoint, setStartPoint] = useState<{ x: number, y: number } | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [selectionBox, setSelectionBox] = useState<{
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  } | null>(null);
+  
+  // Lyssna på Ctrl+Scroll för zoom
+  const handleWheel = (e: WheelEvent) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -25 : 25;
+      const newZoom = Math.min(300, Math.max(50, zoomLevel + delta));
+      setZoomLevel(newZoom);
+      
+      // Försök kommunicera med iframe för att ändra zoom
+      try {
+        const iframe = document.querySelector('iframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'setZoom', zoom: newZoom / 100 }, '*');
         }
+      } catch (e) {
+        console.error('Kunde inte kommunicera med PDF-visaren:', e);
       }
-    };
+    }
+  };
+  
+  // Hantera musklick i markeringsläge
+  const handleMouseDown = (e: MouseEvent) => {
+    if (!isMarkingMode) return;
+    
+    const iframe = document.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'startMarking' }, '*');
+      setIsDrawing(true);
+      
+      // Be om position från PDF-visaren
+      iframe.contentWindow.postMessage({ type: 'getPosition' }, '*');
+    }
+  };
+  
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isMarkingMode || !isDrawing) return;
+    
+    const iframe = document.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'updateMarking', x: e.clientX, y: e.clientY }, '*');
+    }
+  };
+  
+  const handleMouseUp = (e: MouseEvent) => {
+    if (!isMarkingMode || !isDrawing) return;
+    
+    setIsDrawing(false);
+    const iframe = document.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'endMarking' }, '*');
+      
+      // Be om markerade data från PDF-visaren
+      iframe.contentWindow.postMessage({ type: 'getSelection' }, '*');
+    }
+  };
 
     const container = pdfContainerRef.current;
     if (container) {
