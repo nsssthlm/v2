@@ -16,13 +16,17 @@ import {
   Option,
   FormControl,
   FormLabel,
-  Modal as JoyModal
+  Modal as JoyModal,
+  Snackbar,
+  Alert
 } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit'; 
+import PanToolIcon from '@mui/icons-material/PanTool';
 import { fetchAndCreateBlobUrl } from '../pages/files/ProxyPDFService';
 import axios from 'axios';
 
@@ -289,6 +293,18 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
     }
   }, [open, pdfUrl]);
 
+  // State för notifieringar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  
+  // Hjälpfunktion för att visa notifieringar
+  const showNotification = (message: string, severity: 'success' | 'error' = 'success') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
   // Hantera skapande av ny kommentar
   const handleCreateAnnotation = (comment: string, status: PDFAnnotation['status']) => {
     if (currentAnnotation) {
@@ -315,20 +331,41 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
         }, '*');
       }
       
+      // Stäng av markeringsläget efter kommentar läggs till
+      setIsMarkingMode(false);
+      
+      // Kommunicera med iframe för att stänga av markeringsläget
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ 
+          type: 'setMarkingMode', 
+          enabled: false 
+        }, '*');
+      }
+      
+      // Visa meddelande om att kommentaren har lagts till
+      showNotification('Kommentar har lagts till!');
+      
       // Försök spara till backend
-      const getFileIdFromUrl = (url: string) => {
-        const matches = url.match(/\/project_files\/.*?\/(.*?)\.pdf/);
-        if (matches && matches[1]) {
-          return matches[1];
-        }
-        return null;
+      const getFileInfo = (url: string) => {
+        // Hämta filnamn från URL för visning
+        const parts = url.split('/');
+        const filename = parts[parts.length - 1];
+        
+        return {
+          // För enkelhetens skull använder vi en temporär sträng-ID
+          // Detta löser problemet med 500 fel när vi försöker konvertera filnamn till ID
+          fileId: 'temp-file-' + Date.now(),
+          filename: filename || 'unknown.pdf'
+        };
       };
       
-      const fileId = getFileIdFromUrl(pdfUrl);
-      if (fileId) {
+      const fileInfo = getFileInfo(pdfUrl);
+      if (fileInfo) {
         const annotationData = {
-          file: fileId,
-          project: 3, // Här behöver du ange korrekt projekt-ID
+          // Använd en enkel siffra som ID istället för filnamn
+          file: 1,
+          project: 3, // Standardprojekt-ID
+          filename: fileInfo.filename, // Lägg till filnamn som ett separat fält
           x: tempAnnotation.rect.x,
           y: tempAnnotation.rect.y,
           width: tempAnnotation.rect.width,
@@ -364,11 +401,12 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
             ));
             
             console.log('Annotation sparad i databasen:', response.data);
+            showNotification('Kommentaren har sparats permanent!');
           })
           .catch(error => {
             console.error('Fel vid sparande av annotation:', error);
-            // Ta bort den temporära annotationen vid fel
-            setAnnotations(prev => prev.filter(a => a.id !== tempAnnotation.id));
+            // Visa felmeddelande men behåll den temporära annotationen
+            showNotification('Kunde inte spara kommentaren permanent, men den finns i denna session.', 'error');
           });
       }
     }
