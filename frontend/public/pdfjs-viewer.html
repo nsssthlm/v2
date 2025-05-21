@@ -23,8 +23,25 @@
       left: 0;
       cursor: grab;
     }
+    #viewerContainer.marking {
+      cursor: crosshair;
+    }
     #viewerContainer.grabbing {
       cursor: grabbing;
+    }
+    .annotation-overlay {
+      position: absolute;
+      background-color: rgba(255, 235, 59, 0.3);
+      border: 2px solid rgba(255, 193, 7, 0.8);
+      pointer-events: none;
+      z-index: 10;
+    }
+    .selection-overlay {
+      position: absolute;
+      background-color: rgba(255, 235, 59, 0.3);
+      border: 2px solid rgba(255, 193, 7, 0.8);
+      pointer-events: none;
+      z-index: 10;
     }
     #pdfViewer {
       position: relative;
