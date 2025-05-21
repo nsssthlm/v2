@@ -445,18 +445,6 @@
               height: height,
               pageNumber: currentPage
             });
-            
-            // Stäng av markeringsläget automatiskt efter att en markering är gjord
-            // Detta gör att användaren direkt kan navigera i dokumentet igen
-            isMarkingMode = false;
-            viewerContainer.classList.remove('marking');
-            
-            // Meddela parent att markeringsläget är avstängt
-            try {
-              window.parent.onMarkingModeChanged?.(false);
-            } catch (err) {
-              console.error('Kunde inte meddela parent om ändrat markeringsläge:', err);
-            }
           }
         } catch (e) {
           console.error('Kunde inte skicka markeringsdata till parent:', e);
