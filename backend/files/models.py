@@ -110,3 +110,46 @@ def update_previous_version_is_latest(sender, instance, **kwargs):
         # Om denna fil är den senaste versionen, sätt is_latest=False på alla tidigare versioner
         instance.previous_version.is_latest = False
         instance.previous_version.save()
+
+
+class PDFAnnotation(models.Model):
+    """Modell för att lagra annotationer (kommentarer) i PDF-filer"""
+    STATUS_CHOICES = (
+        ('new_comment', 'Ny kommentar'),
+        ('action_required', 'Kräver åtgärd'),
+        ('rejected', 'Avvisad'),
+        ('new_review', 'Ny granskning'),
+        ('other_forum', 'Annat forum'),
+        ('resolved', 'Åtgärdad'),
+    )
+    
+    file = models.ForeignKey(File, on_delete=models.CASCADE, related_name='annotations')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='pdf_annotations')
+    
+    # Position och sidnummer
+    x = models.FloatField()
+    y = models.FloatField()
+    width = models.FloatField()
+    height = models.FloatField()
+    page_number = models.IntegerField()
+    
+    # Innehåll
+    comment = models.TextField()
+    color = models.CharField(max_length=20, default='#FFEB3B')  # Färgkod för markeringen
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new_comment')
+    
+    # Metadata
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pdf_annotations')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Fält för uppföljning
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, 
+                                    related_name='assigned_pdf_annotations', null=True, blank=True)
+    deadline = models.DateField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Annotation på {self.file.name} (sida {self.page_number})"

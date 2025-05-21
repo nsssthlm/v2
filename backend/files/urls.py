@@ -6,11 +6,13 @@ from . import web_api
 from . import upload_api
 from . import api_views
 from . import proxy_views
+from . import api_annotations
 
 # API router för RESTful endpoints
 router = DefaultRouter()
 router.register('directories', views.DirectoryViewSet)
 router.register('files', views.FileViewSet)
+router.register('annotations', api_annotations.PDFAnnotationViewSet, basename='pdfannotation')
 
 urlpatterns = [
     # API-routes
