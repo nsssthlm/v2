@@ -63,6 +63,14 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
   const [annotations, setAnnotations] = useState<PDFAnnotation[]>([]);
   const [currentAnnotation, setCurrentAnnotation] = useState<Partial<PDFAnnotation> | null>(null);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [startPoint, setStartPoint] = useState<{ x: number, y: number } | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [selectionBox, setSelectionBox] = useState<{
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  } | null>(null);
 
   useEffect(() => {
     if (!pdfUrl) {
@@ -105,15 +113,7 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       };
     }
 
-    // Hantera markeringar - start punkt, slutpunkt och aktuell markering
-  const [startPoint, setStartPoint] = useState<{ x: number, y: number } | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [selectionBox, setSelectionBox] = useState<{
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  } | null>(null);
+    // Hantera markeringar
   
   // Lyssna på Ctrl+Scroll för zoom
   const handleWheel = (e: WheelEvent) => {
