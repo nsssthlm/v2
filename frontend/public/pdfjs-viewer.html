@@ -24,7 +24,7 @@
       cursor: grab;
     }
     #viewerContainer.marking {
-      cursor: crosshair;
+      cursor: crosshair !important;
     }
     #viewerContainer.grabbing {
       cursor: grabbing;
@@ -100,11 +100,16 @@
     let scrollStart = { left: 0, top: 0 };
     
     // Variabler för markeringsfunktionalitet
-    let isMarkingMode = false;
+    let isMarkingMode = getQueryParam('enableMarking') === 'true';
     let isMarking = false;
     let markingStart = { x: 0, y: 0 };
     let selectionOverlay = null;
     let annotations = [];
+    
+    // Initiera markeringsläge om det är aktiverat
+    if (isMarkingMode) {
+      viewerContainer.classList.add('marking');
+    }
     
     // Lyssna på meddelanden från förälderkomponenten
     window.addEventListener('message', function(event) {
@@ -145,6 +150,7 @@
       } else if (message.type === 'setMarkingMode') {
         // Aktivera eller inaktivera markeringsläge
         isMarkingMode = message.enabled;
+        console.log("Sätta markeringsläge till:", isMarkingMode);
         if (isMarkingMode) {
           viewerContainer.classList.add('marking');
           viewerContainer.classList.remove('grabbing');
@@ -425,6 +431,13 @@
       if (width > 5 && height > 5) {
         try {
           if (window.parent && window.parent !== window) {
+            console.log("Skickar markering till förälder:", {
+              x: left,
+              y: top,
+              width: width,
+              height: height,
+              pageNumber: currentPage
+            });
             window.parent.handleSelection?.({
               x: left,
               y: top,
@@ -451,6 +464,7 @@
       // Starta drag eller markering
       viewerContainer.addEventListener('mousedown', function(e) {
         if (isMarkingMode) {
+          console.log("Startar markering");
           startSelection(e);
         } else {
           isDragging = true;
@@ -463,7 +477,8 @@
       
       // Avsluta drag eller markering
       viewerContainer.addEventListener('mouseup', function(e) {
-        if (isMarking) {
+        if (isMarkingMode && isMarking) {
+          console.log("Avslutar markering");
           endSelection(e);
         }
         
@@ -471,8 +486,9 @@
         viewerContainer.classList.remove('grabbing');
       });
       
-      viewerContainer.addEventListener('mouseleave', function() {
+      viewerContainer.addEventListener('mouseleave', function(e) {
         if (isMarking) {
+          console.log("Avbryter markering (lämnar container)");
           isMarking = false;
           if (selectionOverlay) {
             selectionOverlay.remove();
@@ -486,7 +502,7 @@
       
       // Panorera eller uppdatera markering när musen flyttas
       viewerContainer.addEventListener('mousemove', function(e) {
-        if (isMarking) {
+        if (isMarkingMode && isMarking) {
           updateSelection(e);
           return;
         }
@@ -573,6 +589,12 @@
     async function renderPDF() {
       const url = getQueryParam('url');
       const initialZoom = getQueryParam('zoom');
+      const enableMarking = getQueryParam('enableMarking') === 'true';
+      
+      if (enableMarking) {
+        isMarkingMode = true;
+        viewerContainer.classList.add('marking');
+      }
       
       if (!url) {
         container.textContent = 'Ingen PDF URL angiven';
