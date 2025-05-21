@@ -16,7 +16,7 @@ import {
   Option,
   FormControl,
   FormLabel,
-  Input
+  Modal as JoyModal
 } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
@@ -48,6 +48,69 @@ interface PDFDialogEnhancedProps {
   filename: string;
 }
 
+// Dialog för att lägga till kommentar till markerat område
+const CommentDialog = ({ 
+  open, 
+  onClose, 
+  onSave, 
+  initialComment = '' 
+}: { 
+  open: boolean, 
+  onClose: () => void, 
+  onSave: (comment: string, status: PDFAnnotation['status']) => void,
+  initialComment?: string 
+}) => {
+  const [comment, setComment] = useState(initialComment);
+  const [status, setStatus] = useState<PDFAnnotation['status']>('new_comment');
+
+  const handleSave = () => {
+    onSave(comment, status);
+    setComment('');
+    setStatus('new_comment');
+    onClose();
+  };
+
+  return (
+    <JoyModal open={open} onClose={onClose}>
+      <ModalDialog sx={{ width: 400, p: 3, maxWidth: '90%' }}>
+        <Typography level="h4" mb={2}>Lägg till kommentar</Typography>
+        
+        <FormControl sx={{ mb: 2 }}>
+          <FormLabel>Status</FormLabel>
+          <Select 
+            value={status} 
+            onChange={(_, newValue) => setStatus(newValue as PDFAnnotation['status'])}
+            sx={{ width: '100%' }}
+          >
+            <Option value="new_comment">Ny kommentar</Option>
+            <Option value="action_required">Kräver åtgärd</Option>
+            <Option value="rejected">Avvisad</Option>
+            <Option value="new_review">Ny granskning</Option>
+            <Option value="other_forum">Annat forum</Option>
+            <Option value="resolved">Åtgärdad</Option>
+          </Select>
+        </FormControl>
+        
+        <FormControl sx={{ mb: 3 }}>
+          <FormLabel>Kommentar</FormLabel>
+          <Textarea 
+            value={comment} 
+            onChange={(e) => setComment(e.target.value)} 
+            minRows={3}
+            placeholder="Skriv din kommentar här..."
+            sx={{ width: '100%' }}
+          />
+        </FormControl>
+        
+        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+          <Button variant="plain" color="neutral" onClick={onClose}>Avbryt</Button>
+          <Button variant="solid" color="primary" onClick={handleSave}>Spara</Button>
+        </Box>
+      </ModalDialog>
+    </JoyModal>
+  );
+};
+
 const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhancedProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,14 +126,6 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
   const [annotations, setAnnotations] = useState<PDFAnnotation[]>([]);
   const [currentAnnotation, setCurrentAnnotation] = useState<Partial<PDFAnnotation> | null>(null);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
-  const [startPoint, setStartPoint] = useState<{ x: number, y: number } | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [selectionBox, setSelectionBox] = useState<{
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  } | null>(null);
 
   useEffect(() => {
     if (!pdfUrl) {
@@ -111,8 +166,29 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       (window as any).updateZoomLevel = (zoom: number) => {
         setZoomLevel(Math.round(zoom * 100));
       };
+      
+      // Hantera markering som skickas från iframe
+      (window as any).handleSelection = (selection: any) => {
+        if (isMarkingMode && selection && selection.width > 5 && selection.height > 5) {
+          const newAnnotation: Partial<PDFAnnotation> = {
+            rect: {
+              x: selection.x,
+              y: selection.y,
+              width: selection.width,
+              height: selection.height,
+              pageNumber: currentPage
+            },
+            color: '#FFEB3B',
+            status: 'new_comment'
+          };
+          
+          setCurrentAnnotation(newAnnotation);
+          setShowCommentDialog(true);
+        }
+      };
     }
 
+    // Lyssna på Ctrl+Scroll för zoom
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
         e.preventDefault();
@@ -151,8 +227,35 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       // Ta bort globala funktioner vid cleanup
       delete (window as any).updatePDFStatus;
       delete (window as any).updateZoomLevel;
+      delete (window as any).handleSelection;
     };
-  }, [pdfUrl, open, zoomLevel]);
+  }, [pdfUrl, open, zoomLevel, isMarkingMode, currentPage]);
+
+  // Hantera skapande av ny kommentar
+  const handleCreateAnnotation = (comment: string, status: PDFAnnotation['status']) => {
+    if (currentAnnotation) {
+      const newAnnotation: PDFAnnotation = {
+        ...currentAnnotation as any,
+        id: `annotation-${Date.now()}`,
+        comment,
+        status,
+        createdBy: 'Aktuell användare',
+        createdAt: new Date().toISOString()
+      };
+      
+      setAnnotations(prev => [...prev, newAnnotation]);
+      setCurrentAnnotation(null);
+      
+      // Skicka meddelande till iframe för att rita upp markeringen
+      const iframe = document.querySelector('iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ 
+          type: 'addAnnotation', 
+          annotation: newAnnotation 
+        }, '*');
+      }
+    }
+  };
 
   // Hantera stängning av dialogen
   const handleClose = () => {
@@ -226,456 +329,483 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
     }
   };
 
-  return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        p: 1,
-        backdropFilter: 'blur(5px)',
-        '& .MuiBackdrop-root': {
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        }
-      }}
-    >
-      <ModalDialog
-        size="lg"
-        variant="outlined"
-        layout="fullscreen"
-        sx={{ 
-          width: '90%', 
-          height: '90%',
-          p: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          borderRadius: '12px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ 
-          py: 1.5,
-          px: 2, 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'background.surface'
-        }}>
-          {/* Vänstra sidan med stäng och namn */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton 
-              variant="plain" 
-              onClick={handleClose} 
-              size="sm"
-              sx={{ color: 'neutral.600' }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <Typography level="title-md">
-              {filename}
-            </Typography>
-          </Box>
-
-          {/* Centrerad navigation och zoom */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton 
-              size="sm" 
-              variant="soft"
-              color="primary"
-              onClick={prevPage}
-              disabled={currentPage <= 1}
-            >
-              <ChevronLeftIcon />
-            </IconButton>
-            
-            <Typography level="body-sm" sx={{ minWidth: '100px', textAlign: 'center' }}>
-              Sida {currentPage} av {totalPages}
-            </Typography>
-            
-            <IconButton 
-              size="sm" 
-              variant="soft"
-              color="primary"
-              onClick={nextPage}
-              disabled={currentPage >= totalPages}
-            >
-              <ChevronRightIcon />
-            </IconButton>
-
-            <Box sx={{ mx: 1, borderLeft: '1px solid', borderColor: 'divider', height: '24px' }} />
-            
-            <IconButton 
-              size="sm" 
-              variant="soft"
-              color="success"
-              onClick={zoomOut}
-            >
-              <ZoomOutIcon />
-            </IconButton>
-            
-            <Typography level="body-sm" sx={{ minWidth: '40px', textAlign: 'center' }}>
-              {zoomLevel}%
-            </Typography>
-            
-            <IconButton 
-              size="sm" 
-              variant="soft"
-              color="success"
-              onClick={zoomIn}
-            >
-              <ZoomInIcon />
-            </IconButton>
-          </Box>
-
-          {/* Högra sidan med knappar */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Button
-              size="sm"
-              variant="soft"
-              color="primary"
-            >
-              Versioner
-            </Button>
-            
-            <Button
-              size="sm"
-              variant={isMarkingMode ? "solid" : "soft"}
-              color={isMarkingMode ? "warning" : "neutral"}
-              onClick={() => setIsMarkingMode(!isMarkingMode)}
-            >
-              {isMarkingMode ? "Avsluta markering" : "Markera område"}
-            </Button>
-
-            <Button
-              size="sm"
-              variant="solid"
-              color="primary"
-            >
-              Ny version
-            </Button>
-          </Box>
-        </Box>
-
-        {/* Huvud Content */}
-        <Box sx={{ 
-          display: 'flex', 
-          flex: 1,
-          overflow: 'hidden',
-          position: 'relative'
-        }}>
-          {/* PDF Viewer Container med scrollbarrar */}
-          <Box 
-            ref={pdfContainerRef}
-            sx={{ 
-              flexGrow: 1, 
-              position: 'relative',
-              overflow: 'auto', 
-              bgcolor: '#494949', // Mörkare bakgrund som i bilden
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'flex-start',
-              '&::-webkit-scrollbar': {
-                width: '12px',
-                height: '12px',
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: '#e0e0e0',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: '#888',
-                borderRadius: '6px',
-                border: '3px solid #e0e0e0',
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                backgroundColor: '#555',
-              }
-            }}
-          >
-            {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
-                <CircularProgress size="lg" />
-              </Box>
-            ) : error ? (
-              <Sheet 
-                variant="outlined" 
-                sx={{ p: 4, maxWidth: '600px', textAlign: 'center', m: 'auto' }}
-              >
-                <Typography level="body-lg" color="danger">
-                  {error}
-                </Typography>
-              </Sheet>
-            ) : processedPdfUrl ? (
-              <iframe
-                src={`/pdfjs-viewer.html?url=${encodeURIComponent(processedPdfUrl)}&zoom=${zoomLevel/100}&parentOrigin=${encodeURIComponent(window.location.origin)}`}
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  border: 'none',
-                  backgroundColor: 'transparent'
-                }}
-                title="PDF Viewer"
-                allow="fullscreen"
-              />
-            ) : (
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                width: '100%', 
-                height: '100%' 
-              }}>
-                <Typography level="body-lg" sx={{ color: 'white' }}>Ingen PDF vald</Typography>
-              </Box>
-            )}
-            
-            {/* Progressbar i botten */}
-            <Box sx={{ 
-              position: 'absolute', 
-              bottom: 8, 
-              left: '5%', 
-              right: '5%',
-              height: '6px', 
-              bgcolor: 'success.200',
-              borderRadius: '3px',
-              overflow: 'hidden'
-            }}>
-              <Box sx={{ 
-                width: `${(currentPage / totalPages) * 100}%`, 
-                height: '100%', 
-                bgcolor: 'success.500' 
-              }} />
-            </Box>
-          </Box>
-
-          {/* Högra sidokolumnen med detaljer */}
-          <Box sx={{ 
-            width: '300px', 
-            minWidth: '300px', 
-            borderLeft: '1px solid', 
-            borderColor: 'divider',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden'
-          }}>
-            {/* Tabs för detaljer/historik/kommentarer */}
-            <Tabs 
-              value={activeTab} 
-              onChange={(_, newValue) => setActiveTab(newValue as string)}
-              sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
-            >
-              <TabList>
-                <Tab value="detaljer">Detaljer</Tab>
-                <Tab value="historik">Historik</Tab>
-                <Tab value="kommentarer">Kommentar</Tab>
-              </TabList>
-            </Tabs>
-
-            {/* Tab innehåll */}
-            <Box sx={{ 
-              overflow: 'auto', 
-              flex: 1, 
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2
-            }}>
-              {activeTab === 'detaljer' && (
-                <>
-                  <Box>
-                    <Typography level="title-md" sx={{ mb: 1 }}>PDF Anteckning</Typography>
-                    <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
-                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Skapad av</Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Box 
-                          sx={{ 
-                            width: 24, 
-                            height: 24, 
-                            bgcolor: 'primary.300', 
-                            borderRadius: '50%' 
-                          }} 
-                        />
-                        <Typography>user@example.com</Typography>
-                        <Typography level="body-xs" sx={{ ml: 'auto' }}>2025-05-20</Typography>
-                      </Box>
-                    </Sheet>
-                  </Box>
-
-                  <Box>
-                    <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Deadline</Typography>
-                    <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography>22 maj 2025</Typography>
-                      </Box>
-                    </Sheet>
-                  </Box>
-
-                  <Box>
-                    <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Granskningspaket</Typography>
-                    <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
-                      <Typography>K - Granskning BH Hus 3-4</Typography>
-                    </Sheet>
-                  </Box>
-
-                  <Box>
-                    <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Typ</Typography>
-                    <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
-                      <Typography>Gransknings kommentar</Typography>
-                    </Sheet>
-                  </Box>
-
-                  <Box>
-                    <Typography level="title-md" sx={{ mb: 1 }}>Aktivitet</Typography>
-                    <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
-                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 1 }}>VERSIONER</Typography>
-                      
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 1, 
-                        p: 1,
-                        borderRadius: 'sm',
-                        borderLeft: '3px solid',
-                        borderColor: 'primary.500',
-                        bgcolor: 'primary.50'
-                      }}>
-                        <Box 
-                          sx={{ 
-                            width: 24, 
-                            height: 24, 
-                            bgcolor: 'primary.300', 
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: '0.75rem',
-                            fontWeight: 'bold'
-                          }} 
-                        >
-                          V
-                        </Box>
-                        <Box>
-                          <Typography level="body-sm" sx={{ fontWeight: 'bold' }}>Version 1</Typography>
-                          <Typography level="body-xs">user@example.com</Typography>
-                        </Box>
-                        <Button 
-                          size="sm" 
-                          variant="soft" 
-                          color="primary" 
-                          sx={{ ml: 'auto', fontSize: '0.75rem' }}
-                        >
-                          Visa version
-                        </Button>
-                      </Box>
-                    </Sheet>
-                  </Box>
-                </>
-              )}
-
-              {activeTab === 'historik' && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                  <Typography>Historik kommer visas här</Typography>
-                </Box>
-              )}
-
-              {activeTab === 'kommentarer' && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                  <Typography>Kommentarer kommer visas här</Typography>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Statusrad i botten */}
-        <Box sx={{ 
-          p: 1, 
-          borderTop: '1px solid', 
-          borderColor: 'divider', 
-          bgcolor: 'background.level1',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          <Button 
-            size="sm" 
-            variant="soft" 
-            color="primary" 
-            sx={{ mr: 2 }}
-          >
-            Nuvarande version
-          </Button>
-        </Box>
-      </ModalDialog>
-    </Modal>
-  );
-};
-
-// Dialog för att lägga till kommentar till markerat område
-const CommentDialog = ({ 
-  open, 
-  onClose, 
-  onSave, 
-  initialComment = '' 
-}: { 
-  open: boolean, 
-  onClose: () => void, 
-  onSave: (comment: string, status: PDFAnnotation['status']) => void,
-  initialComment?: string 
-}) => {
-  const [comment, setComment] = useState(initialComment);
-  const [status, setStatus] = useState<PDFAnnotation['status']>('new_comment');
-
-  const handleSave = () => {
-    onSave(comment, status);
-    setComment('');
-    setStatus('new_comment');
-    onClose();
+  // Aktivera markeringsläge i iframe
+  const toggleMarkingMode = () => {
+    const newMarkingMode = !isMarkingMode;
+    setIsMarkingMode(newMarkingMode);
+    
+    try {
+      const iframe = document.querySelector('iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ 
+          type: 'setMarkingMode', 
+          enabled: newMarkingMode 
+        }, '*');
+      }
+    } catch (e) {
+      console.error('Kunde inte kommunicera med PDF-visaren:', e);
+    }
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <ModalDialog sx={{ width: 400, p: 3, maxWidth: '90%' }}>
-        <Typography level="h4" mb={2}>Lägg till kommentar</Typography>
-        
-        <FormControl sx={{ mb: 2 }}>
-          <FormLabel>Status</FormLabel>
-          <Select 
-            value={status} 
-            onChange={(_, newValue) => setStatus(newValue as PDFAnnotation['status'])}
-            sx={{ width: '100%' }}
-          >
-            <Option value="new_comment">Ny kommentar</Option>
-            <Option value="action_required">Kräver åtgärd</Option>
-            <Option value="rejected">Avvisad</Option>
-            <Option value="new_review">Ny granskning</Option>
-            <Option value="other_forum">Annat forum</Option>
-            <Option value="resolved">Åtgärdad</Option>
-          </Select>
-        </FormControl>
-        
-        <FormControl sx={{ mb: 3 }}>
-          <FormLabel>Kommentar</FormLabel>
-          <Textarea 
-            value={comment} 
-            onChange={(e) => setComment(e.target.value)} 
-            minRows={3}
-            placeholder="Skriv din kommentar här..."
-            sx={{ width: '100%' }}
-          />
-        </FormControl>
-        
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <Button variant="plain" color="neutral" onClick={onClose}>Avbryt</Button>
-          <Button variant="solid" color="primary" onClick={handleSave}>Spara</Button>
-        </Box>
-      </ModalDialog>
-    </Modal>
+    <>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          p: 1,
+          backdropFilter: 'blur(5px)',
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          }
+        }}
+      >
+        <ModalDialog
+          size="lg"
+          variant="outlined"
+          layout="fullscreen"
+          sx={{ 
+            width: '90%', 
+            height: '90%',
+            p: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ 
+            py: 1.5,
+            px: 2, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.surface'
+          }}>
+            {/* Vänstra sidan med stäng och namn */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconButton 
+                variant="plain" 
+                onClick={handleClose} 
+                size="sm"
+                sx={{ color: 'neutral.600' }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Typography level="title-md">
+                {filename}
+              </Typography>
+            </Box>
+
+            {/* Centrerad navigation och zoom */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <IconButton 
+                size="sm" 
+                variant="soft"
+                color="primary"
+                onClick={prevPage}
+                disabled={currentPage <= 1}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+              
+              <Typography level="body-sm" sx={{ minWidth: '100px', textAlign: 'center' }}>
+                Sida {currentPage} av {totalPages}
+              </Typography>
+              
+              <IconButton 
+                size="sm" 
+                variant="soft"
+                color="primary"
+                onClick={nextPage}
+                disabled={currentPage >= totalPages}
+              >
+                <ChevronRightIcon />
+              </IconButton>
+
+              <Box sx={{ mx: 1, borderLeft: '1px solid', borderColor: 'divider', height: '24px' }} />
+              
+              <IconButton 
+                size="sm" 
+                variant="soft"
+                color="success"
+                onClick={zoomOut}
+              >
+                <ZoomOutIcon />
+              </IconButton>
+              
+              <Typography level="body-sm" sx={{ minWidth: '40px', textAlign: 'center' }}>
+                {zoomLevel}%
+              </Typography>
+              
+              <IconButton 
+                size="sm" 
+                variant="soft"
+                color="success"
+                onClick={zoomIn}
+              >
+                <ZoomInIcon />
+              </IconButton>
+            </Box>
+
+            {/* Högra sidan med knappar */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Button
+                size="sm"
+                variant="soft"
+                color="primary"
+              >
+                Versioner
+              </Button>
+              
+              <Button
+                size="sm"
+                variant={isMarkingMode ? "solid" : "soft"}
+                color={isMarkingMode ? "warning" : "neutral"}
+                onClick={toggleMarkingMode}
+              >
+                {isMarkingMode ? "Avsluta markering" : "Markera område"}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="solid"
+                color="primary"
+              >
+                Ny version
+              </Button>
+            </Box>
+          </Box>
+
+          {/* Huvud Content */}
+          <Box sx={{ 
+            display: 'flex', 
+            flex: 1,
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            {/* PDF Viewer Container med scrollbarrar */}
+            <Box 
+              ref={pdfContainerRef}
+              sx={{ 
+                flexGrow: 1, 
+                position: 'relative',
+                overflow: 'auto', 
+                bgcolor: '#494949', // Mörkare bakgrund som i bilden
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                '&::-webkit-scrollbar': {
+                  width: '12px',
+                  height: '12px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: '#e0e0e0',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: '#888',
+                  borderRadius: '6px',
+                  border: '3px solid #e0e0e0',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  backgroundColor: '#555',
+                }
+              }}
+            >
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+                  <CircularProgress size="lg" />
+                </Box>
+              ) : error ? (
+                <Sheet 
+                  variant="outlined" 
+                  sx={{ p: 4, maxWidth: '600px', textAlign: 'center', m: 'auto' }}
+                >
+                  <Typography level="body-lg" color="danger">
+                    {error}
+                  </Typography>
+                </Sheet>
+              ) : processedPdfUrl ? (
+                <iframe
+                  src={`/pdfjs-viewer.html?url=${encodeURIComponent(processedPdfUrl)}&zoom=${zoomLevel/100}&parentOrigin=${encodeURIComponent(window.location.origin)}&enableMarking=${isMarkingMode}`}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    border: 'none',
+                    backgroundColor: 'transparent'
+                  }}
+                  title="PDF Viewer"
+                  allow="fullscreen"
+                />
+              ) : (
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  width: '100%', 
+                  height: '100%' 
+                }}>
+                  <Typography level="body-lg" sx={{ color: 'white' }}>Ingen PDF vald</Typography>
+                </Box>
+              )}
+              
+              {/* Progressbar i botten */}
+              <Box sx={{ 
+                position: 'absolute', 
+                bottom: 8, 
+                left: '5%', 
+                right: '5%',
+                height: '6px', 
+                bgcolor: 'success.200',
+                borderRadius: '3px',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{ 
+                  width: `${(currentPage / totalPages) * 100}%`, 
+                  height: '100%', 
+                  bgcolor: 'success.500' 
+                }} />
+              </Box>
+            </Box>
+
+            {/* Högra sidokolumnen med detaljer */}
+            <Box sx={{ 
+              width: '300px', 
+              minWidth: '300px', 
+              borderLeft: '1px solid', 
+              borderColor: 'divider',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              {/* Tabs för detaljer/historik/kommentarer */}
+              <Tabs 
+                value={activeTab} 
+                onChange={(_, newValue) => setActiveTab(newValue as string)}
+                sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+              >
+                <TabList>
+                  <Tab value="detaljer">Detaljer</Tab>
+                  <Tab value="historik">Historik</Tab>
+                  <Tab value="kommentarer">Kommentar</Tab>
+                </TabList>
+              </Tabs>
+
+              {/* Tab innehåll */}
+              <Box sx={{ 
+                overflow: 'auto', 
+                flex: 1, 
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2
+              }}>
+                {activeTab === 'detaljer' && (
+                  <>
+                    <Box>
+                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Filnamn</Typography>
+                      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
+                        <Typography>{filename}</Typography>
+                      </Sheet>
+                    </Box>
+
+                    <Box>
+                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Version</Typography>
+                      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
+                        <Typography>1.0</Typography>
+                      </Sheet>
+                    </Box>
+
+                    <Box>
+                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Uppladdad</Typography>
+                      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
+                        <Typography>2025-05-19</Typography>
+                      </Sheet>
+                    </Box>
+
+                    <Box>
+                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Uppladdad av</Typography>
+                      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box 
+                            sx={{ 
+                              width: 28, 
+                              height: 28, 
+                              bgcolor: 'primary.300', 
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            P
+                          </Box>
+                          <Typography>Per Andersson</Typography>
+                        </Box>
+                      </Sheet>
+                    </Box>
+
+                    <Box>
+                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Deadline</Typography>
+                      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography>22 maj 2025</Typography>
+                        </Box>
+                      </Sheet>
+                    </Box>
+
+                    <Box>
+                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Granskningspaket</Typography>
+                      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
+                        <Typography>K - Granskning BH Hus 3-4</Typography>
+                      </Sheet>
+                    </Box>
+
+                    <Box>
+                      <Typography level="body-sm" sx={{ fontWeight: 'bold', mb: 0.5 }}>Typ</Typography>
+                      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md' }}>
+                        <Typography>Gransknings kommentar</Typography>
+                      </Sheet>
+                    </Box>
+                  </>
+                )}
+                
+                {activeTab === 'kommentarer' && (
+                  <>
+                    <Typography level="title-sm" mb={1}>Kommentarer ({annotations.length})</Typography>
+                    
+                    {annotations.length === 0 ? (
+                      <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography level="body-sm" color="neutral">
+                          Inga kommentarer än. Använd "Markera område" för att lägga till kommentarer.
+                        </Typography>
+                      </Box>
+                    ) : (
+                      annotations.map(annotation => (
+                        <Sheet
+                          key={annotation.id}
+                          variant="outlined"
+                          sx={{
+                            p: 2,
+                            borderRadius: 'md',
+                            borderLeft: '3px solid',
+                            borderColor: annotation.status === 'resolved' ? 'success.500' : 
+                                        annotation.status === 'action_required' ? 'warning.500' :
+                                        annotation.status === 'rejected' ? 'danger.500' : 'primary.500',
+                            mb: 1
+                          }}
+                        >
+                          <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            mb: 1 
+                          }}>
+                            <Typography level="body-sm" sx={{ fontWeight: 'bold' }}>
+                              {annotation.createdBy}
+                            </Typography>
+                            <Typography level="body-xs" color="neutral">
+                              {new Date(annotation.createdAt).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                          <Typography level="body-sm" mb={1}>
+                            {annotation.comment}
+                          </Typography>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center' 
+                          }}>
+                            <Typography 
+                              level="body-xs" 
+                              sx={{ 
+                                px: 1, 
+                                py: 0.5, 
+                                bgcolor: annotation.status === 'resolved' ? 'success.100' : 
+                                         annotation.status === 'action_required' ? 'warning.100' :
+                                         annotation.status === 'rejected' ? 'danger.100' : 'primary.100',
+                                color: annotation.status === 'resolved' ? 'success.800' : 
+                                       annotation.status === 'action_required' ? 'warning.800' :
+                                       annotation.status === 'rejected' ? 'danger.800' : 'primary.800',
+                                borderRadius: 'sm',
+                                fontWeight: 'medium'
+                              }}
+                            >
+                              {annotation.status === 'new_comment' ? 'Ny kommentar' :
+                               annotation.status === 'action_required' ? 'Kräver åtgärd' :
+                               annotation.status === 'rejected' ? 'Avvisad' :
+                               annotation.status === 'new_review' ? 'Ny granskning' :
+                               annotation.status === 'other_forum' ? 'Annat forum' : 'Åtgärdad'}
+                            </Typography>
+                            <Button 
+                              size="sm" 
+                              variant="plain" 
+                              onClick={() => {
+                                // Zooma till annoteringen
+                                const iframe = document.querySelector('iframe');
+                                if (iframe && iframe.contentWindow) {
+                                  iframe.contentWindow.postMessage({ 
+                                    type: 'zoomToAnnotation', 
+                                    annotation 
+                                  }, '*');
+                                }
+                              }}
+                            >
+                              Visa
+                            </Button>
+                          </Box>
+                        </Sheet>
+                      ))
+                    )}
+                  </>
+                )}
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Statusrad i botten */}
+          <Box sx={{ 
+            p: 1, 
+            borderTop: '1px solid', 
+            borderColor: 'divider', 
+            bgcolor: 'background.level1',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <Button 
+              size="sm" 
+              variant="soft" 
+              color="primary" 
+              sx={{ mr: 2 }}
+            >
+              Nuvarande version
+            </Button>
+          </Box>
+        </ModalDialog>
+      </Modal>
+
+      {/* Dialogruta för att lägga till kommentar */}
+      {showCommentDialog && (
+        <CommentDialog 
+          open={showCommentDialog} 
+          onClose={() => {
+            setShowCommentDialog(false);
+            setCurrentAnnotation(null);
+          }} 
+          onSave={handleCreateAnnotation}
+          initialComment=""
+        />
+      )}
+    </>
   );
 };
 
