@@ -296,10 +296,10 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
   // State för notifieringar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'danger' | 'warning' | 'neutral'>('success');
   
   // Hjälpfunktion för att visa notifieringar
-  const showNotification = (message: string, severity: 'success' | 'error' = 'success') => {
+  const showNotification = (message: string, severity: 'success' | 'danger' | 'warning' | 'neutral' = 'success') => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
@@ -343,7 +343,7 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       }
       
       // Visa meddelande om att kommentaren har lagts till
-      showNotification('Kommentar har lagts till!');
+      showNotification('Kommentar har lagts till!', 'success');
       
       // Försök spara till backend
       const getFileInfo = (url: string) => {
@@ -401,12 +401,12 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
             ));
             
             console.log('Annotation sparad i databasen:', response.data);
-            showNotification('Kommentaren har sparats permanent!');
+            showNotification('Kommentaren har sparats permanent!', 'success');
           })
           .catch(error => {
             console.error('Fel vid sparande av annotation:', error);
             // Visa felmeddelande men behåll den temporära annotationen
-            showNotification('Kunde inte spara kommentaren permanent, men den finns i denna session.', 'error');
+            showNotification('Kunde inte spara kommentaren permanent, men den finns i denna session.', 'danger');
           });
       }
     }
@@ -500,7 +500,7 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       
       // Visa hjälpmeddelande för användaren
       if (newMarkingMode) {
-        showNotification('Markeringsläge aktiverat. Dra med musen för att markera ett område.', 'success');
+        showNotification('Markeringsläge aktiverat. Dra med musen för att markera ett område.', 'warning');
       } else {
         showNotification('Markeringsläge avslutat. Du kan nu navigera fritt i dokumentet.', 'success');
       }
