@@ -24,6 +24,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
 import { fetchAndCreateBlobUrl } from '../pages/files/ProxyPDFService';
+import axios from 'axios';
 
 interface PDFAnnotation {
   id: string;
@@ -231,19 +232,78 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
     };
   }, [pdfUrl, open, zoomLevel, isMarkingMode, currentPage]);
 
+  // Ladda sparade kommentarer från backend
+  useEffect(() => {
+    if (!open || !pdfUrl) return;
+    
+    // Hämta fileId från URL eller annan källa
+    const getFileIdFromUrl = (url: string) => {
+      // Exempel: extrahera fil-ID från URL
+      // Detta måste anpassas baserat på hur din URL struktureras
+      const matches = url.match(/\/project_files\/.*?\/(.*?)\.pdf/);
+      if (matches && matches[1]) {
+        return matches[1];
+      }
+      return null;
+    };
+
+    const fileId = getFileIdFromUrl(pdfUrl);
+    if (fileId) {
+      // Hämta befintliga annotationer från backend
+      axios.get(`/api/files/annotations/?file_id=${fileId}`)
+        .then(response => {
+          if (response.data && Array.isArray(response.data.results)) {
+            const backendAnnotations = response.data.results.map((item: any) => ({
+              id: item.id.toString(),
+              rect: {
+                x: item.x,
+                y: item.y,
+                width: item.width,
+                height: item.height,
+                pageNumber: item.page_number
+              },
+              color: item.color,
+              comment: item.comment,
+              status: item.status,
+              createdBy: item.created_by_details?.username || 'Användare',
+              createdAt: item.created_at
+            }));
+            
+            setAnnotations(backendAnnotations);
+            
+            // Skicka till iframe för att ritas upp
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+              backendAnnotations.forEach(annotation => {
+                iframe.contentWindow!.postMessage({ 
+                  type: 'addAnnotation', 
+                  annotation 
+                }, '*');
+              });
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Fel vid hämtning av annotationer:', error);
+        });
+    }
+  }, [open, pdfUrl]);
+
   // Hantera skapande av ny kommentar
   const handleCreateAnnotation = (comment: string, status: PDFAnnotation['status']) => {
     if (currentAnnotation) {
-      const newAnnotation: PDFAnnotation = {
+      // Skapa temporär annotation med lokalt ID
+      const tempAnnotation: PDFAnnotation = {
         ...currentAnnotation as any,
-        id: `annotation-${Date.now()}`,
+        id: `temp-${Date.now()}`,
         comment,
         status,
         createdBy: 'Aktuell användare',
         createdAt: new Date().toISOString()
       };
       
-      setAnnotations(prev => [...prev, newAnnotation]);
+      // Visa annotationen temporärt i UI
+      setAnnotations(prev => [...prev, tempAnnotation]);
       setCurrentAnnotation(null);
       
       // Skicka meddelande till iframe för att rita upp markeringen
@@ -251,8 +311,65 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow.postMessage({ 
           type: 'addAnnotation', 
-          annotation: newAnnotation 
+          annotation: tempAnnotation 
         }, '*');
+      }
+      
+      // Försök spara till backend
+      const getFileIdFromUrl = (url: string) => {
+        const matches = url.match(/\/project_files\/.*?\/(.*?)\.pdf/);
+        if (matches && matches[1]) {
+          return matches[1];
+        }
+        return null;
+      };
+      
+      const fileId = getFileIdFromUrl(pdfUrl);
+      if (fileId) {
+        const annotationData = {
+          file: fileId,
+          project: 3, // Här behöver du ange korrekt projekt-ID
+          x: tempAnnotation.rect.x,
+          y: tempAnnotation.rect.y,
+          width: tempAnnotation.rect.width,
+          height: tempAnnotation.rect.height,
+          page_number: tempAnnotation.rect.pageNumber,
+          comment: comment,
+          color: tempAnnotation.color,
+          status: status
+        };
+        
+        axios.post('/api/files/annotations/', annotationData)
+          .then(response => {
+            // Uppdatera annotations-listan med den persisterade versionen
+            const persistedAnnotation: PDFAnnotation = {
+              id: response.data.id.toString(),
+              rect: {
+                x: response.data.x,
+                y: response.data.y,
+                width: response.data.width,
+                height: response.data.height,
+                pageNumber: response.data.page_number
+              },
+              color: response.data.color,
+              comment: response.data.comment,
+              status: response.data.status as PDFAnnotation['status'],
+              createdBy: response.data.created_by_details?.username || 'Användare',
+              createdAt: response.data.created_at
+            };
+            
+            // Ersätt den temporära annotationen med den persisterade versionen
+            setAnnotations(prev => prev.map(a => 
+              a.id === tempAnnotation.id ? persistedAnnotation : a
+            ));
+            
+            console.log('Annotation sparad i databasen:', response.data);
+          })
+          .catch(error => {
+            console.error('Fel vid sparande av annotation:', error);
+            // Ta bort den temporära annotationen vid fel
+            setAnnotations(prev => prev.filter(a => a.id !== tempAnnotation.id));
+          });
       }
     }
   };
