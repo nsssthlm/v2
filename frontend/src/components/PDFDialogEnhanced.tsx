@@ -497,6 +497,13 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
           enabled: newMarkingMode 
         }, '*');
       }
+      
+      // Visa hjälpmeddelande för användaren
+      if (newMarkingMode) {
+        showNotification('Markeringsläge aktiverat. Dra med musen för att markera ett område.', 'success');
+      } else {
+        showNotification('Markeringsläge avslutat. Du kan nu navigera fritt i dokumentet.', 'success');
+      }
     } catch (e) {
       console.error('Kunde inte kommunicera med PDF-visaren:', e);
     }
@@ -504,6 +511,25 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
 
   return (
     <>
+      {/* Snackbar för notifikationer */}
+      <Snackbar
+        open={snackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
+        autoHideDuration={5000}
+        color={snackbarSeverity}
+        size="lg"
+        variant="soft"
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          variant="soft"
+          color={snackbarSeverity}
+          onClose={() => setSnackbarOpen(false)}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
       <Modal
         open={open}
         onClose={handleClose}
@@ -625,6 +651,7 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
                 variant={isMarkingMode ? "solid" : "soft"}
                 color={isMarkingMode ? "warning" : "neutral"}
                 onClick={toggleMarkingMode}
+                startDecorator={isMarkingMode ? <PanToolIcon /> : <EditIcon />}
               >
                 {isMarkingMode ? "Avsluta markering" : "Markera område"}
               </Button>
