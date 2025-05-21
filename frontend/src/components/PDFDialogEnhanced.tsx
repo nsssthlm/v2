@@ -113,63 +113,24 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
       };
     }
 
-    // Hantera markeringar
-  
-  // Lyssna på Ctrl+Scroll för zoom
-  const handleWheel = (e: WheelEvent) => {
-    if (e.ctrlKey) {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -25 : 25;
-      const newZoom = Math.min(300, Math.max(50, zoomLevel + delta));
-      setZoomLevel(newZoom);
-      
-      // Försök kommunicera med iframe för att ändra zoom
-      try {
-        const iframe = document.querySelector('iframe');
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage({ type: 'setZoom', zoom: newZoom / 100 }, '*');
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -25 : 25;
+        const newZoom = Math.min(300, Math.max(50, zoomLevel + delta));
+        setZoomLevel(newZoom);
+        
+        // Försök kommunicera med iframe för att ändra zoom
+        try {
+          const iframe = document.querySelector('iframe');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: 'setZoom', zoom: newZoom / 100 }, '*');
+          }
+        } catch (e) {
+          console.error('Kunde inte kommunicera med PDF-visaren:', e);
         }
-      } catch (e) {
-        console.error('Kunde inte kommunicera med PDF-visaren:', e);
       }
-    }
-  };
-  
-  // Hantera musklick i markeringsläge
-  const handleMouseDown = (e: MouseEvent) => {
-    if (!isMarkingMode) return;
-    
-    const iframe = document.querySelector('iframe');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'startMarking' }, '*');
-      setIsDrawing(true);
-      
-      // Be om position från PDF-visaren
-      iframe.contentWindow.postMessage({ type: 'getPosition' }, '*');
-    }
-  };
-  
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isMarkingMode || !isDrawing) return;
-    
-    const iframe = document.querySelector('iframe');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'updateMarking', x: e.clientX, y: e.clientY }, '*');
-    }
-  };
-  
-  const handleMouseUp = (e: MouseEvent) => {
-    if (!isMarkingMode || !isDrawing) return;
-    
-    setIsDrawing(false);
-    const iframe = document.querySelector('iframe');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'endMarking' }, '*');
-      
-      // Be om markerade data från PDF-visaren
-      iframe.contentWindow.postMessage({ type: 'getSelection' }, '*');
-    }
-  };
+    };
 
     const container = pdfContainerRef.current;
     if (container) {
@@ -649,6 +610,69 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
           >
             Nuvarande version
           </Button>
+        </Box>
+      </ModalDialog>
+    </Modal>
+  );
+};
+
+// Dialog för att lägga till kommentar till markerat område
+const CommentDialog = ({ 
+  open, 
+  onClose, 
+  onSave, 
+  initialComment = '' 
+}: { 
+  open: boolean, 
+  onClose: () => void, 
+  onSave: (comment: string, status: PDFAnnotation['status']) => void,
+  initialComment?: string 
+}) => {
+  const [comment, setComment] = useState(initialComment);
+  const [status, setStatus] = useState<PDFAnnotation['status']>('new_comment');
+
+  const handleSave = () => {
+    onSave(comment, status);
+    setComment('');
+    setStatus('new_comment');
+    onClose();
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <ModalDialog sx={{ width: 400, p: 3, maxWidth: '90%' }}>
+        <Typography level="h4" mb={2}>Lägg till kommentar</Typography>
+        
+        <FormControl sx={{ mb: 2 }}>
+          <FormLabel>Status</FormLabel>
+          <Select 
+            value={status} 
+            onChange={(_, newValue) => setStatus(newValue as PDFAnnotation['status'])}
+            sx={{ width: '100%' }}
+          >
+            <Option value="new_comment">Ny kommentar</Option>
+            <Option value="action_required">Kräver åtgärd</Option>
+            <Option value="rejected">Avvisad</Option>
+            <Option value="new_review">Ny granskning</Option>
+            <Option value="other_forum">Annat forum</Option>
+            <Option value="resolved">Åtgärdad</Option>
+          </Select>
+        </FormControl>
+        
+        <FormControl sx={{ mb: 3 }}>
+          <FormLabel>Kommentar</FormLabel>
+          <Textarea 
+            value={comment} 
+            onChange={(e) => setComment(e.target.value)} 
+            minRows={3}
+            placeholder="Skriv din kommentar här..."
+            sx={{ width: '100%' }}
+          />
+        </FormControl>
+        
+        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+          <Button variant="plain" color="neutral" onClick={onClose}>Avbryt</Button>
+          <Button variant="solid" color="primary" onClick={handleSave}>Spara</Button>
         </Box>
       </ModalDialog>
     </Modal>
