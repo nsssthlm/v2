@@ -10,7 +10,13 @@ import {
   Tabs,
   TabList,
   Tab,
-  Button
+  Button,
+  Textarea,
+  Select,
+  Option,
+  FormControl,
+  FormLabel,
+  Input
 } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
@@ -18,6 +24,22 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
 import { fetchAndCreateBlobUrl } from '../pages/files/ProxyPDFService';
+
+interface PDFAnnotation {
+  id: string;
+  rect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    pageNumber: number;
+  };
+  color: string;
+  comment: string;
+  status: 'new_comment' | 'action_required' | 'rejected' | 'new_review' | 'other_forum' | 'resolved';
+  createdBy: string;
+  createdAt: string;
+}
 
 interface PDFDialogEnhancedProps {
   open: boolean;
@@ -35,6 +57,12 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
   const [zoomLevel, setZoomLevel] = useState(100);
   const [activeTab, setActiveTab] = useState('detaljer');
   const pdfContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Markeringsläge
+  const [isMarkingMode, setIsMarkingMode] = useState(false);
+  const [annotations, setAnnotations] = useState<PDFAnnotation[]>([]);
+  const [currentAnnotation, setCurrentAnnotation] = useState<Partial<PDFAnnotation> | null>(null);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
 
   useEffect(() => {
     if (!pdfUrl) {
@@ -310,10 +338,11 @@ const PDFDialogEnhanced = ({ open, onClose, pdfUrl, filename }: PDFDialogEnhance
             
             <Button
               size="sm"
-              variant="soft"
-              color="neutral"
+              variant={isMarkingMode ? "solid" : "soft"}
+              color={isMarkingMode ? "warning" : "neutral"}
+              onClick={() => setIsMarkingMode(!isMarkingMode)}
             >
-              Markera område
+              {isMarkingMode ? "Avsluta markering" : "Markera område"}
             </Button>
 
             <Button
