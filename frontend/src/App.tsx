@@ -29,7 +29,7 @@ import PDFProxyPage from './pages/files/PDFProxyPage';
 import BasicTimeReportingPage from './pages/timereporting/BasicTimeReportingPage';
 
 // Kanban board
-import KanbanPage from './pages/kanban/KanbanPage';
+import SimpleKanbanPage from './pages/kanban/SimpleKanbanPage';
 
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
@@ -63,7 +63,7 @@ function App() {
               <Route path="team" element={<ComingSoonPage title="Team" />} />
               <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
               <Route path="timereporting" element={<BasicTimeReportingPage />} />
-              <Route path="planning/kanban" element={<KanbanPage />} />
+              <Route path="planning/kanban" element={<SimpleKanbanPage />} />
               
               {/* Folder routes */}
               <Route path="folders" element={<FolderListPage />} />
