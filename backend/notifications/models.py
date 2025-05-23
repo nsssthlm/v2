@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from core.models import Project, Task
 
 class Notification(models.Model):
@@ -50,9 +51,18 @@ class Meeting(models.Model):
     is_virtual = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return self.title
-    
+
+    def clean(self):
+        """Ensure end_time is after start_time"""
+        if self.end_time <= self.start_time:
+            raise ValidationError({"end_time": "End time must be after start time"})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = ['-start_time']
