@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban-tavla</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333;
+      margin-top: 0;
+    }
+    .intro {
+      background-color: #f0f7ff;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .kanban-image {
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .back-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007934;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .back-button:hover {
+      background-color: #006228;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kanban-tavla</h1>
+    
+    <div class="intro">
+      <p>Hantera dina uppgifter visuellt med hjälp av Kanban-tavlan. Dra uppgifter mellan kolumner för att uppdatera deras status.</p>
+    </div>
+    
+    <img src="/assets/kanban-board.png" alt="Kanban-tavla" class="kanban-image">
+    
+    <a href="/" class="back-button">Tillbaka till startsidan</a>
+  </div>
+</body>
+</html>
