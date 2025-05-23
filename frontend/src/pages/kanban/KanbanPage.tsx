@@ -1,29 +1,32 @@
 import React, { useState } from 'react';
-import { Box, Typography, Container, Paper, Button } from '@mui/material';
+import Box from '@mui/joy/Box';
+import Typography from '@mui/joy/Typography';
+import Container from '@mui/joy/Container';
+import Button from '@mui/joy/Button';
+import Sheet from '@mui/joy/Sheet';
 import { Add as AddIcon } from '@mui/icons-material';
-import MainLayout from '../../components/layout/MainLayout';
 
 const KanbanPage: React.FC = () => {
   const [showImage, setShowImage] = useState(true);
   
   return (
-    <MainLayout>
-      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+    <Box>
+      <Container sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography level="h4" component="h1">
             Kanban-tavla
           </Typography>
           <Button 
-            variant="contained" 
+            variant="solid" 
             color="primary" 
-            startIcon={<AddIcon />}
+            startDecorator={<AddIcon />}
             onClick={() => setShowImage(!showImage)}
           >
             {showImage ? 'Visa interaktiv vy' : 'Visa exempel'}
           </Button>
         </Box>
         
-        <Paper sx={{ p: 2, width: '100%', minHeight: '80vh', overflowX: 'auto' }}>
+        <Sheet sx={{ p: 2, width: '100%', minHeight: '80vh', overflowX: 'auto' }}>
           {showImage ? (
             // Visa exempelbilden
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
@@ -37,21 +40,21 @@ const KanbanPage: React.FC = () => {
             // Här kommer den interaktiva Kanban-implementationen
             <Box sx={{ display: 'flex', justifyContent: 'space-between', height: '75vh', gap: 2 }}>
               {['Backlog', 'Att göra', 'Pågående', 'Testning', 'Klart'].map((column, index) => (
-                <Paper 
+                <Sheet 
                   key={index} 
                   sx={{ 
                     flex: 1, 
                     p: 2, 
-                    bgcolor: index === 0 ? '#f0f0f0' : 
-                            index === 1 ? '#fff8dc' : 
-                            index === 2 ? '#e0f2ff' : 
-                            index === 3 ? '#f2e6ff' : '#e0f7e0',
+                    bgcolor: index === 0 ? 'neutral.50' : 
+                            index === 1 ? 'warning.50' : 
+                            index === 2 ? 'info.50' : 
+                            index === 3 ? 'warning.50' : 'success.50',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
                 >
                   <Typography 
-                    variant="h6" 
+                    level="title-md" 
                     sx={{ 
                       mb: 2, 
                       pb: 1, 
@@ -73,24 +76,24 @@ const KanbanPage: React.FC = () => {
                       (index === 3 && i === 1) || 
                       (index === 4 && i <= 3)
                     ).map(item => (
-                      <Paper 
+                      <Sheet 
                         key={item} 
                         sx={{ 
                           p: 2, 
                           mb: 2, 
-                          bgcolor: 'white', 
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                          bgcolor: 'background.body', 
+                          boxShadow: 'sm',
                           cursor: 'pointer'
                         }}
                       >
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                        <Typography level="title-sm" sx={{ fontWeight: 'bold' }}>
                           {index === 0 ? `Uppdatera preliminär budget ${item}` :
                            index === 1 ? 'Identifiera funktionella krav' :
                            index === 2 ? 'Dokumentation, mappstruktur' :
                            index === 3 ? 'Utformning av ritningsmall' :
                            `Presentation för kunden ${item}`}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography level="body-sm">
                           {index === 0 ? 'Samla all information för att uppdatera budget' :
                            index === 1 ? 'Identifiera funktionella krav, input, output, gränssnitt' :
                            index === 2 ? 'Skapa mappstruktur för projektet' :
@@ -98,42 +101,42 @@ const KanbanPage: React.FC = () => {
                            'Presentation för kunden av slutresultat'}
                         </Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                          <Typography variant="caption" color="textSecondary">
+                          <Typography level="body-xs">
                             Klart 30 Maj
                           </Typography>
                           <Box sx={{ 
                             width: 20, 
                             height: 20, 
                             borderRadius: '50%',
-                            bgcolor: '#e0e0e0',
+                            bgcolor: 'neutral.200',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}>
-                            <Typography variant="caption">
+                            <Typography level="body-xs">
                               
                             </Typography>
                           </Box>
                         </Box>
-                      </Paper>
+                      </Sheet>
                     ))}
                   </Box>
                   
                   <Button 
-                    variant="text" 
-                    startIcon={<AddIcon />} 
-                    size="small" 
+                    variant="plain" 
+                    startDecorator={<AddIcon />} 
+                    size="sm" 
                     sx={{ mt: 2, alignSelf: 'flex-start' }}
                   >
                     Lägg till kort
                   </Button>
-                </Paper>
+                </Sheet>
               ))}
             </Box>
           )}
-        </Paper>
+        </Sheet>
       </Container>
-    </MainLayout>
+    </Box>
   );
 };
 
