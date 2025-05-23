@@ -501,12 +501,12 @@ export function KanbanBoard({ projectId }: KanbanBoardProps) {
                 borderBottom: '1px solid',
                 borderColor: `${column.color}.200`
               }}>
-                <Typography level="title-md" color={column.color}>
+                <Typography level="title-md">
                   {column.title} ({column.tasks.length})
                 </Typography>
                 <Button 
                   variant="plain" 
-                  color={column.color} 
+                  color="neutral" 
                   size="sm"
                   startDecorator={<AddIcon />}
                   onClick={() => handleOpenNewTaskModal(column.id)}
