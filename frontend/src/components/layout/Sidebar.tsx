@@ -287,7 +287,7 @@ const mainMenuItems = [
       </svg>
     ),
     submenu: [
-      { name: 'Kanban', path: '/planning/kanban' },
+      { name: 'Kanban', path: '/kanban' },
       { name: 'Gantt Chart', path: '/planning/gantt' },
       { name: 'Ekonomi & Tid', path: '/planning/economy' }
     ],
