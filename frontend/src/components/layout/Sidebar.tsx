@@ -39,7 +39,15 @@ const menuItems = [
   { text: 'Anslagstavla', icon: <MessageIcon />, path: '/notice-board' },
   { text: 'Kalender', icon: <CalendarIcon />, path: '/calendar' },
   { text: 'Workspace', icon: <WorkspaceIcon />, path: '/workspace' },
-  { text: 'Projektplanering', icon: <AssignmentIcon />, path: '/project-planning' },
+  { 
+    text: 'Projektplanering', 
+    icon: <AssignmentIcon />, 
+    path: '/project-planning',
+    submenu: [
+      { text: 'Kanban', path: '/kanban' },
+      { text: 'Gantt', path: '/gantt' }
+    ]
+  },
   { text: 'Tidsrapportering', icon: <AssignmentIcon />, path: '/timereporting' },
   { text: 'Vault', icon: <FolderIcon />, path: '/vault' },
   { text: 'Wiki', icon: <WikiIcon />, path: '/wiki' },
@@ -287,7 +295,7 @@ const mainMenuItems = [
       </svg>
     ),
     submenu: [
-      { name: 'Kanban', path: '/kanban' },
+      { name: 'Kanban', path: '/planning/kanban' },
       { name: 'Gantt Chart', path: '/planning/gantt' },
       { name: 'Ekonomi & Tid', path: '/planning/economy' }
     ],

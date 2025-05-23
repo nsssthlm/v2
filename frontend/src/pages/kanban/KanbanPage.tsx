@@ -1,62 +1,109 @@
-import { Box, Container, Typography, Paper } from "@mui/material";
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { Typography, Box, Card, Sheet, Stack, Button, Divider } from "@mui/joy";
+import { useProject } from "../../contexts/ProjectContext";
 
-const KanbanPage = () => {
-  const [loading, setLoading] = useState(true);
+// Enkel Kanban-vy utan DnD-funktionalitet (den mer avancerade kommer senare)
+export default function KanbanPage() {
+  const { currentProject } = useProject();
 
-  // Simulera laddningstid
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Statiska uppgifter för demo
+  const columns = [
+    {
+      id: 'todo',
+      title: 'Att göra',
+      color: '#FFEFD5', // Ljus persika
+      tasks: [
+        { id: 1, title: 'Planera möte', description: 'Boka mötesrum och skicka inbjudningar' },
+        { id: 2, title: 'Uppdatera dokumentation', description: 'Lägg till nya krav i dokumentationen' }
+      ]
+    },
+    {
+      id: 'in_progress',
+      title: 'Pågående',
+      color: '#E0F7FA', // Ljusblå
+      tasks: [
+        { id: 3, title: 'Kanban-funktion', description: 'Implementera Kanban-vy i systemet' },
+        { id: 4, title: 'Prototyp för dashboard', description: 'Skapa mockups för nya dashboard' }
+      ]
+    },
+    {
+      id: 'done',
+      title: 'Klart',
+      color: '#E8F5E9', // Ljusgrön
+      tasks: [
+        { id: 5, title: 'Projektplanering', description: 'Skapa initial projektplan' },
+        { id: 6, title: 'Kravspecifikation', description: 'Definiera kravspecifikation för v1.0' }
+      ]
+    }
+  ];
 
   return (
-    <Container maxWidth={false} sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Kanban-tavla
-      </Typography>
-      
-      <Paper elevation={2} sx={{ p: 2, mb: 3, bgcolor: '#f5f5f5' }}>
-        <Typography variant="body1">
-          Hantera dina uppgifter visuellt med hjälp av Kanban-tavlan. Dra uppgifter mellan kolumner för att uppdatera deras status.
-        </Typography>
-      </Paper>
+    <Box sx={{ p: 3, height: '100vh', overflow: 'auto' }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography level="h2" sx={{ mb: 1 }}>Kanban Board</Typography>
+        
+        {currentProject && (
+          <Typography level="body-md">
+            Projekt: <strong>{currentProject.name}</strong>
+          </Typography>
+        )}
+      </Box>
 
-      {loading ? (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '500px',
-          bgcolor: '#f9f9f9',
-          borderRadius: 2
-        }}>
-          <Typography>Laddar Kanban-tavla...</Typography>
-        </Box>
+      {!currentProject ? (
+        <Sheet 
+          variant="outlined" 
+          sx={{ 
+            p: 4, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '300px'
+          }}
+        >
+          <Typography level="h4" sx={{ mb: 2 }}>
+            Inget projekt valt
+          </Typography>
+          <Typography sx={{ mb: 2, textAlign: 'center', maxWidth: '500px' }}>
+            Välj ett projekt i projektväljaren för att se dess Kanban-tavla
+          </Typography>
+        </Sheet>
       ) : (
-        <Box sx={{ 
-          width: '100%', 
-          display: 'flex',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          borderRadius: 2,
-          boxShadow: 3
-        }}>
-          <img 
-            src="/assets/kanban-board.png" 
-            alt="Kanban Board" 
-            style={{ 
-              width: '100%', 
-              height: 'auto', 
-              maxWidth: '1200px'
-            }} 
-          />
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 3
+          }}
+        >
+          {columns.map(column => (
+            <Card key={column.id} variant="outlined" sx={{ 
+              backgroundColor: column.color,
+              height: 'fit-content'
+            }}>
+              <Typography level="title-lg" sx={{ mb: 1, p: 1 }}>
+                {column.title} ({column.tasks.length})
+              </Typography>
+              <Divider />
+              <Stack spacing={2} sx={{ p: 1, mt: 1 }}>
+                {column.tasks.map(task => (
+                  <Card key={task.id} variant="soft" sx={{ mb: 1 }}>
+                    <Typography level="title-sm">{task.title}</Typography>
+                    <Typography level="body-sm">{task.description}</Typography>
+                  </Card>
+                ))}
+                <Button 
+                  variant="soft" 
+                  size="sm" 
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  + Lägg till uppgift
+                </Button>
+              </Stack>
+            </Card>
+          ))}
         </Box>
       )}
-    </Container>
+    </Box>
   );
-};
-
-export default KanbanPage;
+}

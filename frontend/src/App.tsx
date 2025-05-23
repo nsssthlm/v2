@@ -25,11 +25,11 @@ import GenericFolderView from './pages/folders/GenericFolderView';
 import FilesOverviewPage from './pages/files/FilesOverviewPage';
 import PDFProxyPage from './pages/files/PDFProxyPage';
 
-// Kanban sida
-import KanbanPage from './pages/dashboard/KanbanPage';
-
 // Tidsrapportering
 import BasicTimeReportingPage from './pages/timereporting/BasicTimeReportingPage';
+
+// Kanban page
+import KanbanPage from './pages/kanban/KanbanPage';
 
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
