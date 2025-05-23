@@ -25,6 +25,9 @@ import GenericFolderView from './pages/folders/GenericFolderView';
 import FilesOverviewPage from './pages/files/FilesOverviewPage';
 import PDFProxyPage from './pages/files/PDFProxyPage';
 
+// Kanban sida
+import KanbanPage from './pages/kanban/KanbanPage';
+
 // Tidsrapportering
 import BasicTimeReportingPage from './pages/timereporting/BasicTimeReportingPage';
 
@@ -60,6 +63,7 @@ function App() {
               <Route path="team" element={<ComingSoonPage title="Team" />} />
               <Route path="settings" element={<ComingSoonPage title="Inställningar" />} />
               <Route path="timereporting" element={<BasicTimeReportingPage />} />
+              <Route path="kanban" element={<KanbanPage />} />
               
               {/* Folder routes */}
               <Route path="folders" element={<FolderListPage />} />
