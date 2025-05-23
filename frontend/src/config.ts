@@ -1,11 +1,29 @@
-// Baskonfiguration för frontend
-// API_BASE_URL används för att peka på rätt backend
+// Konfiguration som används i både utveckling och produktion
 
-// I produktion kommer URL:en att vara en absolut URL till backend-servern
-// I utveckling använder vi en relativ URL eftersom både frontend och backend körs på samma domän
-export const API_BASE_URL = '';
+// Funktion för att avgöra om vi kör i deployad miljö
+export const isProduction = (): boolean => {
+  const hostname = window.location.hostname;
+  return !hostname.includes('replit.dev') && hostname.includes('.replit.app');
+};
 
-// WebsocketURL används för att ansluta till WebSocket-servern
-export const WEBSOCKET_URL = window.location.protocol === 'https:' 
-  ? `wss://${window.location.host}/ws` 
-  : `ws://${window.location.host}/ws`;
+// Base API URL - använder alltid relativ URL för att fungera med Vite proxy och i produktionsmiljö
+export const API_BASE_URL = '/api';
+
+// API URL för direkt anslutning - anpassas utifrån miljö
+export const DIRECT_API_URL = '/api';
+
+// Förenklad konfiguration utan autentisering
+export const getAuthHeader = () => {
+  // Inga headers för autentisering
+  return { };
+};
+
+// Standard headers för API-anrop
+export const getStandardHeaders = () => {
+  return {
+    'Content-Type': 'application/json',
+    ...getAuthHeader()
+  };
+};
+
+// Andra konfigurationsvariabler kan läggas till här
